@@ -1,0 +1,1682 @@
+/***************************************************************************
+ *   jEPlus - EnergyPlus shell for parametric studies                      *
+ *   Copyright (C) 2010  Yi Zhang <yizhanguk@googlemail.com>               *
+ *                                                                         *
+ *   This program is free software: you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation, either version 3 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
+ *                                                                         *
+ ***************************************************************************
+ *                                                                         *
+ * Change log:                                                             *
+ *                                                                         *
+ *  - Created                                                              *
+ *                                                                         *
+ ***************************************************************************/
+package jeplus;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import jeplus.data.ParameterItem;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.swing.JFrame;
+import javax.swing.tree.DefaultMutableTreeNode;
+import jeplus.agent.*;
+import jeplus.data.Counter;
+import jeplus.data.ExecutionOptions;
+import jeplus.data.FileList;
+import jeplus.data.RVX;
+import jeplus.data.RVX.Constraint;
+import jeplus.data.RVX.Objective;
+import jeplus.data.RVX.UserVar;
+import jeplus.postproc.ResultCollector;
+import jeplus.simpleparser.Parser;
+import jeplus.simpleparser.SimpleParserError;
+import jeplus.util.RelativeDirUtil;
+import org.slf4j.LoggerFactory;
+
+/**
+ * <p>EPlusBatch is the execution manager of the tasks. It is implemented
+ * a java Thread. </p>
+ * <p>Copyright (c) 2008</p>
+ * <p>Company: IESD, DMU</p>
+ * @author Yi Zhang
+ * @version 1.0
+ * @since 0.1
+ */
+public class EPlusBatch extends Thread {
+
+    /** Logger */
+    final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusBatch.class);
+
+    /**
+     * Type of job strings used for identifying input format of the jobs strings
+     */
+    public enum JobStringType {
+        INDEX,
+        VALUE,
+        ID,
+        FILE
+    };
+
+    protected String IDprefixEP = "EP";
+    protected String IDprefixTRN = "TR";
+    protected String IDprefix = IDprefixEP;
+    public String BatchId = null;
+
+    /** Link to the GUI */
+    protected JEPlusFrameMain GUI = null;
+
+    /** The job queue */
+    protected List<EPlusTask> JobQueue = new ArrayList<>();
+    
+    /** The job counter for compiling jobs */
+    protected Counter JobCounter = new Counter ();
+
+    /** jE+ project (to replace EPlusWorkEnv) */
+    protected JEPlusProject Project = null;
+
+    /** E+ work environment for individual jobs */
+    //protected EPlusWorkEnv Env = new EPlusWorkEnv();
+    /** Idf template file list */
+    protected FileList IdfFiles = null;
+    /** Weather file list */
+    protected FileList WthrFiles = null;
+    /** Parameter tree */
+    //protected DefaultMutableTreeNode ParamTree = null;
+
+    /** Top level task group */
+    // protected EPlusTaskGroup TaskGroup = null;
+    /** Information of the batch jobs, including progress and results */
+    protected EPlusBatchInfo Info = null;
+
+    /** Execution agent */
+    protected EPlusAgent Agent = null;
+
+    /** Flag for simulation running status */
+    protected boolean SimulationRunning = false;
+
+    /** Result collector */
+    protected EPlusDefaultResultCollector Collector = null;
+
+    /** Whether or not to use Job Archive to avoid repetition of simulation */
+    protected boolean EnableArchive = false;
+
+    /** Archive of simulated jobs, for avoiding repeating simulations */
+    private HashMap <String, ArrayList<ArrayList<double []>>> JobArchive = null;
+
+    public EPlusBatch () {
+        Info = new EPlusBatchInfo();
+    }
+    
+    /**
+     * Constructor
+     * @param gui Reference to Main GUI
+     * @param project The project definition object
+     * @param g_id Group (project) ID string
+     */
+    public EPlusBatch(JFrame gui, JEPlusProject project) {
+        // BatchId = IDprefix + "_" + (EPlusBatch.NextID++);
+        GUI = (JEPlusFrameMain) gui;
+        Project = project;
+        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+            IDprefix = IDprefixEP;
+        }else {
+            IDprefix = IDprefixTRN;
+        }
+        BatchId = IDprefix + "_" + Project.getProjectID();
+        //Project.resolveToEnv(Env);
+        Info = new EPlusBatchInfo();
+        Collector = new EPlusDefaultResultCollector(this);
+    }
+
+
+//    /**
+//     * Clone constructor with specified number of jobs
+//     * @param batch Source of Batch
+//     * @param njobs Number of jobs to put in queue
+//     * @param randomsrc Random generator source. If null is received, jobs are executed without shuffling
+//     */
+//    public EPlusBatch(EPlusBatch batch, int njobs, Random randomsrc) {
+//        this (null, batch.Project);
+//        this.GUI = batch.GUI;
+//        this.BatchId = batch.BatchId;
+//        this.Agent = batch.Agent;
+//        this.Collector = batch.Collector;
+//        this.IDprefix = batch.IDprefix;
+//        this.Info = batch.Info;
+//        //this.TaskGroup = batch.TaskGroup;
+//        this.WthrFiles = batch.WthrFiles;
+//        this.IdfFiles = batch.IdfFiles;
+//        if (this.JobQueue == null) 
+//            JobQueue = new Vector<EPlusTask>();
+//        else
+//            JobQueue.removeAllElements();
+//        if (njobs <=0) { // sample the first job in each idf/chain combination
+//        }
+//        
+//    }
+
+    public JEPlusProject getProject() {
+        return Project;
+    }
+
+    public void setProject(JEPlusProject Project) {
+        this.Project = Project;
+        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+            IDprefix = IDprefixEP;
+        }else {
+            IDprefix = IDprefixTRN;
+        }
+        BatchId = IDprefix + "_" + Project.getProjectID();
+    }
+
+    public boolean isEnableArchive() {
+        return EnableArchive;
+    }
+
+    /**
+     * Enable or disable archive. Archive allows simulation being bypassed if
+     * result is already available.
+     * @param EnableArchive
+     */
+    public void setEnableArchive(boolean EnableArchive) {
+        this.EnableArchive = EnableArchive;
+        if (this.EnableArchive && JobArchive == null)
+            JobArchive = new HashMap <> ();
+    }
+
+    public HashMap<String, ArrayList<ArrayList<double[]>>> getJobArchive() {
+        return JobArchive;
+    }
+
+    public JEPlusFrameMain getGUI() {
+        return GUI;
+    }
+
+    public void setGUI(JEPlusFrameMain GUI) {
+        this.GUI = GUI;
+    }
+
+    public EPlusDefaultResultCollector getCollector() {
+        return Collector;
+    }
+
+    public EPlusAgent getAgent() {
+        return Agent;
+    }
+
+    public void setAgent(EPlusAgent Agent) {
+        this.Agent = Agent;
+        this.Agent.setJobOwner(this);
+    }
+
+    public boolean isSimulationRunning() {
+        return SimulationRunning;
+    }
+
+    public void setSimulationRunning(boolean SimulationRunning) {
+        this.SimulationRunning = SimulationRunning;
+        if (this.getGUI() != null) getGUI().setSimulationRunning(SimulationRunning);
+    }
+
+    /**
+     * Decode IDF files string and store them, with directory, in an array
+     * @param dir Default directory for IDF/IMF/DCK/LST files. Entries in the LST files should contain only relative paths to this directory (??)
+     * @param files Input files string. ';' delimited list of IDF/IMF/DCK/LST files
+     * @return Validation result: true if all files are available
+     */
+    public boolean setIdfFiles(String dir, String files) {
+        if (dir != null && files != null) {
+            IdfFiles = new FileList(this.BatchId, "T", dir);
+            IdfFiles.addAll(Project.parseFileListString(dir, files));
+            if (IdfFiles.size() > 0) {
+                if (!IdfFiles.validate(Info.ValidationErrors)) {
+                    Info.addValidationError("Some of model template files are missing. Check file directory.");
+                    Info.ValidationSuccessful = false;
+                    return false;
+                }
+                Info.setModels(IdfFiles);
+                return true;
+            }
+        }
+        IdfFiles = null;
+        Info.setModels(null);
+        Info.addValidationError("Cannot extract model template file. Check input string.");
+        Info.ValidationSuccessful = false;
+        return false;
+    }
+
+    /**
+     * Decode Weather files string and store them, with directory, in an array
+     * @param dir Default directory for EPW/LST files. Entries in the LST files should contain only relative paths to this directory (??)
+     * @param files Input files string. ';' delimited list of EPW/LST files
+     * @return Validation result: true if all files are available
+     */
+    public boolean setWthrFiles(String dir, String files) {
+        if (dir != null && files != null) {
+            WthrFiles = new FileList(this.BatchId, "W", dir);
+            WthrFiles.addAll(Project.parseFileListString(dir, files));
+            if (WthrFiles.size() > 0) {
+                if (!WthrFiles.validate(Info.ValidationErrors)) {
+                    Info.addValidationError("Some of Weather files are missing. Check file directory.");
+                    Info.ValidationSuccessful = false;
+                    return false;
+                }
+                Info.setWeatherFiles(WthrFiles);
+                return true;
+            }
+        }
+        WthrFiles = null;
+        Info.setWeatherFiles(null);
+        Info.addValidationError("Cannot extract Weather file. Check input string.");
+        Info.ValidationSuccessful = false;
+        return false;
+    }
+
+    /**
+     * Copy project information to a work env object; also resolves relative paths
+     * @return Work Env object containing all job details
+     */
+    public EPlusWorkEnv getResolvedEnv() {
+        EPlusWorkEnv Env = new EPlusWorkEnv ();
+        Project.resolveToEnv(Env);
+        return Env;
+    }
+
+    /**
+     * Validate the composition of the project. Validation includes 
+     * @return a batch info object containing descriptions and error messages
+     */
+    public EPlusBatchInfo validateProject() {
+        Info = new EPlusBatchInfo();
+        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+            // Parse and validate IDF files
+            setIdfFiles(Project.resolveIDFDir(), Project.getIDFTemplate());
+            // Pares and validate Weather files
+            setWthrFiles(Project.resolveWeatherDir(), Project.getWeatherFile());
+            // Check RVI file
+            Info.ValidationSuccessful &= checkFile (Project.resolveRVIDir() + Project.getRVIFile(), Info);
+        }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
+            // Parse and validate DCK files
+            setIdfFiles(Project.resolveDCKDir(), Project.getDCKTemplate());
+        }else if (Project.getProjectType() == JEPlusProject.INSEL) {
+            // Parse and validate DCK files
+            setIdfFiles(Project.resolveINSELDir(), Project.getINSELTemplate());
+        }
+        // Check ExecSettings
+        validateExecSettings ();
+        // Validate Parameter tree
+        validateParamTree();
+        // done
+        return Info;
+    }
+
+    /**
+     * Validate the execution agent's settings including work dir
+     * @return Validation successful or not
+     */
+    protected boolean validateExecSettings () {
+        boolean ok = true;
+        File dir = new File (Project.resolveWorkDir());
+        try { dir.mkdirs(); } catch (Exception ex) {}
+        if (! (dir.isDirectory() && dir.canWrite())) {
+            Info.addValidationError("Specified Work Directory " + dir.getParent() + " is not present or cannot be written to.");
+            ok = false;
+        }
+        if (Project.getExecSettings().getExecutionType() == ExecutionOptions.LOCAL_PBS_CONTROLLER) {
+            ok &= checkFile (Project.resolvePBSscriptFile(), Info);
+        }else if (Project.getExecSettings().getExecutionType() == ExecutionOptions.NETWORK_JOB_SERVER) {
+            ok &= checkFile (Project.resolveServerConfigFile(), Info);
+        }else if (Project.getExecSettings().getExecutionType() == ExecutionOptions.REMOTE_SERVER) {
+            // check remote server?
+        }
+        Info.ValidationSuccessful &= ok;
+        return ok;
+    }
+
+    /**
+     * Check read accessibility of a file
+     * @param fn File to be checked
+     * @param info Validation error details holder
+     * @return File is accessible or not
+     */
+    protected static boolean checkFile (String fn, EPlusBatchInfo info) {
+        File file = new File (fn);
+        if (file.canRead() && file.isFile()) return true;
+        info.addValidationError("File " + fn + " is not accessible.");
+        return false;
+    }
+
+    /**
+     * Validate the parameter tree
+     * @return successful or else
+     */
+    public boolean validateParamTree() {
+
+        EPlusBatchInfo info = this.Info;
+        boolean ok = true;
+
+        DefaultMutableTreeNode ParaTree = Project.getParamTree();
+        if (ParaTree != null) {
+            DefaultMutableTreeNode thisleaf = ParaTree.getFirstLeaf();
+
+            // get this leaf's parent path. Each path has to be of equal length and
+            // contains the same set of search strings
+            // ArrayList<ParameterItem> thischain = new ArrayList<ParameterItem> ();
+            try {
+                // First leaf
+                Object[] path = thisleaf.getUserObjectPath();
+                this.Info.ParamChains.add(new ArrayList (Arrays.asList(path)));
+                int chainlen = path.length;
+                for (int i = 0; i < chainlen; i++) {
+                    if (!info.SearchStrings.contains(((ParameterItem) path[i]).SearchString)) {
+                        info.SearchStrings.add(((ParameterItem) path[i]).SearchString);
+                    } else {// Error
+                        info.addValidationError("Duplicate search string: Level " + i + " - Node " + path[i].toString());
+                        ok = false;
+                    }
+                }
+                // other leaves
+                thisleaf = thisleaf.getNextLeaf();
+                while (thisleaf != null) {
+                    path = thisleaf.getUserObjectPath();
+                    this.Info.ParamChains.add(new ArrayList (Arrays.asList(path)));
+                    if (chainlen != path.length) {
+                        info.addValidationError("Uneven parameter chain: to Node " + path[path.length - 1].toString());
+                        ok = false;
+                    }
+                    ArrayList<String> thisset = new ArrayList<>();
+                    for (int i = 0; i < path.length; i++) {
+                        // test against the first chain
+                        if (!info.SearchStrings.contains(((ParameterItem) path[i]).SearchString)) {
+                            // Found new search string
+                            info.addValidationError("Found new search string: Level " + i + " - Node " + path[i].toString());
+                            ok = false;
+                        }
+                        // test for duplication
+                        if (!thisset.contains(((ParameterItem) path[i]).SearchString)) {
+                            thisset.add(((ParameterItem) path[i]).SearchString);
+                        } else {// Error
+                            info.addValidationError("Duplicate search string: Level " + i + " - Node " + path[i].toString());
+                            ok = false;
+                        }
+                    }
+
+                    thisleaf = thisleaf.getNextLeaf();
+                }
+            } catch (ClassCastException cce) {
+                logger.error("", cce);
+            }
+
+            // Check duplication in Item Ids. All items in the tree should have
+            // a unique id.
+            try {
+                for (Enumeration e = ParaTree.breadthFirstEnumeration(); e.hasMoreElements();) {
+                    ParameterItem item = (ParameterItem) ((DefaultMutableTreeNode) e.nextElement()).getUserObject();
+                    if (!info.ShortNames.contains(item.ID)) {
+                        info.ShortNames.add(item.ID);
+                        info.ParamList.add(item);
+                    } else {// Error
+                        info.addValidationError("Duplicate Parameter ID found in: Node " + item.toString());
+                        ok = false;
+                    }
+                }
+            } catch (ClassCastException cce) {
+                logger.error("", cce);
+            }
+        } else {
+            info.addValidationError("Parameter tree doesn't exist.");
+            ok = false;
+        }
+        info.ValidationSuccessful = info.ValidationSuccessful && ok;
+        return ok;
+    }
+
+    /**
+     * Writes an index table of the current job queue, listing selected alt values
+     * of each job against search strings
+     * @param filename File name
+     * @param dir The path where the output file should be stored
+     * @return Number of jobs written
+     */
+    public int writeJobIndexCSV (String filename, String dir) {
+        int nResCollected = 0;
+        File fn = new File (dir + filename);
+        try (PrintWriter fw = new PrintWriter(new FileWriter(fn))) {
+            ArrayList<String> headers = new ArrayList <> ();
+            headers.add("#");
+            headers.add("Job_ID");
+            headers.add("WeatherFile");
+            headers.add("ModelFile");
+            ArrayList<String> paramsstrs = this.Info.getSearchStrings();
+            ArrayList<String> allsstrs = new ArrayList<> ();
+            for (int i=0; i<paramsstrs.size(); i++) {
+                allsstrs.addAll(Arrays.asList(paramsstrs.get(i).split("\\s*\\|\\s*")));
+            }
+            headers.addAll(allsstrs);
+
+            // Create a map for sorting alt values
+            HashMap<String, String> map = new HashMap<> ();
+            for (String str : headers) {
+                map.put(str, "");
+            }
+
+            // Write table header
+            StringBuffer buf = new StringBuffer(headers.get(0));
+            for (int i = 1; i < headers.size(); i++) {
+                buf.append(", ").append(headers.get(i));
+            }
+
+            // Print Jobs
+            for (int i = 0; i < JobQueue.size(); i++) {
+                // For each job, do:
+                EPlusTask job = JobQueue.get(i);
+                if (job.getWorkEnv().getProjectType() == JEPlusProject.EPLUS) {
+                    if (i==0) {
+                        // Print table header
+                        fw.println(buf.toString());                        
+                    }
+                    buf = new StringBuffer();
+                    buf.append(i).append(", ");
+                    buf.append(job.getJobID()).append(", ");
+                    buf.append(job.getWorkEnv().getWeatherFile()).append(", ");
+                    buf.append(job.getWorkEnv().getIDFTemplate()).append(", ");
+                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.TRNSYS){
+                    if (i==0) {
+                        // Print table header
+                        buf.delete(11,24);
+                        fw.println(buf.toString());                        
+                    }
+                    buf = new StringBuffer();
+                    buf.append(i).append(", ");
+                    buf.append(job.getJobID()).append(", ");
+                    buf.append(job.getWorkEnv().getDCKTemplate()).append(", ");
+                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.INSEL){
+                    if (i==0) {
+                        // Print table header
+                        buf.delete(11,24);
+                        fw.println(buf.toString());                        
+                    }
+                    buf = new StringBuffer();
+                    buf.append(i).append(", ");
+                    buf.append(job.getJobID()).append(", ");
+                    buf.append(job.getWorkEnv().getINSELTemplate()).append(", ");
+                }
+                for (int j=0; j<job.SearchStringList.size(); j++) {
+                    map.put(job.SearchStringList.get(j), job.AltValueList.get(j));                        
+                }
+                for (int j=0; j<allsstrs.size(); j++) {
+                    buf.append(map.get(allsstrs.get(j)));
+                    if (j < allsstrs.size()-1) buf.append(", ");                        
+                }
+                fw.println(buf.toString());
+                nResCollected ++;
+            }
+        } catch (Exception ex) {
+            logger.error("", ex);
+            nResCollected = -1;
+        }
+        return nResCollected;
+    }
+    
+    /**
+     * Writes an index table of the current job queue, listing selected alt values
+     * of each job against search strings
+     * @param filename File name
+     * @param dir The path where the output file should be stored
+     * @return Number of jobs written
+     */
+    public int writeJobListFile (String filename, String dir) {
+        int nResCollected = 0;
+        File fn = new File (dir + filename);
+        try (PrintWriter fw = new PrintWriter(new FileWriter(fn))) {
+            // Write notes
+            fw.println("# This file can be used as an example job list file for specify your own job set. Please note the generated");
+            fw.println("# file may be incorrect if combinatorial parameters ('|' separated search and value strings) are used.");
+            fw.println("# ");
+
+            // Get header
+            ArrayList<String> headers = new ArrayList <> ();
+            headers.add("# Job_ID");
+            if (this.getResolvedEnv().getProjectType() == JEPlusProject.EPLUS) {
+                headers.add("WeatherFile");
+            }
+            headers.add("ModelFile");
+            headers.addAll(this.Info.getSearchStrings());
+
+            // Create a map for sorting alt values
+            HashMap<String, String> map = new HashMap<> ();
+            for (String str : headers) {
+                map.put(str, "");
+            }
+
+            // Write table header
+            StringBuffer buf = new StringBuffer(headers.get(0));
+            for (int i = 1; i < headers.size(); i++) {
+                buf.append(", ").append(headers.get(i));
+            }
+            // Print table header
+            fw.println(buf.toString());
+
+            // Print Jobs
+            for (int i = 0; i < JobQueue.size(); i++) {
+                // For each job, do:
+                EPlusTask job = JobQueue.get(i);
+                buf = new StringBuffer();
+                buf.append(job.getJobID()).append(", ");
+                if (job.getWorkEnv().getProjectType() == JEPlusProject.EPLUS) {
+                    buf.append(job.getWorkEnv().getWeatherFile()).append(", ");
+                    buf.append(job.getWorkEnv().getIDFTemplate()).append(", ");
+                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.TRNSYS){
+                    buf.append(job.getWorkEnv().getDCKTemplate()).append(", ");
+                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.INSEL){
+                    buf.append(job.getWorkEnv().getINSELTemplate()).append(", ");
+                }
+                
+                for (int j=0; j<job.SearchStringList.size(); j++) {
+                    map.put(job.SearchStringList.get(j), job.AltValueList.get(j));                        
+                }
+                for (Iterator it=Info.getSearchStrings().iterator(); it.hasNext();) {
+                    buf.append(map.get((String)it.next()));
+                    if (it.hasNext()) buf.append(", ");                        
+                }
+                fw.println(buf.toString());
+                nResCollected ++;
+            }
+        } catch (Exception ex) {
+            logger.error("", ex);
+            nResCollected = -1;
+        }
+        return nResCollected;
+    }
+    
+    /**
+     * Create and write full parameter indexes to .csv files in the output directory
+     * @return A report of the list of files and in which directory they've been written
+     */
+    public String writeProjectIndexCSV() {
+        StringBuilder buf = new StringBuilder ("Writing project index. The following files: \n");
+        String dir = this.getResolvedEnv().getParentDir();
+        String fn;
+        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+            // idf index
+            fn = "IndexIDF.csv";
+            if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+            // Weather index
+            fn = "IndexWthr.csv";
+            if (WthrFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+        }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
+            // idf index
+            fn = "IndexDCK.csv";
+            if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+        }else if (Project.getProjectType() == JEPlusProject.INSEL) {
+            // idf index
+            fn = "IndexINSEL.csv";
+            if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+        }
+        // Parameter index
+        if (Info.isValid() && Info.ParamList != null) {
+            for (int i = 0; i < Info.ParamList.size(); i++) {
+                ParameterItem item = Info.ParamList.get(i);
+                fn = "Index" + item.ID + ".csv";
+                if (item.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+            }
+        }
+        // Job index
+        if (JobQueue != null) {
+            fn = "IndexJobs.csv";
+            if (this.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+        }
+        buf.append("have been created in ").append(dir).append("\n");
+        // done
+        return buf.toString();
+    }
+
+
+    /**
+     * Create and write full parameter indexes to a sql script file in the output directory
+     * @return A report of the list of tables and in which directory they've been written
+     */
+    public String writeProjectIndexSQL(String dbname, String tableprefix) {
+        // idf index
+        String sqlfile = "CreateJobDB.sql";
+        StringBuilder buf = new StringBuilder ("Creating project index SQL script " + sqlfile);
+        String dir = this.getResolvedEnv().getParentDir();
+        buf.append(" in ").append(dir).append("...\n");
+        sqlfile = dir + sqlfile;
+        boolean ok = true;
+        // Create and use db
+        try (PrintWriter fw = new PrintWriter(new FileWriter(sqlfile))) {
+            fw.println("--\n-- Database: `" + dbname + "`\n-- Created by jEPlus\n--");
+            fw.println("CREATE DATABASE `" + dbname + "` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;");
+            fw.println("USE `" + dbname + "`;");
+            fw.println("-- --------------------------------------------------------");
+            fw.println();
+            buf.append("The script creates a database named ").append(dbname).append(", with the following tables: \n");
+        }catch (Exception ex) {
+            logger.error("", ex);
+            buf.append(" failed. Please check the file is writable.\n");
+            return buf.toString();
+        }
+
+        String tn;
+        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+            tn = tableprefix+"IndexIDF";
+            // write idf index table
+            if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+            // Weather index
+            tn = tableprefix+"IndexWthr";
+            if (WthrFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+        }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
+            tn = tableprefix+"IndexDCK";
+            // write idf index table
+            if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+        }else if (Project.getProjectType() == JEPlusProject.INSEL) {
+            tn = tableprefix+"IndexINSEL";
+            // write idf index table
+            if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+        }
+        // Parameter index
+        if (Info.isValid() && Info.ParamList != null) {
+            for (int i = 0; i < Info.ParamList.size(); i++) {
+                ParameterItem item = Info.ParamList.get(i);
+                tn = tableprefix+"Index" + item.ID;
+                if (item.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+            }
+        }
+//        // Job index
+//        if (JobQueue != null) {
+//            tn = tableprefix+"IndexJobs";
+//            if (this.exportSQL(sqlfile, tn)) buf.append("\n").append(tn).append("\n");
+//        }
+        // done
+        buf.append("Done!\n");
+        return buf.toString();
+    }
+
+    public boolean exportCSV(String fn) {
+        try (PrintWriter fw = new PrintWriter(new FileWriter(fn))) {
+            String[] header = new String[8 + Info.ShortNames.size()];
+            ArrayList<String> tag = new ArrayList<>();
+            int idx = 0;
+            header[idx++] = "INDEX";
+            header[idx++] = "GROUP_ID";
+            tag.add(this.IDprefix);
+            int tag_idx_offset = 1;
+            header[idx++] = "IDF_ID";
+            tag.add(IdfFiles.getIDprefix());
+            header[idx++] = "WTHR_ID";
+            tag.add(WthrFiles.getIDprefix());
+            for (int i = 0; i < Info.ShortNames.size(); i++) {
+                String ParID = Info.ShortNames.get(i);
+                header[idx++] = ParID;
+                tag.add(ParID);
+            }
+            header[idx++] = "JOBNAME";
+            header[idx++] = "WORKDIR";
+            header[idx++] = "EXECUTED";
+            header[idx++] = "RESULT_AVAILABLE";
+
+            StringBuffer buf = new StringBuffer(header[0]);
+            for (int i = 1; i < header.length; i++) {
+                buf.append(", ").append(header[i]);
+            }
+            fw.println(buf.toString());
+
+            // Jobs
+            for (int i = 0; i < JobQueue.size(); i++) {
+                // For each job, do:
+                EPlusTask job = JobQueue.get(i);
+                String taskid = job.TaskID;
+                String[] pairs = taskid.split("-");
+                String[] vals = new String [header.length];
+                vals[0] = Integer.toString(i);
+                for (int j = 0; j < pairs.length; j++) {
+                    String[] val = pairs[j].split("_");
+                    idx = tag.indexOf(val[0]);
+                    if (idx >= 0) {
+                        vals[idx + tag_idx_offset] = val[1];
+                    }
+                }
+                vals[vals.length - 4] = taskid;
+                vals[vals.length - 3] = job.getWorkingDir();
+                vals[vals.length - 2] = Boolean.toString(job.isExecuted());
+                vals[vals.length - 1] = Boolean.toString(job.isResultAvailable());
+                buf = new StringBuffer(vals[0]);
+                for (int j = 1; j < vals.length; j++) {
+                    buf.append(", ").append(vals[j]);
+                }
+                fw.println(buf.toString());
+            }
+            return true;
+        } catch (Exception ex) {
+            logger.error("", ex);
+        }
+        return false;
+    }
+
+    public boolean exportSQL(String fn, String tablename) {
+        try (PrintWriter fw = new PrintWriter(new FileWriter(fn, true))) {
+            fw.println("CREATE TABLE `" + tablename + "` (");
+            // Compile Table Header
+            String[] header = new String[8 + Info.ShortNames.size()];
+            ArrayList<String> tag = new ArrayList<>();
+            int idx = 0;
+            header[idx++] = "ID";
+            fw.println("`ID` INT NOT NULL,");
+            header[idx++] = "Group_ID";
+            fw.println("`Group_ID` SMALLINT NOT NULL,");
+            tag.add(this.IDprefix);
+            int tag_idx_offset = 1;
+            header[idx++] = "IDF_ID";
+            fw.println("`IDF_ID` SMALLINT NOT NULL,");
+            tag.add(IdfFiles.getIDprefix());
+            header[idx++] = "Weather_ID";
+            fw.println("`Weather_ID` SMALLINT NOT NULL,");
+            tag.add(WthrFiles.getIDprefix());
+            for (int i = 0; i < Info.ShortNames.size(); i++) {
+                String ParID = Info.ShortNames.get(i);
+                header[idx++] = ParID;
+                tag.add(ParID);
+                fw.println("`" + ParID + "` SMALLINT default NULL,");
+            }
+            header[idx++] = "JobName";
+            fw.println("`JobName` varchar(255) NOT NULL,");
+            header[idx++] = "WorkDir";
+            fw.println("`WorkDir` varchar(255) NOT NULL,");
+            header[idx++] = "Executed";
+            fw.println("`Executed` BOOL default false,");
+            header[idx++] = "ResultReady";
+            fw.println("`ResultReady` BOOL default false,");
+            fw.println("PRIMARY KEY  (`ID`)");
+            fw.println(") ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+            fw.println();
+
+            // Insert command
+            fw.print("INSERT INTO `" + tablename + "` (");
+            for (int i = 0; i < header.length; i++) {
+                if (i > 0) fw.print(",");
+                fw.print(" `" + header[i] + "`");
+            }
+            fw.println(") VALUES");
+
+            // Insert records for Jobs
+            for (int i = 0; i < JobQueue.size(); i++) {
+                // For each job, do:
+                EPlusTask job = JobQueue.get(i);
+                String taskid = job.TaskID;
+                String[] pairs = taskid.split("-");
+                String[] vals = new String [header.length];
+                vals[0] = Integer.toString(i);
+                for (int j = 0; j < pairs.length; j++) {
+                    String[] val = pairs[j].split("_");
+                    idx = tag.indexOf(val[0]);
+                    if (idx >= 0) {
+                        vals[idx + tag_idx_offset] = val[1];
+                    }
+                }
+                vals[vals.length - 4] = taskid;
+                vals[vals.length - 3] = job.getWorkingDir();
+                vals[vals.length - 2] = Boolean.toString(job.isExecuted());
+                vals[vals.length - 1] = Boolean.toString(job.isResultAvailable());
+
+                if (i > 0) fw.println(",");
+                fw.print("(");
+                for (int j = 0; j < vals.length-3; j++) {
+                    fw.print("" + vals[j] + ",");
+                }
+                fw.print("'" + vals[vals.length - 3] + "', ");
+                fw.print("'" + vals[vals.length - 2] + "', ");
+                fw.print(vals[vals.length - 1] + ")");
+            }
+            fw.println(";");
+            fw.println();
+            return true;
+        } catch (Exception ex) {
+            logger.error("", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Building the jobs of the project and keeping only those in the index list.
+     * @return Number of jobs found
+     */
+    public long buildJobs(long [] indexlist) {
+        boolean largeproject = false; 
+        // If building whole project and tree depth is deeper than 6, use the automatic job names
+        if (indexlist == null) largeproject = this.Info.getParamTreeDepth() > 6; 
+        // Clear JobQueue (?)
+        JobQueue.clear();
+        // Reset TaskGroup's job counter anyway
+        this.JobCounter.reset();
+        Counter ptr = new Counter();
+        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+            for (int j = 0; j < WthrFiles.size(); j++) {
+                for (int i = 0; i < IdfFiles.size(); i++) {
+                    // env is needed to carry individual job settings
+                    EPlusWorkEnv env = new EPlusWorkEnv();
+                    Project.resolveToEnv(env);
+                    env.IDFTemplate = IdfFiles.get(i);
+                    env.EPlusVersion = IDFmodel.getEPlusVersionInIDF (env.IDFDir + env.IDFTemplate);
+                    env.WeatherFile = WthrFiles.get(j);
+                    String tag = BatchId + "-" + IdfFiles.getIDprefix() + "_" + i +
+                            "-" + WthrFiles.getIDprefix() + "_" + j;
+                    EPlusTaskGroup TaskGroup = new EPlusTaskGroup(env, largeproject? BatchId : tag, null, null);
+                    TaskGroup.compile(JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
+                }
+            }
+        }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
+            for (int i = 0; i < IdfFiles.size(); i++) {
+                // env is needed to carry individual job settings
+                EPlusWorkEnv env = new EPlusWorkEnv();
+                Project.resolveToEnv(env);
+                env.DCKTemplate = IdfFiles.get(i);
+                String tag = BatchId + "-" + IdfFiles.getIDprefix() + "_" + i;
+                EPlusTaskGroup TaskGroup = new EPlusTaskGroup(env, largeproject? BatchId : tag, null, null);
+                TaskGroup.compile(JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
+            }
+        }else if (Project.getProjectType() == JEPlusProject.INSEL) {
+            for (int i = 0; i < IdfFiles.size(); i++) {
+                // env is needed to carry individual job settings
+                EPlusWorkEnv env = new EPlusWorkEnv();
+                Project.resolveToEnv(env);
+                env.INSELTemplate = IdfFiles.get(i);
+                String tag = BatchId + "-" + IdfFiles.getIDprefix() + "_" + i;
+                EPlusTaskGroup TaskGroup = new EPlusTaskGroup(env, largeproject? BatchId : tag, null, null);
+                TaskGroup.compile(JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
+            }
+        }
+        // Force garbage collection
+        System.gc();
+        // Done
+        return JobQueue.size();
+    }
+
+    /**
+     * Build a task group from the variable tree in the GUI
+     * @return Number of jobs created
+     */
+    public long buildJobs() {
+        long [] ind = null;
+        return buildJobs(ind);
+    }
+
+    /**
+     * A Primitive form of buildJobs() that creates a task group from the input
+     * material. The definition of the jobs relies on the Project object attached
+     * to this Batch. The input job array contains only parameter values organised
+     * in 2-D array, in which each row representing one job.
+     * - The first element of each row is the job id string used for identifying the job;
+     * - The second element is the index of weather file, i.e. the i-th weather file in the project's weather list
+     * - The third element of each row is the index of the IDF template to be used;
+     * The width of the array equals the depth of the parameter tree plus 3.
+     * @param jobArray The 2-d array contains the parameter values (as String)
+     * for the jobs.
+     * @return Number of jobs created
+     */
+    public int buildJobs(String [][] jobArray) {
+        // Clear job queue first
+        JobQueue.clear();
+        if (Info == null || ! Info.isValid()) {
+            System.err.println("EPlusBatch.buildJobs(): Project has not been validated or is invalid.");
+            return -4;
+        }
+        if (jobArray == null || jobArray.length < 1 || jobArray[0] == null) {
+            System.err.println("EPlusBatch.buildJobs(): Invalid job array.");
+            return -5;
+        }
+        String [] searchstr = Info.getSearchStringsArray();
+        if (searchstr.length != jobArray[0].length - 3) {
+            System.err.println("EPlusBatch.buildJobs(): Supplied job array does not comply with project definition. "
+                    + searchstr.length + " variables are present, whereas " + jobArray[0].length + " values are given.");
+            return -6;
+        }
+        // env is needed to carry individual job settings
+        EPlusWorkEnv env = new EPlusWorkEnv();
+        Project.resolveToEnv(env);
+        if (Info != null && Info.isValid()) {
+            for (int i=0; i<jobArray.length; i++) {
+                String tag = jobArray[i][0];
+                if (isEnableArchive() && JobArchive.containsKey(tag)) {
+                    continue;
+                }else {
+                    // Create a new instance of env by duplication
+                    env = new EPlusWorkEnv(env);
+                    EPlusTask Task = null;
+                    if (env.getProjectType() == JEPlusProject.EPLUS) {
+                        try {
+                            env.WeatherFile = WthrFiles.get(Integer.valueOf(jobArray[i][1]));
+                        }catch (NumberFormatException nfe) {
+                            env.WeatherFile = jobArray[i][1];
+                        }
+                        try {
+                            env.IDFTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
+                        }catch (NumberFormatException nfe) {
+                            env.IDFTemplate = jobArray[i][2];
+                        }
+                        env.EPlusVersion = IDFmodel.getEPlusVersionInIDF (env.IDFDir + env.IDFTemplate);
+                        // Collect search strings
+                        ArrayList<String> keys = new ArrayList<> ();
+                        ArrayList<String> vals = new ArrayList<> ();
+                        for (int j=0; j<searchstr.length; j++) {
+                            keys.add(searchstr[j]);
+                            vals.add(jobArray[i][j+3]);
+                        }
+                        keys.trimToSize();
+                        vals.trimToSize();
+                        Task = new EPlusTask(env, tag, keys, vals);
+                    }else if (env.getProjectType() == JEPlusProject.TRNSYS) {
+                        try {
+                            env.DCKTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
+                        }catch (NumberFormatException nfe) {
+                            env.DCKTemplate = jobArray[i][2];
+                        }
+                        // Collect search strings
+                        ArrayList<String> keys = new ArrayList<> ();
+                        ArrayList<String> vals = new ArrayList<> ();
+                        for (int j=0; j<searchstr.length; j++) {
+                            keys.add(searchstr[j]);
+                            vals.add(jobArray[i][j+3]);
+                        }
+                        keys.trimToSize();
+                        vals.trimToSize();
+                        Task = new TRNSYSTask(env, tag, keys, vals);
+                    }else if (env.getProjectType() == JEPlusProject.INSEL) {
+                        try {
+                            env.INSELTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
+                        }catch (NumberFormatException nfe) {
+                            env.INSELTemplate = jobArray[i][2];
+                        }
+                        // Collect search strings
+                        ArrayList<String> keys = new ArrayList<> ();
+                        ArrayList<String> vals = new ArrayList<> ();
+                        for (int j=0; j<searchstr.length; j++) {
+                            keys.add(searchstr[j]);
+                            vals.add(jobArray[i][j+3]);
+                        }
+                        keys.trimToSize();
+                        vals.trimToSize();
+                        Task = new INSELTask(env, tag, keys, vals);
+                    }
+                    JobQueue.add(Task);
+                }
+            }
+        }
+        return JobQueue.size();
+    }
+
+    /**
+     * Filter the current job queue with the supplied list of job IDs. If the 
+     * option (keep) is set to true, the IDs are for the jobs to keep in the queue; 
+     * otherwise they are for the jobs to be removed from the queue.
+     * @param jobids An array of job IDs
+     * @param keep Option to keep the jobs in the list (true) or to keep the jobs not in the list (false)
+     * @return Number of jobs remain in the list
+     */
+    public int filterJobs (String [] jobids, boolean keep) {
+        Arrays.sort(jobids);
+        for (int i=JobQueue.size()-1; i>=0; i--) {
+            EPlusTask job = JobQueue.get(i);
+            if (Arrays.binarySearch(jobids, job.getJobID()) >= 0) { // job id found in the list
+                if (! keep) JobQueue.remove(i);
+            }else { // wasn't found
+                if (keep) JobQueue.remove(i);
+            }
+        }
+        return JobQueue.size();
+    }
+
+    public List<EPlusTask> getJobQueue() {
+        return this.JobQueue;
+    }
+
+    public int getNumberOfJobs() {
+        return (JobQueue == null) ? 0 : JobQueue.size();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public EPlusBatchInfo getBatchInfo() {
+        return Info;
+    }
+
+    public int getNumberOfIDFs () {
+        return this.IdfFiles.size();
+    }
+
+    public int getNumberOfWeathers () {
+        return this.WthrFiles.size();
+    }
+    
+    /**
+     * Simulate the given set of jobs, wait for simulations to finish, and return
+     * results in a HashMap. For the details of the jobArray, see <code>
+     * buildJobs(String [][] jobArray) </code>
+     * @param jobArray An array of jobs, see <code>buildJobs(String [][] jobArray) </code>
+     */
+    public HashMap<String, ArrayList<ArrayList<double []>>>  simulateJobSet (String [][] jobArray) {
+        runJobSet (jobArray);
+        // wait for jobs to finish
+        try {
+            do {
+                Thread.sleep(2000);
+            }while (this.isSimulationRunning());
+        }catch (InterruptedException iex) {
+            this.getAgent().setStopAgent(true);
+        }
+        return getSimulationResults(this.getAgent().getResultCollectors(), this.getResolvedEnv().getParentDir(), (this.isEnableArchive()?JobArchive:null));
+    }
+
+    /**
+     * Build the given set of jobs but not start running. For the details of the jobArray, see <code>
+     * buildJobs(String [][] jobArray) </code>
+     * @param jobArray An array of jobs, see <code>
+     * buildJobs(String [][] jobArray) </code>
+     */
+    public void prepareJobSet (JobStringType type, String jobstr) {
+        if (! getBatchInfo().isValidationSuccessful()) validateProject();
+        String [][] jobArray;
+        switch (type) {
+            case INDEX:
+                String [] jobs = jobstr.split("\\s*;\\s*");
+                jobArray = new String [jobs.length][];
+                Object [] items = Project.getParamTree().getFirstLeaf().getUserObjectPath();
+                for (int i=0; i<jobs.length; i++) {
+                    jobArray[i] = jobs[i].split("\\s*,\\s*");
+                    for (int j=3; j<jobArray[i].length; j++) {
+                        jobArray[i][j] = ((ParameterItem)items[j-3]).getAlternativeValues()[Integer.parseInt(jobArray[i][j])];
+                    }
+                }
+                this.buildJobs(jobArray);
+                break;
+            case FILE: // in an external file, job strings must be in a VALUE form. Each end-of-line is treated as a ";". '#' or '!' Comment lines are filtered.
+                try {
+                    BufferedReader fr = new BufferedReader (new FileReader (jobstr));
+                    StringBuilder buf = new StringBuilder ();
+                    String line = fr.readLine();
+                    while (line !=  null) {
+                        if (line.contains("#")) {
+                            line = line.substring(0, line.indexOf("#"));
+                        }
+                        if (line.contains("!")) {
+                            line = line.substring(0, line.indexOf("!"));
+                        }
+                        line = line.trim();
+                        if (line.length() > 0)
+                            buf.append(line).append(line.endsWith(";") ? "" : ";");
+                        line = fr.readLine();
+                    }
+                    jobstr = buf.toString();
+                }catch (Exception ex) {
+                    logger.error("", ex);
+                    jobstr = "";
+                }
+                // no break here, to have the new jobStr processed as VALUE
+            case VALUE:
+                jobs = jobstr.split("\\s*;\\s*");
+                jobArray = new String [jobs.length][];
+                for (int i=0; i<jobs.length; i++) {
+                    jobArray[i] = jobs[i].split("\\s*,\\s*");
+                }
+                this.buildJobs(jobArray);
+                break;
+            case ID:
+                jobs = jobstr.split("\\s*;\\s*");
+                this.buildJobs();
+                this.filterJobs(jobs, true);
+                break;
+            default:
+        }
+    }
+
+    /**
+     * Simulate the given set of jobs. For the details of the jobArray, see <code>
+     * buildJobs(String [][] jobArray) </code>
+     * @param jobArray An array of jobs, see <code>
+     * buildJobs(String [][] jobArray) </code>
+     */
+    public void runJobSet (String [][] jobArray) {
+        if (! getBatchInfo().isValidationSuccessful()) validateProject();
+        this.buildJobs(jobArray);
+        new Thread(this).start();
+    }
+
+    /**
+     * Run simulation on a Latin Hypercube sample. For each parameter, if 
+     * probability distribution function is not defined, it is treated as 
+     * uniform discrete distribution.
+     * @param n Sample size of LHS. 5 x number of variables is recommended
+     */
+    public void runLHSample (int n, Random randomsrc) {
+        validateProject();
+        if (getBatchInfo().isValidationSuccessful()) {
+            // Run jobs
+            this.buildJobs(Project.getLHSJobList(n, randomsrc));
+            new Thread(this).start();
+        }
+    }
+
+    /**
+     * Run simulation on a set of randomly selected samples. 
+     * @param njobs Sample size
+     * @param randomsrc Random generator
+     */
+    public void runRandomSample (int njobs, Random randomsrc) {
+        this.buildJobs(getRandomJobList(njobs, randomsrc));
+        // Start simulation
+        new Thread(this).start();
+    }
+
+    /**
+     * Create a random sample by shuffling existing jobs
+     * @param njobs Sample size
+     * @param randomsrc Random generator
+     * @return Index list of selected jobs
+     */
+    public long [] getRandomJobList (int njobs, Random randomsrc) {
+        long alljobs = Info.getTotalNumberOfJobs();
+        // Check njobs not exceeding total number of jobs
+        njobs = (int)Math.min((long)njobs, alljobs);
+        long [] list = new long [njobs];
+        if (randomsrc != null) {
+            ArrayList<Long> alist = new ArrayList<> ();
+            if (alljobs <= 1000000) {
+                for (int i=0; i<alljobs; i++) alist.add(new Long (i));
+                Collections.shuffle(alist, randomsrc);
+                for (int i=0; i<njobs; i++) list[i] = alist.get(i).longValue();
+            }else {
+                while (alist.size() < njobs) {
+                    Long newjob = new Long((long)Math.floor(randomsrc.nextDouble() * alljobs - 0.00001));
+                    if (! alist.contains(newjob)) alist.add(newjob);
+                }
+                for (int i=0; i<njobs; i++) list[i] = alist.get(i).longValue();
+            }
+        }else {
+            for (int i=0; i<njobs; i++) list[i] = i;
+        }
+        Arrays.sort(list);
+        return list;
+    }
+
+    public String [][] getTestJobList () {
+        if (! getBatchInfo().isValidationSuccessful()) validateProject();
+        int m = this.getNumberOfIDFs();
+        int n = Info.ParamChains.size();
+        String [][] jobs = new String [m * n] [Info.getSearchStrings().size() + 3];
+        // For each IDF first
+        for (int i=0; i<m; i++) {
+            // Collect jobs from parameter chains
+            for (int j=0; j<n; j++) {
+                ArrayList chain = Info.ParamChains.get(j);
+                int jobidx = i * n + j;
+                jobs[jobidx][0] = BatchId + "-" + IdfFiles.getIDprefix() + "_" + i + 
+                        (Project.getProjectType() == JEPlusProject.EPLUS ? 
+                        "-" + WthrFiles.getIDprefix() + "_" + 0 : "");  // job_id
+                jobs[jobidx][1] = Integer.toString(0);  // weather id
+                jobs[jobidx][2] = Integer.toString(i);  // idf id
+                for (int k=0; k<chain.size(); k++) {
+                    ParameterItem item = (ParameterItem)chain.get(k);
+                    jobs[jobidx][k+3] = item.getAlternativeValues()[0];
+                    jobs[jobidx][0] += "-" + item.getID() + "_0";
+                }
+            }
+        }
+        return jobs;
+    }
+    
+    public void runTest () {
+        this.buildJobs(getTestJobList());
+        // Start simulation
+        new Thread(this).start();
+    }
+    
+    /**
+     * Run as a thread
+     */
+    @Override
+    public void run() {
+        if (this.Agent != null) {
+            Agent.setJobOwner(this);
+            Agent.purgeJobQueue(); //??
+            if (GUI != null) Agent.setGUIPanel(GUI.getOutputPanel());
+            Agent.addJobs(JobQueue);
+            new Thread (Agent).start();
+        }
+    }
+
+    /**
+     * Load result headers from "SimResults.csv" to an array
+     * @return An array containing merged [table-column]
+     */
+    public static ArrayList<String> getSimulationResultHeaders(ArrayList<ResultCollector> rcs, String result_folder, String rvifile) {
+        // Example SimResults.csv:
+        // row 1 - Collumn heading: comma delimitted text
+        // row 2 and on - data: comma delimitted text, starting with line id, job id, date, data ....
+
+        ArrayList<String> Results = new ArrayList<> ();
+        for (int i=0; i<rcs.size(); i++) {
+//            if (rcs.get(i).getResReader() != null && rcs.get(i).getResWriter() != null) {
+//                if (rcs.get(i).getResultFiles().isEmpty()) { 
+//                    rcs.get(i).listResultFilesFromRVI(rvifile); 
+//                }
+                ArrayList<String> fns = rcs.get(i).getResultFiles();
+                for (int j=0; j<fns.size(); j++) {
+                    String fn = result_folder + fns.get(j);
+                    try (BufferedReader fr = new BufferedReader (new FileReader (fn))) {
+                        String line = fr.readLine();    // Read only the first line (headers)
+                        if (line != null && line.trim().length() > 0) {
+                            String [] items = line.split("\\s*,\\s*");
+                            for (int k=3; k<items.length; k++) {
+                                Results.add(items[k].trim());
+                            }
+                        }
+                    }catch (Exception ex) {
+                        logger.error("", ex);
+                    }
+                }
+//            }
+        }
+        return Results;
+    }
+
+    /**
+     * Load results from "SimResults.csv" to a double array
+     * @return A HashMap containing [table][row][column] referenced by job_id. 
+     */
+    public static HashMap<String, ArrayList<ArrayList<double []>>> getSimulationResults(ArrayList<ResultCollector> rcs, String result_folder, HashMap<String, ArrayList<ArrayList<double []>>> archive) {
+        // Example SimResults.csv:
+        // row 1 - Collumn heading: comma delimitted text
+        // row 2 and on - data: comma delimitted text, starting with line id, job id, date, data ....
+
+        HashMap<String, ArrayList<ArrayList<double []>>> Results = (archive != null) ? archive : new HashMap<String, ArrayList<ArrayList<double []>>> ();
+        int tabidx = 0;
+        for (int i=0; i<rcs.size(); i++) {
+//            if (rcs.get(i).getResReader() != null && rcs.get(i).getResWriter() != null) {
+                if (rcs.get(i).getResultFiles().isEmpty()) { 
+                    // Not sure why this is useful ...
+                    // rcs.get(i).listResultFilesFromRVI(null); 
+                }
+                ArrayList<String> fns = rcs.get(i).getResultFiles();
+                for (int j=0; j<fns.size(); j++) {
+                    String fn = result_folder + fns.get(j);
+                    try (BufferedReader fr = new BufferedReader (new FileReader (fn))) {
+                        fr.readLine();    // Skip the first line (headers)
+                        String line = fr.readLine();
+                        while (line != null && line.trim().length() > 0) {
+                            String [] items = line.split("\\s*,\\s*");
+                            if (items.length > 3) {
+                                String job_id = items[1];
+                                ArrayList<ArrayList<double []>> JobResult;
+                                if (Results.containsKey(job_id)) {
+                                    JobResult = Results.get(job_id);
+                                }else {
+                                    JobResult = new ArrayList<>();
+                                    Results.put(job_id, JobResult);
+                                }
+                                ArrayList<double []> rec;
+                                if (JobResult.size() > tabidx) {
+                                    rec = JobResult.get(tabidx);
+                                    if (rec == null) {
+                                        rec = new ArrayList<> ();
+                                        JobResult.set(tabidx, rec);
+                                    }
+                                }else {
+                                    rec = new ArrayList<> ();
+                                    JobResult.add(rec);
+                                }
+                                double [] data = new double [items.length - 3];
+                                for (int k=3; k<items.length; k++) {
+                                    try {
+                                        data[k-3] = Double.parseDouble(items[k]);
+                                    }catch (NumberFormatException nfe) {
+                                        data[k-3] = 0;
+                                    }
+                                }
+                                rec.add(data);
+                            }
+                            line = fr.readLine();
+                        }
+                    }catch (Exception ex) {
+                        logger.error("", ex);
+                    }
+                    tabidx ++;
+                }
+//            }
+        }
+        return Results;
+    }
+    
+    public static ArrayList<String> getDerivativeResultHeaders (String rvi) {
+        ArrayList<String> Results = new ArrayList<> ();
+        try {
+            RVX rvx = RVX.getRVX(rvi);
+            // User variables
+            if (rvx.getUserVars() != null) {
+                for (UserVar item : rvx.getUserVars()) {
+                    if (item.isReport()) {
+                        Results.add(item.getIdentifier() + ": " + item.getCaption());
+                    }
+                }
+            }
+            // Constraints
+            if (rvx.getConstraints() != null) {
+                for (Constraint item : rvx.getConstraints()) {
+                    Results.add(item.getIdentifier() + ": " + item.getCaption());
+                    if (item.isScaling()) {
+                        Results.add("_" + item.getIdentifier());
+                    }
+                }
+            }
+            // Objectives
+            if (rvx.getObjectives() != null) {
+                for (Objective item : rvx.getObjectives()) {
+                    Results.add(item.getIdentifier() + ": " + item.getCaption());
+                    if (item.isScaling()) {
+                        Results.add("_" + item.getIdentifier());
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            logger.error("Error open RVX file " + rvi, ex);
+        }
+        return  Results;
+    }
+    
+    public static HashMap<String, ArrayList<Double>> getDerivativeResults (String rvi, HashMap<String, ArrayList<ArrayList<double []>>> data) {
+        try {
+            RVX rvx = RVX.getRVX(rvi);
+            HashMap<String, ArrayList<Double>> derived = new HashMap<> ();
+            if (data != null && !data.isEmpty()) {
+                for (String job_id : data.keySet()) {
+                    ArrayList<ArrayList<double []>> job_data = data.get(job_id);
+                    // First pass to work out total number of columns
+                    int ncol = 0;
+                    for (int i = 0; i < job_data.size(); i++) {
+                        ncol += job_data.get(i).get(job_data.get(i).size() - 1).length;
+                    }
+                    // Create a new parser
+                    Parser parser = new Parser();
+                    // First pass to collect original outputs, taking only the last row of the results, put each value to an variable name c??
+                    int idx = 0;
+                    for (int j = 0; j < job_data.size(); j++) {
+                        double[] lastrow = job_data.get(j).get(job_data.get(j).size() - 1);
+                        for (int i = 0; i < lastrow.length; i++) {
+                            String statement = "c" + idx + "=" + lastrow[i];
+                            try {
+                                parser.resolve(statement);
+                            }catch (SimpleParserError spe) {
+                                logger.error("Error parsing conversion formula " + statement + ".");
+                            }
+                            idx ++;
+                        }
+                    }
+                    ArrayList<Double> derived_row = new ArrayList<>();
+                    // User variables
+                    if (rvx.getUserVars() != null) {
+                        for (UserVar item : rvx.getUserVars()) {
+                            String statement = item.getIdentifier() + "=" + item.getFormula();
+                            double val = 0;
+                            try {
+                                val = parser.resolve(statement);
+                            }catch (SimpleParserError spe) {
+                                logger.error("Error parsing conversion formula " + statement + ".");
+                            }
+                            if (item.isReport()) {
+                                derived_row.add(val);
+                            }
+                        }
+                    }
+                    // Constraints
+                    if (rvx.getConstraints() != null) {
+                        for (Constraint item : rvx.getConstraints()) {
+                            String statement = item.getIdentifier() + "=" + item.getFormula();
+                            double val = 0;
+                            try {
+                                val = parser.resolve(statement);
+                            }catch (SimpleParserError spe) {
+                                logger.error("Error parsing conversion formula " + statement + ".");
+                            }
+                            derived_row.add(val);
+                            if (item.isScaling()) {
+                                derived_row.add(item.scale(val));
+                            }
+                        }
+                    }
+                    // Objectives
+                    if (rvx.getObjectives() != null) {
+                        for (Objective item : rvx.getObjectives()) {
+                            String statement = item.getIdentifier() + "=" + item.getFormula();
+                            double val = 0;
+                            try {
+                                val = parser.resolve(statement);
+                            }catch (SimpleParserError spe) {
+                                logger.error("Error parsing conversion formula " + statement + ".");
+                            }
+                            derived_row.add(val);
+                            if (item.isScaling()) {
+                                derived_row.add(item.scale(val));
+                            }
+                        }
+                    }
+                    // Add to derived results table
+                    derived.put(job_id, derived_row);
+                }
+            }
+            return derived;
+        } catch (IOException ex) {
+            logger.error("Error open RVX file " + rvi, ex);
+        }
+        return null;
+    }
+    
+
+    /** 
+     * Write a combined table to a file with CSV format. The table contains indexes, simulation report, and all results (last row for each 
+     * job.
+     * 
+     * @param rcs
+     * @param result_folder
+     * @param fname File name
+     */
+    public static void writeCombinedResultTable (ArrayList<ResultCollector> rcs, String result_folder, String fname) {
+        TreeMap<String, StringBuilder> table = new TreeMap<> ();
+        int cCount = 0;
+        // Get index table and report tables together
+        for (int i=0; i<rcs.size(); i++) {
+            if (rcs.get(i).getIdxWriter() != null) {
+                try {
+                    String fn = rcs.get(i).getIdxWriter().getIndexFile();
+                    BufferedReader fr = new BufferedReader (new FileReader (fn));
+                    String line = fr.readLine();
+                    while (line != null && line.trim().length() > 0) {
+                        String [] items = line.split("\\s*,\\s*", 3);
+                        if (items.length == 3) {
+                            if (table.containsKey(items[1])) {
+                                table.get(items[1]).append(items[0]).append(",").append(items[1]).append(",").append(items[2]);
+                            }else {
+                                table.put(items[1], new StringBuilder (items[0]).append(",").append(items[1]).append(",").append(items[2]));
+                            }
+                        }
+                        line = fr.readLine();
+                    }
+                }catch (Exception ex) {
+                    logger.error("", ex);
+                }
+            }
+            if (rcs.get(i).getRepReader() != null && rcs.get(i).getRepWriter() != null) {
+                try {
+                    String fn = rcs.get(i).getRepWriter().getReportFile();
+                    BufferedReader fr = new BufferedReader (new FileReader (fn));
+                    String line = fr.readLine();
+                    while (line != null && line.trim().length() > 0) {
+                        String [] items = line.split("\\s*,\\s*", 3);
+                        if (items.length == 3) {
+                            if (table.containsKey(items[1])) {
+                                table.get(items[1]).append(",").append(items[2]);
+                            }else {
+                                table.put(items[1], new StringBuilder (items[2]));
+                            }
+                        }
+                        line = fr.readLine();
+                    }
+                }catch (Exception ex) {
+                    logger.error("", ex);
+                }
+            }
+            // Result table headers
+            if (rcs.get(i).getResReader() != null && rcs.get(i).getResWriter() != null) {
+                for (int j=0; j<rcs.get(i).getResultFiles().size(); j++) {
+                    try {
+                        String fn = result_folder + rcs.get(i).getResultFiles().get(j);
+                        BufferedReader fr = new BufferedReader (new FileReader (fn));
+                        String line = fr.readLine();
+                        if (line != null && line.trim().length() > 0) {
+                            String [] items = line.split("\\s*,\\s*");
+                            if (items.length >= 2) { // Contains job_id
+                                StringBuilder row;
+                                if (table.containsKey(items[1])) {
+                                    row = table.get(items[1]);
+                                }else {
+                                    row = new StringBuilder ();
+                                    table.put(items[1], row);
+                                }
+                                for (int k=3; k<items.length; k++) {
+                                    row.append(",").append("c").append(cCount).append(": ").append(items[k]);
+                                    cCount ++;
+                                }
+                            }
+                        }
+                    }catch (Exception ex) {
+                        logger.error("", ex);
+                    }
+                }
+            }
+        }
+        // Fill in results
+        HashMap<String, ArrayList<ArrayList<double []>>> data = getSimulationResults(rcs, result_folder, null);
+        for (String key: data.keySet()) {
+            ArrayList<ArrayList<double []>> jobdata = data.get(key);
+            StringBuilder rec = table.get(key);
+            for (int i=0; i<jobdata.size(); i++) {
+                double[] row = jobdata.get(i).get(jobdata.get(i).size()-1);
+                for (int j=0; j<row.length; j++) {
+                    rec.append(",").append(row[j]);
+                }
+            }
+        }
+        // Write to file
+        try (PrintWriter fw = new PrintWriter (new FileWriter (RelativeDirUtil.checkAbsolutePath(fname, result_folder)))) {
+            fw.println(table.remove("Job_ID").toString());
+            for (String key: table.keySet()) {
+                fw.println(table.get(key).toString());
+            }
+        }catch (Exception ex) {
+            logger.error("", ex);
+        }
+    }
+    
+    /** 
+     * Write the derived results table to a file in CSV format. 
+     * @param rcs
+     * @param result_folder
+     * @param rvifile
+     * @param tablefile
+     */
+    public static void writeDerivedResultTable (ArrayList<ResultCollector> rcs, String result_folder, String rvifile, String tablefile) {
+        // Get headers
+        ArrayList<String> header = getDerivativeResultHeaders (rvifile);
+        // Fill in results
+        HashMap<String, ArrayList<ArrayList<double []>>> data = getSimulationResults(rcs, result_folder, null);
+        HashMap<String, ArrayList<Double>> derived = getDerivativeResults (rvifile, data);
+        // Write to file
+        try (PrintWriter fw = new PrintWriter (new FileWriter (RelativeDirUtil.checkAbsolutePath(tablefile, result_folder)))) {
+            fw.print("#,Job_ID,Reserved,");
+            for (String item : header) {
+                fw.print(item + ",");
+            }
+            fw.println();
+            int counter = 0;
+            for (String jobid : derived.keySet()) {
+                fw.print(counter);
+                fw.print("," + jobid + ",,");
+                for (Double val : derived.get(jobid)) {
+                    fw.print(val);
+                    fw.print(",");
+                }
+                fw.println();
+            }
+        }catch (Exception ex) {
+            logger.error("Error write derived results table to " + tablefile, ex);
+        }
+    }
+    
+    /**
+     * Build a simulation manager with the specified project file
+     * @param projfn Name of the project file
+     * @param showGUI
+     * @return a new and initialised EPlusBatch object
+     */
+    public static EPlusBatch getSimManager (String projfn, boolean showGUI) {
+        return getSimManager(new JEPlusProject (projfn), showGUI);
+    }
+
+    /**
+     * Build a simulation manager with the specified project file
+     * @param proj
+     * @param showGUI
+     * @return a new and initialised EPlusBatch object
+     */
+    public static EPlusBatch getSimManager (JEPlusProject proj, boolean showGUI) {
+        // Create problem
+        JEPlusProject Project = proj;
+        JEPlusFrameMain GUI = null;
+        if (showGUI) {
+            GUI = new JEPlusFrameMain ();
+            GUI.setDefaultCloseOperation(JEPlusFrameMain.DISPOSE_ON_CLOSE);
+            JEPlusFrameMain.startGUI(GUI, "jeplus.cfg", null);
+            GUI.setProject(Project, null);
+        }
+        EPlusBatch SimManager = new EPlusBatch (GUI, Project);
+        if (showGUI && GUI != null) GUI.setBatchManager(SimManager);
+        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+            SimManager.setAgent(new EPlusAgentLocal (Project.getExecSettings()));
+        }else {
+            SimManager.setAgent(new TrnsysAgentLocal (Project.getExecSettings()));
+        }
+        System.out.println(SimManager.validateProject().getValidationErrorsText());
+        if (SimManager.getBatchInfo().isValidationSuccessful()) {
+            SimManager.buildJobs();
+            SimManager.setEnableArchive(true);
+        }
+        return SimManager;
+    }
+}
