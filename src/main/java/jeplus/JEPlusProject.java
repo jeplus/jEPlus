@@ -34,6 +34,7 @@ import java.util.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
+import jeplus.data.RVX;
 import jeplus.data.RandomSource;
 import jeplus.data.RouletteWheel;
 import jeplus.util.CsvUtil;
@@ -464,6 +465,21 @@ public class JEPlusProject implements Serializable {
     }
 
     // ====================== End Getters and Setters ======================
+    
+    // RVX is going to replace RVI in version 2.0
+    /**
+     * Currently read and parse the project rvi/rvx file into a RVX object
+     * @return The resultant RVX object
+     */
+    public RVX getRVX () {
+        RVX rvx = new RVX();
+        try {
+            rvx = RVX.getRVX(this.resolveRVIDir() + this.getRVIFile());
+        }catch (IOException ioe) {
+            logger.error("Cannot read the project RVI/RVX file...", ioe);
+        }
+        return rvx;
+    }
     
     // A new set of resolveXYZFile functions
     

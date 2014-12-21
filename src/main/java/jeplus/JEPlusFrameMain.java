@@ -55,6 +55,7 @@ import jeplus.agent.InselAgentLocal;
 import jeplus.agent.TrnsysAgentLocal;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
+import jeplus.data.RVX;
 import jeplus.data.RandomSource;
 import jeplus.gui.*;
 import jeplus.postproc.ResultCollector;
@@ -82,7 +83,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
     
     protected NumberFormat LargeIntFormatter = new DecimalFormat("###,###,###,###,###,###");
 
-    public final static String version = "1.5";
+    public final static String version = "1.5.1";
     public final static String version_ps = "_1_5";
     public final static String osName = System.getProperty( "os.name" );
     protected static String VersionInfo = "jEPlus (version " + version + ") for " + osName;
@@ -1667,9 +1668,9 @@ public class JEPlusFrameMain extends JEPlusFrame {
 
                 }
             }
-            // while (tabTexts.getTabCount() > 1) tabTexts.removeTabAt(1);
 
             boolean OkToStart = true;
+            // Validate jobs if the execution agent requires it
             if (ExecAgents.get(this.cboExecutionType.getSelectedIndex()).isValidationRequired()) {
                 // Validate the jobs before start
                 if (! validateBatchJobs()) {
@@ -1688,39 +1689,38 @@ public class JEPlusFrameMain extends JEPlusFrame {
                 BatchManager.setAgent(this.ExecAgents.get(this.cboExecutionType.getSelectedIndex()));
             }
 
-// This part has been moved to SQLiteResultCollector            
-//            if (true) {
-//                // add additional result collector
-//                ResultCollector rc;
-//                // get extra output specs from rvi in the project
-//                try {
-//                    BufferedReader fr = new BufferedReader (new FileReader (BatchManager.getResolvedEnv().getRVIDir() + BatchManager.getResolvedEnv().getRVIFile()));
-//                    String line = fr.readLine();
-//                    boolean extra_on = false;
-//                    ArrayList<String[]> sections = new ArrayList<String[]> ();
-//                    while (line != null) {
-//                        if (extra_on && line.trim().length() > 0) {
-//                            String [] section = line.split(";");
-//                            sections.add(section);
-//                        }
-//                        if (line.trim().equals("0")) {
-//                            extra_on = true;
-//                        }
-//                        line = fr.readLine();
-//                    }
-//                    for (int i=0; i<sections.size(); i++) {
-//                        DefaultCSVWriter csvwriter = new DefaultCSVWriter(null, "SimSQLite_" + sections.get(i)[0] + ".csv");
-//                        EPlusSQLiteReader sqlitereader = new EPlusSQLiteReader(sections.get(i)[1], sections.get(i)[2]);
-//                        rc = new ResultCollector ("SQLite result collector");
-//                        rc.setResReader(sqlitereader);
-//                        rc.setResWriter(csvwriter);
-//                        BatchManager.getAgent().addResultCollector(rc);
-//                    }
-//                }catch (Exception ex) {
-//                    ex.printStackTrace();
-//                    //logger.error("Error reading extended rvi file: ", ex);
-//                }
-//            }
+            // Clear output folder
+            if (OkToStart) {
+                File workdir = new File (Project.resolveWorkDir());
+                if (workdir.exists() && workdir.isDirectory() && workdir.listFiles().length > 0) {
+                    int rep = JOptionPane.showConfirmDialog(this,
+                            "The output folder " + workdir.getAbsolutePath() + " is not empty.\n" +
+                            "Do you want to delete its contents before running new simulations?\n" +
+                                    "Warning: All files and subfolders in the folder will be deleted if you choose YES",
+                            "Output folder not empty", JOptionPane.YES_NO_CANCEL_OPTION);
+                    switch (rep) {
+                        case JOptionPane.YES_OPTION:
+                            try {
+                                FileUtils.deleteDirectory(workdir);
+                            }catch (IOException ioe) {
+                                JOptionPane.showMessageDialog(this, 
+                                        "Failed to delete some of the files. Please make sure these files are not open in \n" +
+                                                "programs such as Excel or Windows Explorer.\n" + ioe.getMessage(), 
+                                        "Cannot clear the output folder", 
+                                        JOptionPane.OK_OPTION);
+                                OkToStart = false;
+                            }
+                            break;
+                        case JOptionPane.NO_OPTION: 
+                            break;
+                        case JOptionPane.CANCEL_OPTION:
+                        default:
+                            OkToStart = false;
+                    }
+                }
+            }
+            
+            // Run simulations
             if (OkToStart) {
                 // Start jobs accordingly
                 if (BatchManager.getAgent().isValidationRequired()) {
@@ -2385,13 +2385,15 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             if (! file.toLowerCase().endsWith(".csv")) {
                 file = file.concat(".csv");
             }
+            RVX rvx = BatchManager.getProject().getRVX();
             EPlusBatch.writeCombinedResultTable(BatchManager.getAgent().getResultCollectors(), 
                     BatchManager.getResolvedEnv().getParentDir(), 
+                    rvx,
                     file);
             // Save derivative results too
             EPlusBatch.writeDerivedResultTable(BatchManager.getAgent().getResultCollectors(), 
                     BatchManager.getResolvedEnv().getParentDir(), 
-                    BatchManager.getResolvedEnv().getRVIDir() + BatchManager.getResolvedEnv().getRVIFile(), 
+                    rvx,
                     "DerivedResults.csv");
             // Open it in associated application
             try {

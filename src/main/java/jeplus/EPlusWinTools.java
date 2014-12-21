@@ -498,7 +498,7 @@ public class EPlusWinTools {
                     outs.flush();
                 }
                 StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
-                StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR");
+                StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
                 p_out.start();
                 p_err.start();
                 ExitValue = EPProc.waitFor();
@@ -534,7 +534,7 @@ public class EPlusWinTools {
                     outs.flush();
                 }
                 StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
-                StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR");
+                StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
                 p_out.start();
                 p_err.start();
                 ExitValue = EPProc.waitFor();
@@ -558,7 +558,7 @@ public class EPlusWinTools {
                         outs.flush();
                     }
                     StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
-                    StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR");
+                    StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
                     p_out.start();
                     p_err.start();
                     ExitValue = EPProc.waitFor();

@@ -39,10 +39,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -138,7 +135,6 @@ public class EPlusBatch extends Thread {
      * Constructor
      * @param gui Reference to Main GUI
      * @param project The project definition object
-     * @param g_id Group (project) ID string
      */
     public EPlusBatch(JFrame gui, JEPlusProject project) {
         // BatchId = IDprefix + "_" + (EPlusBatch.NextID++);
@@ -476,8 +472,8 @@ public class EPlusBatch extends Thread {
             headers.add("ModelFile");
             ArrayList<String> paramsstrs = this.Info.getSearchStrings();
             ArrayList<String> allsstrs = new ArrayList<> ();
-            for (int i=0; i<paramsstrs.size(); i++) {
-                allsstrs.addAll(Arrays.asList(paramsstrs.get(i).split("\\s*\\|\\s*")));
+            for (String paramsstr : paramsstrs) {
+                allsstrs.addAll(Arrays.asList(paramsstr.split("\\s*\\|\\s*")));
             }
             headers.addAll(allsstrs);
 
@@ -538,6 +534,7 @@ public class EPlusBatch extends Thread {
                 fw.println(buf.toString());
                 nResCollected ++;
             }
+            fw.close();
         } catch (Exception ex) {
             logger.error("", ex);
             nResCollected = -1;
@@ -585,9 +582,7 @@ public class EPlusBatch extends Thread {
             fw.println(buf.toString());
 
             // Print Jobs
-            for (int i = 0; i < JobQueue.size(); i++) {
-                // For each job, do:
-                EPlusTask job = JobQueue.get(i);
+            for (EPlusTask job : JobQueue) {
                 buf = new StringBuffer();
                 buf.append(job.getJobID()).append(", ");
                 if (job.getWorkEnv().getProjectType() == JEPlusProject.EPLUS) {
@@ -642,8 +637,7 @@ public class EPlusBatch extends Thread {
         }
         // Parameter index
         if (Info.isValid() && Info.ParamList != null) {
-            for (int i = 0; i < Info.ParamList.size(); i++) {
-                ParameterItem item = Info.ParamList.get(i);
+            for (ParameterItem item : Info.ParamList) {
                 fn = "Index" + item.ID + ".csv";
                 if (item.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
             }
@@ -661,6 +655,8 @@ public class EPlusBatch extends Thread {
 
     /**
      * Create and write full parameter indexes to a sql script file in the output directory
+     * @param dbname
+     * @param tableprefix
      * @return A report of the list of tables and in which directory they've been written
      */
     public String writeProjectIndexSQL(String dbname, String tableprefix) {
@@ -704,8 +700,7 @@ public class EPlusBatch extends Thread {
         }
         // Parameter index
         if (Info.isValid() && Info.ParamList != null) {
-            for (int i = 0; i < Info.ParamList.size(); i++) {
-                ParameterItem item = Info.ParamList.get(i);
+            for (ParameterItem item : Info.ParamList) {
                 tn = tableprefix+"Index" + item.ID;
                 if (item.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
             }
@@ -733,8 +728,7 @@ public class EPlusBatch extends Thread {
             tag.add(IdfFiles.getIDprefix());
             header[idx++] = "WTHR_ID";
             tag.add(WthrFiles.getIDprefix());
-            for (int i = 0; i < Info.ShortNames.size(); i++) {
-                String ParID = Info.ShortNames.get(i);
+            for (String ParID : Info.ShortNames) {
                 header[idx++] = ParID;
                 tag.add(ParID);
             }
@@ -757,8 +751,8 @@ public class EPlusBatch extends Thread {
                 String[] pairs = taskid.split("-");
                 String[] vals = new String [header.length];
                 vals[0] = Integer.toString(i);
-                for (int j = 0; j < pairs.length; j++) {
-                    String[] val = pairs[j].split("_");
+                for (String pair : pairs) {
+                    String[] val = pair.split("_");
                     idx = tag.indexOf(val[0]);
                     if (idx >= 0) {
                         vals[idx + tag_idx_offset] = val[1];
@@ -800,8 +794,7 @@ public class EPlusBatch extends Thread {
             header[idx++] = "Weather_ID";
             fw.println("`Weather_ID` SMALLINT NOT NULL,");
             tag.add(WthrFiles.getIDprefix());
-            for (int i = 0; i < Info.ShortNames.size(); i++) {
-                String ParID = Info.ShortNames.get(i);
+            for (String ParID : Info.ShortNames) {
                 header[idx++] = ParID;
                 tag.add(ParID);
                 fw.println("`" + ParID + "` SMALLINT default NULL,");
@@ -834,8 +827,8 @@ public class EPlusBatch extends Thread {
                 String[] pairs = taskid.split("-");
                 String[] vals = new String [header.length];
                 vals[0] = Integer.toString(i);
-                for (int j = 0; j < pairs.length; j++) {
-                    String[] val = pairs[j].split("_");
+                for (String pair : pairs) {
+                    String[] val = pair.split("_");
                     idx = tag.indexOf(val[0]);
                     if (idx >= 0) {
                         vals[idx + tag_idx_offset] = val[1];
@@ -866,6 +859,7 @@ public class EPlusBatch extends Thread {
 
     /**
      * Building the jobs of the project and keeping only those in the index list.
+     * @param indexlist
      * @return Number of jobs found
      */
     public long buildJobs(long [] indexlist) {
@@ -1082,6 +1076,7 @@ public class EPlusBatch extends Thread {
      * results in a HashMap. For the details of the jobArray, see <code>
      * buildJobs(String [][] jobArray) </code>
      * @param jobArray An array of jobs, see <code>buildJobs(String [][] jobArray) </code>
+     * @return 
      */
     public HashMap<String, ArrayList<ArrayList<double []>>>  simulateJobSet (String [][] jobArray) {
         runJobSet (jobArray);
@@ -1093,14 +1088,20 @@ public class EPlusBatch extends Thread {
         }catch (InterruptedException iex) {
             this.getAgent().setStopAgent(true);
         }
-        return getSimulationResults(this.getAgent().getResultCollectors(), this.getResolvedEnv().getParentDir(), (this.isEnableArchive()?JobArchive:null));
+        RVX rvx = null;
+        try {
+            rvx = RVX.getRVX(Project.getRVIDir() + Project.getRVIFile());
+        }catch (IOException ioe) {
+            logger.error("Error reading the project RVI/RVX file...", ioe);
+        }
+        return getSimulationResults(this.getAgent().getResultCollectors(), this.getResolvedEnv().getParentDir(), rvx, (this.isEnableArchive()?JobArchive:null));
     }
 
     /**
      * Build the given set of jobs but not start running. For the details of the jobArray, see <code>
      * buildJobs(String [][] jobArray) </code>
-     * @param jobArray An array of jobs, see <code>
-     * buildJobs(String [][] jobArray) </code>
+     * @param type
+     * @param jobstr
      */
     public void prepareJobSet (JobStringType type, String jobstr) {
         if (! getBatchInfo().isValidationSuccessful()) validateProject();
@@ -1175,6 +1176,7 @@ public class EPlusBatch extends Thread {
      * probability distribution function is not defined, it is treated as 
      * uniform discrete distribution.
      * @param n Sample size of LHS. 5 x number of variables is recommended
+     * @param randomsrc
      */
     public void runLHSample (int n, Random randomsrc) {
         validateProject();
@@ -1212,13 +1214,13 @@ public class EPlusBatch extends Thread {
             if (alljobs <= 1000000) {
                 for (int i=0; i<alljobs; i++) alist.add(new Long (i));
                 Collections.shuffle(alist, randomsrc);
-                for (int i=0; i<njobs; i++) list[i] = alist.get(i).longValue();
+                for (int i=0; i<njobs; i++) list[i] = alist.get(i);
             }else {
                 while (alist.size() < njobs) {
-                    Long newjob = new Long((long)Math.floor(randomsrc.nextDouble() * alljobs - 0.00001));
+                    Long newjob = (long)Math.floor(randomsrc.nextDouble() * alljobs - 0.00001);
                     if (! alist.contains(newjob)) alist.add(newjob);
                 }
-                for (int i=0; i<njobs; i++) list[i] = alist.get(i).longValue();
+                for (int i=0; i<njobs; i++) list[i] = alist.get(i);
             }
         }else {
             for (int i=0; i<njobs; i++) list[i] = i;
@@ -1261,7 +1263,7 @@ public class EPlusBatch extends Thread {
     
     /**
      * Run as a thread
-     */
+     */ 
     @Override
     public void run() {
         if (this.Agent != null) {
@@ -1275,110 +1277,113 @@ public class EPlusBatch extends Thread {
 
     /**
      * Load result headers from "SimResults.csv" to an array
+     * @param rcs
+     * @param result_folder
+     * @param rvx
      * @return An array containing merged [table-column]
      */
-    public static ArrayList<String> getSimulationResultHeaders(ArrayList<ResultCollector> rcs, String result_folder, String rvifile) {
+    public static ArrayList<String> getSimulationResultHeaders(ArrayList<ResultCollector> rcs, String result_folder, RVX rvx) {
         // Example SimResults.csv:
         // row 1 - Collumn heading: comma delimitted text
         // row 2 and on - data: comma delimitted text, starting with line id, job id, date, data ....
 
         ArrayList<String> Results = new ArrayList<> ();
-        for (int i=0; i<rcs.size(); i++) {
-//            if (rcs.get(i).getResReader() != null && rcs.get(i).getResWriter() != null) {
-//                if (rcs.get(i).getResultFiles().isEmpty()) { 
-//                    rcs.get(i).listResultFilesFromRVI(rvifile); 
-//                }
-                ArrayList<String> fns = rcs.get(i).getResultFiles();
-                for (int j=0; j<fns.size(); j++) {
-                    String fn = result_folder + fns.get(j);
-                    try (BufferedReader fr = new BufferedReader (new FileReader (fn))) {
-                        String line = fr.readLine();    // Read only the first line (headers)
-                        if (line != null && line.trim().length() > 0) {
-                            String [] items = line.split("\\s*,\\s*");
-                            for (int k=3; k<items.length; k++) {
-                                Results.add(items[k].trim());
-                            }
+        for (ResultCollector rc : rcs) {
+            ArrayList<String> fns;
+            if (rc.getResultFiles().isEmpty()) {
+                fns = rc.getExpectedResultFiles(rvx);
+            } else {
+                fns = rc.getResultFiles();
+            }
+            for (String fn : fns) {
+                try (BufferedReader fr = new BufferedReader (new FileReader (result_folder + fn))) {
+                    String line = fr.readLine();    // Read only the first line (headers)
+                    if (line != null && line.trim().length() > 0) {
+                        String [] items = line.split("\\s*,\\s*");
+                        for (int k=3; k<items.length; k++) {
+                            Results.add(items[k].trim());
                         }
-                    }catch (Exception ex) {
-                        logger.error("", ex);
                     }
+                }catch (Exception ex) {
+                    logger.error("", ex);
                 }
-//            }
+            }
         }
         return Results;
     }
 
     /**
      * Load results from "SimResults.csv" to a double array
+     * @param rcs
+     * @param result_folder
+     * @param rvx
+     * @param archive
      * @return A HashMap containing [table][row][column] referenced by job_id. 
      */
-    public static HashMap<String, ArrayList<ArrayList<double []>>> getSimulationResults(ArrayList<ResultCollector> rcs, String result_folder, HashMap<String, ArrayList<ArrayList<double []>>> archive) {
+    public static HashMap<String, ArrayList<ArrayList<double []>>> getSimulationResults(ArrayList<ResultCollector> rcs, String result_folder, RVX rvx, HashMap<String, ArrayList<ArrayList<double []>>> archive) {
         // Example SimResults.csv:
         // row 1 - Collumn heading: comma delimitted text
         // row 2 and on - data: comma delimitted text, starting with line id, job id, date, data ....
 
         HashMap<String, ArrayList<ArrayList<double []>>> Results = (archive != null) ? archive : new HashMap<String, ArrayList<ArrayList<double []>>> ();
         int tabidx = 0;
-        for (int i=0; i<rcs.size(); i++) {
-//            if (rcs.get(i).getResReader() != null && rcs.get(i).getResWriter() != null) {
-                if (rcs.get(i).getResultFiles().isEmpty()) { 
-                    // Not sure why this is useful ...
-                    // rcs.get(i).listResultFilesFromRVI(null); 
-                }
-                ArrayList<String> fns = rcs.get(i).getResultFiles();
-                for (int j=0; j<fns.size(); j++) {
-                    String fn = result_folder + fns.get(j);
-                    try (BufferedReader fr = new BufferedReader (new FileReader (fn))) {
-                        fr.readLine();    // Skip the first line (headers)
-                        String line = fr.readLine();
-                        while (line != null && line.trim().length() > 0) {
-                            String [] items = line.split("\\s*,\\s*");
-                            if (items.length > 3) {
-                                String job_id = items[1];
-                                ArrayList<ArrayList<double []>> JobResult;
-                                if (Results.containsKey(job_id)) {
-                                    JobResult = Results.get(job_id);
-                                }else {
-                                    JobResult = new ArrayList<>();
-                                    Results.put(job_id, JobResult);
-                                }
-                                ArrayList<double []> rec;
-                                if (JobResult.size() > tabidx) {
-                                    rec = JobResult.get(tabidx);
-                                    if (rec == null) {
-                                        rec = new ArrayList<> ();
-                                        JobResult.set(tabidx, rec);
-                                    }
-                                }else {
-                                    rec = new ArrayList<> ();
-                                    JobResult.add(rec);
-                                }
-                                double [] data = new double [items.length - 3];
-                                for (int k=3; k<items.length; k++) {
-                                    try {
-                                        data[k-3] = Double.parseDouble(items[k]);
-                                    }catch (NumberFormatException nfe) {
-                                        data[k-3] = 0;
-                                    }
-                                }
-                                rec.add(data);
+        for (ResultCollector rc : rcs) {
+            ArrayList<String> fns;
+            if (rc.getResultFiles().isEmpty()) {
+                fns = rc.getExpectedResultFiles(rvx);
+            } else {
+                fns = rc.getResultFiles();
+            }
+            for (String fn : fns) {
+                try (BufferedReader fr = new BufferedReader (new FileReader (result_folder + fn))) {
+                    fr.readLine();    // Skip the first line (headers)
+                    String line = fr.readLine();
+                    while (line != null && line.trim().length() > 0) {
+                        String [] items = line.split("\\s*,\\s*");
+                        if (items.length > 3) {
+                            String job_id = items[1];
+                            ArrayList<ArrayList<double []>> JobResult;
+                            if (Results.containsKey(job_id)) {
+                                JobResult = Results.get(job_id);
+                            }else {
+                                JobResult = new ArrayList<>();
+                                Results.put(job_id, JobResult);
                             }
-                            line = fr.readLine();
+                            ArrayList<double []> rec;
+                            if (JobResult.size() > tabidx) {
+                                rec = JobResult.get(tabidx);
+                                if (rec == null) {
+                                    rec = new ArrayList<> ();
+                                    JobResult.set(tabidx, rec);
+                                }
+                            }else {
+                                rec = new ArrayList<> ();
+                                JobResult.add(rec);
+                            }
+                            double [] data = new double [items.length - 3];
+                            for (int k=3; k<items.length; k++) {
+                                try {
+                                    data[k-3] = Double.parseDouble(items[k]);
+                                }catch (NumberFormatException nfe) {
+                                    data[k-3] = 0;
+                                }
+                            }
+                            rec.add(data);
                         }
-                    }catch (Exception ex) {
-                        logger.error("", ex);
+                        line = fr.readLine();
                     }
-                    tabidx ++;
+                }catch (Exception ex) {
+                    logger.error("", ex);
                 }
-//            }
+                tabidx ++;
+            }
         }
         return Results;
     }
     
-    public static ArrayList<String> getDerivativeResultHeaders (String rvi) {
+    public static ArrayList<String> getDerivativeResultHeaders (RVX rvx) {
         ArrayList<String> Results = new ArrayList<> ();
-        try {
-            RVX rvx = RVX.getRVX(rvi);
+        if (rvx != null) {
             // User variables
             if (rvx.getUserVars() != null) {
                 for (UserVar item : rvx.getUserVars()) {
@@ -1405,30 +1410,27 @@ public class EPlusBatch extends Thread {
                     }
                 }
             }
-        } catch (IOException ex) {
-            logger.error("Error open RVX file " + rvi, ex);
         }
         return  Results;
     }
     
-    public static HashMap<String, ArrayList<Double>> getDerivativeResults (String rvi, HashMap<String, ArrayList<ArrayList<double []>>> data) {
-        try {
-            RVX rvx = RVX.getRVX(rvi);
+    public static HashMap<String, ArrayList<Double>> getDerivativeResults (RVX rvx, HashMap<String, ArrayList<ArrayList<double []>>> data) {
+        if (rvx != null) {
             HashMap<String, ArrayList<Double>> derived = new HashMap<> ();
             if (data != null && !data.isEmpty()) {
                 for (String job_id : data.keySet()) {
                     ArrayList<ArrayList<double []>> job_data = data.get(job_id);
                     // First pass to work out total number of columns
                     int ncol = 0;
-                    for (int i = 0; i < job_data.size(); i++) {
-                        ncol += job_data.get(i).get(job_data.get(i).size() - 1).length;
+                    for (ArrayList<double[]> table : job_data) {
+                        ncol += table.get(table.size() - 1).length;
                     }
                     // Create a new parser
                     Parser parser = new Parser();
                     // First pass to collect original outputs, taking only the last row of the results, put each value to an variable name c??
                     int idx = 0;
-                    for (int j = 0; j < job_data.size(); j++) {
-                        double[] lastrow = job_data.get(j).get(job_data.get(j).size() - 1);
+                    for (ArrayList<double[]> table : job_data) {
+                        double[] lastrow = table.get(table.size() - 1);
                         for (int i = 0; i < lastrow.length; i++) {
                             String statement = "c" + idx + "=" + lastrow[i];
                             try {
@@ -1492,8 +1494,6 @@ public class EPlusBatch extends Thread {
                 }
             }
             return derived;
-        } catch (IOException ex) {
-            logger.error("Error open RVX file " + rvi, ex);
         }
         return null;
     }
@@ -1505,17 +1505,17 @@ public class EPlusBatch extends Thread {
      * 
      * @param rcs
      * @param result_folder
+     * @param rvx
      * @param fname File name
      */
-    public static void writeCombinedResultTable (ArrayList<ResultCollector> rcs, String result_folder, String fname) {
+    public static void writeCombinedResultTable (ArrayList<ResultCollector> rcs, String result_folder, RVX rvx, String fname) {
         TreeMap<String, StringBuilder> table = new TreeMap<> ();
         int cCount = 0;
         // Get index table and report tables together
-        for (int i=0; i<rcs.size(); i++) {
-            if (rcs.get(i).getIdxWriter() != null) {
-                try {
-                    String fn = rcs.get(i).getIdxWriter().getIndexFile();
-                    BufferedReader fr = new BufferedReader (new FileReader (fn));
+        for (ResultCollector rc : rcs) {
+            if (rc.getIdxWriter() != null) {
+                String fn = rc.getIdxWriter().getIndexFile();
+                try (BufferedReader fr = new BufferedReader (new FileReader (fn));) {
                     String line = fr.readLine();
                     while (line != null && line.trim().length() > 0) {
                         String [] items = line.split("\\s*,\\s*", 3);
@@ -1532,10 +1532,9 @@ public class EPlusBatch extends Thread {
                     logger.error("", ex);
                 }
             }
-            if (rcs.get(i).getRepReader() != null && rcs.get(i).getRepWriter() != null) {
-                try {
-                    String fn = rcs.get(i).getRepWriter().getReportFile();
-                    BufferedReader fr = new BufferedReader (new FileReader (fn));
+            if (rc.getRepReader() != null && rc.getRepWriter() != null) {
+                String fn = rc.getRepWriter().getReportFile();
+                try (BufferedReader fr = new BufferedReader (new FileReader (fn));) {
                     String line = fr.readLine();
                     while (line != null && line.trim().length() > 0) {
                         String [] items = line.split("\\s*,\\s*", 3);
@@ -1553,11 +1552,10 @@ public class EPlusBatch extends Thread {
                 }
             }
             // Result table headers
-            if (rcs.get(i).getResReader() != null && rcs.get(i).getResWriter() != null) {
-                for (int j=0; j<rcs.get(i).getResultFiles().size(); j++) {
-                    try {
-                        String fn = result_folder + rcs.get(i).getResultFiles().get(j);
-                        BufferedReader fr = new BufferedReader (new FileReader (fn));
+            if (rc.getResReader() != null && rc.getResWriter() != null) {
+                for (int j = 0; j < rc.getResultFiles().size(); j++) {
+                    String fn = result_folder + rc.getResultFiles().get(j);
+                    try (BufferedReader fr = new BufferedReader (new FileReader (fn));) {
                         String line = fr.readLine();
                         if (line != null && line.trim().length() > 0) {
                             String [] items = line.split("\\s*,\\s*");
@@ -1582,12 +1580,12 @@ public class EPlusBatch extends Thread {
             }
         }
         // Fill in results
-        HashMap<String, ArrayList<ArrayList<double []>>> data = getSimulationResults(rcs, result_folder, null);
+        HashMap<String, ArrayList<ArrayList<double []>>> data = getSimulationResults(rcs, result_folder, rvx, null);
         for (String key: data.keySet()) {
             ArrayList<ArrayList<double []>> jobdata = data.get(key);
             StringBuilder rec = table.get(key);
-            for (int i=0; i<jobdata.size(); i++) {
-                double[] row = jobdata.get(i).get(jobdata.get(i).size()-1);
+            for (ArrayList<double[]> jobtable : jobdata) {
+                double[] row = jobtable.get(jobtable.size() - 1);
                 for (int j=0; j<row.length; j++) {
                     rec.append(",").append(row[j]);
                 }
@@ -1608,15 +1606,15 @@ public class EPlusBatch extends Thread {
      * Write the derived results table to a file in CSV format. 
      * @param rcs
      * @param result_folder
-     * @param rvifile
+     * @param rvx
      * @param tablefile
      */
-    public static void writeDerivedResultTable (ArrayList<ResultCollector> rcs, String result_folder, String rvifile, String tablefile) {
+    public static void writeDerivedResultTable (ArrayList<ResultCollector> rcs, String result_folder, RVX rvx, String tablefile) {
         // Get headers
-        ArrayList<String> header = getDerivativeResultHeaders (rvifile);
+        ArrayList<String> header = getDerivativeResultHeaders (rvx);
         // Fill in results
-        HashMap<String, ArrayList<ArrayList<double []>>> data = getSimulationResults(rcs, result_folder, null);
-        HashMap<String, ArrayList<Double>> derived = getDerivativeResults (rvifile, data);
+        HashMap<String, ArrayList<ArrayList<double []>>> data = getSimulationResults(rcs, result_folder, rvx, null);
+        HashMap<String, ArrayList<Double>> derived = getDerivativeResults (rvx, data);
         // Write to file
         try (PrintWriter fw = new PrintWriter (new FileWriter (RelativeDirUtil.checkAbsolutePath(tablefile, result_folder)))) {
             fw.print("#,Job_ID,Reserved,");
