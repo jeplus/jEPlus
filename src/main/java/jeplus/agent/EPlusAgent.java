@@ -35,6 +35,7 @@ import jeplus.EPlusTask;
 import jeplus.EPlusWorkEnv;
 import jeplus.JEPlusFrameMain;
 import jeplus.data.ExecutionOptions;
+import jeplus.data.RVX;
 import jeplus.gui.EPlusTextPanelOld;
 import jeplus.gui.JEPlusPrintablePanel;
 import jeplus.gui.JFrameAgentMonitor;
@@ -414,12 +415,11 @@ public abstract class EPlusAgent implements Runnable {
                 }
             }
         }
+        RVX rvx = this.getJobOwner().getProject().getRVX();
         // Combine results into combined table and derivatives table
-        EPlusBatch.writeCombinedResultTable(getResultCollectors(), this.getJobOwner().getResolvedEnv().getParentDir(), "AllCombinedResults.csv");
+        EPlusBatch.writeCombinedResultTable(getResultCollectors(), this.getJobOwner().getResolvedEnv().getParentDir(), rvx, "AllCombinedResults.csv");
         writeLog("Combined result table AllCombinedResults.csv is created.");
-        EPlusBatch.writeDerivedResultTable(getResultCollectors(), this.getJobOwner().getResolvedEnv().getParentDir(), 
-                this.getJobOwner().getResolvedEnv().getRVIDir() + this.getJobOwner().getResolvedEnv().getRVIFile(), 
-                "AllDerivedResults.csv");
+        EPlusBatch.writeDerivedResultTable(getResultCollectors(), this.getJobOwner().getResolvedEnv().getParentDir(), rvx, "AllDerivedResults.csv");
         writeLog("Derivative result table AllDerivedResults.csv is created.");
        
     }

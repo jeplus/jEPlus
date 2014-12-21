@@ -94,6 +94,7 @@ public class DefaultCSVWriter implements IFReportWriter, IFResultWriter {
                 fw.println();
             }
             fw.flush();
+            fw.close();
             LastResFile = manager.getResolvedEnv().getParentDir() + ResultCSV;
         } catch (Exception ex) {
             logger.error("", ex);
@@ -118,6 +119,7 @@ public class DefaultCSVWriter implements IFReportWriter, IFResultWriter {
                 fw.println();
             }
             fw.flush();
+            fw.close();
             LastRepFile = manager.getResolvedEnv().getParentDir() + ReportCSV;
         } catch (Exception ex) {
             logger.error("", ex);

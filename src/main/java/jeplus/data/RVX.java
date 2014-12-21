@@ -21,41 +21,62 @@ import org.slf4j.LoggerFactory;
  * @author Yi
  */
 public class RVX implements Serializable {
+    
+    
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(RVX.class);
     
-//	[ 
-//		"RVI" : { 
-//			"filename" : "my.rvi",
-//			"tablename" : "rvitable1.csv"
+    // Serialization version code; to maintain backwards compatibility, do not change.
+    static final long serialVersionUID = 5600302679570045420L;
+    
+//	"rvis" : [ 
+//		{ 
+//			"fileName" : "5ZoneCostEst2.rvi",
+//                      "frequency" : "Annual",
+//			"tableName" : "SimResults2",
+//                      "usedInCalc" : true
 //		}
 //	],
     public static class RVIitem implements Serializable {
         private String FileName = "my.rvi";
-        private String TableName = "SimResults.csv";
+        private String Frequency = "Annual";
+        private String TableName = "SimResults";
+        private boolean UsedInCalc = true;
 
         public String getFileName() { return FileName; }
         public void setFileName(String FileName) { this.FileName = FileName; }
+        public String getFrequency() { return Frequency; }
+        public void setFrequency(String Frequency) { this.Frequency = Frequency; }
         public String getTableName() { return TableName; }
         public void setTableName(String TableName) { this.TableName = TableName; }
+        public boolean isUsedInCalc() { return UsedInCalc; }
+        public void setUsedInCalc(boolean UsedInCalc) { this.UsedInCalc = UsedInCalc; }
     }
     private RVIitem [] RVIs = null;
     public RVIitem[] getRVIs() { return RVIs; }
     public void setRVIs(RVIitem[] RVIs) { this.RVIs = RVIs; }
 
     
-//	[
-//		"SQL" : { 
-//			"tablename" : "sqltable1.csv"
-//			"columnheaders" : "column1 [a], column2 [b]",
-//			"command" : "SELECT * FROM abc"
+//	"sqls" : [
+//		{ 
+//			"tableName" : "ChillerCap",
+//			"columnHeaders" : "Chiller Nominal Capacity [W]",
+//			"sqlcommand" : "select Value from ComponentSizes WHERE (CompType='Chiller:Electric' AND CompName='CHILLER PLANT CHILLER' AND Description='Nominal Capacity')"
+//                      "useInCalc" : true
+//		},
+//		{ 
+//			"tableName" : "ConsCost",
+//			"columnHeaders" : "Construction Cost [$/m2]",
+//			"sqlcommand" : "select Value from TabularDataWithStrings WHERE (ReportName='Construction Cost Estimate Summary' AND ReportForString='Entire Facility' AND TableName='Construction Cost Estimate Summary' AND RowName='Cost Per Conditioned Building Area (~~$~~/m2)' AND ColumnName='Current Bldg. Model' AND Units='' AND RowId=10)"
+//                      "usedInCalc" : true
 //		}
 //	],
     public static class SQLitem implements Serializable {
         private String TableName = "SqlTable.csv";  // E.g.
         private String ColumnHeaders = "";          // E.g. "Temperature [K], Heating [kWh]"
         private String SQLcommand = "";             // E.g.
+        private boolean UsedInCalc = true;
 
         public String getTableName() { return TableName; }
         public void setTableName(String TableName) { this.TableName = TableName; }
@@ -63,27 +84,29 @@ public class RVX implements Serializable {
         public void setColumnHeaders(String ColumnHeaders) { this.ColumnHeaders = ColumnHeaders; }
         public String getSQLcommand() { return SQLcommand; }
         public void setSQLcommand(String SQLcommand) { this.SQLcommand = SQLcommand; }
+        public boolean isUsedInCalc() { return UsedInCalc; }
+        public void setUsedInCalc(boolean UsedInCalc) { this.UsedInCalc = UsedInCalc; }
     }
     private SQLitem [] SQLs = null;
     public SQLitem[] getSQLs() { return SQLs; }
     public void setSQLs(SQLitem[] SQLs) { this.SQLs = SQLs; }
 
     
-//	[
-//		"PYTHON" : {
-//			"filename" : "myscript.py",
-//			"pythonversion" : "python3",
-//                      "onEachJob" : true,
-//			"arguments" : "arg1 arg2 arg3", 
-//			"tablename" : "pytable1.csv"
+//	"scripts" : [
+//		{
+//			"fileName" : "readRunTimes_jy.py",
+//			"pythonVersion" : "jython",
+//			"onEachJob" : false,
+//			"arguments" : "",
+//			"tableName" : "CpuTime"
 //		}
 //	],
     public static class PYTHONitem implements Serializable {
-        private String FileName = "postproc.py";
-        private String PythonVersion = "2";
-        private boolean OnEachJob = true;
+        private String FileName = "readRunTimes_jy.py";
+        private String PythonVersion = "jython";
+        private boolean OnEachJob = false;
         private String Arguments = "";
-        private String TableName = "PyTable.csv";
+        private String TableName = "CpuTime";
 
         public String getFileName() { return FileName; }
         public void setFileName(String FileName) { this.FileName = FileName; }
@@ -100,13 +123,47 @@ public class RVX implements Serializable {
     public PYTHONitem[] getScripts() { return Scripts; }
     public void setScripts(PYTHONitem[] Scripts) { this.Scripts = Scripts; }
 
+//	"userSupplied" : [
+//		{
+//			"fileName" : "ExternResultTable.csv",
+//			"headerRow" : 0,
+//			"jobIdColumn" : 1,
+//			"dataColumns" : "3 4",
+//			"tableName" : "UserResults"
+//		}
+//	],
+    public static class UserSuppliedItem implements Serializable {
+        private String FileName = "ExternResultTable.csv";
+        private int HeaderRow = 0;
+        private int JobIdColumn = 1;
+        private String DataColumns = "3";
+        private String TableName = "UserResults";
+
+        public String getFileName() { return FileName; }
+        public void setFileName(String FileName) { this.FileName = FileName; }
+        public int getHeaderRow() { return HeaderRow; }
+        public void setHeaderRow(int HeaderRow) { this.HeaderRow = HeaderRow; }
+        public int getJobIdColumn() { return JobIdColumn; }
+        public void setJobIdColumn(int JobIdColumn) { this.JobIdColumn = JobIdColumn; }
+        public String getDataColumns() { return DataColumns; }
+        public void setDataColumns(String DataColumns) { this.DataColumns = DataColumns; }
+        public String getTableName() { return TableName; }
+        public void setTableName(String TableName) { this.TableName = TableName; }
+    }
+    private UserSuppliedItem [] UserSuppliedResults = null;
+    public UserSuppliedItem[] getUserSuppliedResults() { return UserSuppliedResults; }
+    public void setUserSuppliedResults(UserSuppliedItem[] usersupplied) { this.UserSuppliedResults = usersupplied; }
+
     
-//	"UserVar" : {
-//		"identifier" : "v1",
-//		"formula" : "c1 * 12"
-//		"caption" : "Variable 1 []",
-//              "report" : false
-//	},
+    
+//	"userVars" : [
+//		{
+//			"identifier" : "v2",
+//			"formula" : "c2",
+//			"caption" : "Variable 2 []",
+//			"report" : false
+//		}
+//	],
     public static class UserVar implements Serializable {
         private String Identifier = "v1";
         private String Formula = "0";
@@ -131,19 +188,31 @@ public class RVX implements Serializable {
     private UserVar [] UserVars = null;
     public UserVar[] getUserVars() { return UserVars; }
     public void setUserVars(UserVar[] UserVars) { this.UserVars = UserVars; }
+    public ArrayList<UserVar> getReportedUserVars () {
+        ArrayList<UserVar> list = new ArrayList<> ();
+        if (UserVars != null) {
+            for (UserVar var : UserVars) {
+                if (var.isReport()) list.add(var);
+            }
+        }
+        return list;
+    }
 
 	
-//	"CONSTRAINTs" : {
-//		"identifier" : "s1",
-//		"formula" : "v1 + 100",
-//		"caption" : "Constraint 1 []",
-//		"scaling" : false,
-//		"lb" : "100.0",
-//		"ub" : "200.0",
-//		"min" : "0.0",
-//		"max" : "1000.0",
-//		"weight" : "1.0"
-//	},
+//	"constraints" : [
+//		{
+//			"identifier" : "s1",
+//			"formula" : "v1/1000",
+//			"caption" : "Chiller Capacity [kW]",
+//			"scaling" : true,
+//			"lb" : 0,
+//			"ub" : 200,
+//			"min" : 0,
+//			"max" : 300,
+//			"weight" : 1.0,
+//                      "enabled" : true
+//		}
+//	],
     public static class Constraint implements Serializable {
         private String Identifier = "s1";
         private String Formula = "c1";
@@ -154,6 +223,7 @@ public class RVX implements Serializable {
         private double Min = 0;
         private double Max = 1;
         private double Weight = 1;
+        private boolean Enabled = true;
 
         public String getIdentifier() { return Identifier; }
         public void setIdentifier(String Identifier) { this.Identifier = Identifier; }
@@ -173,6 +243,8 @@ public class RVX implements Serializable {
         public void setMax(double Max) { this.Max = Max; }
         public double getWeight() { return Weight; }
         public void setWeight(double Weight) { this.Weight = Weight; }
+        public boolean isEnabled() { return Enabled; }
+        public void setEnabled(boolean Enabled) { this.Enabled = Enabled; }
         
         /**
          * Normalize and scale (weigh) the objective value. User is responsible for ensuring the correct values of mMax and mMin
@@ -198,7 +270,7 @@ public class RVX implements Serializable {
             StringBuilder buf = new StringBuilder (Caption);
             buf.append(": ").append(Identifier).append(" = ").append(Formula);
             if (Scaling) {
-                buf.append("; feasible range [").append(LB).append(", ").append("UB").append("], normalized between [");
+                buf.append("; feasible range [").append(LB).append(", ").append(UB).append("], normalized between [");
                 buf.append(Min).append(", ").append(Max).append("] ");
             }
             return buf.toString();
@@ -207,17 +279,29 @@ public class RVX implements Serializable {
     private Constraint [] Constraints = null;
     public Constraint[] getConstraints() { return Constraints; }
     public void setConstraints(Constraint[] Constraints) { this.Constraints = Constraints; }
+    public ArrayList<Constraint> getEnabledConstraints () {
+        ArrayList<Constraint> list = new ArrayList<> ();
+        if (Constraints != null) {
+            for (Constraint cons : Constraints) {
+                if (cons.isEnabled()) list.add(cons);
+            }
+        }
+        return list;
+    }
 
 	
-//	"OBJECTIVEs" : {
-//		"identifier" : "t1",
-//		"formula" : "v1 + 100",
-//		"caption" : "Objecive 1 []",
-//		"scaling" : false,
-//		"min" : "0",
-//		"max" : "1000",
-//		"weight" : "1.0"
-//	}
+//	"objectives" : [
+//		{
+//			"identifier" : "t2",
+//			"formula" : "v2",
+//			"caption" : "Construction Cost [$/m2]",
+//			"scaling" : false,
+//			"min" : 0,
+//			"max" : 1000,
+//			"weight" : 1.0,
+//                      "enabled" : true
+//		}
+//	]
     public static class Objective implements Serializable {
         private String Identifier = "t1";
         private String Formula = "c1";
@@ -226,6 +310,7 @@ public class RVX implements Serializable {
         private double Min = 0;
         private double Max = 1;
         private double Weight = 1;
+        private boolean Enabled = true;
 
         public String getIdentifier() { return Identifier; }
         public void setIdentifier(String Identifier) { this.Identifier = Identifier; }
@@ -241,6 +326,8 @@ public class RVX implements Serializable {
         public void setMax(double Max) { this.Max = Max; }
         public double getWeight() { return Weight; }
         public void setWeight(double Weight) { this.Weight = Weight; }
+        public boolean isEnabled() { return Enabled; }
+        public void setEnabled(boolean Enabled) { this.Enabled = Enabled; }
         /**
          * Normalize and scale (weigh) the objective value. User is responsible for ensuring the correct values of mMax and mMin
          * @param initval
@@ -270,6 +357,15 @@ public class RVX implements Serializable {
     private Objective [] Objectives = null;
     public Objective[] getObjectives() { return Objectives; }
     public void setObjectives(Objective[] Objectives) { this.Objectives = Objectives; }
+    public ArrayList<Objective> getEnabledObjectives () {
+        ArrayList<Objective> list = new ArrayList<> ();
+        if (Objectives != null) {
+            for (Objective obj : Objectives) {
+                if (obj.isEnabled()) list.add(obj);
+            }
+        }
+        return list;
+    }
 
     
 //	"NOTE" : "Some notes about this RVX"
@@ -357,6 +453,9 @@ public class RVX implements Serializable {
                 }
                 rvx.setObjectives(objs);
             }
+            // Constraint section is empty
+            rvx.setConstraints(new RVX.Constraint [0]);
+            // Retrun rvx
             return rvx;
         }
     }

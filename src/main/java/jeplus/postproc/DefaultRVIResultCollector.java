@@ -24,6 +24,8 @@
  ***************************************************************************/
 package jeplus.postproc;
 
+import java.util.ArrayList;
+import jeplus.data.RVX;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -50,4 +52,10 @@ public class DefaultRVIResultCollector extends ResultCollector {
         this.IdxWriter = new DefaultIndexWriter ("SimJobIndex.csv");
     }
 
+    @Override
+    public ArrayList<String> getExpectedResultFiles(RVX rvx) {
+        ArrayList<String> list = new ArrayList<> ();
+        list.add("SimResults.csv");
+        return list;
+    }
 }

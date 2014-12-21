@@ -27,6 +27,7 @@ package jeplus.postproc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import jeplus.EPlusBatch;
+import jeplus.data.RVX;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -193,6 +194,16 @@ public class ResultCollector {
             }
         }
         return -1;
+    }
+    
+    /**
+     * Get a list of expected result table file names from the given rvx configuration. 
+     * This function should be overridden by child classes.
+     * @param rvx
+     * @return 
+     */
+    public ArrayList<String> getExpectedResultFiles (RVX rvx) {
+        return new ArrayList<String>();
     }
     
     public ArrayList<String[]>  listResultFilesFromRVI (String rvifile) {

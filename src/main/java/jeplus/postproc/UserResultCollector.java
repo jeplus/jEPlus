@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import jeplus.EPlusBatch;
+import jeplus.data.RVX;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -115,6 +116,12 @@ public class UserResultCollector extends ResultCollector {
             }
         }
         return -1;
+    }
+    
+    @Override
+    public ArrayList<String> getExpectedResultFiles(RVX rvx) {
+        ArrayList<String> list = new ArrayList<> ();
+        return list;
     }
     
     

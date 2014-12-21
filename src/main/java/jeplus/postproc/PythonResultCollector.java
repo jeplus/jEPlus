@@ -118,5 +118,15 @@ public class PythonResultCollector extends ResultCollector {
         return ResCollected;
     }
     
-    
+    @Override
+    public ArrayList<String> getExpectedResultFiles(RVX rvx) {
+        ArrayList<String> list = new ArrayList<> ();
+        if (rvx.getSQLs() != null) {
+            for (RVX.SQLitem item : rvx.getSQLs()) {
+                list.add(item.getTableName() + ".csv");
+            }
+        }
+        return list;
+    }
+        
 }

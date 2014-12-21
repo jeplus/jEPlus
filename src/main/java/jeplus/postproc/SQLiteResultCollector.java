@@ -133,5 +133,15 @@ public class SQLiteResultCollector extends ResultCollector {
         return ResCollected;
     }
     
+    @Override
+    public ArrayList<String> getExpectedResultFiles(RVX rvx) {
+        ArrayList<String> list = new ArrayList<> ();
+        if (rvx.getScripts() != null) {
+            for (RVX.PYTHONitem item : rvx.getScripts()) {
+                list.add(item.getTableName() + ".csv");
+            }
+        }
+        return list;
+    }
     
 }
