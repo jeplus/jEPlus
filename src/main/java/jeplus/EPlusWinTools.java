@@ -605,7 +605,11 @@ public class EPlusWinTools {
                 // Copy the result file (eplusout.csv) to the target csv file name
                 File csv = new File (WorkDir + EPlusConfig.getEPDefOutCSV());
                 boolean ok = false;
-                if (csv.exists() && csv.renameTo(new File (WorkDir + csvfile))) {
+                // Clear the existing output csv file
+                File csvout = new File (WorkDir + csvfile);
+                if (csvout.exists()) csvout.delete();
+                // Rename the new csv to the output csv
+                if (csv.exists() && csv.renameTo(csvout)) {
                     ok = true;
                 }
                 if (outs != null) {

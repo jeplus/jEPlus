@@ -17,6 +17,9 @@ import java.util.List;
 import jeplus.JEPlusConfig;
 import jeplus.gui.JPanelRunPython;
 import org.python.core.PyException;
+import org.python.core.PyString;
+import org.python.core.PySystemState;
+import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +53,13 @@ public class PythonTools {
             if (arg2 != null && arg2.trim().length()>0) buf.append(", ").append(arg2);
             if (moreargs != null && moreargs.trim().length()>0) buf.append(", ").append(moreargs);
             String [] args = buf.toString().split("\\s*,\\s*");
-            org.python.util.PythonInterpreter.initialize(System.getProperties(), System.getProperties(), args);
-            org.python.util.PythonInterpreter interp = new org.python.util.PythonInterpreter();
+            PythonInterpreter.initialize(System.getProperties(), System.getProperties(), args);
+            PySystemState state = new PySystemState();
+            state.argv.clear();
+            for (String arg : args) {
+                state.argv.append (new PyString (arg));
+            }
+            PythonInterpreter interp = new PythonInterpreter(null, state);
             interp.setOut(stream);
             interp.setErr(stream);
             try {
@@ -61,6 +69,7 @@ public class PythonTools {
                 stream.println(pye.toString());
             }
             interp.cleanup();
+            
         }else {
             String PythonExe;
             if (version.equalsIgnoreCase("python2")) {

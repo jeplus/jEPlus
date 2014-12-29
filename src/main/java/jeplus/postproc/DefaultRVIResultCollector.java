@@ -29,7 +29,7 @@ import jeplus.data.RVX;
 import org.slf4j.LoggerFactory;
 
 /**
- * This default RVI result collector reads the eplusout.csv files if available, and also the indexes and simulation reports.
+ * This default RVI result collector reads the indexes and simulation reports.
  * @author Yi
  */
 public class DefaultRVIResultCollector extends ResultCollector {
@@ -55,7 +55,7 @@ public class DefaultRVIResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        list.add("SimResults.csv");
+        // This collector deals with index and reports only
         return list;
     }
 }

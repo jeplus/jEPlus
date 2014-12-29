@@ -1690,6 +1690,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
             }
 
             // Clear output folder
+            // This is for diagnostic of file locking issues. It is not necessary and unsafe to delete the whole output folder
+            /*
             if (OkToStart) {
                 File workdir = new File (Project.resolveWorkDir());
                 if (workdir.exists() && workdir.isDirectory() && workdir.listFiles().length > 0) {
@@ -1719,7 +1721,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
                     }
                 }
             }
-            
+            */
             // Run simulations
             if (OkToStart) {
                 // Start jobs accordingly
