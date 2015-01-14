@@ -586,7 +586,7 @@ public class EPlusWinTools {
             Process EPProc;
 
             // Run EnergyPlus ReadVarsESO
-            String CmdLine = config.getResolvedReadVars() + " " + rvifile;
+            String CmdLine = config.getResolvedReadVars() + " \"" + rvifile + "\"";
             EPProc = Runtime.getRuntime().exec(CmdLine, null, new File(WorkDir));
             // Console logger
             try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
