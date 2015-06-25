@@ -149,7 +149,7 @@ public class EPlusConfig {
     protected String Python3EXE = null;
     protected String PythonArgv = null;
     protected String PythonScript = null;
-    protected String ScreenFile = null;
+    protected String ScreenFile = "console.log";
     protected int    NThreads = 0;
 
     public EPlusConfig () {
@@ -170,7 +170,7 @@ public class EPlusConfig {
             EPlusExpandObjectsEXE = prop.getProperty("EPlusExpandObjectsEXE", EPlusBinDir + getDefEPlusExpandObjects());
             EPlusEXE = prop.getProperty("EPlusEXE", EPlusBinDir + getDefEPlusEXEC());
             EPlusReadVarsEXE = prop.getProperty("EPlusReadVarsEXE", EPlusBinDir + getDefEPlusReadVars());
-            ScreenFile = prop.getProperty("ScreenFile", null);
+            ScreenFile = prop.getProperty("ScreenFile", "console.log");
         }catch (FileNotFoundException fnfe) {
             logger.error("Specified configue file " + fn + " is not found.");
             return false;

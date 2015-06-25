@@ -83,7 +83,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
     
     protected NumberFormat LargeIntFormatter = new DecimalFormat("###,###,###,###,###,###");
 
-    public final static String version = "1.5.1";
+    public final static String version = "1.5.2";
     public final static String version_ps = "_1_5";
     public final static String osName = System.getProperty( "os.name" );
     protected static String VersionInfo = "jEPlus (version " + version + ") for " + osName;

@@ -12,7 +12,7 @@
             <properties>
                 <exec.args>-classpath %classpath jeplus.Main</exec.args>
                 <exec.executable>java</exec.executable>
-                <exec.workingdir>D:\Dev-Java\jEPlus_\run</exec.workingdir>
+                <exec.workingdir>D:\4\jEPlus+EA_v1.5_beta_05</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -28,7 +28,7 @@
                 <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath jeplus.Main</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
-                <exec.workingdir>D:\Dev-Java\jEPlus_\run</exec.workingdir>
+                <exec.workingdir>D:\4\jEPlus+EA_v1.5_beta_05</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -43,12 +43,11 @@
             <properties>
                 <exec.args>-classpath %classpath jeplus.Main</exec.args>
                 <exec.executable>java</exec.executable>
-                <exec.workingdir>D:\Dev-Java\jEPlus_\run</exec.workingdir>
+                <exec.workingdir>D:\4\jEPlus+EA_v1.5_beta_05</exec.workingdir>
             </properties>
         </action>
         <action>
             <actionName>build</actionName>
-            <preAction>build-with-dependencies</preAction>
             <packagings>
                 <packaging>*</packaging>
             </packagings>

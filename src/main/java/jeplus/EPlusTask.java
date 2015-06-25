@@ -26,10 +26,15 @@
 package jeplus;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+import static jeplus.EPlusBatch.logger;
 import jeplus.simpleparser.Parser;
 import jeplus.simpleparser.SimpleParserError;
 import jeplus.util.RelativeDirUtil;
@@ -105,6 +110,9 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         // Parse search strings for hybrid parameters "@@a@@|@@b@@"
         SearchStringList = new ArrayList<> ();
         AltValueList = new ArrayList<> ();
+        // Initialize Jython script engine
+        ScriptEngine engine = JEPlusProject.getScript_Engine();
+        
         // size of keys and vals must be the same
         for (int i=0; i<prevkey.size(); i++) {
             String [] sstrs = prevkey.get(i).split("\\s*\\|\\s*");
@@ -116,7 +124,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                 if (formula.startsWith("?=")) {
                     formula = formula.substring(2);
                     // Create a new parser
-                    Parser parser = new Parser();
+//                    Parser parser = new Parser();
                     // Map search tags to variables and then assign values to variables
                     HashMap<String, String> map = new HashMap<> ();
                     for (int k=0; k<SearchStringList.size()-sstrs.length; k++) {
@@ -124,18 +132,18 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                         map.put(SearchStringList.get(k), var);
                         String statement = var + " = " + AltValueList.get(k);
                         try {
-                            parser.resolve(statement);
-                        } catch (SimpleParserError ex) {
-                            logger.error("Error parsing statement " + statement, ex);
+                            engine.eval(statement);
+                        }catch (ScriptException spe) {
+                            logger.error("Error evaluating expression " + statement + ".");
                         }
                     }
+                    for (String tag: map.keySet()) {
+                        formula = formula.replaceAll(tag, map.get(tag));
+                    }
                     try {
-                        for (String tag: map.keySet()) {
-                            formula = formula.replaceAll(tag, map.get(tag));
-                        }
-                        vstrs[j] = Double.toString(parser.resolve(formula));
-                    } catch (SimpleParserError ex) {
-                        logger.error("Error parsing formula " + formula, ex);
+                        vstrs[j] = engine.eval(formula).toString();
+                    }catch (ScriptException spe) {
+                        logger.error("Error evaluating expression " + formula + ".");
                     }
                 }
                 // Add the result string to the list
@@ -309,6 +317,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
 
     /**
      * Preprocess the input file (.imf/.idf), including calling EP-Macro
+     * @param config
      * @return Operation successful or not
      */
     public boolean preprocessInputFile (JEPlusConfig config) {
@@ -355,16 +364,36 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         if (ok) {
             // Collect E+ include files (e.g. in Schedule:File objects)
             ArrayList<String> incfiles = IDFmodel.getScheduleFiles(getWorkingDir() + EPlusConfig.getEPDefIDF());
-            // Copy them to working dir
-            for (int i=0; i<incfiles.size(); i++) {
-                File ori = new File (RelativeDirUtil.checkAbsolutePath(incfiles.get(i), WorkEnv.IDFDir));
-                File dest = new File (getWorkingDir() + ori.getName());
-                try {
-                    FileUtils.copyFile(ori, dest);
-                } catch (IOException ex) {
+            if (! incfiles.isEmpty()) {
+                try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (getWorkingDir() + config.getScreenFile(), true));) {
+                    if (outs != null) {
+                        outs.println("# Copying dependant files - " + (new SimpleDateFormat()).format(new Date()));
+                        outs.flush();
+                    }
+                    // Copy them to working dir
+                    for (String incfile : incfiles) {
+                        File ori = new File(RelativeDirUtil.checkAbsolutePath(incfile, WorkEnv.IDFDir));
+                        File dest = new File (getWorkingDir() + ori.getName());
+                        try {
+                            // Log to console.log
+                            if (outs != null) {
+                                outs.println(incfile);
+                                outs.flush();
+                            }
+                            FileUtils.copyFile(ori, dest);
+                        }catch (IOException ex) {
+                            logger.error("", ex);
+                            // Log to console.log
+                            if (outs != null) {
+                                outs.println(ex.getMessage());
+                                outs.flush();
+                            }
+                            ok = false;
+                            break;
+                        }
+                    }
+                }catch (Exception ex) {
                     logger.error("", ex);
-                    ok = false;
-                    break;
                 }
             }
             // Update idf

@@ -43,6 +43,7 @@ import jeplus.IDFmodel;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusFrameMain;
 import jeplus.JEPlusProject;
+import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
@@ -483,7 +484,7 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel {
             try {
                 RVX rvx = RVX.getRVX(rvifile);
                 if (rvx.getRVIs() != null && rvx.getRVIs().length > 0) {
-                    for (RVX.RVIitem item : rvx.getRVIs()) {
+                    for (RVX_RVIitem item : rvx.getRVIs()) {
                         list.add(RelativeDirUtil.checkAbsolutePath(item.getFileName(), Project.resolveRVIDir()));
                     }
                 }

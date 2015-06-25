@@ -81,8 +81,8 @@ public class PythonTools {
                 StringBuilder buf = new StringBuilder (PythonExe);
                 buf.append(" \"").append(scriptfile).append("\" ");
                 buf.append("\"").append(CurrentWorkDir).append("\" ");
-                buf.append(arg1).append(" ").append(arg2);
-                buf.append(moreargs);
+                buf.append(arg1).append(" ").append(arg2).append(" ");
+                buf.append("\"").append(moreargs).append("\" ");
 
                 List<String> command = new ArrayList<> ();
                 command.add(PythonExe);

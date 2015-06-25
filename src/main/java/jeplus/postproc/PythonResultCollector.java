@@ -33,6 +33,7 @@ import java.util.List;
 import jeplus.EPlusBatch;
 import jeplus.EPlusTask;
 import jeplus.JEPlusConfig;
+import jeplus.data.RVX_ScriptItem;
 import jeplus.data.RVX;
 import jeplus.util.PythonTools;
 import jeplus.util.RelativeDirUtil;
@@ -68,7 +69,7 @@ public class PythonResultCollector extends ResultCollector {
         try {
             RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
             if (rvx.getScripts() != null) {
-                for (RVX.PYTHONitem item : rvx.getScripts()) {
+                for (RVX_ScriptItem item : rvx.getScripts()) {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
                     if (item.isOnEachJob()) {
@@ -121,8 +122,8 @@ public class PythonResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx.getSQLs() != null) {
-            for (RVX.SQLitem item : rvx.getSQLs()) {
+        if (rvx.getScripts() != null) {
+            for (RVX_ScriptItem item : rvx.getScripts()) {
                 list.add(item.getTableName() + ".csv");
             }
         }

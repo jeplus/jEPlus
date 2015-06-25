@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import jeplus.EPlusBatch;
 import jeplus.data.RVX;
+import jeplus.data.RVX_SQLitem;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -114,7 +115,7 @@ public class SQLiteResultCollector extends ResultCollector {
         try {
             RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
             if (rvx.getSQLs() != null) {
-                for (RVX.SQLitem item : rvx.getSQLs()) {
+                for (RVX_SQLitem item : rvx.getSQLs()) {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
                     ResWriter = new DefaultCSVWriter(null, fn);
@@ -136,12 +137,11 @@ public class SQLiteResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx.getScripts() != null) {
-            for (RVX.PYTHONitem item : rvx.getScripts()) {
+        if (rvx.getSQLs() != null) {
+            for (RVX_SQLitem item : rvx.getSQLs()) {
                 list.add(item.getTableName() + ".csv");
             }
         }
         return list;
     }
-    
 }

@@ -76,7 +76,7 @@ public class ParameterItem implements Serializable, Cloneable {
     /** Parameter type: PARAMETRICS, OPTIMISATION or UNCERTAINTY */
     public int ParamType = PARAMETRICS;
     /** Parameter value type: INTEGER, DOUBLE, or DISCRETE */
-    public int Type = INTEGER;
+    public int Type = 0;
     /** Description of the parameter - for information only */
     public String Description = null;
     public String SearchString = null;
@@ -261,9 +261,10 @@ public class ParameterItem implements Serializable, Cloneable {
     /**
      * clone the object
      * @return the clone
+     * @throws java.lang.CloneNotSupportedException
      */
     @Override
-    public Object clone () {
+    public Object clone () throws CloneNotSupportedException {
         return new ParameterItem (this);
     }
 

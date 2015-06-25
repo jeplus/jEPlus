@@ -44,7 +44,7 @@ public class JEPlusConfig extends INSELConfig {
         config.setEPlusEXEC(pathtobin + "/" + getDefEPlusEXEC());
         config.setEPlusExpandObjects(pathtobin + "/" + getDefEPlusExpandObjects());
         config.setEPlusReadVars(pathtobin + "/" + getDefEPlusReadVars());
-        config.setScreenFile(null); // no screen log by default
+        config.setScreenFile("console.log"); // no screen log by default
         return config;
     }
     

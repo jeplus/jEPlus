@@ -31,6 +31,9 @@ import java.beans.XMLEncoder;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.swing.tree.DefaultMutableTreeNode;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
@@ -54,6 +57,21 @@ public class JEPlusProject implements Serializable {
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusProject.class);
     
+    /** ScriptEngine used by all evaluators */
+    protected static final ScriptEngine Script_Engine = new ScriptEngineManager().getEngineByName("python");
+    static {
+        // Set up script engine
+        try {
+            Script_Engine.eval("import math");
+        }catch (ScriptException sce) {
+            logger.error("Script engine error when importing math module.", sce);
+        }
+    }
+    
+    public static ScriptEngine getScript_Engine() {
+        return Script_Engine;
+    }
+
     private static final long serialVersionUID = -3920321004466467177L;
     public static final int EPLUS = 0;
     public static final int TRNSYS = 1;

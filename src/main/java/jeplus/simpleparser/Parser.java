@@ -547,6 +547,27 @@ public class Parser {
         return parse_number();
     }
 
+    /**
+     * parenthesized multiple expressions or values separated by comma ','
+     */
+    double parse_level10m() throws SimpleParserError {
+        // check if it is a parenthesized expression
+        if (token_type == TOKENTYPE.DELIMETER) {
+            if (token.equals("(")) {
+                getToken();
+                double ans = parse_level2();
+                if (token_type != TOKENTYPE.DELIMETER || !token.equals(")")) {
+                    throw new SimpleParserError(row(), col(), 3);
+                }
+                getToken();
+                return ans;
+            }
+        }
+
+        // if not parenthesized then the expression is a value
+        return parse_number();
+    }
+
     double parse_number() throws SimpleParserError {
         double ans = 0.0;
 

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import jeplus.EPlusBatch;
+import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public class EsoResultCollector extends ResultCollector {
         try {
             RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
             if (rvx.getRVIs() != null) {
-                for (RVX.RVIitem item : rvx.getRVIs()) {
+                for (RVX_RVIitem item : rvx.getRVIs()) {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
                     ResWriter = new DefaultCSVWriter(null, fn);
@@ -88,7 +89,7 @@ public class EsoResultCollector extends ResultCollector {
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
         if (rvx.getRVIs() != null) {
-            for (RVX.RVIitem item : rvx.getRVIs()) {
+            for (RVX_RVIitem item : rvx.getRVIs()) {
                 list.add(item.getTableName() + ".csv");
             }
         }

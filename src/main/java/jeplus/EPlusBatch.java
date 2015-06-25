@@ -37,9 +37,13 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 
 import javax.swing.JFrame;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -48,9 +52,9 @@ import jeplus.data.Counter;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.FileList;
 import jeplus.data.RVX;
-import jeplus.data.RVX.Constraint;
-import jeplus.data.RVX.Objective;
-import jeplus.data.RVX.UserVar;
+import jeplus.data.RVX_Constraint;
+import jeplus.data.RVX_Objective;
+import jeplus.data.RVX_UserVar;
 import jeplus.postproc.ResultCollector;
 import jeplus.simpleparser.Parser;
 import jeplus.simpleparser.SimpleParserError;
@@ -1381,32 +1385,37 @@ public class EPlusBatch extends Thread {
         return Results;
     }
     
-    public static ArrayList<String> getDerivativeResultHeaders (RVX rvx) {
-        ArrayList<String> Results = new ArrayList<> ();
+    /**
+     * 
+     * @param rvx
+     * @return 
+     */
+    public static LinkedHashMap<String, String> getDerivativeResultHeaders (RVX rvx) {
+        LinkedHashMap<String, String> Results = new LinkedHashMap<> ();
         if (rvx != null) {
             // User variables
             if (rvx.getUserVars() != null) {
-                for (UserVar item : rvx.getUserVars()) {
+                for (RVX_UserVar item : rvx.getUserVars()) {
                     if (item.isReport()) {
-                        Results.add(item.getIdentifier() + ": " + item.getCaption());
+                        Results.put(item.getIdentifier(), item.getIdentifier() + ": " + item.getCaption());
                     }
                 }
             }
             // Constraints
             if (rvx.getConstraints() != null) {
-                for (Constraint item : rvx.getConstraints()) {
-                    Results.add(item.getIdentifier() + ": " + item.getCaption());
+                for (RVX_Constraint item : rvx.getConstraints()) {
+                    Results.put(item.getIdentifier(), item.getIdentifier() + ": " + item.getCaption());
                     if (item.isScaling()) {
-                        Results.add("_" + item.getIdentifier());
+                        Results.put("_" + item.getIdentifier(), item.getIdentifier() + ": normalized");
                     }
                 }
             }
             // Objectives
             if (rvx.getObjectives() != null) {
-                for (Objective item : rvx.getObjectives()) {
-                    Results.add(item.getIdentifier() + ": " + item.getCaption());
+                for (RVX_Objective item : rvx.getObjectives()) {
+                    Results.put(item.getIdentifier(), item.getIdentifier() + ": " + item.getCaption());
                     if (item.isScaling()) {
-                        Results.add("_" + item.getIdentifier());
+                        Results.put("_" + item.getIdentifier(), item.getIdentifier() + ": normalized");
                     }
                 }
             }
@@ -1414,6 +1423,13 @@ public class EPlusBatch extends Thread {
         return  Results;
     }
     
+    /**
+     * 
+     * @param rvx
+     * @param data
+     * @return 
+     * @deprecated Replaced by getDerivedResultsJython()
+     */
     public static HashMap<String, ArrayList<Double>> getDerivativeResults (RVX rvx, HashMap<String, ArrayList<ArrayList<double []>>> data) {
         if (rvx != null) {
             HashMap<String, ArrayList<Double>> derived = new HashMap<> ();
@@ -1444,7 +1460,7 @@ public class EPlusBatch extends Thread {
                     ArrayList<Double> derived_row = new ArrayList<>();
                     // User variables
                     if (rvx.getUserVars() != null) {
-                        for (UserVar item : rvx.getUserVars()) {
+                        for (RVX_UserVar item : rvx.getUserVars()) {
                             String statement = item.getIdentifier() + "=" + item.getFormula();
                             double val = 0;
                             try {
@@ -1459,7 +1475,7 @@ public class EPlusBatch extends Thread {
                     }
                     // Constraints
                     if (rvx.getConstraints() != null) {
-                        for (Constraint item : rvx.getConstraints()) {
+                        for (RVX_Constraint item : rvx.getConstraints()) {
                             String statement = item.getIdentifier() + "=" + item.getFormula();
                             double val = 0;
                             try {
@@ -1475,7 +1491,7 @@ public class EPlusBatch extends Thread {
                     }
                     // Objectives
                     if (rvx.getObjectives() != null) {
-                        for (Objective item : rvx.getObjectives()) {
+                        for (RVX_Objective item : rvx.getObjectives()) {
                             String statement = item.getIdentifier() + "=" + item.getFormula();
                             double val = 0;
                             try {
@@ -1498,6 +1514,109 @@ public class EPlusBatch extends Thread {
         return null;
     }
     
+    /**
+     * 
+     * @param rvx
+     * @param data
+     * @return 
+     */
+    public static HashMap<String, HashMap<String, Double>> getDerivativeResultsJython (RVX rvx, HashMap<String, ArrayList<ArrayList<double []>>> data) {
+        if (rvx != null) {
+            // Initialize Jython script engine
+            ScriptEngine engine = JEPlusProject.getScript_Engine();
+
+            HashMap<String, HashMap<String, Double>> derived = new HashMap<> ();
+            if (data != null && !data.isEmpty()) {
+                for (String job_id : data.keySet()) {
+                    ArrayList<ArrayList<double []>> job_data = data.get(job_id);
+                    // Process data
+                    HashMap<String, Double> derived_row = calculateUserMetrics (rvx, job_data, engine);
+                    // Add to derived results table
+                    derived.put(job_id, derived_row);
+                }
+            }
+            return derived;
+        }
+        return null;
+    }
+    
+    /**
+     * 
+     * @param rvx
+     * @param job_data
+     * @param engine
+     * @return 
+     */
+    public static HashMap<String, Double> calculateUserMetrics (RVX rvx, ArrayList<ArrayList<double []>> job_data, ScriptEngine engine) {
+        HashMap<String, Double> metrics = new HashMap<> ();
+        
+        // First pass to collect original outputs, taking only the last row of the results, put each value to an variable name c??
+        int idx = 0;
+        for (ArrayList<double[]> table : job_data) {
+            double[] lastrow = table.get(table.size() - 1);
+            for (int i = 0; i < lastrow.length; i++) {
+                String statement = "c" + idx + "=" + lastrow[i];
+                try {
+                    engine.eval(statement);
+                }catch (ScriptException spe) {
+                    logger.error("Error parsing expression " + statement + ".");
+                }
+                idx ++;
+            }
+        }
+        
+        // User variables
+        if (rvx.getUserVars() != null) {
+            for (RVX_UserVar item : rvx.getUserVars()) {
+                String statement = item.getIdentifier() + "=" + item.getFormula();
+                double val = 0;
+                try {
+                    engine.eval(statement);
+                    val = Double.valueOf(engine.get(item.getIdentifier()).toString());
+                }catch (ScriptException spe) {
+                    logger.error("Error parsing expression " + statement + ".");
+                }
+                metrics.put(item.getIdentifier(), val);
+            }
+        }
+        // Constraints
+        if (rvx.getConstraints() != null) {
+            for (RVX_Constraint item : rvx.getConstraints()) {
+                String statement = item.getIdentifier() + "=" + item.getFormula();
+                double val = 0;
+                try {
+                    engine.eval(statement);
+                    val = Double.valueOf(engine.get(item.getIdentifier()).toString());
+                }catch (ScriptException spe) {
+                    logger.error("Error parsing expression " + statement + ".");
+                }
+                metrics.put(item.getIdentifier(), val);
+                if (item.isScaling()) {
+                    metrics.put("_" + item.getIdentifier(), item.scale(val));
+                }
+            }
+        }
+        // Objectives
+        if (rvx.getObjectives() != null) {
+            for (RVX_Objective item : rvx.getObjectives()) {
+                String statement = item.getIdentifier() + "=" + item.getFormula();
+                double val = 0;
+                try {
+                    engine.eval(statement);
+                    val = Double.valueOf(engine.get(item.getIdentifier()).toString());
+                }catch (ScriptException spe) {
+                    logger.error("Error parsing expression " + statement + ".");
+                }
+                metrics.put(item.getIdentifier(), val);
+                if (item.isScaling()) {
+                    metrics.put("_" + item.getIdentifier(), item.scale(val));
+                }
+            }
+        }
+
+        // Done
+        return metrics;
+    }
 
     /** 
      * Write a combined table to a file with CSV format. The table contains indexes, simulation report, and all results (last row for each 
@@ -1611,24 +1730,25 @@ public class EPlusBatch extends Thread {
      */
     public static void writeDerivedResultTable (ArrayList<ResultCollector> rcs, String result_folder, RVX rvx, String tablefile) {
         // Get headers
-        ArrayList<String> header = getDerivativeResultHeaders (rvx);
+        LinkedHashMap<String, String> header = getDerivativeResultHeaders (rvx);
         // Fill in results
         HashMap<String, ArrayList<ArrayList<double []>>> data = getSimulationResults(rcs, result_folder, rvx, null);
-        HashMap<String, ArrayList<Double>> derived = getDerivativeResults (rvx, data);
+        HashMap<String, HashMap<String, Double>> derived = getDerivativeResultsJython (rvx, data);
         // Write to file
         try (PrintWriter fw = new PrintWriter (new FileWriter (RelativeDirUtil.checkAbsolutePath(tablefile, result_folder)))) {
-            fw.print("#,Job_ID,Reserved,");
-            for (String item : header) {
-                fw.print(item + ",");
+            fw.print("#,Job_ID,Reserved");
+            for (String item : header.keySet()) {
+                fw.print("," + header.get(item));
             }
             fw.println();
             int counter = 0;
             for (String jobid : derived.keySet()) {
                 fw.print(counter);
-                fw.print("," + jobid + ",,");
-                for (Double val : derived.get(jobid)) {
-                    fw.print(val);
+                fw.print("," + jobid + ",");
+                HashMap <String, Double> row = derived.get(jobid);
+                for (String item : header.keySet()) {
                     fw.print(",");
+                    fw.print(row.get(item));
                 }
                 fw.println();
             }
