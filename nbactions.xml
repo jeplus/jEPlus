@@ -10,9 +10,9 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath jeplus.Main</exec.args>
+                <exec.args>-classpath %classpath jeplus.Main -job example_2-rvx_E+v8.1/project.jep -sample 2 -seed -1 -cfg CmdLineExamples/jeplus_v81.cfg</exec.args>
                 <exec.executable>java</exec.executable>
-                <exec.workingdir>D:\4\jEPlus+EA_v1.5_beta_05</exec.workingdir>
+                <exec.workingdir>D:\4\jEPlus_v1.5.2</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -25,10 +25,10 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath jeplus.Main</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath jeplus.Main -job example_2-rvx_E+v8.1/project.jep -sample 2 -seed -1 -cfg CmdLineExamples/jeplus_v81.cfg</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
-                <exec.workingdir>D:\4\jEPlus+EA_v1.5_beta_05</exec.workingdir>
+                <exec.workingdir>D:\4\jEPlus_v1.5.2</exec.workingdir>
             </properties>
         </action>
         <action>
@@ -41,9 +41,9 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath jeplus.Main</exec.args>
+                <exec.args>-classpath %classpath jeplus.Main -job example_2-rvx_E+v8.1/project.jep -sample 2 -seed -1 -cfg CmdLineExamples/jeplus_v81.cfg</exec.args>
                 <exec.executable>java</exec.executable>
-                <exec.workingdir>D:\4\jEPlus+EA_v1.5_beta_05</exec.workingdir>
+                <exec.workingdir>D:\4\jEPlus_v1.5.2</exec.workingdir>
             </properties>
         </action>
         <action>

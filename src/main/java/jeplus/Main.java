@@ -203,8 +203,7 @@ public class Main {
                                     randomseed = project.getExecSettings().getRandomSeed();
                                 }
                                 int njobs = Integer.parseInt(commandline.getOptionValue("sample"));
-                                RandomSource.setSeed(randomseed);
-                                batch.runRandomSample(njobs, RandomSource.getRandomGenerator());
+                                batch.runRandomSample(njobs, RandomSource.getRandomGenerator(randomseed));
                         }else if (commandline.hasOption("lhs")) {
                                 long randomseed;
                                 if (commandline.hasOption("seed")) {
@@ -219,8 +218,7 @@ public class Main {
                                     randomseed = project.getExecSettings().getRandomSeed();
                                 }
                                 int njobs = Integer.parseInt(commandline.getOptionValue("lhs"));
-                                RandomSource.setSeed(randomseed);
-                                batch.runLHSample(njobs, RandomSource.getRandomGenerator());
+                                batch.runLHSample(njobs, RandomSource.getRandomGenerator(randomseed));
                         }else if (commandline.hasOption("index")) {
                                 batch.prepareJobSet(EPlusBatch.JobStringType.INDEX, commandline.getOptionValue("index"));
                                 batch.start();

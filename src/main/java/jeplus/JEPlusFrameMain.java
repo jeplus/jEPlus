@@ -1748,10 +1748,9 @@ public class JEPlusFrameMain extends JEPlusFrame {
                             }
                             Project.ExecSettings.setRandomSeed(seed);
 
-                            RandomSource.setSeed(Project.ExecSettings.getRandomSeed());
                             startBatchRunSample (Project.ExecSettings.getNumberOfJobs(), 
                                     Project.ExecSettings.isUseLHS(),
-                                    RandomSource.getRandomGenerator());
+                                    RandomSource.getRandomGenerator(Project.ExecSettings.getRandomSeed()));
                             break;
                         case ExecutionOptions.FILE:
                             startBatchRunFile (Project.ExecSettings.getJobListFile());

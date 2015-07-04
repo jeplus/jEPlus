@@ -41,8 +41,8 @@ public class RandomSource {
     }
 
     public static void setSeed(long Seed) {
-        RandomSource.Seed = Seed;
-        Generator = new Random(Seed);
+        RandomSource.Seed = (Seed > 0) ? Seed : new Date().getTime();
+        Generator.setSeed(RandomSource.Seed);
     }
     
     public static void initRandomGenerator () {
@@ -54,7 +54,7 @@ public class RandomSource {
     }
     
     public static Random getRandomGenerator (long seed) {
-        return new Random (seed);
+        return new Random ((seed > 0) ? seed : new Date().getTime());
     }
     
 }
