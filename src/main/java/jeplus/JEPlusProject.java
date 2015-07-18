@@ -26,6 +26,9 @@
  ***************************************************************************/
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.*;
@@ -82,10 +85,10 @@ public class JEPlusProject implements Serializable {
     protected static String UserBaseDir = System.getProperty("user.dir") + File.separator;
     
     /** Flag marking whether this project has been changed since last save/load */
-    private transient boolean ContentChanged = false;
+    transient private boolean ContentChanged = false;
     
     /** Base directory of the project, i.e. the location where the project file is saved */
-    protected String BaseDir = null;
+    transient protected String BaseDir = null;
     
     /** Project Type: E+ or TRNSYS */
     protected int ProjectType = -1; // set to illegal type
@@ -129,17 +132,20 @@ public class JEPlusProject implements Serializable {
     /** Execution settings */
     protected ExecutionOptions ExecSettings = null;
 
+    /** List of parameters */
+    protected ArrayList<ParameterItem> Parameters = null;
+    
     /** Parameter tree */
     protected DefaultMutableTreeNode ParamTree = null;
-    
+       
     /** Parameter definition file */
     protected String ParamFile = null;
 
-    /** Job list in string format */
-    protected String [][] StrJobList = null;
-
-    /** Job list in index format */
-    protected int [][] IdxJobList = null;
+    /** RVX object for result collection */
+    protected RVX Rvx = null;
+    
+    /** External file defining the RVX object, in JSON format */
+    protected String RvxFile = null;
     
     /**
      * Class containing post-process function options
@@ -185,7 +191,10 @@ public class JEPlusProject implements Serializable {
         // INSELTemplate = "select a file ...";
         OutputFileNames = "trnsysout.csv";  // fixed on one file name for the time being
         ExecSettings = new ExecutionOptions ();
-        ParamTree = new DefaultMutableTreeNode (new ParameterItem(this));
+        ParameterItem root = new ParameterItem(this);
+        Parameters = new ArrayList<> ();
+        Parameters.add(root);
+        ParamTree = new DefaultMutableTreeNode (root);
         BaseDir = new File ("./").getAbsolutePath() + File.separator;
     }
 
@@ -214,18 +223,19 @@ public class JEPlusProject implements Serializable {
             INSELTemplate = proj.INSELTemplate;
             OutputFileNames = proj.OutputFileNames;
             ExecSettings = new ExecutionOptions (proj.ExecSettings);
+            Parameters = proj.Parameters;
             ParamTree = proj.ParamTree;
         }
     }
 
-    /**
-     * Construct a project object from an external .jep file
-     * @param projectfile The project file (.jep) to be loaded
-     */
-    public JEPlusProject (String projectfile) {
-        this(loadAsXML(new File (projectfile)));
-    }
-
+//    /**
+//     * Construct a project object from an external .jep file
+//     * @param projectfile The project file (.jep) to be loaded
+//     */
+//    public JEPlusProject (String projectfile) {
+//        this(loadAsXML(new File (projectfile)));
+//    }
+//
     // ================= File operations ==============================
     /**
      * Save the project to an object file
@@ -265,22 +275,24 @@ public class JEPlusProject implements Serializable {
      * @param fn The File object associated with the file to which the contents will be saved
      * @return Successful or not
      */
-    public static boolean saveAsXML (File fn, JEPlusProject proj) {
+    public boolean saveAsXML (File fn) {
         boolean success = true;
         
         // Write project file
         XMLEncoder encoder;
         try {
             encoder = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(fn)));
-            // Clear parameter file field before saving the project
-            proj.ParamFile = null;
-            encoder.writeObject(proj);
+            // Clear external parameters and rvx file reference fields before saving the project
+            // These files are for importing only
+            this.ParamFile = null;
+            this.RvxFile = null;
+            encoder.writeObject(this);
             encoder.close();
             // get new location of project file
             String dir = fn.getAbsoluteFile().getParent();
             dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
-            proj.setBaseDir(dir);
-            proj.ContentChanged = false;
+            this.setBaseDir(dir);
+            this.ContentChanged = false;
         } catch (FileNotFoundException ex) {
             logger.error("Failed to create " + fn + " for writing project.", ex);
             success = false;
@@ -316,16 +328,93 @@ public class JEPlusProject implements Serializable {
                 }
             }
         }
-        proj.ContentChanged = false;
+        // Assign the first branch to the Parameters list
+        DefaultMutableTreeNode thisleaf = proj.getParamTree().getFirstLeaf();
+        Object [] path = thisleaf.getUserObjectPath();
+        proj.setParameters(new ArrayList<ParameterItem> ());
+        for (Object item : path) {
+            proj.getParameters().add((ParameterItem)item);
+        }
+        // Load Rvx if a RVX file is available
+        try {
+            proj.Rvx = RVX.getRVX(proj.resolveRVIDir() + proj.getRVIFile());
+        }catch (IOException ioe) {
+            logger.error("Cannot read the project's RVX file", ioe);
+        }
+
+        // done            
         return proj;
+    }
+    
+    /**
+     * Save this project to an XML file
+     * @param file The File object associated with the file to which the contents will be saved
+     * @return Successful or not
+     */
+    public boolean saveAsJSON (File file) {
+        boolean success = true;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setDateFormat(format);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        try (FileOutputStream fw = new FileOutputStream(file); ) {
+            mapper.writeValue(fw, this);
+            logger.info("Project saved to " + file.getAbsolutePath());
+        }catch (Exception ex) {
+            logger.error("Error saving project to JSON.", ex);
+            success = false;
+        }
+        return success;
+    }
+
+    /**
+     * Read the project from the given JSON file. 
+     * @param file The File object associated with the file
+     * @return a new project instance from the file
+     * @throws java.io.IOException
+     */
+    public static JEPlusProject loadFromJSON (File file) throws IOException {
+        // Read JSON
+        ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
+        JEPlusProject project = mapper.readValue(file, JEPlusProject.class);
+        // Set base dir
+        String dir = file.getAbsoluteFile().getParent();
+        dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
+        project.setBaseDir(dir);
+        // If parameter file is given, use the contents to override the parameters in the project
+        if (project.ParamFile != null) {
+            // Load parameters from text file, to replace the existing Parameters list and tree
+            project.importParameterTableFile(new File (RelativeDirUtil.checkAbsolutePath(project.ParamFile, dir)));
+        }else {
+            // Reassign reference to project in all parameters, and build param tree
+            if (project.getParameters() != null) {
+                for (ParameterItem item: project.getParameters()) {
+                    item.setProject(project);
+                }
+                project.addParameterListAsBranch(null, project.getParameters());
+            }
+        }
+        // If external RVX file is specified, use its contents for Rvx object
+        if (project.RvxFile != null) {
+            try {
+                project.Rvx = RVX.getRVX(RelativeDirUtil.checkAbsolutePath(project.RvxFile, dir));
+            }catch (IOException ioe) {
+                logger.error("Cannot read the given RVX file", ioe);
+            }
+        }
+        project.ContentChanged = false;
+        // Return
+        return project;
     }
     
     // ================== Getters and Setters ==========================
     
+    @JsonIgnore
     public String getBaseDir() {
         return BaseDir;
     }
 
+    @JsonIgnore
     public void setBaseDir(String BaseDir) {
         this.BaseDir = BaseDir;
     }
@@ -378,74 +467,110 @@ public class JEPlusProject implements Serializable {
         this.IDFTemplate = IDFTemplate;
     }
 
+    @JsonIgnore
+    public boolean isContentChanged() {
+        return ContentChanged;
+    }
+
+    @JsonIgnore
+    public void setContentChanged(boolean ContentChanged) {
+        this.ContentChanged = ContentChanged;
+    }
+
+    public ArrayList<ParameterItem> getParameters() {
+        return Parameters;
+    }
+
+    public void setParameters(ArrayList<ParameterItem> Parameters) {
+        this.Parameters = Parameters;
+    }
+
+    @JsonIgnore
     public DefaultMutableTreeNode getParamTree() {
         return ParamTree;
     }
 
+    @JsonIgnore
     public void setParamTree(DefaultMutableTreeNode ParamTree) {
         this.ParamTree = ParamTree;
     }
 
+    @JsonIgnore
     public String getRVIDir() {
         return RVIDir;
     }
 
+    @JsonIgnore
     public void setRVIDir(String RVIDir) {
         this.RVIDir = RVIDir;
     }
 
+    @JsonIgnore
     public String getRVIFile() {
         return RVIFile;
     }
 
+    @JsonIgnore
     public void setRVIFile(String RVIFile) {
         this.RVIFile = RVIFile;
     }
 
+    @JsonIgnore
     public boolean isUseReadVars() {
         return UseReadVars;
     }
 
+    @JsonIgnore
     public void setUseReadVars(boolean UseReadVars) {
         this.UseReadVars = UseReadVars;
     }
 
+    @JsonIgnore
     public String getDCKDir() {
         return DCKDir;
     }
 
+    @JsonIgnore
     public void setDCKDir(String DCKDir) {
         this.DCKDir = DCKDir;
     }
 
+    @JsonIgnore
     public String getDCKTemplate() {
         return DCKTemplate;
     }
 
+    @JsonIgnore
     public void setDCKTemplate(String DCKTemplate) {
         this.DCKTemplate = DCKTemplate;
     }
 
+    @JsonIgnore
     public String getINSELDir() {
         return INSELDir;
     }
 
+    @JsonIgnore
     public void setINSELDir(String INSELDir) {
         this.INSELDir = INSELDir;
     }
 
+    @JsonIgnore
     public String getINSELTemplate() {
         return INSELTemplate;
     }
 
+    @JsonIgnore
     public void setINSELTemplate(String INSELTemplate) {
         this.INSELTemplate = INSELTemplate;
     }
 
+    @JsonIgnore
     public String getOutputFileNames() {
         return OutputFileNames;
     }
 
+    @JsonIgnore
     public void setOutputFileNames(String OutputFileNames) {
         this.OutputFileNames = OutputFileNames;
     }
@@ -466,14 +591,6 @@ public class JEPlusProject implements Serializable {
         this.WeatherFile = WeatherFile;
     }
 
-    public void setStrJobList (String [][] list) {
-        StrJobList = list;
-    }
-
-    public void setIdxJobList (int [][] list) {
-        IdxJobList = list;
-    }
-
     public String getParamFile() {
         return ParamFile;
     }
@@ -482,22 +599,34 @@ public class JEPlusProject implements Serializable {
         this.ParamFile = ParamFile;
     }
 
+    public RVX getRvx() {
+        return Rvx;
+    }
+
+    public void setRvx(RVX Rvx) {
+        this.Rvx = Rvx;
+    }
+
+    public String getRvxFile() {
+        return RvxFile;
+    }
+
+    public void setRvxFile(String RvxFile) {
+        this.RvxFile = RvxFile;
+        // If external RVX file is specified, use its contents for Rvx object
+        if (RvxFile != null) {
+            try {
+                this.Rvx = RVX.getRVX(RelativeDirUtil.checkAbsolutePath(RvxFile, this.getBaseDir()));
+            }catch (IOException ioe) {
+                logger.error("Cannot read the given RVX file", ioe);
+            }
+        }
+    }
+    
+    
+
     // ====================== End Getters and Setters ======================
     
-    // RVX is going to replace RVI in version 2.0
-    /**
-     * Currently read and parse the project rvi/rvx file into a RVX object
-     * @return The resultant RVX object
-     */
-    public RVX getRVX () {
-        RVX rvx = new RVX();
-        try {
-            rvx = RVX.getRVX(this.resolveRVIDir() + this.getRVIFile());
-        }catch (IOException ioe) {
-            logger.error("Cannot read the project RVI/RVX file...", ioe);
-        }
-        return rvx;
-    }
     
     // A new set of resolveXYZFile functions
     
@@ -583,6 +712,7 @@ public class JEPlusProject implements Serializable {
      * This function reads the E+ version from the first model file, and return it in a string, such as 7.0
      * @return Version info in a string
      */
+    @JsonIgnore
     public String getEPlusModelVersion () {
         return IDFmodel.getEPlusVersionInIDF (resolveIDFDir() + parseFileListString(resolveIDFDir(), getIDFTemplate()).get(0));
     }
@@ -676,6 +806,7 @@ public class JEPlusProject implements Serializable {
      * - RVI/MVI file
      * @return A list of file full paths
      */
+    @JsonIgnore
     public ArrayList<String> getAllInputFiles () {
         ArrayList<String> filelist = new ArrayList<> ();
         if (ProjectType == EPLUS) {
@@ -691,7 +822,7 @@ public class JEPlusProject implements Serializable {
     /**
      * Convert all directories to relative paths to where the project base (the
      * location of the project file, for example) is.
-     * @param base_dir The base directory of the project
+     * @param Base The base directory of the project
      * @return conversion successful or not
      */
     protected boolean convertToRelativeDir (File Base) {
@@ -713,7 +844,7 @@ public class JEPlusProject implements Serializable {
 
     /**
      * Convert all directories to absolute paths.
-     * @param base_dir The base directory of the project
+     * @param base The base directory of the project
      */
     protected void convertToAbsoluteDir (File base) {
         IDFDir = new File (base, IDFDir).getAbsolutePath();
@@ -729,6 +860,7 @@ public class JEPlusProject implements Serializable {
      *
      * @return
      */
+    @JsonIgnore
     public String [] getSearchStrings () {
         DefaultMutableTreeNode ParaTree = this.getParamTree();
         if (ParaTree == null) return null;
@@ -750,6 +882,7 @@ public class JEPlusProject implements Serializable {
      *
      * @return parameter count
      */
+    @JsonIgnore
     public int getNumberOfParams () {
         DefaultMutableTreeNode ParaTree = this.getParamTree();
         if (ParaTree == null) {
@@ -791,20 +924,19 @@ public class JEPlusProject implements Serializable {
 
     /**
      * Import parameters in a CSV table (#-commented) and create a new single-branch tree
-     * @param filename File name of the table
+     * @param file File name of the table
      * @return import successful or not
      */
     public boolean importParameterTableFile (File file) {
         String [][] table = CsvUtil.parseCSVwithComments(file);
         if (table != null) {
-            ArrayList<ParameterItem> list = new ArrayList<> ();
-            for (int i=0; i<table.length; i++) {
-                String [] row = table[i];
+            Parameters = new ArrayList<> ();
+            for (String[] row : table) {
                 if (row.length >= 8) {
-                    list.add(new ParameterItem (this, row));
+                    Parameters.add(new ParameterItem (this, row));
                 }
             }
-            addParameterListAsBranch (null, list);
+            addParameterListAsBranch (null, Parameters);
             return true;
         }
         return false;
@@ -812,7 +944,7 @@ public class JEPlusProject implements Serializable {
     
     /**
      * Import parameters in a CSV table (#-commented) and create a new single-branch tree
-     * @param filename File name of the table
+     * @param file File name of the table
      * @return import successful or not
      */
     public boolean exportParameterTableFile (File file) {
@@ -827,8 +959,8 @@ public class JEPlusProject implements Serializable {
                 fw.println("# Please note , or ' must not be used in data fields, e.g. {1, 2, 3} will cause errors; use { 1 2 3 } instead.");
                 DefaultMutableTreeNode thisleaf = ParamTree.getFirstLeaf();
                 Object[] path = thisleaf.getUserObjectPath();
-                for (int i=0; i<path.length; i++) {
-                    ParameterItem item = (ParameterItem) path[i];
+                for (Object obj : path) {
+                    ParameterItem item = (ParameterItem) obj;
                     fw.println(item.toCSVrow());
                 }
                 return true;
@@ -844,7 +976,7 @@ public class JEPlusProject implements Serializable {
      * @param root Root where the new branch is attached
      * @param list The list of parameter items
      */
-    public void addParameterListAsBranch (DefaultMutableTreeNode root, ArrayList<ParameterItem> list) {
+    public void addParameterListAsBranch (DefaultMutableTreeNode root, List<ParameterItem> list) {
         if (list != null && list.size() > 0) {
             if (root == null) { // replace current tree
                 ParamTree = new DefaultMutableTreeNode (list.get(0));
@@ -856,8 +988,8 @@ public class JEPlusProject implements Serializable {
                 }
             }else {
                 DefaultMutableTreeNode current = root;
-                for (int i=0; i<list.size(); i++) {
-                    DefaultMutableTreeNode newnode = new DefaultMutableTreeNode (list.get(i));
+                for (ParameterItem item : list) {
+                    DefaultMutableTreeNode newnode = new DefaultMutableTreeNode(item);
                     current.add(newnode);
                     current = newnode;
                 }

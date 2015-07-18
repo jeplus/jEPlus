@@ -159,7 +159,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
                         ArrayList<String> altvals = (ArrayList<String>)AltValueList.clone();
                         keys.add(item.getSearchString());
                         altvals.add(vals[i]);
-                        String lbl = GroupLabel + "-" + item.ID;
+                        String lbl = GroupLabel + "-" + item.getID();
                         EPlusTask task;
                         switch (WorkEnv.getProjectType()) {
                             case JEPlusProject.TRNSYS: 
@@ -185,7 +185,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
                             ArrayList<String> altvals = (ArrayList<String>)AltValueList.clone();
                             keys.add(item.getSearchString());
                             altvals.add(vals[i]);
-                            String lbl = GroupLabel + "-" + item.ID;
+                            String lbl = GroupLabel + "-" + item.getID();
                             EPlusTask task;
                             switch (WorkEnv.getProjectType()) {
                                 case JEPlusProject.TRNSYS: 
@@ -214,7 +214,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
                             ArrayList<String> altvals = (ArrayList<String>)AltValueList.clone();
                             keys.add(item.getSearchString());
                             altvals.add(vals[i]);
-                            String lbl = GroupLabel + "-" + item.ID;
+                            String lbl = GroupLabel + "-" + item.getID();
                             EPlusTask task;
                             switch (WorkEnv.getProjectType()) {
                                 case JEPlusProject.TRNSYS: 
@@ -246,7 +246,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
                                 ArrayList<String> altvals = (ArrayList<String>)AltValueList.clone();
                                 keys.add(item.getSearchString());
                                 altvals.add(vals[i]);
-                                String lbl = GroupLabel + "-" + item.ID;
+                                String lbl = GroupLabel + "-" + item.getID();
                                 EPlusTask task;
                                 switch (WorkEnv.getProjectType()) {
                                     case JEPlusProject.TRNSYS: 
@@ -293,7 +293,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
                     ArrayList<String> altvals = (ArrayList<String>)AltValueList.clone();
                     keys.add(item.getSearchString());
                     altvals.add(vals[i]);
-                    String lbl = GroupLabel + "-" + item.ID + "_" + i;
+                    String lbl = GroupLabel + "-" + item.getID() + "_" + i;
                     EPlusTaskGroup group = new EPlusTaskGroup (WorkEnv, autolabel ? GroupLabel : lbl, keys, altvals);
                     // Pass control to the sub-groups
                     for (Enumeration e = tree.children(); e.hasMoreElements();) {
@@ -314,7 +314,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
                         ArrayList<String> altvals = (ArrayList<String>)AltValueList.clone();
                         keys.add(item.getSearchString());
                         altvals.add(vals[i]);
-                        String lbl = GroupLabel + "-" + item.ID + "_" + i;
+                        String lbl = GroupLabel + "-" + item.getID() + "_" + i;
                         EPlusTaskGroup group = new EPlusTaskGroup (WorkEnv, autolabel ? GroupLabel : lbl, keys, altvals);
                         // Pass control to the sub-groups
                         for (Enumeration e = tree.children(); e.hasMoreElements();) {

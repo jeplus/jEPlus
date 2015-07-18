@@ -59,7 +59,10 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
         setParameterTree(null);
     }
     
-    /** Creates new form JPanel_ParameterTree */
+    /** 
+     * Creates new form JPanel_ParameterTree
+     * @param project 
+     */
     public JPanel_ParameterTree(JEPlusProject project) {
         initComponents();
         setParameterTree(Project);
@@ -76,7 +79,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
 
     /**
      * Set title to this panel
-     * @param title new title
+     * @param Title new title
      */
     public void setTitle(String Title) {
         this.Title = Title;
@@ -243,17 +246,15 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
             txtAltValues.setEnabled(true);
             cboParamType.setEnabled(true);
             cboType.setEnabled(true);
-            cboPlatform.setEnabled(true);
             cboFixValue.setEnabled(true);
 
-            txtName.setText(CurrentItem.Name);
-            txtShortName.setText(CurrentItem.ID);
-            txtDescript.setText(CurrentItem.Description);
-            txtSearchString.setText(CurrentItem.SearchString);
+            txtName.setText(CurrentItem.getName());
+            txtShortName.setText(CurrentItem.getID());
+            txtDescript.setText(CurrentItem.getDescription());
+            txtSearchString.setText(CurrentItem.getSearchString());
             txtAltValues.setText(CurrentItem.getValuesString());
-            cboParamType.setSelectedIndex(CurrentItem.ParamType);
-            cboType.setSelectedIndex(CurrentItem.Type);
-            cboPlatform.setSelectedIndex(CurrentItem.getPlatform());
+            cboParamType.setSelectedIndex(CurrentItem.getParamType());
+            cboType.setSelectedIndex(CurrentItem.getType());
             txpPreview.setText(getAltValuesPreview());
             resetAltValueNumbers ();
             cboFixValue.setSelectedIndex(CurrentItem.getSelectedAltValue());
@@ -266,7 +267,6 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
             txtAltValues.setEnabled(false);
             cboParamType.setEnabled(false);
             cboType.setEnabled(false);
-            cboPlatform.setEnabled(false);
             cboFixValue.setEnabled(false);
 
             txtName.setText("");
@@ -276,7 +276,6 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
             txtAltValues.setText("");
             cboParamType.setSelectedIndex(0);
             cboType.setSelectedIndex(0);
-            cboPlatform.setSelectedIndex(0);
             txpPreview.setText("");
             cboFixValue.setSelectedIndex(0);
         }
@@ -297,14 +296,14 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
      */
     protected void updateParamDetails() {
         if (CurrentItem != null) {
-            CurrentItem.Name = txtName.getText().trim();
-            CurrentItem.ID = txtShortName.getText().trim();
-            CurrentItem.Description = txtDescript.getText().trim();
-            CurrentItem.SearchString = txtSearchString.getText().trim();
-        txpPreview.setText(getAltValuesPreview());
-        resetAltValueNumbers ();
+            CurrentItem.setName(txtName.getText().trim());
+            CurrentItem.setID(txtShortName.getText().trim());
+            CurrentItem.setDescription(txtDescript.getText().trim());
+            CurrentItem.setSearchString(txtSearchString.getText().trim());
+            txpPreview.setText(getAltValuesPreview());
+            resetAltValueNumbers ();
             CurrentItem.setValuesString(txtAltValues.getText().trim());
-            CurrentItem.Type = cboType.getSelectedIndex();
+            CurrentItem.setType(cboType.getSelectedIndex());
         }
         //??ParamTreeModel.nodeChanged(ParamTreeRoot);
         //jTreeParams.repaint();
@@ -494,7 +493,6 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        cboPlatform = new javax.swing.JComboBox();
         jLabel1 = new javax.swing.JLabel();
         cmdMoveUp = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
@@ -524,15 +522,6 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
         cmdDeleteBranch = new javax.swing.JButton();
         cmdDuplicate = new javax.swing.JButton();
         cmdRemove = new javax.swing.JButton();
-
-        cboPlatform.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Any platform", "Windows only", "Mac/Linux only" }));
-        cboPlatform.setToolTipText("Some simulation options require a particular version/platform of E+. This option has no effect in the current version of jEPlus. ");
-        cboPlatform.setEnabled(false);
-        cboPlatform.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboPlatformActionPerformed(evt);
-            }
-        });
 
         jLabel1.setText("Version requirement");
 
@@ -909,10 +898,6 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
         deleteParameterBranch();
     }//GEN-LAST:event_cmdDeleteBranchActionPerformed
 
-    private void cboPlatformActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboPlatformActionPerformed
-        CurrentItem.setPlatform(cboPlatform.getSelectedIndex());
-    }//GEN-LAST:event_cboPlatformActionPerformed
-
     private void cboFixValueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFixValueActionPerformed
         CurrentItem.setSelectedAltValue(cboFixValue.getSelectedIndex());
     }//GEN-LAST:event_cboFixValueActionPerformed
@@ -925,7 +910,6 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboFixValue;
     private javax.swing.JComboBox cboParamType;
-    private javax.swing.JComboBox cboPlatform;
     private javax.swing.JComboBox cboType;
     private javax.swing.JButton cmdAdd;
     private javax.swing.JButton cmdDeleteBranch;

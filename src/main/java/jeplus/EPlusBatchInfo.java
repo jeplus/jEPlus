@@ -152,7 +152,7 @@ public class EPlusBatchInfo {
             for (ArrayList chain: ParamChains) {
                 long n = 1;
                 for (ParameterItem param: (ArrayList<ParameterItem>)chain) {
-                    buf.append(param.ID).append("(\"").append(param.SearchString).append("\") --> ");
+                    buf.append(param.getID()).append("(\"").append(param.getSearchString()).append("\") --> ");
                     n *= param.getNAltValues();
                 }
                 buf.append(n).append( " jobs\n");

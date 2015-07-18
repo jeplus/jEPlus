@@ -24,6 +24,7 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 
 /**
@@ -73,9 +74,9 @@ public class ExecutionOptions implements Serializable {
     /** Selected file name patterns to keep */
     protected String SelectedFiles = "*.dxf *.htm *.mtd *.mdd *.rdd *.shd *.out *.audit *.eio *.idd *.bnd *.ini";
     /** Whether or not to try collect results from E+ SQLite output file */
-    protected boolean UseSQLite = true;
+//    protected boolean UseSQLite = true;
     /** Whether or not to try look up further information from a user-specified spreadsheet */
-    protected boolean UseUserSpreadsheet = true;
+//    protected boolean UseUserSpreadsheet = true;
 
     // PBS specific options
     /** PBS job script template file name */
@@ -86,16 +87,19 @@ public class ExecutionOptions implements Serializable {
     protected String ServerConfigFile = null;
 
     // Remote services specific options
-    /** Remote server address */
-    protected String RemoteServerAddr = null;
-    /** Remote server port number */
-    protected int RemoteServerPort = -1;
-    /** Packed file name */
-    protected String PackedFile = null;
+    /** JESS Client configuration file name */
+    protected String ClientConfigFile = null;
+    
+//    /** Remote server address */
+//    protected String RemoteServerAddr = null;
+//    /** Remote server port number */
+//    protected int RemoteServerPort = -1;
+//    /** Packed file name */
+//    protected String PackedFile = null;
 
     // Last batch options
     /** job set within the project */
-    protected int SubSet = NONE;
+    protected int SubSet = ALL;
     /** Number of random jobs to run */
     protected int NumberOfJobs = 0;
     /** Use Latin Hypercube sampling or not */
@@ -121,9 +125,9 @@ public class ExecutionOptions implements Serializable {
 
         ServerConfigFile = "server.cfg";
 
-        RemoteServerAddr = "set server addr...";
-        RemoteServerPort = 0;
-        PackedFile = "project/";
+//        RemoteServerAddr = "set server addr...";
+//        RemoteServerPort = 0;
+//        PackedFile = "project/";
 
         SubSet = ALL;
         NumberOfJobs = 1;
@@ -148,9 +152,9 @@ public class ExecutionOptions implements Serializable {
 
         ServerConfigFile = "server.cfg";
 
-        RemoteServerAddr = "set server addr...";
-        RemoteServerPort = 0;
-        PackedFile = "project/";
+//        RemoteServerAddr = "set server addr...";
+//        RemoteServerPort = 0;
+//        PackedFile = "project/";
 
         SubSet = ALL;
         NumberOfJobs = 1;
@@ -173,13 +177,13 @@ public class ExecutionOptions implements Serializable {
         KeepEPlusFiles = obj.KeepEPlusFiles;
         PBSscriptFile = obj.PBSscriptFile;
         ServerConfigFile = obj.ServerConfigFile;
-        RemoteServerAddr = obj.RemoteServerAddr;
-        RemoteServerPort = obj.RemoteServerPort;
+//        RemoteServerAddr = obj.RemoteServerAddr;
+//        RemoteServerPort = obj.RemoteServerPort;
         DeleteSelectedFiles = obj.DeleteSelectedFiles;
         SelectedFiles = obj.SelectedFiles;
-        UseSQLite = obj.UseSQLite;
-        UseUserSpreadsheet = obj.UseUserSpreadsheet;
-        PackedFile = obj.PackedFile;
+//        UseSQLite = obj.UseSQLite;
+//        UseUserSpreadsheet = obj.UseUserSpreadsheet;
+//        PackedFile = obj.PackedFile;
         SubSet = obj.SubSet;
         NumberOfJobs = obj.NumberOfJobs;
         UseLHS = obj.UseLHS;
@@ -199,21 +203,21 @@ public class ExecutionOptions implements Serializable {
         return PBSscriptFile;
     }
 
-    public String getRemoteServerAddr() {
-        return RemoteServerAddr;
-    }
-
-    public void setRemoteServerAddr(String RemoteServerAddr) {
-        this.RemoteServerAddr = RemoteServerAddr;
-    }
-
-    public int getRemoteServerPort() {
-        return RemoteServerPort;
-    }
-
-    public void setRemoteServerPort(int RemoteServerPort) {
-        this.RemoteServerPort = RemoteServerPort;
-    }
+//    public String getRemoteServerAddr() {
+//        return RemoteServerAddr;
+//    }
+//
+//    public void setRemoteServerAddr(String RemoteServerAddr) {
+//        this.RemoteServerAddr = RemoteServerAddr;
+//    }
+//
+//    public int getRemoteServerPort() {
+//        return RemoteServerPort;
+//    }
+//
+//    public void setRemoteServerPort(int RemoteServerPort) {
+//        this.RemoteServerPort = RemoteServerPort;
+//    }
 
     public String getServerConfigFile() {
         return ServerConfigFile;
@@ -299,21 +303,23 @@ public class ExecutionOptions implements Serializable {
         this.NumThreads = NumThreads;
     }
 
+    @JsonIgnore
     public String getParentDir() {
         return WorkDir;
     }
 
+    @JsonIgnore
     public void setParentDir(String ParentDir) {
         this.WorkDir = ParentDir;
     }
 
-    public String getPackedFile() {
-        return PackedFile;
-    }
-
-    public void setPackedFile(String PackedFile) {
-        this.PackedFile = PackedFile;
-    }
+//    public String getPackedFile() {
+//        return PackedFile;
+//    }
+//
+//    public void setPackedFile(String PackedFile) {
+//        this.PackedFile = PackedFile;
+//    }
 
     public int getJobSubmissionCap() {
         return JobSubmissionCap;
@@ -369,22 +375,6 @@ public class ExecutionOptions implements Serializable {
 
     public void setUseLHS(boolean UseLHS) {
         this.UseLHS = UseLHS;
-    }
-
-    public boolean isUseSQLite() {
-        return UseSQLite;
-    }
-
-    public void setUseSQLite(boolean UseSQLite) {
-        this.UseSQLite = UseSQLite;
-    }
-
-    public boolean isUseUserSpreadsheet() {
-        return UseUserSpreadsheet;
-    }
-
-    public void setUseUserSpreadsheet(boolean UseUserSpreadsheet) {
-        this.UseUserSpreadsheet = UseUserSpreadsheet;
     }
 
 }

@@ -17,8 +17,12 @@ import javax.swing.*;
 import javax.swing.tree.*;
 import java.awt.dnd.*;
 import jeplus.data.ParameterItem;
+import org.slf4j.LoggerFactory;
 
 public class DNDTree extends JTree {
+
+    /** Logger */
+    final static org.slf4j.Logger logger = LoggerFactory.getLogger(DNDTree.class);
 
     Insets autoscrollInsets = new Insets(20, 20, 20, 20); // insets
 
@@ -50,7 +54,11 @@ public class DNDTree extends JTree {
     public static DefaultMutableTreeNode makeDeepCopy(DefaultMutableTreeNode node) {
         Object uobj = node.getUserObject();
         if (uobj instanceof ParameterItem) {
-            uobj = ((ParameterItem) uobj).clone();
+            try {
+                uobj = ((ParameterItem) uobj).clone();
+            } catch (CloneNotSupportedException ex) {
+                logger.error("Cannot make copy of user object.", ex);
+            }
         }
         DefaultMutableTreeNode copy = new DefaultMutableTreeNode(uobj);
         for (Enumeration e = node.children(); e.hasMoreElements();) {

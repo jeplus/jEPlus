@@ -2008,7 +2008,7 @@ private void jMenuItemSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN
         File file = new File (CurrentProjectFile);
         // convert to relative paths?
         // Project.convertToRelativeDir(file.getParentFile());
-        JEPlusProject.saveAsXML(file, (JEPlusProject)Project);
+        Project.saveAsXML(file);
     }else {
         jMenuItemSaveAsActionPerformed(null);
     }
@@ -2043,7 +2043,7 @@ private void jMenuItemSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//G
         // convert to relative paths?
         // Project.convertToRelativeDir(file.getParentFile());
         // write object
-        if (! JEPlusProject.saveAsXML(file, (JEPlusProject)Project)) {
+        if (! Project.saveAsXML(file)) {
             // warning message
             JOptionPane.showMessageDialog(
                 this,
@@ -2386,7 +2386,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             if (! file.toLowerCase().endsWith(".csv")) {
                 file = file.concat(".csv");
             }
-            RVX rvx = BatchManager.getProject().getRVX();
+            RVX rvx = BatchManager.getProject().getRvx();
             EPlusBatch.writeCombinedResultTable(BatchManager.getAgent().getResultCollectors(), 
                     BatchManager.getResolvedEnv().getParentDir(), 
                     rvx,

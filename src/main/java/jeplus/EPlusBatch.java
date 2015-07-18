@@ -395,8 +395,8 @@ public class EPlusBatch extends Thread {
                 this.Info.ParamChains.add(new ArrayList (Arrays.asList(path)));
                 int chainlen = path.length;
                 for (int i = 0; i < chainlen; i++) {
-                    if (!info.SearchStrings.contains(((ParameterItem) path[i]).SearchString)) {
-                        info.SearchStrings.add(((ParameterItem) path[i]).SearchString);
+                    if (!info.SearchStrings.contains(((ParameterItem) path[i]).getSearchString())) {
+                        info.SearchStrings.add(((ParameterItem) path[i]).getSearchString());
                     } else {// Error
                         info.addValidationError("Duplicate search string: Level " + i + " - Node " + path[i].toString());
                         ok = false;
@@ -414,14 +414,14 @@ public class EPlusBatch extends Thread {
                     ArrayList<String> thisset = new ArrayList<>();
                     for (int i = 0; i < path.length; i++) {
                         // test against the first chain
-                        if (!info.SearchStrings.contains(((ParameterItem) path[i]).SearchString)) {
+                        if (!info.SearchStrings.contains(((ParameterItem) path[i]).getSearchString())) {
                             // Found new search string
                             info.addValidationError("Found new search string: Level " + i + " - Node " + path[i].toString());
                             ok = false;
                         }
                         // test for duplication
-                        if (!thisset.contains(((ParameterItem) path[i]).SearchString)) {
-                            thisset.add(((ParameterItem) path[i]).SearchString);
+                        if (!thisset.contains(((ParameterItem) path[i]).getSearchString())) {
+                            thisset.add(((ParameterItem) path[i]).getSearchString());
                         } else {// Error
                             info.addValidationError("Duplicate search string: Level " + i + " - Node " + path[i].toString());
                             ok = false;
@@ -439,8 +439,8 @@ public class EPlusBatch extends Thread {
             try {
                 for (Enumeration e = ParaTree.breadthFirstEnumeration(); e.hasMoreElements();) {
                     ParameterItem item = (ParameterItem) ((DefaultMutableTreeNode) e.nextElement()).getUserObject();
-                    if (!info.ShortNames.contains(item.ID)) {
-                        info.ShortNames.add(item.ID);
+                    if (!info.ShortNames.contains(item.getID())) {
+                        info.ShortNames.add(item.getID());
                         info.ParamList.add(item);
                     } else {// Error
                         info.addValidationError("Duplicate Parameter ID found in: Node " + item.toString());
@@ -642,7 +642,7 @@ public class EPlusBatch extends Thread {
         // Parameter index
         if (Info.isValid() && Info.ParamList != null) {
             for (ParameterItem item : Info.ParamList) {
-                fn = "Index" + item.ID + ".csv";
+                fn = "Index" + item.getID() + ".csv";
                 if (item.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
             }
         }
@@ -705,7 +705,7 @@ public class EPlusBatch extends Thread {
         // Parameter index
         if (Info.isValid() && Info.ParamList != null) {
             for (ParameterItem item : Info.ParamList) {
-                tn = tableprefix+"Index" + item.ID;
+                tn = tableprefix+"Index" + item.getID();
                 if (item.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
             }
         }
@@ -1764,7 +1764,7 @@ public class EPlusBatch extends Thread {
      * @return a new and initialised EPlusBatch object
      */
     public static EPlusBatch getSimManager (String projfn, boolean showGUI) {
-        return getSimManager(new JEPlusProject (projfn), showGUI);
+        return getSimManager(JEPlusProject.loadAsXML(new File(projfn)), showGUI);
     }
 
     /**

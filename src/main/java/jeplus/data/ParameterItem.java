@@ -27,6 +27,7 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.*;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -81,15 +82,15 @@ public class ParameterItem implements Serializable, Cloneable {
     public String Description = null;
     public String SearchString = null;
     protected String ValuesString = null;
-    private boolean ValueStringChanged = true;
+    
+    transient private boolean ValueStringChanged = true;
 
-    protected String [] AltValues = null;
-    protected int NAltValues = 0;
-    protected int Platform = 0;
+    transient protected String [] AltValues = null;
+    transient protected int NAltValues = 0;
     protected int SelectedAltValue = 0; // 0-use all; 1-the 1st value; 2-the 2nd value ...
     
     /** Reference to project in order to get access to its base dir - for loading parameter from file */
-    protected JEPlusProject Project;
+    transient protected JEPlusProject Project;
 
     /**
      * Construct an empty entry
@@ -175,22 +176,13 @@ public class ParameterItem implements Serializable, Cloneable {
         SearchString = item.SearchString;
         ValuesString = item.ValuesString;
         ValueStringChanged = true;
-        Platform = item.Platform;
         SelectedAltValue = item.SelectedAltValue;
         Project = item.Project;
     }
 
-
+    @JsonIgnore
     public boolean isAltValueFixed () {
         return this.SelectedAltValue > 0;
-    }
-
-    public int getPlatform() {
-        return Platform;
-    }
-
-    public void setPlatform(int Platform) {
-        this.Platform = Platform;
     }
 
     public int getSelectedAltValue() {
@@ -273,6 +265,7 @@ public class ParameterItem implements Serializable, Cloneable {
      * <code>getAlternativeValues ()</code> function.
      * @return Number of alternative values of this parameter item
      */
+    @JsonIgnore
     public int getNAltValues() {
         if (NAltValues <= 0) getAlternativeValues ();
         return NAltValues;
@@ -282,6 +275,7 @@ public class ParameterItem implements Serializable, Cloneable {
      * Retrieve alternative values list. Par
      * @return
      */
+    @JsonIgnore
     public String [] getAlternativeValues () {
         if (ValueStringChanged || AltValues == null) {
             parseAlternativeValues ();
@@ -290,10 +284,12 @@ public class ParameterItem implements Serializable, Cloneable {
         return AltValues;
     }
 
+    @JsonIgnore
     public JEPlusProject getProject() {
         return Project;
     }
 
+    @JsonIgnore
     public void setProject(JEPlusProject Project) {
         this.Project = Project;
     }
@@ -304,6 +300,7 @@ public class ParameterItem implements Serializable, Cloneable {
      * takes the left most alt value. This is subject to future changes.
      * @return 
      */
+    @JsonIgnore
     public double getMinAltValue () {
         double min = Double.NaN;
         String [] vals = getAlternativeValues ();
@@ -319,6 +316,7 @@ public class ParameterItem implements Serializable, Cloneable {
      * takes the right most alt value. This is subject to future changes.
      * @return 
      */
+    @JsonIgnore
     public double getMaxAltValue () {
         double max = Double.NaN;
         String [] vals = getAlternativeValues ();

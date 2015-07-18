@@ -24,6 +24,7 @@
  ***************************************************************************/
 package jeplus;
 
+import java.io.File;
 import java.util.Locale;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -162,7 +163,7 @@ public class Main {
         boolean showGUI = true;
         // Prepare simulation manager
         if (prjfile != null) {
-            JEPlusProject project = new JEPlusProject (prjfile);
+            JEPlusProject project = JEPlusProject.loadAsXML(new File(prjfile));
             EPlusBatch batch = new EPlusBatch (null, project);
             // override output folder and number of threads
             if (output != null) {

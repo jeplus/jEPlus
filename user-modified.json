@@ -1,0 +1,80 @@
+{
+  "rvis" : [ {
+    "fileName" : "5ZoneCostEst.rvi",
+    "tableName" : "SimResults",
+    "usedInCalc" : true,
+    "frequency" : "Annual"
+  }, {
+    "fileName" : "5ZoneCostEst2.rvi",
+    "tableName" : "SimResults2",
+    "usedInCalc" : true,
+    "frequency" : "Annual"
+  } ],
+  "sqls" : [ {
+    "tableName" : "ChillerCap",
+    "sqlcommand" : "select Value from ComponentSizes WHERE (CompType='Chiller:Electric' AND CompName='CHILLER PLANT CHILLER' AND Description='Nominal Capacity')",
+    "columnHeaders" : "Chiller Nominal Capacity [W]",
+    "usedInCalc" : true
+  }, {
+    "tableName" : "ConsCost",
+    "sqlcommand" : "select Value from TabularDataWithStrings WHERE (ReportName='Construction Cost Estimate Summary' AND ReportForString='Entire Facility' AND TableName='Construction Cost Estimate Summary' AND RowName='Cost Per Conditioned Building Area (~~$~~/m2)' AND ColumnName='Current Bldg. Model' AND Units='' AND RowId=10)",
+    "columnHeaders" : "Construction Cost [$/m2]",
+    "usedInCalc" : true
+  } ],
+  "scripts" : [ {
+    "fileName" : "readRunTimes_jy.py",
+    "arguments" : "",
+    "tableName" : "CpuTime",
+    "pythonVersion" : "jython",
+    "onEachJob" : false
+  } ],
+  "userVars" : [ {
+    "identifier" : "v0",
+    "report" : false,
+    "caption" : "Variable 0 []",
+    "formula" : "c0"
+  }, {
+    "identifier" : "v1",
+    "report" : true,
+    "caption" : "Variable 1 []",
+    "formula" : "min(c0, c1, c2, c3, c4, -10)"
+  }, {
+    "identifier" : "v2",
+    "report" : true,
+    "caption" : "Variable 2 []",
+    "formula" : "math.hypot(c0, c1)"
+  } ],
+  "objectives" : [ {
+    "identifier" : "t1",
+    "enabled" : true,
+    "weight" : 1.0,
+    "caption" : "Electricity [kWh]",
+    "formula" : "v0/1000/3600",
+    "scaling" : true,
+    "min" : 0.0,
+    "max" : 100000.0
+  }, {
+    "identifier" : "t2",
+    "enabled" : true,
+    "weight" : 1.0,
+    "caption" : "Construction Cost [$/m2]",
+    "formula" : "v2",
+    "scaling" : false,
+    "min" : 0.0,
+    "max" : 1000.0
+  } ],
+  "notes" : "Some notes about this RVX",
+  "constraints" : [ {
+    "identifier" : "s1",
+    "enabled" : true,
+    "weight" : 1.0,
+    "caption" : "Chiller Capacity [kW]",
+    "formula" : "v1/1000",
+    "scaling" : true,
+    "lb" : 0.0,
+    "ub" : 200.0,
+    "min" : 0.0,
+    "max" : 300.0
+  } ],
+  "userSuppliedResults" : null
+}

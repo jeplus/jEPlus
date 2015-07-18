@@ -6,6 +6,7 @@
 
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.File;
@@ -53,6 +54,7 @@ public class RVX implements Serializable {
     private RVX_UserVar [] UserVars = new RVX_UserVar [0];
     public RVX_UserVar[] getUserVars() { return UserVars; }
     public void setUserVars(RVX_UserVar[] UserVars) { this.UserVars = UserVars; }
+    @JsonIgnore 
     public ArrayList<RVX_UserVar> getReportedUserVars () {
         ArrayList<RVX_UserVar> list = new ArrayList<> ();
         if (UserVars != null) {
@@ -67,6 +69,7 @@ public class RVX implements Serializable {
     private RVX_Constraint [] Constraints = new RVX_Constraint [0];
     public RVX_Constraint[] getConstraints() { return Constraints; }
     public void setConstraints(RVX_Constraint[] Constraints) { this.Constraints = Constraints; }
+    @JsonIgnore 
     public ArrayList<RVX_Constraint> getEnabledConstraints () {
         ArrayList<RVX_Constraint> list = new ArrayList<> ();
         if (Constraints != null) {
@@ -81,6 +84,7 @@ public class RVX implements Serializable {
     private RVX_Objective [] Objectives = new RVX_Objective [0];
     public RVX_Objective[] getObjectives() { return Objectives; }
     public void setObjectives(RVX_Objective[] Objectives) { this.Objectives = Objectives; }
+    @JsonIgnore 
     public ArrayList<RVX_Objective> getEnabledObjectives () {
         ArrayList<RVX_Objective> list = new ArrayList<> ();
         if (Objectives != null) {
