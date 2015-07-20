@@ -71,15 +71,21 @@ public class ParameterItem implements Serializable, Cloneable {
     public final static int LINUX = 2;
 
     /** Parameter id as a unique identifier */
+    @JsonIgnore
     public String ID = null;
     /** Parameter name - for information only */
+    @JsonIgnore
     public String Name = null;
     /** Parameter type: PARAMETRICS, OPTIMISATION or UNCERTAINTY */
+    @JsonIgnore
     public int ParamType = PARAMETRICS;
     /** Parameter value type: INTEGER, DOUBLE, or DISCRETE */
+    @JsonIgnore
     public int Type = 0;
     /** Description of the parameter - for information only */
+    @JsonIgnore
     public String Description = null;
+    @JsonIgnore
     public String SearchString = null;
     protected String ValuesString = null;
     

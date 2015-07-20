@@ -1,0 +1,300 @@
+{
+  "title": "jEPlus Project",
+  "type": "object",
+  "properties": {
+    "projectNotes": {
+      "type": "string",
+      "description": "Project Description",
+      "minLength": 0,
+      "default": "New project",
+	  "propertyOrder": 1
+    },
+    "projectType": {
+      "type": "integer",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 3,
+	  "propertyOrder": 2
+    },
+    "projectID": {
+      "type": "string",
+      "description": "Project ID prefix",
+      "minLength": 1,
+      "default": "G",
+	  "propertyOrder": 3
+    },
+    "idfdir": {
+      "type": "string",
+      "description": "Paths to the IDF template files",
+      "minLength": 1,
+      "default": "./",
+	  "propertyOrder": 4
+    },
+    "idftemplate": {
+      "type": "string",
+      "description": "IDF/IMF template files, separated by ,",
+      "minLength": 5,
+      "default": "in.idf",
+	  "propertyOrder": 5
+    },
+    "weatherDir": {
+      "type": "string",
+      "description": "Paths to the weather files",
+      "minLength": 1,
+      "default": "./",
+	  "propertyOrder": 6
+    },
+    "weatherFile": {
+      "type": "string",
+      "description": "Weather files, separated by ,",
+      "minLength": 5,
+      "default": "in.epw",
+	  "propertyOrder": 7
+    },
+	"parameterFile": {
+	  "type": "string",
+	  "description": "External parameter file name",
+	  "default": null,
+	  "propertyOrder": 8
+	},
+    "parameters": {
+      "type": "array",
+      "format": "tabs",
+      "title": "Parameters",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "title": "Parameter",
+        "properties": {
+			"id": {
+			  "type": "string",
+			  "description": "Parameter ID, must be unique",
+			  "default": "P1",
+			  "propertyOrder": 1
+			},
+			"name": {
+			  "type": "string",
+			  "description": "Descriptive name of the parameter",
+			  "default": "parameter 1",
+			  "propertyOrder": 2
+			},
+			"description": {
+			  "type": "string",
+			  "description": "Further information of the parameter",
+			  "default": "parameter 1",
+			  "propertyOrder": 3
+			},
+			"type": {
+			  "type": "integer",
+			  "description": "Parameter value type",
+			  "default": "0",
+			  "propertyOrder": 4
+			},
+			"searchString": {
+			  "type": "string",
+			  "description": "Search tag",
+			  "default": "@@P1@@",
+			  "propertyOrder": 5
+			},
+			"valueString": {
+			  "type": "string",
+			  "description": "Value definition string",
+			  "default": "{1}",
+			  "propertyOrder": 6
+			}
+        }
+      },
+      "default": [
+        {
+          "id": "P1",
+          "name": "Parameter1",
+          "description": "Parameter 1",
+		  "type": 0,
+		  "searchString": "@@P1@@",
+		  "valueString": "{1}"
+        }
+      ],
+	  "propertyOrder": 9
+    },
+	"rvxFile": {
+	  "type": "string",
+	  "description": "External RVX file name",
+	  "default": null,
+	  "propertyOrder": 10
+	},
+	"rvx": {
+		"type": "object",
+		"title": "Result Collection Settings",
+		"properties": {
+			"notes" : {"type": "string", "default": "Some notes about this RVX"},
+			"rvis" : {
+				"type": "array",
+				"format": "tabs",
+				"title": "RVIs",
+				"uniqueItems": true,
+				"items": {
+					"type": "object",
+					"title": "RVI",
+					"properties": {
+						"fileName" : {"type": "string", "default": "5ZoneCostEst.rvi"},
+						"usedInCalc" : {"type": "boolean", "format": "checkbox", "default": true},
+						"tableName" : {"type": "string", "default": "SimResults"},
+						"frequency" : {"type": "string", "default": "Annual"}
+					}
+				}
+			},
+			"xmls" : {
+				"type": "array",
+				"format": "tabs",
+				"title": "XMLs",
+				"uniqueItems": true,
+				"items": {
+					"type": "object",
+					"title": "XML",
+					"properties": {
+						"columnHeaders" : {"type": "string", "default": "Header"},
+						"xpath" : {"type": "string", "default": "XPath statement"},
+						"usedInCalc" : {"type": "boolean", "format": "checkbox", "default": true},
+						"tableName" : {"type": "string", "default": "ChillerCap"}
+					}
+				}
+			},
+			"sqls" : {
+				"type": "array",
+				"format": "tabs",
+				"title": "SQLs",
+				"uniqueItems": true,
+				"items": {
+					"type": "object",
+					"title": "SQL",
+					"properties": {
+						"columnHeaders" : {"type": "string", "default": "Chiller Nominal Capacity [W]"},
+						"sqlcommand" : {"type": "string", "default": "select Value from ComponentSizes WHERE (CompType='Chiller:Electric' AND CompName='CHILLER PLANT CHILLER' AND Description='Nominal Capacity')"},
+						"usedInCalc" : {"type": "boolean", "format": "checkbox", "default": true},
+						"tableName" : {"type": "string", "default": "ChillerCap"}
+					}
+				}
+			},
+			"scripts" : {
+				"type": "array",
+				"format": "tabs",
+				"title": "Scripts",
+				"uniqueItems": true,
+				"items": {
+					"type": "object",
+					"title": "Script",
+					"properties": {
+						"fileName" : {"type": "string", "default": "readRunTimes_jy.py"},
+						"pythonVersion" : {"type": "string", "enum": ["jython", "python2", "python3"]},
+						"arguments" : {"type": "string", "default": ""},
+						"onEachJob" : {"type": "boolean", "format": "checkbox", "default": false},
+						"tableName" : {"type": "string", "default": "CpuTime"}
+					}
+				}
+			},
+			"userSuppliedResults" : {
+				"type": "array",
+				"format": "tabs",
+				"title": "User supplied results",
+				"uniqueItems": true,
+				"items": {
+					"type": "object",
+					"title": "Supplied table",
+					"properties": {
+						"fileName" : {"type": "string", "default": "ExternResultTable.csv"},
+						"headerRow" : {"type": "integer", "default": 0},
+						"jobIdColumn" : {"type": "integer", "default": 1},
+						"dataColumns" : {"type": "string", "default": "3 4"},
+						"tableName" : {"type": "string", "default": "UserResults"}
+					}
+				}
+			},
+			"userVars" : {
+				"type": "array",
+				"format": "tabs",
+				"title": "User Variables",
+				"uniqueItems": true,
+				"items": {
+					"type": "object",
+					"title": "Variable",
+					"properties": {
+						"identifier" : {"type": "string", "default": "v0"},
+						"caption" : {"type": "string", "default": "Variable 0 []"},
+						"formula" : {"type": "string", "default": "c0"},
+						"report" : {"type": "boolean", "format": "checkbox", "default": false}
+					}
+				}
+			},
+			"constraints" : {
+				"type": "array",
+				"format": "tabs",
+				"title": "Constraint definitions",
+				"uniqueItems": true,
+				"items": {
+					"type": "object",
+					"title": "Constraint",
+					"properties": {
+						"weight" : {"type": "number", "default": 1.0},
+						"enabled" : {"type": "boolean", "format": "checkbox", "default": true},
+						"identifier" : {"type": "string", "default": "s1"},
+						"caption" : {"type": "string", "default": "Chiller Capacity [kW]"},
+						"formula" : {"type": "string", "default": "v1/1000"},
+						"scaling" : {"type": "boolean", "format": "checkbox", "default": true},
+						"lb" : {"type": "number", "default": 0.0},
+						"ub" : {"type": "number", "default": 200.0},
+						"min" : {"type": "number", "default": 0.0},
+						"max" : {"type": "number", "default": 300.0}
+					}
+				}
+			},
+			"objectives" : {
+				"type": "array",
+				"format": "tabs",
+				"title": "Objective functions",
+				"uniqueItems": true,
+				"items": {
+					"type": "object",
+					"title": "Objective",
+					"properties": {
+						"weight" : {"type": "number", "default": 1.0},
+						"enabled" : {"type": "boolean", "format": "checkbox", "default": true},
+						"identifier" : {"type": "string", "default": "t1"},
+						"caption" : {"type": "string", "default": "Electricity [kWh]"},
+						"formula" : {"type": "string", "default": "v0/1000/3600"},
+						"scaling" : {"type": "boolean", "format": "checkbox", "default": true},
+						"min" : {"type": "number", "default": 0.0},
+						"max" : {"type": "number", "default": 100000.0}
+					}
+				}
+			}
+		},
+		"propertyOrder": 11
+	},
+	"execSettings" : {
+		"type": "object",
+		"title": "Exec Settings",
+		"properties": {
+			"workDir" : {"type": "string", "default": "../output/"},
+			"keepJobDir" : {"type": "boolean", "format": "checkbox", "default": true},
+			"rerunAll" : {"type": "boolean", "format": "checkbox", "default": true},
+			"pbsscriptFile" : {"type": "string", "default": "select script file..."},
+			"serverConfigFile" : {"type": "string", "default": "server.cfg"},
+			"keepEPlusFiles" : {"type": "boolean", "format": "checkbox", "default": true},
+			"keepJEPlusFiles" : {"type": "boolean", "format": "checkbox", "default": true},
+			"deleteSelectedFiles" : {"type": "boolean", "format": "checkbox", "default": false},
+			"selectedFiles" : {"type": "string", "default": "*.dxf *.htm *.mtd *.mdd *.rdd *.shd *.out *.audit *.eio *.idd *.bnd *.ini"},
+			"delay" : {"type": "integer", "default": 100},
+			"ompthreads" : {"type": "integer", "default": 1},
+			"numThreads" : {"type": "integer", "default": 4},
+			"randomSeed" : {"type": "integer", "default": 12345},
+			"subSet" : {"type": "integer", "default": 2},
+			"useLHS" : {"type": "boolean", "format": "checkbox", "default": false},
+			"executionType" : {"type": "integer", "default": 0},
+			"jobSubmissionCap" : {"type": "integer", "default": 100},
+			"jobListFile" : {"type": "string", "default": "select job list file ..."},
+			"numberOfJobs" : {"type": "integer", "default": 4}
+		},
+		"propertyOrder": 12
+	}
+  }
+}
