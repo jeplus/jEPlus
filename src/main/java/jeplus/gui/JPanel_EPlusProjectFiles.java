@@ -458,11 +458,11 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = MainGUI.getFileChooser().getSelectedFile();
             String dir = file.getParent() + File.separator;
-            //String dir1 = RelativeDirUtil.getRelativePath(MainGUI.getDefaultDir(), file.getParentFile());
-            txtRviDir.setText(dir);
+            String reldir = RelativeDirUtil.getRelativePath(dir, Project.getBaseDir(), "/");
+            txtRviDir.setText(reldir);
             String name = file.getName();
             cboRviFile.setModel(new DefaultComboBoxModel(new String[]{name}));
-            Project.setRVIDir(dir);
+            Project.setRVIDir(reldir);
             Project.setRVIFile(name);
         }
         MainGUI.getFileChooser().resetChoosableFileFilters();
@@ -479,7 +479,8 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File[] files = MainGUI.getFileChooser().getSelectedFiles();
             String dir = files[0].getParent() + File.separator;
-            txtWthrDir.setText(dir);
+            String reldir = RelativeDirUtil.getRelativePath(dir, Project.getBaseDir(), "/");
+            txtWthrDir.setText(reldir);
             String[] names = new String[files.length];
             names[0] = files[0].getName();
             String namestr = files[0].getName();
@@ -488,7 +489,7 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
                 namestr = namestr + "; " + names[i];
             }
             cboWeatherFile.setModel(new DefaultComboBoxModel(names));
-            Project.setWeatherDir(dir);
+            Project.setWeatherDir(reldir);
             Project.setWeatherFile(namestr);
         }
         MainGUI.getFileChooser().resetChoosableFileFilters();
@@ -505,7 +506,8 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File[] files = MainGUI.getFileChooser().getSelectedFiles();
             String dir = files[0].getParent() + File.separator;
-            txtIdfDir.setText(dir);
+            String reldir = RelativeDirUtil.getRelativePath(dir, Project.getBaseDir(), "/");
+            txtIdfDir.setText(reldir);
             String[] names = new String[files.length];
             names[0] = files[0].getName();
             String namestr = files[0].getName();
@@ -514,7 +516,7 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
                 namestr = namestr + "; " + names[i];
             }
             cboTemplateFile.setModel(new DefaultComboBoxModel(names));
-            Project.setIDFDir(dir);
+            Project.setIDFDir(reldir);
             Project.setIDFTemplate(namestr);
         }
         MainGUI.getFileChooser().resetChoosableFileFilters();

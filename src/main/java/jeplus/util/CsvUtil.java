@@ -103,7 +103,8 @@ public class CsvUtil {
         try (BufferedReader fr = new BufferedReader(new FileReader(file))) {
             String line = readNextLineOfContents(fr);
             while (line != null) {
-                buf.add(line.split("\\s*,\\s*"));
+                // buf.add(line.split("\\s*,\\s*"));
+                buf.add(line.split("\\s*,\\s*(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*(?![^\\(\\[\\{]*[\\}\\]\\)]))"));
                 line = readNextLineOfContents(fr);
             }
         } catch (Exception ex) {

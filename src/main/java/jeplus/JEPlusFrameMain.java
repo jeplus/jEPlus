@@ -83,8 +83,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
     
     protected NumberFormat LargeIntFormatter = new DecimalFormat("###,###,###,###,###,###");
 
-    public final static String version = "1.5.2";
-    public final static String version_ps = "_1_5";
+    public final static String version = "1.6.0";
+    public final static String version_ps = "_1_6";
     public final static String osName = System.getProperty( "os.name" );
     protected static String VersionInfo = "jEPlus (version " + version + ") for " + osName;
     
@@ -783,6 +783,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         cboProjectType = new javax.swing.JComboBox();
         jLabel2 = new javax.swing.JLabel();
         cmdValidate = new javax.swing.JButton();
+        pnlRvx = new javax.swing.JPanel();
         pnlExecution = new javax.swing.JPanel();
         cboExecutionType = new javax.swing.JComboBox();
         jLabel27 = new javax.swing.JLabel();
@@ -816,6 +817,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuItemSave = new javax.swing.JMenuItem();
         jMenuItemSaveAs = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JSeparator();
+        jMenuItemImportJson = new javax.swing.JMenuItem();
+        jMenuItemExportJson = new javax.swing.JMenuItem();
         jMenuItemOpenTree = new javax.swing.JMenuItem();
         jMenuItemSaveTree = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JSeparator();
@@ -1022,6 +1025,19 @@ public class JEPlusFrameMain extends JEPlusFrame {
         );
 
         tpnMain.addTab("Project", pnlProject);
+
+        javax.swing.GroupLayout pnlRvxLayout = new javax.swing.GroupLayout(pnlRvx);
+        pnlRvx.setLayout(pnlRvxLayout);
+        pnlRvxLayout.setHorizontalGroup(
+            pnlRvxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 485, Short.MAX_VALUE)
+        );
+        pnlRvxLayout.setVerticalGroup(
+            pnlRvxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 691, Short.MAX_VALUE)
+        );
+
+        tpnMain.addTab("RVX", pnlRvx);
 
         pnlExecution.setPreferredSize(new java.awt.Dimension(500, 688));
 
@@ -1309,6 +1325,24 @@ public class JEPlusFrameMain extends JEPlusFrame {
         });
         jMenuFile.add(jMenuItemSaveAs);
         jMenuFile.add(jSeparator2);
+
+        jMenuItemImportJson.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/view_as_json.png"))); // NOI18N
+        jMenuItemImportJson.setText("Import JSON ...");
+        jMenuItemImportJson.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemImportJsonActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemImportJson);
+
+        jMenuItemExportJson.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/view_as_json.png"))); // NOI18N
+        jMenuItemExportJson.setText("Export JSON ...");
+        jMenuItemExportJson.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemExportJsonActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemExportJson);
 
         jMenuItemOpenTree.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_get.png"))); // NOI18N
         jMenuItemOpenTree.setText("Import jE+ v0.5 OBJ file ...");
@@ -1918,8 +1952,8 @@ private void jMenuItemOpenTreeActionPerformed(java.awt.event.ActionEvent evt) {/
         // set current path to the location of the obj file only if current project is unknown
         if (this.CurrentProjectFile == null) DefaultDir = file.getParentFile();
     }
-    fc.setFileFilter(null);
-
+    fc.resetChoosableFileFilters();
+    fc.setSelectedFile(new File(""));
 }//GEN-LAST:event_jMenuItemOpenTreeActionPerformed
 
 private void jMenuItemSaveTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveTreeActionPerformed
@@ -1944,7 +1978,8 @@ private void jMenuItemSaveTreeActionPerformed(java.awt.event.ActionEvent evt) {/
     } else {
 
     }
-    fc.setFileFilter(null);
+    fc.resetChoosableFileFilters();
+    fc.setSelectedFile(new File(""));
 }//GEN-LAST:event_jMenuItemSaveTreeActionPerformed
 
 private void jMenuItemValidateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemValidateActionPerformed
@@ -2026,8 +2061,8 @@ private void jMenuItemOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN
     } else {
 
     }
-    fc.setFileFilter(null);
-
+    fc.resetChoosableFileFilters();
+    fc.setSelectedFile(new File(""));
 }//GEN-LAST:event_jMenuItemOpenActionPerformed
 
 private void jMenuItemSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveAsActionPerformed
@@ -2054,10 +2089,14 @@ private void jMenuItemSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//G
         // Update default dir and current project file reference
         DefaultDir = new File (Project.getBaseDir());
         this.setCurrentProjectFile(file.getPath());
+        // update screen
+        this.initProjectSection();
+        this.cboExecutionTypeActionPerformed(null);
     } else {
 
     }
-    fc.setFileFilter(null);
+    fc.resetChoosableFileFilters();
+    fc.setSelectedFile(new File(""));
 }//GEN-LAST:event_jMenuItemSaveAsActionPerformed
 
 private void jMenuItemNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemNewActionPerformed
@@ -2404,6 +2443,8 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                 JOptionPane.showMessageDialog(this, "Combined result table has been saved to " + file, "Combined table saved", JOptionPane.INFORMATION_MESSAGE);
             }
         }
+        fc.resetChoosableFileFilters();
+        fc.setSelectedFile(new File(""));
     }//GEN-LAST:event_jMenuItemCombineTableActionPerformed
 
     private void jMenuItemExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportTableActionPerformed
@@ -2431,7 +2472,8 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         } else {
 
         }
-        fc.setFileFilter(null);
+        fc.resetChoosableFileFilters();
+        fc.setSelectedFile(new File(""));
     }//GEN-LAST:event_jMenuItemExportTableActionPerformed
 
     private void jMenuItemCreateJobListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCreateJobListActionPerformed
@@ -2456,8 +2498,8 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                     JOptionPane.CLOSED_OPTION);
             }
         }
-        fc.setFileFilter(null);
-
+        fc.resetChoosableFileFilters();
+        fc.setSelectedFile(new File(""));
     }//GEN-LAST:event_jMenuItemCreateJobListActionPerformed
 
     private void jMenuItemViewFolderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemViewFolderActionPerformed
@@ -2582,6 +2624,47 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         this.TpnUtilities.setSelectedIndex(2);       
     }//GEN-LAST:event_jMenuItemRunReadVarsActionPerformed
 
+    private void jMenuItemImportJsonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemImportJsonActionPerformed
+        // Select a file to open
+        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JSON));
+        fc.setSelectedFile(new File(""));
+        fc.setCurrentDirectory(DefaultDir);
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            // load object
+            this.importProjectFromJson(this, file);
+        } else {
+
+        }
+        fc.resetChoosableFileFilters();
+        fc.setSelectedFile(new File(""));
+    }//GEN-LAST:event_jMenuItemImportJsonActionPerformed
+
+    private void jMenuItemExportJsonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportJsonActionPerformed
+        // Select a file to save
+        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JSON));
+        fc.setSelectedFile(new File(""));
+        fc.setCurrentDirectory(DefaultDir);
+        if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            if (! file.getName().endsWith(".json"))
+                file = new File (file.getPath().concat(".json"));
+            // write object
+            if (! Project.saveAsJSON(file)) {
+                // warning message
+                JOptionPane.showMessageDialog(
+                    this,
+                    "The JEPlus Project cannot be saved for some reasons. :-(",
+                    "Error",
+                    JOptionPane.CLOSED_OPTION);
+            }
+        } else {
+
+        }
+        fc.resetChoosableFileFilters();
+        fc.setSelectedFile(new File(""));
+    }//GEN-LAST:event_jMenuItemExportJsonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane TpnEditors;
     private javax.swing.JTabbedPane TpnUtilities;
@@ -2614,7 +2697,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JMenuItem jMenuItemDefaultLaF;
     private javax.swing.JMenuItem jMenuItemEditorTheme;
     private javax.swing.JMenuItem jMenuItemExit;
+    private javax.swing.JMenuItem jMenuItemExportJson;
     private javax.swing.JMenuItem jMenuItemExportTable;
+    private javax.swing.JMenuItem jMenuItemImportJson;
     private javax.swing.JMenuItem jMenuItemImportTable;
     private javax.swing.JMenuItem jMenuItemMemoryUsage;
     private javax.swing.JMenuItem jMenuItemMonitor;
@@ -2665,6 +2750,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPanel jplTree;
     private javax.swing.JPanel pnlExecution;
     private javax.swing.JPanel pnlProject;
+    private javax.swing.JPanel pnlRvx;
     private javax.swing.JPanel pnlUtilities;
     private javax.swing.JRadioButton rdoAllJobs;
     private javax.swing.JRadioButton rdoCombineResults;
@@ -2687,6 +2773,42 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             JOptionPane.showMessageDialog(
                 parent,
                 "Failed to load project from file: " + file.getPath() + ". Please check if the file is accessible.",
+                "Error",
+                JOptionPane.CLOSED_OPTION);
+        }else {
+            Project = proj;
+            // GUI update
+            // this.initProjectSection();
+            // Update project type (E+ or TRNSYS) and gui
+            this.cboProjectType.setSelectedIndex(Project.getProjectType());
+            this.setProjectType(Project.getProjectType());
+            // update Exec Agent's reference to the Execution options
+            for (EPlusAgent agent: ExecAgents) {
+                agent.setSettings(Project.getExecSettings());
+            }
+            // select again Exec agent and update gui
+            this.setExecType(Project.getExecSettings().getExecutionType());
+            this.cboExecutionTypeActionPerformed(null);
+            // Base directory update
+            DefaultDir = new File (Project.getBaseDir());
+            // Batch options gui
+            this.initBatchOptions();
+            this.setCurrentProjectFile(file.getPath());
+        }
+    }
+
+    public void importProjectFromJson (Component parent, File file) {
+        JEPlusProject proj = null;
+        try {
+            proj = JEPlusProject.loadFromJSON(file);
+        }catch (IOException ioe) {
+            logger.error("Error opening JSON file " + file.getAbsolutePath(), ioe);
+        }
+        if (proj == null) {
+            // warning message
+            JOptionPane.showMessageDialog(
+                parent,
+                "Failed to import project from file: " + file.getPath() + ". Please check if the file is accessible.",
                 "Error",
                 JOptionPane.CLOSED_OPTION);
         }else {

@@ -409,14 +409,37 @@ public class JEPlusProject implements Serializable {
     
     // ================== Getters and Setters ==========================
     
+    /**
+     * Get the base directory of the current project
+     * @return Base directory
+     */
     @JsonIgnore
     public String getBaseDir() {
         return BaseDir;
     }
 
+    /**
+     * Set the base directory of the current project to the given paths. Once the
+     * new paths are set, the relative paths of all project files are recalculated,
+     * and the absolute paths converted to relative form.
+     * @param BaseDir The new base directory for this project
+     */
     @JsonIgnore
     public void setBaseDir(String BaseDir) {
+        // First to convert all paths to absolute using the existing Base
+        this.setWeatherDir(this.resolveWeatherDir());   // Weather file path
+        this.setIDFDir(this.resolveIDFDir());        // idf file path
+        this.setDCKDir(this.resolveDCKDir());        // dck file path
+        this.setRVIDir(this.resolveRVIDir());        // rvi file path
+        this.getExecSettings().setParentDir(this.resolveWorkDir());        // output dir
+        // Update BaseDir
         this.BaseDir = BaseDir;
+        // Calculate relative dir from the new base
+        this.setWeatherDir(RelativeDirUtil.getRelativePath(this.getWeatherDir(), this.BaseDir, "/"));   // Weather file path
+        this.setIDFDir(RelativeDirUtil.getRelativePath(this.getIDFDir(), this.BaseDir, "/"));        // idf file path
+        this.setDCKDir(RelativeDirUtil.getRelativePath(this.getDCKDir(), this.BaseDir, "/"));        // dck file path
+        this.setRVIDir(RelativeDirUtil.getRelativePath(this.getRVIDir(), this.BaseDir, "/"));        // rvi file path
+        this.getExecSettings().setParentDir(RelativeDirUtil.getRelativePath(this.getExecSettings().getParentDir(), this.BaseDir, "/"));        // output dir
     }
 
     public int getProjectType() {
