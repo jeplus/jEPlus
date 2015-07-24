@@ -580,15 +580,15 @@ public class EPlusWinTools {
         return ExitValue;
     }
     
-    public static int runReadVars (EPlusConfig config, String WorkDir, String rvifile, String csvfile) {
+    public static int runReadVars (EPlusConfig config, String WorkDir, String rvifile, String freq, String csvfile) {
         int ExitValue = -99;
         try {
             Process EPProc;
 
             // Run EnergyPlus ReadVarsESO
-            String CmdLine = config.getResolvedReadVars() + " \"" + rvifile + "\"";
+            String CmdLine = config.getResolvedReadVars() + " \"" + rvifile + "\" " + freq + " unlimited";
             EPProc = Runtime.getRuntime().exec(
-                    new String [] {config.getResolvedReadVars(), rvifile}, 
+                    new String [] {config.getResolvedReadVars(), rvifile, freq, "unlimited"}, 
                     null, 
                     new File(WorkDir));
             // Console logger

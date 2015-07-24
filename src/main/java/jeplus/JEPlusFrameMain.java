@@ -783,7 +783,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
         cboProjectType = new javax.swing.JComboBox();
         jLabel2 = new javax.swing.JLabel();
         cmdValidate = new javax.swing.JButton();
-        pnlRvx = new javax.swing.JPanel();
         pnlExecution = new javax.swing.JPanel();
         cboExecutionType = new javax.swing.JComboBox();
         jLabel27 = new javax.swing.JLabel();
@@ -819,6 +818,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jSeparator2 = new javax.swing.JSeparator();
         jMenuItemImportJson = new javax.swing.JMenuItem();
         jMenuItemExportJson = new javax.swing.JMenuItem();
+        jSeparator10 = new javax.swing.JPopupMenu.Separator();
         jMenuItemOpenTree = new javax.swing.JMenuItem();
         jMenuItemSaveTree = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JSeparator();
@@ -844,6 +844,9 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jSeparator9 = new javax.swing.JPopupMenu.Separator();
         jMenuItemCreateJobList = new javax.swing.JMenuItem();
         jMenuItemCreateIndex = new javax.swing.JMenuItem();
+        jSeparator12 = new javax.swing.JPopupMenu.Separator();
+        jMenuItemJESSClient = new javax.swing.JMenuItem();
+        jMenuItemJEPlusEA = new javax.swing.JMenuItem();
         jMenuTools = new javax.swing.JMenu();
         jSeparator4 = new javax.swing.JSeparator();
         jMenuItemViewErr = new javax.swing.JMenuItem();
@@ -856,6 +859,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuItemMemoryUsage = new javax.swing.JMenuItem();
         jMenuItemDefaultLaF = new javax.swing.JMenuItem();
         jMenuItemEditorTheme = new javax.swing.JMenuItem();
+        jSeparator11 = new javax.swing.JPopupMenu.Separator();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenuHelp = new javax.swing.JMenu();
         jMenuItemUserGuide = new javax.swing.JMenuItem();
@@ -1026,19 +1030,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
 
         tpnMain.addTab("Project", pnlProject);
 
-        javax.swing.GroupLayout pnlRvxLayout = new javax.swing.GroupLayout(pnlRvx);
-        pnlRvx.setLayout(pnlRvxLayout);
-        pnlRvxLayout.setHorizontalGroup(
-            pnlRvxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 485, Short.MAX_VALUE)
-        );
-        pnlRvxLayout.setVerticalGroup(
-            pnlRvxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 691, Short.MAX_VALUE)
-        );
-
-        tpnMain.addTab("RVX", pnlRvx);
-
         pnlExecution.setPreferredSize(new java.awt.Dimension(500, 688));
 
         cboExecutionType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Local batch controller", "Offline PBS script generator", "Local PBS controller", "JEPlusPlus Job Server (PBS only)", "JEPlusPlus Job Server (Windows only)", "JEPlusPlus Job Server" }));
@@ -1153,10 +1144,10 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+            .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdoTestChains, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rdoTestChains, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(rdoTestRandomN, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1169,7 +1160,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
                         .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtRandomSeed))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                    .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(rdoJobListFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtJobListFile)
@@ -1177,10 +1168,10 @@ public class JEPlusFrameMain extends JEPlusFrame {
                         .addComponent(cmdSelectJobListFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmdEditJobListFile, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(rdoAllJobs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                        .addComponent(rdoAllJobs, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(98, 98, 98)
-                        .addComponent(cmdStart)))
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(cmdStart, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -1203,9 +1194,10 @@ public class JEPlusFrameMain extends JEPlusFrame {
                     .addComponent(cmdSelectJobListFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmdEditJobListFile))
                 .addGap(7, 7, 7)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmdStart)
-                    .addComponent(rdoAllJobs)))
+                .addComponent(rdoAllJobs)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmdStart)
+                .addContainerGap(116, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -1220,8 +1212,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(152, Short.MAX_VALUE))
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout pnlExecutionLayout = new javax.swing.GroupLayout(pnlExecution);
@@ -1327,7 +1319,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuFile.add(jSeparator2);
 
         jMenuItemImportJson.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/view_as_json.png"))); // NOI18N
-        jMenuItemImportJson.setText("Import JSON ...");
+        jMenuItemImportJson.setText("Import JSON project ...");
         jMenuItemImportJson.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemImportJsonActionPerformed(evt);
@@ -1336,13 +1328,14 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuFile.add(jMenuItemImportJson);
 
         jMenuItemExportJson.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/view_as_json.png"))); // NOI18N
-        jMenuItemExportJson.setText("Export JSON ...");
+        jMenuItemExportJson.setText("Export JSON project ...");
         jMenuItemExportJson.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemExportJsonActionPerformed(evt);
             }
         });
         jMenuFile.add(jMenuItemExportJson);
+        jMenuFile.add(jSeparator10);
 
         jMenuItemOpenTree.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_get.png"))); // NOI18N
         jMenuItemOpenTree.setText("Import jE+ v0.5 OBJ file ...");
@@ -1521,7 +1514,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuAction.add(jSeparator9);
 
         jMenuItemCreateJobList.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_key.png"))); // NOI18N
-        jMenuItemCreateJobList.setText("Create a job list file...");
+        jMenuItemCreateJobList.setText("Create the full job list...");
         jMenuItemCreateJobList.setToolTipText("Create the list of jobs in the current project and save it in a CSV file. This list or part of it can be used as a job list file in the future.");
         jMenuItemCreateJobList.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1540,6 +1533,15 @@ public class JEPlusFrameMain extends JEPlusFrame {
             }
         });
         jMenuAction.add(jMenuItemCreateIndex);
+        jMenuAction.add(jSeparator12);
+
+        jMenuItemJESSClient.setText("Launch JESS Client");
+        jMenuItemJESSClient.setEnabled(false);
+        jMenuAction.add(jMenuItemJESSClient);
+
+        jMenuItemJEPlusEA.setText("Launch jEPlus+EA");
+        jMenuItemJEPlusEA.setEnabled(false);
+        jMenuAction.add(jMenuItemJEPlusEA);
 
         jMenuBarMain.add(jMenuAction);
 
@@ -1625,9 +1627,10 @@ public class JEPlusFrameMain extends JEPlusFrame {
             }
         });
         jMenuTools.add(jMenuItemEditorTheme);
+        jMenuTools.add(jSeparator11);
 
         jMenuItem2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/hammer_screwdriver.png"))); // NOI18N
-        jMenuItem2.setText("Options");
+        jMenuItem2.setText("Options (jeplus.cfg)");
         jMenuItem2.setEnabled(false);
         jMenuTools.add(jMenuItem2);
 
@@ -2701,6 +2704,8 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JMenuItem jMenuItemExportTable;
     private javax.swing.JMenuItem jMenuItemImportJson;
     private javax.swing.JMenuItem jMenuItemImportTable;
+    private javax.swing.JMenuItem jMenuItemJEPlusEA;
+    private javax.swing.JMenuItem jMenuItemJESSClient;
     private javax.swing.JMenuItem jMenuItemMemoryUsage;
     private javax.swing.JMenuItem jMenuItemMonitor;
     private javax.swing.JMenuItem jMenuItemNew;
@@ -2733,6 +2738,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPanel jPanel4;
     private jeplus.gui.JPanel_EPlusProjectFiles jPanel_EPlusProjectFiles2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator10;
+    private javax.swing.JPopupMenu.Separator jSeparator11;
+    private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
@@ -2750,7 +2758,6 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPanel jplTree;
     private javax.swing.JPanel pnlExecution;
     private javax.swing.JPanel pnlProject;
-    private javax.swing.JPanel pnlRvx;
     private javax.swing.JPanel pnlUtilities;
     private javax.swing.JRadioButton rdoAllJobs;
     private javax.swing.JRadioButton rdoCombineResults;

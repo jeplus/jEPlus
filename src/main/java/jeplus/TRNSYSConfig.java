@@ -12,6 +12,7 @@
  */
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -136,6 +137,7 @@ public class TRNSYSConfig extends EPlusConfig {
     /**
      * Get User ID file
      */
+    @JsonIgnore
     public String getUserID() {
         File dir = new File(TRNSYSBinDir);
         try {
@@ -162,6 +164,7 @@ public class TRNSYSConfig extends EPlusConfig {
      *
      * @return the version string
      */
+    @JsonIgnore
     public String getTRNSYSVersion() {
         String vers = null;
         try {
@@ -205,6 +208,7 @@ public class TRNSYSConfig extends EPlusConfig {
     /**
      * Get Bin Directory
      */
+    @JsonIgnore
     public String getResolvedTRNSYSBinDir() {
         String dir = RelativeDirUtil.checkAbsolutePath(TRNSYSBinDir, UserBaseDir);
         dir = dir.concat(dir.endsWith(File.separator) ? "" : File.separator);
@@ -235,6 +239,7 @@ public class TRNSYSConfig extends EPlusConfig {
     /**
      * Get full TRNSYS exec command path
      */
+    @JsonIgnore
     public String getResolvedTRNSYSEXEC() {
         String cmd = RelativeDirUtil.checkAbsolutePath(TRNSYSEXE, UserBaseDir);
         return cmd;

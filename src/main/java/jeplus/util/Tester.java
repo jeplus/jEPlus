@@ -18,6 +18,7 @@ package jeplus.util;
 
 import java.io.File;
 import java.io.IOException;
+import jeplus.JEPlusConfig;
 import jeplus.JEPlusProject;
 
 /**
@@ -26,6 +27,9 @@ import jeplus.JEPlusProject;
  */
 public class Tester {
     public static void main (String [] args) throws IOException {
+        JEPlusConfig.getDefaultInstance().saveAsJSON (new File("D:\\4\\jEPlus_v1.5.2\\test_config.json"));
+        System.exit(0);
+        
         JEPlusProject proj = JEPlusProject.loadAsXML(new File("D:\\4\\jEPlus_v1.5.2\\example_2-rvx_E+v8.1\\project.jep"));
         proj.saveAsJSON(new File("D:\\4\\jEPlus_v1.5.2\\test_project.json"));
         

@@ -19,7 +19,6 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="jLabel4" max="32767" attributes="0"/>
                   <Component id="jLabel2" alignment="1" max="32767" attributes="1"/>
                   <Component id="jLabel18" alignment="0" max="32767" attributes="1"/>
                   <Component id="jLabel14" alignment="0" max="32767" attributes="1"/>
@@ -49,7 +48,6 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="txtSelectedFiles" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="chkExtractSQLite" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="chkKeepJobDir" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -58,7 +56,6 @@
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="jCheckBox1" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -96,13 +93,6 @@
                   <Component id="chkDeleteSelected" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="txtSelectedFiles" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="chkExtractSQLite" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="jCheckBox1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -223,25 +213,6 @@
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="txtSelectedFiles">
-    </Component>
-    <Component class="javax.swing.JLabel" name="jLabel4">
-      <Properties>
-        <Property name="horizontalAlignment" type="int" value="11"/>
-        <Property name="text" type="java.lang.String" value="Also use: "/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="chkExtractSQLite">
-      <Properties>
-        <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Extract data from E+ SQLite output file (eplusout.sql)"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="jCheckBox1">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Look up data in user-specified spreadsheets"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
     </Component>
   </SubComponents>
 </Form>

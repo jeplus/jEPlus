@@ -46,18 +46,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yi
  */
-public class JPanelRunPython extends javax.swing.JPanel {
+public class JPanelRunRuby extends javax.swing.JPanel {
   
     /** Logger */
-    final static Logger logger = LoggerFactory.getLogger(JPanelRunPython.class);
+    final static Logger logger = LoggerFactory.getLogger(JPanelRunRuby.class);
     
     protected JEPlusFrameMain MainFrame = null;
     protected JFileChooser fc = new JFileChooser("./");
     protected EPlusTextPanelOld OutputViewer = null;
     protected String CurrentWorkDir = "./";
     protected JEPlusConfig Config = null;
-    protected String Python2Exe = null;
-    protected String Python3Exe = null;
+    protected String RubyExe = null;
 
     private DocumentListener DL = null;
     
@@ -67,7 +66,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
      * @param config
      * @param workdir
      */
-    public JPanelRunPython(JEPlusFrameMain hostframe, JEPlusConfig config, String workdir) {
+    public JPanelRunRuby(JEPlusFrameMain hostframe, JEPlusConfig config, String workdir) {
         MainFrame = hostframe;
         Config = config;
         initComponents();
@@ -121,7 +120,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
     }
     
     private String updateSampleCommandLine () {
-        StringBuilder buf = new StringBuilder ("python \"");
+        StringBuilder buf = new StringBuilder ("ruby \"");
         buf.append(txtScriptFileName.getText().trim()).append("\" ");
         if (chkPassWorkDir.isSelected()) {
             buf.append("\"").append(txtWorkDir.getText().trim()).append("\" ");
@@ -144,10 +143,8 @@ public class JPanelRunPython extends javax.swing.JPanel {
         this.cmdSyncJobListActionPerformed(null);
         this.txtMoreArguments.setText(Config.getPythonArgv() == null ? "" : Config.getPythonArgv());
         this.txtScriptFileName.setText(Config.getPythonScript() == null ? "" : Config.getPythonScript());
-        Python2Exe = Config.getPython2EXE() == null ? null : Config.getPython2EXE();
-        this.txtPython2Exe.setText(Python2Exe == null ? "Select Python exe..." : Python2Exe);
-        Python3Exe = Config.getPython3EXE() == null ? null : Config.getPython3EXE();
-        this.txtPython3Exe.setText(Python3Exe == null ? "Select Python exe..." : Python3Exe);
+        RubyExe = Config.getPython2EXE() == null ? null : Config.getPython2EXE();
+        this.txtPython2Exe.setText(RubyExe == null ? "Select Python exe..." : RubyExe);
     }
     
     /**
@@ -175,9 +172,6 @@ public class JPanelRunPython extends javax.swing.JPanel {
         txtMoreArguments = new javax.swing.JTextField();
         chkMoreArguments = new javax.swing.JCheckBox();
         txtScriptFileName = new javax.swing.JTextField();
-        rdoPython3 = new javax.swing.JRadioButton();
-        txtPython3Exe = new javax.swing.JTextField();
-        cmdSelectPython3Exe = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         chkPassJobList = new javax.swing.JCheckBox();
         txtJobList = new javax.swing.JTextField();
@@ -213,7 +207,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
         });
 
         jLabel1.setBackground(new java.awt.Color(204, 204, 204));
-        jLabel1.setText("Python script file: ");
+        jLabel1.setText("Ruby script file: ");
         jLabel1.setOpaque(true);
 
         cmdSelectWorkDir.setText("...");
@@ -240,13 +234,13 @@ public class JPanelRunPython extends javax.swing.JPanel {
             }
         });
 
-        txtPython2Exe.setText("Select Python2 executable...");
+        txtPython2Exe.setText("Select Ruby executable...");
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, rdoPython2, org.jdesktop.beansbinding.ELProperty.create("${selected}"), txtPython2Exe, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
         bindingGroup.addBinding(binding);
 
         buttonGroup1.add(rdoPython2);
-        rdoPython2.setText("Use Python2 installed in: ");
+        rdoPython2.setText("Use Ruby installed in:");
 
         chkPassWorkDir.setSelected(true);
         chkPassWorkDir.setText("Pass the work folder as the first argument:");
@@ -258,7 +252,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
 
         buttonGroup1.add(rdoJython);
         rdoJython.setSelected(true);
-        rdoJython.setText("Use integrated Jython (supports Python 2.5, no SciPy libraries)");
+        rdoJython.setText("Use integrated JRuby (fully compatible with Ruby 2.2)");
 
         txtWorkDir.setText("./");
         txtWorkDir.setToolTipText("The working directory serves as the root to all the sub-directories to be generated during the simulation.");
@@ -288,26 +282,6 @@ public class JPanelRunPython extends javax.swing.JPanel {
         });
 
         txtScriptFileName.setText("select a script file ...");
-
-        buttonGroup1.add(rdoPython3);
-        rdoPython3.setText("Use Python3 installed in: ");
-
-        txtPython3Exe.setText("Select Python3 executable...");
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, rdoPython3, org.jdesktop.beansbinding.ELProperty.create("${selected}"), txtPython3Exe, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        cmdSelectPython3Exe.setText("...");
-        cmdSelectPython3Exe.setToolTipText("Select the root working directory");
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, rdoPython3, org.jdesktop.beansbinding.ELProperty.create("${selected}"), cmdSelectPython3Exe, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        cmdSelectPython3Exe.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectPython3ExeActionPerformed(evt);
-            }
-        });
 
         chkPassJobList.setText("Pass the list of jobs (job ids separated by ';' ):");
         chkPassJobList.addActionListener(new java.awt.event.ActionListener() {
@@ -393,15 +367,9 @@ public class JPanelRunPython extends javax.swing.JPanel {
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(rdoPython2)
                         .addGap(18, 18, 18)
-                        .addComponent(txtPython2Exe, javax.swing.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
+                        .addComponent(txtPython2Exe, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmdSelectPython2Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(rdoPython3)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtPython3Exe)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdSelectPython3Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -480,11 +448,6 @@ public class JPanelRunPython extends javax.swing.JPanel {
                     .addComponent(rdoPython2)
                     .addComponent(txtPython2Exe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmdSelectPython2Exe))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(rdoPython3)
-                    .addComponent(txtPython3Exe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectPython3Exe))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmdOpenConsole)
@@ -617,30 +580,12 @@ public class JPanelRunPython extends javax.swing.JPanel {
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             txtPython2Exe.setText(file.getAbsolutePath());
-            Python2Exe = file.getAbsolutePath();
-            Config.setPython2EXE(Python2Exe);
+            RubyExe = file.getAbsolutePath();
+            Config.setPython2EXE(RubyExe);
         }
         fc.resetChoosableFileFilters();
         fc.setSelectedFiles(null);
     }//GEN-LAST:event_cmdSelectPython2ExeActionPerformed
-
-    private void cmdSelectPython3ExeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectPython3ExeActionPerformed
-        // Select a file to open
-        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.ALL));
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fc.setMultiSelectionEnabled(false);
-        fc.setSelectedFile(new File(""));
-        fc.setCurrentDirectory(new File("./"));
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            txtPython3Exe.setText(file.getAbsolutePath());
-            Python3Exe = file.getAbsolutePath();
-            Config.setPython3EXE(Python3Exe);
-        }
-        fc.resetChoosableFileFilters();
-        fc.setSelectedFiles(null);
-
-    }//GEN-LAST:event_cmdSelectPython3ExeActionPerformed
 
     private void cmdSyncJobListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSyncJobListActionPerformed
         
@@ -697,7 +642,6 @@ public class JPanelRunPython extends javax.swing.JPanel {
     private javax.swing.JButton cmdOpenConsole;
     private javax.swing.JButton cmdRunScript;
     private javax.swing.JButton cmdSelectPython2Exe;
-    private javax.swing.JButton cmdSelectPython3Exe;
     private javax.swing.JButton cmdSelectScriptFile;
     private javax.swing.JButton cmdSelectWorkDir;
     private javax.swing.JButton cmdSyncJobList;
@@ -709,13 +653,11 @@ public class JPanelRunPython extends javax.swing.JPanel {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JRadioButton rdoJython;
     private javax.swing.JRadioButton rdoPython2;
-    private javax.swing.JRadioButton rdoPython3;
     private javax.swing.JTextArea txaCmdLn;
     private javax.swing.JTextField txtJobList;
     private javax.swing.JTextField txtMoreArguments;
     private javax.swing.JTextField txtOutputFile;
     private javax.swing.JTextField txtPython2Exe;
-    private javax.swing.JTextField txtPython3Exe;
     private javax.swing.JTextField txtScriptFileName;
     private javax.swing.JTextField txtWorkDir;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;

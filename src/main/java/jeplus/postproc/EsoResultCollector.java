@@ -70,7 +70,7 @@ public class EsoResultCollector extends ResultCollector {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
                     ResWriter = new DefaultCSVWriter(null, fn);
-                    ResReader = new EPlusRVIReader(RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getResolvedEnv().getRVIDir()), fn);
+                    ResReader = new EPlusRVIReader(RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getResolvedEnv().getRVIDir()), item.getFrequency(), fn, item.isUsedInCalc());
                     ResultHeader = new HashMap <>();
                     ResultTable = new ArrayList <> ();
                     ResReader.readResult(JobOwner, JobOwner.getResolvedEnv().getParentDir(), ResultHeader, ResultTable);

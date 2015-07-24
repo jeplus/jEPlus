@@ -5,10 +5,16 @@
 
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Properties;
 import static jeplus.EPlusConfig.getDefEPlusBinDir;
@@ -34,9 +40,11 @@ public class JEPlusConfig extends INSELConfig {
     public static JEPlusConfig Config = new JEPlusConfig ();
     public static JEPlusConfig getDefaultInstance () {return Config;}
     public static void setDefaultInstance (JEPlusConfig config) {Config = config;}
+    
     public static JEPlusConfig getNewInstance (String fn) {
         return new JEPlusConfig(fn);
     }
+    
     public static JEPlusConfig buildNewInstance (String pathtobin) {
         JEPlusConfig config = new JEPlusConfig();
         config.setEPlusBinDir(pathtobin + "/");
@@ -50,6 +58,7 @@ public class JEPlusConfig extends INSELConfig {
     
     /** Reference to configure file */
     public String CurrentConfigFile = "jeplus.cfg";
+    @JsonIgnore
     public String getCurrentConfigFile () { return CurrentConfigFile; }
     
     /**
@@ -99,7 +108,7 @@ public class JEPlusConfig extends INSELConfig {
         TRNSYSBinDir = prop.getProperty("TRNSYSBinDir", getDefTRNSYSBinDir());
         TRNSYSEXE = prop.getProperty("TRNSYSEXE", TRNSYSBinDir + getDefTRNSYSEXEC());
         InselBinDir = prop.getProperty("InselBinDir", getDefInselBinDir());
-        InselEXE = prop.getProperty("InselEXE", InselBinDir + getDefInselEXEC());
+        InselEXEC = prop.getProperty("InselEXE", InselBinDir + getDefInselEXEC());
         //NThreads = Integer.parseInt(prop.getProperty("NThreads", "0"));
         ScreenFile = prop.getProperty("ScreenFile", "console.log");
         if (ScreenFile.trim().length() == 0) {
@@ -113,7 +122,6 @@ public class JEPlusConfig extends INSELConfig {
 
     /**
      * Save configuration to file in java property format
-     * @param fn Configure file name
      * @param comment Comment line to be added to the file
      * @return Save successful or not
      */
@@ -128,7 +136,7 @@ public class JEPlusConfig extends INSELConfig {
             prop.setProperty("TRNSYSBinDir", TRNSYSBinDir);
             prop.setProperty("TRNSYSEXE", TRNSYSEXE);
             prop.setProperty("InselBinDir", InselBinDir);
-            prop.setProperty("InselEXE", InselEXE);
+            prop.setProperty("InselEXE", InselEXEC);
             prop.setProperty("ScreenFile", ScreenFile);
             if (EPlusVerConvDir != null) {
                 prop.setProperty("EPlusVerConvDir", EPlusVerConvDir);
@@ -156,6 +164,43 @@ public class JEPlusConfig extends INSELConfig {
         return true;
     }
 
+    /**
+     * Save this configuration to a JSON file
+     * @param file The File object associated with the file to which the contents will be saved
+     * @return Successful or not
+     */
+    public boolean saveAsJSON (File file) {
+        boolean success = true;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setDateFormat(format);
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        try (FileOutputStream fw = new FileOutputStream(file); ) {
+            mapper.writeValue(fw, this);
+            logger.info("Configuration saved to " + file.getAbsolutePath());
+        }catch (Exception ex) {
+            logger.error("Error saving configuration to JSON.", ex);
+            success = false;
+        }
+        return success;
+    }
+    
+    /**
+     * Read the configuration from the given JSON file. 
+     * @param file The File object associated with the file
+     * @return a new configuration instance from the file
+     * @throws java.io.IOException
+     */
+    public static JEPlusConfig loadFromJSON (File file) throws IOException {
+        // Read JSON
+        ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
+        JEPlusConfig config = mapper.readValue(file, JEPlusConfig.class);
+        // Set current file
+        config.CurrentConfigFile = file.getAbsolutePath();
+        // Return
+        return config;
+    }
+    
     /** 
      * Clear the screen log file
      */

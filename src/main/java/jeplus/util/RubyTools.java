@@ -25,13 +25,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yi
  */
-public class PythonTools {
+public class RubyTools {
   
     /** Logger */
-    final static Logger logger = LoggerFactory.getLogger(PythonTools.class);
+    final static Logger logger = LoggerFactory.getLogger(RubyTools.class);
+    
     
     /**
-     * Run Python script
+     * @todo: !This is not working yet!
+     * Run Ruby script 
      * @param config Config file of the executables
      * @param scriptfile Name of the Python file
      * @param version Python version string
@@ -41,10 +43,10 @@ public class PythonTools {
      * @param moreargs More arguments
      * @param stream Log stream
      */
-    public static void runPython (JEPlusConfig config, String scriptfile, String version, String arg0, String arg1, String arg2, String moreargs, PrintStream stream) {
+    public static void runRuby (JEPlusConfig config, String scriptfile, String version, String arg0, String arg1, String arg2, String moreargs, PrintStream stream) {
 
         String CurrentWorkDir = (arg0 != null && arg0.trim().length()>0) ? arg0 : "./";
-        if (version.equalsIgnoreCase("jython")) {
+        if (version.equalsIgnoreCase("jruby")) {
             StringBuilder buf = new StringBuilder (scriptfile);
             buf.append(", ").append(CurrentWorkDir);
             if (arg1 != null && arg1.trim().length()>0) buf.append(", ").append(arg1);
@@ -70,7 +72,7 @@ public class PythonTools {
             
         }else {
             String PythonExe;
-            if (version.equalsIgnoreCase("python2")) {
+            if (version.equalsIgnoreCase("ruby")) {
                 PythonExe = config.getPython2EXE() == null ? null : config.getPython2EXE();
             }else {
                 PythonExe = config.getPython3EXE() == null ? null : config.getPython3EXE();
@@ -106,7 +108,7 @@ public class PythonTools {
                             res = ins.readLine();
                         }
                         logstream.println("-==-");
-                        // logstream.println("Python exit value = " + ExitValue);
+                        // logstream.println("Ruby exit value = " + ExitValue);
                     }else {
                         int res = ins.read();
                         while (res != -1) {

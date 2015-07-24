@@ -47,6 +47,7 @@ import jeplus.util.CsvUtil;
 import jeplus.util.RelativeDirUtil;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.TriangularDistribution;
+import org.apache.commons.math3.random.SobolSequenceGenerator;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -291,7 +292,7 @@ public class JEPlusProject implements Serializable {
             // get new location of project file
             String dir = fn.getAbsoluteFile().getParent();
             dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
-            this.setBaseDir(dir);
+            this.updateBaseDir(dir);
             this.ContentChanged = false;
         } catch (FileNotFoundException ex) {
             logger.error("Failed to create " + fn + " for writing project.", ex);
@@ -315,7 +316,7 @@ public class JEPlusProject implements Serializable {
         }
         String dir = fn.getAbsoluteFile().getParent();
         dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
-        proj.setBaseDir(dir);
+        proj.updateBaseDir(dir);
         if (proj.ParamFile != null) {
             // Load parameters from text file
             proj.importParameterTableFile(new File (RelativeDirUtil.checkAbsolutePath(proj.ParamFile, dir)));
@@ -380,7 +381,7 @@ public class JEPlusProject implements Serializable {
         // Set base dir
         String dir = file.getAbsoluteFile().getParent();
         dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
-        project.setBaseDir(dir);
+        project.updateBaseDir(dir);
         // If parameter file is given, use the contents to override the parameters in the project
         if (project.ParamFile != null) {
             // Load parameters from text file, to replace the existing Parameters list and tree
@@ -419,27 +420,13 @@ public class JEPlusProject implements Serializable {
     }
 
     /**
-     * Set the base directory of the current project to the given paths. Once the
-     * new paths are set, the relative paths of all project files are recalculated,
-     * and the absolute paths converted to relative form.
+     * Set the base directory of the current project to the given paths. This 
+     * function is for serialisation only. For updating the base dir, use updateBaseDir()
      * @param BaseDir The new base directory for this project
      */
     @JsonIgnore
     public void setBaseDir(String BaseDir) {
-        // First to convert all paths to absolute using the existing Base
-        this.setWeatherDir(this.resolveWeatherDir());   // Weather file path
-        this.setIDFDir(this.resolveIDFDir());        // idf file path
-        this.setDCKDir(this.resolveDCKDir());        // dck file path
-        this.setRVIDir(this.resolveRVIDir());        // rvi file path
-        this.getExecSettings().setParentDir(this.resolveWorkDir());        // output dir
-        // Update BaseDir
         this.BaseDir = BaseDir;
-        // Calculate relative dir from the new base
-        this.setWeatherDir(RelativeDirUtil.getRelativePath(this.getWeatherDir(), this.BaseDir, "/"));   // Weather file path
-        this.setIDFDir(RelativeDirUtil.getRelativePath(this.getIDFDir(), this.BaseDir, "/"));        // idf file path
-        this.setDCKDir(RelativeDirUtil.getRelativePath(this.getDCKDir(), this.BaseDir, "/"));        // dck file path
-        this.setRVIDir(RelativeDirUtil.getRelativePath(this.getRVIDir(), this.BaseDir, "/"));        // rvi file path
-        this.getExecSettings().setParentDir(RelativeDirUtil.getRelativePath(this.getExecSettings().getParentDir(), this.BaseDir, "/"));        // output dir
     }
 
     public int getProjectType() {
@@ -653,6 +640,29 @@ public class JEPlusProject implements Serializable {
     
     // A new set of resolveXYZFile functions
     
+    /**
+     * Set the base directory of the current project to the given paths. Once the
+     * new paths are set, the relative paths of all project files are recalculated,
+     * and the absolute paths converted to relative form.
+     * @param BaseDir The new base directory for this project
+     */
+    public void updateBaseDir(String BaseDir) {
+        // First to convert all paths to absolute using the existing Base
+        this.setWeatherDir(this.resolveWeatherDir());   // Weather file path
+        this.setIDFDir(this.resolveIDFDir());        // idf file path
+        this.setDCKDir(this.resolveDCKDir());        // dck file path
+        this.setRVIDir(this.resolveRVIDir());        // rvi file path
+        this.getExecSettings().setParentDir(this.resolveWorkDir());        // output dir
+        // Update BaseDir
+        this.BaseDir = BaseDir;
+        // Calculate relative dir from the new base
+        this.setWeatherDir(RelativeDirUtil.getRelativePath(this.getWeatherDir(), this.BaseDir, "/"));   // Weather file path
+        this.setIDFDir(RelativeDirUtil.getRelativePath(this.getIDFDir(), this.BaseDir, "/"));        // idf file path
+        this.setDCKDir(RelativeDirUtil.getRelativePath(this.getDCKDir(), this.BaseDir, "/"));        // dck file path
+        this.setRVIDir(RelativeDirUtil.getRelativePath(this.getRVIDir(), this.BaseDir, "/"));        // rvi file path
+        this.getExecSettings().setParentDir(RelativeDirUtil.getRelativePath(this.getExecSettings().getParentDir(), this.BaseDir, "/"));        // output dir
+    }
+
     /** 
      * Resolve the path to the project's work (a.k.a. parent) directory. If
      * relative path is used, it is relative to the project folder

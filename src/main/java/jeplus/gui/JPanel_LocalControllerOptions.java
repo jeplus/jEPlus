@@ -148,9 +148,6 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         txtEPlusThreads = new javax.swing.JTextField();
         chkDeleteSelected = new javax.swing.JCheckBox();
         txtSelectedFiles = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        chkExtractSQLite = new javax.swing.JCheckBox();
-        jCheckBox1 = new javax.swing.JCheckBox();
 
         jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel18.setText("Working dir: ");
@@ -227,16 +224,6 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
             }
         });
 
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel4.setText("Also use: ");
-
-        chkExtractSQLite.setSelected(true);
-        chkExtractSQLite.setText("Extract data from E+ SQLite output file (eplusout.sql)");
-        chkExtractSQLite.setEnabled(false);
-
-        jCheckBox1.setText("Look up data in user-specified spreadsheets");
-        jCheckBox1.setEnabled(false);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -244,7 +231,6 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -270,14 +256,12 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                         .addComponent(chkDeleteSelected)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtSelectedFiles))
-                    .addComponent(chkExtractSQLite, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkKeepJobDir)
                             .addComponent(chkKeepJEPlusFiles)
                             .addComponent(chkKeepEPlusFiles))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jCheckBox1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -308,12 +292,6 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkDeleteSelected)
                     .addComponent(txtSelectedFiles, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(chkExtractSQLite))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCheckBox1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -354,19 +332,16 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboNThreads;
     private javax.swing.JCheckBox chkDeleteSelected;
-    private javax.swing.JCheckBox chkExtractSQLite;
     private javax.swing.JCheckBox chkKeepEPlusFiles;
     private javax.swing.JCheckBox chkKeepJEPlusFiles;
     private javax.swing.JCheckBox chkKeepJobDir;
     private javax.swing.JButton cmdSelectWorkDir;
-    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JTextField txtEPlusThreads;
     private javax.swing.JTextField txtFileDir;
     private javax.swing.JTextField txtSelectedFiles;

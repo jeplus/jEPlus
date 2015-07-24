@@ -25,6 +25,7 @@
  ***************************************************************************/
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -196,6 +197,7 @@ public class EPlusConfig {
     }
 
     /** Get Bin Directory */
+    @JsonIgnore
     public String getResolvedEPlusBinDir() {
         String dir = RelativeDirUtil.checkAbsolutePath(EPlusBinDir, UserBaseDir);
         dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
@@ -222,6 +224,7 @@ public class EPlusConfig {
     }
 
     /** Get full EPlus exec command path */
+    @JsonIgnore
     public String getResolvedEPlusEXEC() {
         String cmd = RelativeDirUtil.checkAbsolutePath(EPlusEXE, UserBaseDir);
         return cmd;
@@ -247,6 +250,7 @@ public class EPlusConfig {
     }
 
     /** Get full EPlus readvarseso command path */
+    @JsonIgnore
     public String getResolvedReadVars() {
         String cmd = RelativeDirUtil.checkAbsolutePath(EPlusReadVarsEXE, UserBaseDir);
         return cmd;
@@ -312,6 +316,7 @@ public class EPlusConfig {
     }
 
     /** Get full EPlus epmacro command path */
+    @JsonIgnore
     public String getResolvedEPMacro() {
         String cmd = RelativeDirUtil.checkAbsolutePath(EPlusEPMacroEXE, UserBaseDir);
         return cmd;
@@ -337,6 +342,7 @@ public class EPlusConfig {
     }
 
     /** Get full EPlus ExpandObjects command path */
+    @JsonIgnore
     public String getResolvedExpandObjects() {
         String cmd = RelativeDirUtil.checkAbsolutePath(EPlusExpandObjectsEXE, UserBaseDir);
         return cmd;

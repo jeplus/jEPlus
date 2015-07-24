@@ -43,16 +43,9 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="rdoPython2" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="txtPython2Exe" pref="236" max="32767" attributes="0"/>
+                      <Component id="txtPython2Exe" pref="254" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="cmdSelectPython2Exe" min="-2" pref="25" max="-2" attributes="1"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="rdoPython3" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="txtPython3Exe" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cmdSelectPython3Exe" min="-2" pref="25" max="-2" attributes="1"/>
                   </Group>
                   <Component id="jLabel1" alignment="1" max="32767" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
@@ -146,12 +139,6 @@
                   <Component id="txtPython2Exe" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="cmdSelectPython2Exe" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="rdoPython3" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtPython3Exe" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="cmdSelectPython3Exe" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="cmdOpenConsole" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -198,7 +185,7 @@
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="cc" green="cc" red="cc" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Python script file: "/>
+        <Property name="text" type="java.lang.String" value="Ruby script file: "/>
         <Property name="opaque" type="boolean" value="true"/>
       </Properties>
     </Component>
@@ -228,7 +215,7 @@
     </Component>
     <Component class="javax.swing.JTextField" name="txtPython2Exe">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Select Python2 executable..."/>
+        <Property name="text" type="java.lang.String" value="Select Ruby executable..."/>
       </Properties>
       <BindingProperties>
         <BindingProperty name="enabled" source="rdoPython2" sourcePath="${selected}" target="txtPython2Exe" targetPath="enabled" updateStrategy="0" immediately="false"/>
@@ -239,7 +226,7 @@
         <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
           <ComponentRef name="buttonGroup1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Use Python2 installed in: "/>
+        <Property name="text" type="java.lang.String" value="Use Ruby installed in:"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JCheckBox" name="chkPassWorkDir">
@@ -257,7 +244,7 @@
           <ComponentRef name="buttonGroup1"/>
         </Property>
         <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Use integrated Jython (supports Python 2.5, no SciPy libraries)"/>
+        <Property name="text" type="java.lang.String" value="Use integrated JRuby (fully compatible with Ruby 2.2)"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="txtWorkDir">
@@ -301,34 +288,6 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="select a script file ..."/>
       </Properties>
-    </Component>
-    <Component class="javax.swing.JRadioButton" name="rdoPython3">
-      <Properties>
-        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-          <ComponentRef name="buttonGroup1"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Use Python3 installed in: "/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="txtPython3Exe">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Select Python3 executable..."/>
-      </Properties>
-      <BindingProperties>
-        <BindingProperty name="enabled" source="rdoPython3" sourcePath="${selected}" target="txtPython3Exe" targetPath="enabled" updateStrategy="0" immediately="false"/>
-      </BindingProperties>
-    </Component>
-    <Component class="javax.swing.JButton" name="cmdSelectPython3Exe">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="..."/>
-        <Property name="toolTipText" type="java.lang.String" value="Select the root working directory"/>
-      </Properties>
-      <BindingProperties>
-        <BindingProperty name="enabled" source="rdoPython3" sourcePath="${selected}" target="cmdSelectPython3Exe" targetPath="enabled" updateStrategy="0" immediately="false"/>
-      </BindingProperties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSelectPython3ExeActionPerformed"/>
-      </Events>
     </Component>
     <Component class="javax.swing.JSeparator" name="jSeparator1">
     </Component>

@@ -48,31 +48,35 @@ public class EPlusRVIReader implements IFResultReader {
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusRVIReader.class);
     
     protected String RVIFile = EPlusConfig.getEPDefRvi();
+    protected String Frequency = "Annual";
     protected String CSVFile = EPlusConfig.getEPDefOutCSV();
+    protected boolean UseInCalc = true;
     
     /**
      * Default constructor, does nothing
      * @param rvi
+     * @param freq
      * @param csv
+     * @param use
      */
-    public EPlusRVIReader (String rvi, String csv) {
+    public EPlusRVIReader (String rvi, String freq, String csv, boolean use) {
         RVIFile = rvi;
+        Frequency = freq;
         CSVFile = csv;
+        UseInCalc = use;
     }
 
     @Override
     public int readResult(EPlusBatch manager, String dir, HashMap<String, Integer> header, ArrayList<ArrayList<String>> table) {
         // Initiate header
         header.clear();
-        header.put("#", Integer.valueOf(0));
-        header.put("Job_ID", Integer.valueOf(1));
+        header.put("#", 0);
+        header.put("Job_ID", 1);
         // Get finished jobs
         List <EPlusTask> JobQueue = manager.getAgent().getFinishedJobs();
         // Collect Job results
         int counter = 0;
-        for (int i = 0; i < JobQueue.size(); i++) {
-            // For each job, do:
-            EPlusTask job = JobQueue.get(i);
+        for (EPlusTask job : JobQueue) {
             String job_id = job.getJobID();
             if (readResult(dir, job_id, header, table) > 0) counter ++;
         } // done with loading
@@ -90,46 +94,50 @@ public class EPlusRVIReader implements IFResultReader {
         // Get path to job folder
         String job_dir = dir + (dir.endsWith(File.separator)?"":"/") + job_id + "/";
         // Run ReadVars
-        EPlusWinTools.runReadVars(JEPlusConfig.getDefaultInstance(), job_dir, RVIFile, CSVFile);
-        // Read job result file
-        File csv = new File(job_dir + CSVFile);
-        if (csv.exists()) {
-            try (BufferedReader fr = new BufferedReader(new FileReader(csv))) {
-                String line = fr.readLine();
-                if (line != null) {
-                    // process first line, the column header
-                    String [] headings = line.split("\\s*,\\s*");
-                    int [] index = new int [headings.length];
-                    for (int j=0; j<headings.length; j++) {
-                        headings[j] = headings[j].trim();
-                        if (! header.containsKey(headings[j])) {
-                            index[j] = header.size();
-                            header.put(headings[j], index[j]);
-                            for (int k=0; k<table.size(); k++) table.get(k).add("-");
-                        }else {
-                            index[j] = header.get(headings[j]).intValue();
+        EPlusWinTools.runReadVars(JEPlusConfig.getDefaultInstance(), job_dir, RVIFile, Frequency, CSVFile);
+        if (UseInCalc) {
+            // Read job result file
+            File csv = new File(job_dir + CSVFile);
+            if (csv.exists()) {
+                try (BufferedReader fr = new BufferedReader(new FileReader(csv))) {
+                    String line = fr.readLine();
+                    if (line != null) {
+                        // process first line, the column header
+                        String [] headings = line.split("\\s*,\\s*");
+                        int [] index = new int [headings.length];
+                        for (int j=0; j<headings.length; j++) {
+                            headings[j] = headings[j].trim();
+                            if (! header.containsKey(headings[j])) {
+                                index[j] = header.size();
+                                header.put(headings[j], index[j]);
+                                for (ArrayList<String> table1 : table) {
+                                    table1.add("-");
+                                }
+                            }else {
+                                index[j] = header.get(headings[j]);
+                            }
                         }
-                    }
-                    // the rest is data
-                    line = fr.readLine();
-                    while (line != null && line.trim().length() > 0) {
-                        ArrayList<String> row = new ArrayList<> ();
-                        row.add(Integer.toString(table.size()));
-                        row.add(job_id);
-                        // add a new row in the data table
-                        for (int j=2; j<header.size(); j++) row.add("-");
-                        // fill in data from the result file
-                        String [] data = line.split(",");
-                        for (int j=0; j<data.length; j++) {
-                            row.set(index[j], data[j]);
-                        }
-                        nResCollected ++;
-                        table.add(row);
+                        // the rest is data
                         line = fr.readLine();
+                        while (line != null && line.trim().length() > 0) {
+                            ArrayList<String> row = new ArrayList<> ();
+                            row.add(Integer.toString(table.size()));
+                            row.add(job_id);
+                            // add a new row in the data table
+                            for (int j=2; j<header.size(); j++) row.add("-");
+                            // fill in data from the result file
+                            String [] data = line.split(",");
+                            for (int j=0; j<data.length; j++) {
+                                row.set(index[j], data[j]);
+                            }
+                            nResCollected ++;
+                            table.add(row);
+                            line = fr.readLine();
+                        }
                     }
+                }catch (Exception ex) {
+                    logger.error("Error reading or parsing E+ result for " + job_id, ex);
                 }
-            }catch (Exception ex) {
-                logger.error("Error reading or parsing E+ result for " + job_id, ex);
             }
         }
         return nResCollected;

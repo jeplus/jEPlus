@@ -24,6 +24,7 @@
  ***************************************************************************/
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -74,12 +75,12 @@ public class INSELConfig extends TRNSYSConfig {
      * INSEL settings
      */
     protected String InselBinDir = null;
-    protected String InselEXE = null;
+    protected String InselEXEC = null;
 
     public INSELConfig() {
         super ();
         InselBinDir = getDefInselBinDir();
-        InselEXE = TRNSYSBinDir + getDefInselEXEC();
+        InselEXEC = TRNSYSBinDir + getDefInselEXEC();
         ScreenFile = "console.log";
     }
 
@@ -89,7 +90,7 @@ public class INSELConfig extends TRNSYSConfig {
         try {
             prop.load(new FileReader(fn));
             InselBinDir = prop.getProperty("InselBinDir", getDefTRNSYSBinDir());
-            InselEXE = prop.getProperty("InselEXE", InselBinDir + getDefTRNSYSEXEC());
+            InselEXEC = prop.getProperty("InselEXE", InselBinDir + getDefTRNSYSEXEC());
             ScreenFile = prop.getProperty("ScreenFile", "console.log");
         } catch (FileNotFoundException fnfe) {
             logger.error("Specified configue file " + fn + " is not found.");
@@ -109,13 +110,6 @@ public class INSELConfig extends TRNSYSConfig {
     }
 
     /**
-     * Get Bin Directory
-     */
-    public String getInselSBinDir() {
-        return InselBinDir;
-    }
-
-    /**
      * Set Bin Directory
      */
     public void setInselBinDir(String dir) {
@@ -125,6 +119,7 @@ public class INSELConfig extends TRNSYSConfig {
     /**
      * Get Bin Directory
      */
+    @JsonIgnore
     public String getResolvedInselBinDir() {
         String dir = RelativeDirUtil.checkAbsolutePath(InselBinDir, UserBaseDir);
         dir = dir.concat(dir.endsWith(File.separator) ? "" : File.separator);
@@ -142,21 +137,22 @@ public class INSELConfig extends TRNSYSConfig {
      * Get TRNSYS executable
      */
     public String getInselEXEC() {
-        return InselEXE;
+        return InselEXEC;
     }
 
     /**
      * Set TRNSYS executable
      */
     public void setInselEXEC(String name) {
-        InselEXE = name;
+        InselEXEC = name;
     }
 
     /**
      * Get full TRNSYS exec command path
      */
+    @JsonIgnore
     public String getResolvedInselEXEC() {
-        String cmd = RelativeDirUtil.checkAbsolutePath(InselEXE, UserBaseDir);
+        String cmd = RelativeDirUtil.checkAbsolutePath(InselEXEC, UserBaseDir);
         return cmd;
     }
 
@@ -178,10 +174,6 @@ public class INSELConfig extends TRNSYSConfig {
 
     public String getInselBinDir() {
         return InselBinDir;
-    }
-
-    public String getInselEXE() {
-        return InselEXE;
     }
 
     /**
