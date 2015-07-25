@@ -74,7 +74,12 @@ public class PythonResultCollector extends ResultCollector {
                     ResultFiles.add(fn);
                     if (item.isOnEachJob()) {
                         ResWriter = new DefaultCSVWriter(null, fn);
-                        ResReader = new EPlusScriptReader(RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getResolvedEnv().getRVIDir()), item.getPythonVersion(), item.getArguments(), fn);
+                        ResReader = new EPlusScriptReader(
+                                RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
+                                item.getPythonVersion(), 
+                                JobOwner.getProject().getBaseDir(), 
+                                item.getArguments(), 
+                                fn);
                         ResultHeader = new HashMap <>();
                         ResultTable = new ArrayList <> ();
                         ResReader.readResult(JobOwner, JobOwner.getResolvedEnv().getParentDir(), ResultHeader, ResultTable);
@@ -82,7 +87,7 @@ public class PythonResultCollector extends ResultCollector {
                         ResCollected += ResultTable.size();
                     }else {
                         ResWriter = new DefaultCSVWriter(null, null);
-                        ResReader = new EPlusScriptReader(null, null, null, null);
+                        ResReader = new EPlusScriptReader(null, null, null, null, null);
                         StringBuilder buf = new StringBuilder ();
                         try {
                             // Get finished jobs
@@ -100,6 +105,7 @@ public class PythonResultCollector extends ResultCollector {
                                     config, 
                                     RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getResolvedEnv().getRVIDir()), 
                                     item.getPythonVersion(), 
+                                    JobOwner.getProject().getBaseDir(),
                                     workdir, 
                                     buf.toString(), 
                                     fn, 

@@ -567,7 +567,7 @@ public class JPanelRunRuby extends javax.swing.JPanel {
         String arg2 = chkPassOutputFile.isSelected()? txtOutputFile.getText().trim(): null;
         String moreargs = chkMoreArguments.isSelected()? txtMoreArguments.getText().trim(): null;
         // Start running
-        PythonTools.runPython(Config, txtScriptFileName.getText().trim(), version, arg0, arg1, arg2, moreargs, OutputViewer.getPrintStream());
+//        PythonTools.runPython(Config, txtScriptFileName.getText().trim(), version, arg0, arg1, arg2, moreargs, OutputViewer.getPrintStream());
     }//GEN-LAST:event_cmdRunScriptActionPerformed
 
     private void cmdSelectPython2ExeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectPython2ExeActionPerformed

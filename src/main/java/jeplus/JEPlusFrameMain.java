@@ -1536,11 +1536,19 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuAction.add(jSeparator12);
 
         jMenuItemJESSClient.setText("Launch JESS Client");
-        jMenuItemJESSClient.setEnabled(false);
+        jMenuItemJESSClient.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemJESSClientActionPerformed(evt);
+            }
+        });
         jMenuAction.add(jMenuItemJESSClient);
 
         jMenuItemJEPlusEA.setText("Launch jEPlus+EA");
-        jMenuItemJEPlusEA.setEnabled(false);
+        jMenuItemJEPlusEA.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemJEPlusEAActionPerformed(evt);
+            }
+        });
         jMenuAction.add(jMenuItemJEPlusEA);
 
         jMenuBarMain.add(jMenuAction);
@@ -2667,6 +2675,80 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         fc.resetChoosableFileFilters();
         fc.setSelectedFile(new File(""));
     }//GEN-LAST:event_jMenuItemExportJsonActionPerformed
+
+    private void jMenuItemJESSClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemJESSClientActionPerformed
+        // Check if JESS Client folder is available
+        if (JEPlusConfig.getDefaultInstance().getJESSClientDir() == null) {
+            // Select a file to open
+            fc.resetChoosableFileFilters();
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fc.setCurrentDirectory(new File("./"));
+            fc.setMultiSelectionEnabled(false);
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                String path = fc.getSelectedFile().getPath() + File.separator;
+                JEPlusConfig.getDefaultInstance().setJESSClientDir(path);
+            }else {
+                return;
+            }
+        }
+        // Launch JESS Client
+        List<String> command = new ArrayList<> ();
+        command.add("java");
+        command.add("-jar");
+        command.add("JESS_Client.jar");
+        ProcessBuilder builder = new ProcessBuilder(command);
+        builder.directory(new File (JEPlusConfig.getDefaultInstance().getJESSClientDir()));
+        builder.redirectErrorStream(true);
+        try {
+            Process proc = builder.start();
+            // int ExitValue = proc.waitFor();
+            try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+                int res = ins.read();
+                while (res != -1) {
+                    res = ins.read();
+                }
+            }
+        } catch (IOException ex) {
+            logger.error("Cannot run JESS_Client.", ex);
+        }
+    }//GEN-LAST:event_jMenuItemJESSClientActionPerformed
+
+    private void jMenuItemJEPlusEAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemJEPlusEAActionPerformed
+        // Check if JEPlus+EA folder is available
+        if (JEPlusConfig.getDefaultInstance().getJEPlusEADir() == null) {
+            // Select a file to open
+            fc.resetChoosableFileFilters();
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            fc.setCurrentDirectory(new File("./"));
+            fc.setMultiSelectionEnabled(false);
+            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                String path = fc.getSelectedFile().getPath() + File.separator;
+                JEPlusConfig.getDefaultInstance().setJEPlusEADir(path);
+            }else {
+                return;
+            }
+        }
+        // Launch JESS Client
+        List<String> command = new ArrayList<> ();
+        command.add("java");
+        command.add("-jar");
+        command.add("jEPlus+EA.jar");
+        ProcessBuilder builder = new ProcessBuilder(command);
+        builder.directory(new File (JEPlusConfig.getDefaultInstance().getJEPlusEADir()));
+        builder.redirectErrorStream(true);
+        try {
+            Process proc = builder.start();
+            // int ExitValue = proc.waitFor();
+            try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+                int res = ins.read();
+                while (res != -1) {
+                    res = ins.read();
+                }
+            }
+        } catch (IOException ex) {
+            logger.error("Cannot run JESS_Client.", ex);
+        }
+    }//GEN-LAST:event_jMenuItemJEPlusEAActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane TpnEditors;

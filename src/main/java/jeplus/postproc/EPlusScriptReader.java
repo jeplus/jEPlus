@@ -53,6 +53,7 @@ public class EPlusScriptReader implements IFResultReader {
     
     protected String ScriptFile = null;
     protected String Version = "2";
+    protected String RefDir = "./";
     protected String Args = "";
     protected String CSVFile = null;
     
@@ -60,12 +61,14 @@ public class EPlusScriptReader implements IFResultReader {
      * Default constructor, does nothing
      * @param script
      * @param ver
+     * @param refdir
      * @param args
      * @param csv
      */
-    public EPlusScriptReader (String script, String ver, String args, String csv) {
+    public EPlusScriptReader (String script, String ver, String refdir, String args, String csv) {
         ScriptFile = script;
         Version = ver;
+        RefDir = refdir;
         Args = args;
         CSVFile = csv;
     }
@@ -103,7 +106,7 @@ public class EPlusScriptReader implements IFResultReader {
         JEPlusConfig config = JEPlusConfig.getDefaultInstance();
         // Console logger
         try (PrintStream outs = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + config.getScreenFile(), true));) {
-            PythonTools.runPython(config, ScriptFile, Version, job_dir, null, CSVFile, Args, outs);
+            PythonTools.runPython(config, ScriptFile, Version, RefDir, job_dir, null, CSVFile, Args, outs);
             // Read job result file
             File csv = new File(job_dir + CSVFile);
             if (csv.exists()) {

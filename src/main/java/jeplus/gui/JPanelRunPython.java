@@ -81,16 +81,18 @@ public class JPanelRunPython extends javax.swing.JPanel {
     private void initDL () {
         // Set listeners to text fields
         DL = new DocumentListener () {
+            Document DocProjectBase = txtProjectBase.getDocument();
             Document DocWorkDir = txtWorkDir.getDocument();
             Document DocJobList = txtJobList.getDocument();
             Document DocOutputFile = txtOutputFile.getDocument();
             Document DocMoreArguments = txtMoreArguments.getDocument();
             Document DocScriptFileName = txtScriptFileName.getDocument();
-
             @Override
             public void insertUpdate(DocumentEvent e) {
                 Document src = e.getDocument();
-                if(src == DocWorkDir) {
+                if(src == DocProjectBase) {
+                    
+                }else if(src == DocWorkDir) {
                     
                 }else if (src == DocJobList) {
                     
@@ -111,8 +113,8 @@ public class JPanelRunPython extends javax.swing.JPanel {
             public void changedUpdate(DocumentEvent e) {
                 // not applicable
             }
-
         };
+        txtProjectBase.getDocument().addDocumentListener(DL);
         txtWorkDir.getDocument().addDocumentListener(DL);
         txtJobList.getDocument().addDocumentListener(DL);
         txtOutputFile.getDocument().addDocumentListener(DL);
@@ -123,6 +125,9 @@ public class JPanelRunPython extends javax.swing.JPanel {
     private String updateSampleCommandLine () {
         StringBuilder buf = new StringBuilder ("python \"");
         buf.append(txtScriptFileName.getText().trim()).append("\" ");
+        if (chkPassProjectBase.isSelected()) {
+            buf.append("\"").append(txtProjectBase.getText().trim()).append("\" ");
+        }
         if (chkPassWorkDir.isSelected()) {
             buf.append("\"").append(txtWorkDir.getText().trim()).append("\" ");
         }
@@ -141,6 +146,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
     public final void updateDisplay (String workdir) {
         CurrentWorkDir = workdir;
         this.txtWorkDir.setText(workdir);
+        this.txtProjectBase.setText(MainFrame.getProject().getBaseDir());
         this.cmdSyncJobListActionPerformed(null);
         this.txtMoreArguments.setText(Config.getPythonArgv() == null ? "" : Config.getPythonArgv());
         this.txtScriptFileName.setText(Config.getPythonScript() == null ? "" : Config.getPythonScript());
@@ -189,6 +195,9 @@ public class JPanelRunPython extends javax.swing.JPanel {
         jLabel4 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txaCmdLn = new javax.swing.JTextArea();
+        chkPassProjectBase = new javax.swing.JCheckBox();
+        txtProjectBase = new javax.swing.JTextField();
+        cmdSelectProjectBase = new javax.swing.JButton();
 
         cmdOpenConsole.setText("Open a Console");
         cmdOpenConsole.addActionListener(new java.awt.event.ActionListener() {
@@ -249,7 +258,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
         rdoPython2.setText("Use Python2 installed in: ");
 
         chkPassWorkDir.setSelected(true);
-        chkPassWorkDir.setText("Pass the work folder as the first argument:");
+        chkPassWorkDir.setText("Pass Work dir:");
         chkPassWorkDir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkPassWorkDirActionPerformed(evt);
@@ -368,70 +377,90 @@ public class JPanelRunPython extends javax.swing.JPanel {
         txaCmdLn.setRows(5);
         jScrollPane1.setViewportView(txaCmdLn);
 
+        chkPassProjectBase.setSelected(true);
+        chkPassProjectBase.setText("Pass Project base: ");
+
+        txtProjectBase.setText("./");
+
+        cmdSelectProjectBase.setText("...");
+        cmdSelectProjectBase.setToolTipText("Select the the working directory");
+        cmdSelectProjectBase.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdSelectProjectBaseActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkPassWorkDir, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkMoreArguments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addComponent(txtWorkDir)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addComponent(txtScriptFileName)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdSelectScriptFile, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdEditScript, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(rdoPython2)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtPython2Exe, javax.swing.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdSelectPython2Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(rdoPython3)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtPython3Exe)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdSelectPython3Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(cmdRunScript, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdOpenConsole))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(rdoJython)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addComponent(txtJobList)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdSyncJobList, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(chkPassJobList, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addComponent(txtOutputFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdViewOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(chkPassOutputFile, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkMoreArguments, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addComponent(txtMoreArguments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(jScrollPane1)))
-                .addContainerGap())
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jSeparator1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(chkPassProjectBase, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(chkPassWorkDir, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtProjectBase)
+                                    .addComponent(txtWorkDir))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(cmdSelectProjectBase, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(21, 21, 21)
+                                .addComponent(txtJobList)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(cmdSyncJobList, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(chkPassOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(txtOutputFile)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(cmdViewOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(chkPassJobList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(rdoPython2)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(txtPython2Exe, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(rdoPython3)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(txtPython3Exe)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(cmdSelectPython2Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(cmdSelectPython3Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(rdoJython, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(14, 14, 14)
+                                .addComponent(txtScriptFileName)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cmdSelectScriptFile, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cmdEditScript, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(10, 10, 10)
+                                .addComponent(jScrollPane1))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(cmdRunScript, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cmdOpenConsole))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(21, 21, 21)
+                                .addComponent(txtMoreArguments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -439,11 +468,16 @@ public class JPanelRunPython extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(chkPassWorkDir)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtWorkDir))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkPassProjectBase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtProjectBase)
+                    .addComponent(cmdSelectProjectBase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkPassWorkDir, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkPassJobList)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -451,11 +485,10 @@ public class JPanelRunPython extends javax.swing.JPanel {
                     .addComponent(cmdSyncJobList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtJobList, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(chkPassOutputFile)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cmdViewOutputFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmdViewOutputFile)
+                    .addComponent(chkPassOutputFile))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkMoreArguments)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -470,7 +503,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
                 .addGap(18, 18, 18)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(1, 1, 1)
@@ -485,11 +518,11 @@ public class JPanelRunPython extends javax.swing.JPanel {
                     .addComponent(rdoPython3)
                     .addComponent(txtPython3Exe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmdSelectPython3Exe))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmdOpenConsole)
                     .addComponent(cmdRunScript))
-                .addContainerGap())
+                .addGap(9, 9, 9))
         );
 
         bindingGroup.bind();
@@ -599,12 +632,13 @@ public class JPanelRunPython extends javax.swing.JPanel {
         }else {
             version = "python3";
         }
-        String arg0 = chkPassWorkDir.isSelected()? txtWorkDir.getText().trim(): null;
-        String arg1 = chkPassJobList.isSelected()? txtJobList.getText().trim(): null;
-        String arg2 = chkPassOutputFile.isSelected()? txtOutputFile.getText().trim(): null;
+        String arg0 = chkPassProjectBase.isSelected()? txtProjectBase.getText().trim(): null;
+        String arg1 = chkPassWorkDir.isSelected()? txtWorkDir.getText().trim(): null;
+        String arg2 = chkPassJobList.isSelected()? txtJobList.getText().trim(): null;
+        String arg3 = chkPassOutputFile.isSelected()? txtOutputFile.getText().trim(): null;
         String moreargs = chkMoreArguments.isSelected()? txtMoreArguments.getText().trim(): null;
         // Start running
-        PythonTools.runPython(Config, txtScriptFileName.getText().trim(), version, arg0, arg1, arg2, moreargs, OutputViewer.getPrintStream());
+        PythonTools.runPython(Config, txtScriptFileName.getText().trim(), version, arg0, arg1, arg2, arg3, moreargs, OutputViewer.getPrintStream());
     }//GEN-LAST:event_cmdRunScriptActionPerformed
 
     private void cmdSelectPython2ExeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectPython2ExeActionPerformed
@@ -687,15 +721,29 @@ public class JPanelRunPython extends javax.swing.JPanel {
         txaCmdLn.setText(updateSampleCommandLine());
     }//GEN-LAST:event_chkMoreArgumentsActionPerformed
 
+    private void cmdSelectProjectBaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectProjectBaseActionPerformed
+        // Select a directory to open
+        fc.resetChoosableFileFilters();
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fc.setCurrentDirectory(new File (CurrentWorkDir));
+        fc.setMultiSelectionEnabled(false);
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            CurrentWorkDir = fc.getSelectedFile().getAbsolutePath() + File.separator;
+            txtWorkDir.setText(CurrentWorkDir);
+        }
+    }//GEN-LAST:event_cmdSelectProjectBaseActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JCheckBox chkMoreArguments;
     private javax.swing.JCheckBox chkPassJobList;
     private javax.swing.JCheckBox chkPassOutputFile;
+    private javax.swing.JCheckBox chkPassProjectBase;
     private javax.swing.JCheckBox chkPassWorkDir;
     private javax.swing.JButton cmdEditScript;
     private javax.swing.JButton cmdOpenConsole;
     private javax.swing.JButton cmdRunScript;
+    private javax.swing.JButton cmdSelectProjectBase;
     private javax.swing.JButton cmdSelectPython2Exe;
     private javax.swing.JButton cmdSelectPython3Exe;
     private javax.swing.JButton cmdSelectScriptFile;
@@ -714,6 +762,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
     private javax.swing.JTextField txtJobList;
     private javax.swing.JTextField txtMoreArguments;
     private javax.swing.JTextField txtOutputFile;
+    private javax.swing.JTextField txtProjectBase;
     private javax.swing.JTextField txtPython2Exe;
     private javax.swing.JTextField txtPython3Exe;
     private javax.swing.JTextField txtScriptFileName;

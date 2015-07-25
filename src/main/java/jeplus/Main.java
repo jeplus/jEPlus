@@ -36,7 +36,6 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.PropertyConfigurator;
@@ -136,7 +135,7 @@ public class Main {
 
     /** 
      * Instance main function so it can be inherited
-     * @param args Program arguments
+     * @param commandline CommandLine arguments
      */
     public void mainFunction (CommandLine commandline) {
         
@@ -260,63 +259,63 @@ public class Main {
     protected Options getCommandLineOptions (Options opts) {
         Option help = new Option( "help", "Show this message" );
         
-        Option cfg = OptionBuilder.withArgName( "config file" )
+        Option cfg = Option.builder("cfg").argName( "config file" )
                                         .hasArg()
-                                        .withDescription(  "Load jEPlus configuration file. Default=./jeplus.cfg" )
-                                        .create( "cfg" );
+                                        .desc(  "Load jEPlus configuration file. Default=./jeplus.cfg" )
+                                        .build();
 
-        Option log = OptionBuilder.withArgName( "log config file" )
+        Option log = Option.builder("log").argName( "log config file" )
                                         .hasArg()
-                                        .withDescription(  "Specify the configuration file for logs. Default=./log4j.cfg" )
-                                        .create( "log" );
+                                        .desc(  "Specify the configuration file for logs. Default=./log4j.cfg" )
+                                        .build();
 
-        Option job = OptionBuilder.withArgName( "project file" )
+        Option job = Option.builder("job").argName( "project file" )
                                         .hasArg()
-                                        .withDescription(  "Open project file" )
-                                        .create( "job" );
+                                        .desc(  "Open project file" )
+                                        .build();
         
         Option run_all = new Option( "all", "Execute all jobs in project" );
         
-        Option run_sample   = OptionBuilder.withArgName( "sample size" )
+        Option run_sample   = Option.builder("sample").argName( "sample size" )
                                         .hasArg()
-                                        .withDescription(  "Execute a random sample in project. Project size limit applies. Effective with -job" )
-                                        .create( "sample" );
-        Option run_lhs   = OptionBuilder.withArgName( "sample size" )
+                                        .desc(  "Execute a random sample in project. Project size limit applies. Effective with -job" )
+                                        .build();
+        Option run_lhs   = Option.builder("lhs").argName( "sample size" )
                                         .hasArg()
-                                        .withDescription(  "Execute a Latin Hypercube sample in project. Effective with -job" )
-                                        .create( "lhs" );
-        Option random_seed   = OptionBuilder.withArgName( "random seed" )
+                                        .desc(  "Execute a Latin Hypercube sample in project. Effective with -job" )
+                                        .build();
+        Option random_seed   = Option.builder("seed").argName( "random seed" )
                                         .hasArg()
-                                        .withDescription(  "Use the given random seed for sampling. If seed is not specified, jEPlus uses the seed saved in the project. This option is effective only with -sample and -lhs" )
-                                        .create( "seed" );
-        Option run_index   = OptionBuilder.withArgName( "job indexes" )
+                                        .desc(  "Use the given random seed for sampling. If seed is not specified, jEPlus uses the seed saved in the project. This option is effective only with -sample and -lhs" )
+                                        .build();
+        Option run_index   = Option.builder("index").argName( "job indexes" )
                                         .hasArg()
-                                        .withDescription(  "Execute selected jobs in project using specified parameter value indexes. Effective with -job" )
-                                        .create( "index" );
-        Option run_value   = OptionBuilder.withArgName( "job values" )
+                                        .desc(  "Execute selected jobs in project using specified parameter value indexes. Effective with -job" )
+                                        .build();
+        Option run_value   = Option.builder("value").argName( "job values" )
                                         .hasArg()
-                                        .withDescription(  "Execute selected jobs in project using specified parameter values. Effective with -job" )
-                                        .create( "value" );
-        Option run_id   = OptionBuilder.withArgName( "job ids" )
+                                        .desc(  "Execute selected jobs in project using specified parameter values. Effective with -job" )
+                                        .build();
+        Option run_id   = Option.builder("id").argName( "job ids" )
                                         .hasArg()
-                                        .withDescription(  "Execute selected jobs in project using specified job id strings. Effective with -job" )
-                                        .create( "id" );
-        Option run_file   = OptionBuilder.withArgName( "job list file" )
+                                        .desc(  "Execute selected jobs in project using specified job id strings. Effective with -job" )
+                                        .build();
+        Option run_file   = Option.builder("file").argName( "job list file" )
                                         .hasArg()
-                                        .withDescription(  "Execute selected jobs in project using a job list file. Effective with -job" )
-                                        .create( "file" );
-        Option output_folder   = OptionBuilder.withArgName( "output folder" )
+                                        .desc(  "Execute selected jobs in project using a job list file. Effective with -job" )
+                                        .build();
+        Option output_folder   = Option.builder("output").argName( "output folder" )
                                         .hasArg()
-                                        .withDescription(  "Use the specified folder for outputs." )
-                                        .create( "output" );
-        Option local   = OptionBuilder.withArgName( "number of threads" )
+                                        .desc(  "Use the specified folder for outputs." )
+                                        .build();
+        Option local   = Option.builder("local").argName( "number of threads" )
                                         .hasArg()
-                                        .withDescription(  "Use specified number of local threads for parallel execution." )
-                                        .create( "local" );
-        Option post   = OptionBuilder.withArgName( "post-process script" )
+                                        .desc(  "Use specified number of local threads for parallel execution." )
+                                        .build();
+        Option post   = Option.builder("post").argName( "post-process script" )
                                         .hasArg()
-                                        .withDescription(  "Python script file for post-processing after simulation." )
-                                        .create( "post" );
+                                        .desc(  "Python script file for post-processing after simulation." )
+                                        .build();
 
         Options options = (opts == null) ? new Options() : opts;
 

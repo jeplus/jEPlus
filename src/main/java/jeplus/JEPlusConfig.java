@@ -57,9 +57,17 @@ public class JEPlusConfig extends INSELConfig {
     }
     
     /** Reference to configure file */
-    public String CurrentConfigFile = "jeplus.cfg";
+    protected String CurrentConfigFile = "jeplus.cfg";
     @JsonIgnore
     public String getCurrentConfigFile () { return CurrentConfigFile; }
+    
+    protected String JESSClientDir = null;
+    public String getJESSClientDir() {return JESSClientDir;}
+    public void setJESSClientDir(String JESSClientDir) {this.JESSClientDir = JESSClientDir;}
+    
+    protected String JEPlusEADir = null;
+    public String getJEPlusEADir() {return JEPlusEADir;}
+    public void setJEPlusEADir(String JEPlusEADir) {this.JEPlusEADir = JEPlusEADir;}
     
     /**
      * Default constructor
@@ -105,6 +113,8 @@ public class JEPlusConfig extends INSELConfig {
         Python3EXE = prop.getProperty("Python3EXE", null);
         PythonArgv = prop.getProperty("PythonArgv", null);
         PythonScript = prop.getProperty("PythonScript", null);
+        JESSClientDir = prop.getProperty("JESSClientDir", null);
+        JEPlusEADir = prop.getProperty("JEPlusEADir", null);
         TRNSYSBinDir = prop.getProperty("TRNSYSBinDir", getDefTRNSYSBinDir());
         TRNSYSEXE = prop.getProperty("TRNSYSEXE", TRNSYSBinDir + getDefTRNSYSEXEC());
         InselBinDir = prop.getProperty("InselBinDir", getDefInselBinDir());
@@ -152,6 +162,12 @@ public class JEPlusConfig extends INSELConfig {
             }
             if (PythonScript != null) {
                 prop.setProperty("PythonScript", PythonScript);
+            }
+            if (JESSClientDir != null) {
+                prop.setProperty("JESSClientDir", JESSClientDir);
+            }
+            if (JEPlusEADir != null) {
+                prop.setProperty("JEPlusEADir", JEPlusEADir);
             }
             for (int i=0; i<Math.min(NRecentProjs, RecentProjects.size()); i++) {
                 if (RecentProjects.get(i) != null) prop.setProperty("RecentProject" + i, RecentProjects.get(i));

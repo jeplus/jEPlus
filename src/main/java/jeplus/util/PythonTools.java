@@ -35,20 +35,22 @@ public class PythonTools {
      * @param config Config file of the executables
      * @param scriptfile Name of the Python file
      * @param version Python version string
-     * @param arg0 This must be the path of the working directory of the script. If null or empty is supplied, the current dir is assumed.
-     * @param arg1 This is reserved for job list
-     * @param arg2 This is reserved for output file name
+     * @param arg0 This must be the path of the project base. If null or empty is supplied, the current dir is assumed.
+     * @param arg1 This must be the path of the working directory of the script. If null or empty is supplied, the current dir is assumed.
+     * @param arg2 This is reserved for job list
+     * @param arg3 This is reserved for output file name
      * @param moreargs More arguments
      * @param stream Log stream
      */
-    public static void runPython (JEPlusConfig config, String scriptfile, String version, String arg0, String arg1, String arg2, String moreargs, PrintStream stream) {
+    public static void runPython (JEPlusConfig config, String scriptfile, String version, String arg0, String arg1, String arg2, String arg3, String moreargs, PrintStream stream) {
 
-        String CurrentWorkDir = (arg0 != null && arg0.trim().length()>0) ? arg0 : "./";
+        String CurrentWorkDir = (arg1 != null && arg1.trim().length()>0) ? arg1 : "./";
         if (version.equalsIgnoreCase("jython")) {
             StringBuilder buf = new StringBuilder (scriptfile);
+            if (arg0 != null && arg0.trim().length()>0) buf.append(", ").append(arg0);
             buf.append(", ").append(CurrentWorkDir);
-            if (arg1 != null && arg1.trim().length()>0) buf.append(", ").append(arg1);
             if (arg2 != null && arg2.trim().length()>0) buf.append(", ").append(arg2);
+            if (arg3 != null && arg3.trim().length()>0) buf.append(", ").append(arg3);
             if (moreargs != null && moreargs.trim().length()>0) buf.append(", ").append(moreargs);
             String [] args = buf.toString().split("\\s*,\\s*");
             PythonInterpreter.initialize(System.getProperties(), System.getProperties(), args);
@@ -78,16 +80,18 @@ public class PythonTools {
             try {
                 StringBuilder buf = new StringBuilder (PythonExe);
                 buf.append(" \"").append(scriptfile).append("\" ");
+                buf.append(" \"").append(arg0).append("\" ");
                 buf.append("\"").append(CurrentWorkDir).append("\" ");
-                buf.append(arg1).append(" ").append(arg2).append(" ");
+                buf.append(arg2).append(" ").append(arg3).append(" ");
                 buf.append("\"").append(moreargs).append("\" ");
 
                 List<String> command = new ArrayList<> ();
                 command.add(PythonExe);
                 command.add(scriptfile);
+                if (arg0 != null && arg0.trim().length()>0) command.add(arg0);
                 command.add(CurrentWorkDir);
-                if (arg1 != null && arg1.trim().length()>0) command.add(arg1);
                 if (arg2 != null && arg2.trim().length()>0) command.add(arg2);
+                if (arg3 != null && arg3.trim().length()>0) command.add(arg3);
                 if (moreargs != null && moreargs.trim().length()>0) command.add(moreargs);
                 ProcessBuilder builder = new ProcessBuilder(command);
                 builder.directory(new File (CurrentWorkDir));

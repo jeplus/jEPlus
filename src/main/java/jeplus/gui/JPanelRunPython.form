@@ -20,77 +20,91 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="1" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" attributes="0">
-                  <Component id="jLabel4" max="32767" attributes="0"/>
-                  <Component id="jLabel2" alignment="0" max="32767" attributes="0"/>
-                  <Component id="chkPassWorkDir" alignment="0" max="32767" attributes="0"/>
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="21" pref="21" max="-2" attributes="0"/>
-                      <Component id="txtWorkDir" max="32767" attributes="2"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cmdSelectWorkDir" min="-2" pref="25" max="-2" attributes="1"/>
-                  </Group>
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
-                      <Component id="txtScriptFileName" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cmdSelectScriptFile" min="-2" pref="27" max="-2" attributes="1"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cmdEditScript" min="-2" pref="28" max="-2" attributes="2"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="rdoPython2" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="txtPython2Exe" pref="236" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cmdSelectPython2Exe" min="-2" pref="25" max="-2" attributes="1"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="rdoPython3" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="txtPython3Exe" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cmdSelectPython3Exe" min="-2" pref="25" max="-2" attributes="1"/>
-                  </Group>
-                  <Component id="jLabel1" alignment="1" max="32767" attributes="0"/>
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                      <Component id="cmdRunScript" min="-2" pref="76" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cmdOpenConsole" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="rdoJython" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
-                      <Component id="txtJobList" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cmdSyncJobList" min="-2" pref="28" max="-2" attributes="0"/>
-                  </Group>
-                  <Component id="chkPassJobList" alignment="0" max="32767" attributes="0"/>
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="21" pref="21" max="-2" attributes="0"/>
-                      <Component id="txtOutputFile" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="cmdViewOutputFile" min="-2" pref="25" max="-2" attributes="0"/>
-                  </Group>
-                  <Component id="chkPassOutputFile" alignment="0" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="chkMoreArguments" alignment="0" max="32767" attributes="0"/>
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="21" pref="21" max="-2" attributes="0"/>
-                      <Component id="txtMoreArguments" max="32767" attributes="0"/>
-                  </Group>
-                  <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
-                      <EmptySpace min="10" pref="10" max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jLabel2" max="32767" attributes="0"/>
+                          <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                  <Component id="chkPassProjectBase" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="chkPassWorkDir" alignment="0" max="32767" attributes="0"/>
+                              </Group>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="txtProjectBase" max="32767" attributes="0"/>
+                                  <Component id="txtWorkDir" max="32767" attributes="2"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="cmdSelectWorkDir" min="-2" pref="25" max="-2" attributes="1"/>
+                                  <Component id="cmdSelectProjectBase" min="-2" pref="25" max="-2" attributes="1"/>
+                              </Group>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <EmptySpace min="21" pref="21" max="-2" attributes="0"/>
+                              <Component id="txtJobList" max="32767" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="cmdSyncJobList" min="-2" pref="28" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="jLabel4" alignment="0" max="32767" attributes="0"/>
+                          <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="chkPassOutputFile" min="-2" pref="175" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="txtOutputFile" max="32767" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="cmdViewOutputFile" min="-2" pref="25" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="chkPassJobList" alignment="0" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="rdoPython2" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Component id="txtPython2Exe" pref="257" max="32767" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="rdoPython3" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Component id="txtPython3Exe" max="32767" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="cmdSelectPython2Exe" alignment="0" min="-2" pref="25" max="-2" attributes="1"/>
+                                  <Component id="cmdSelectPython3Exe" alignment="0" min="-2" pref="25" max="-2" attributes="1"/>
+                              </Group>
+                          </Group>
+                          <Component id="rdoJython" alignment="0" max="32767" attributes="0"/>
+                          <Group type="102" alignment="1" attributes="0">
+                              <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
+                              <Component id="txtScriptFileName" max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cmdSelectScriptFile" min="-2" pref="27" max="-2" attributes="1"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cmdEditScript" min="-2" pref="28" max="-2" attributes="2"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                              <Component id="jScrollPane1" max="32767" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="cmdRunScript" min="-2" pref="76" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cmdOpenConsole" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
+                              <Component id="txtMoreArguments" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -100,11 +114,18 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="chkPassWorkDir" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="cmdSelectWorkDir" max="32767" attributes="0"/>
-                  <Component id="txtWorkDir" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="chkPassProjectBase" alignment="3" max="32767" attributes="0"/>
+                  <Component id="txtProjectBase" alignment="1" max="32767" attributes="0"/>
+                  <Component id="cmdSelectProjectBase" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="chkPassWorkDir" alignment="1" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                      <Component id="txtWorkDir" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
+                      <Component id="cmdSelectWorkDir" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="chkPassJobList" min="-2" max="-2" attributes="0"/>
@@ -114,11 +135,10 @@
                   <Component id="txtJobList" min="-2" pref="25" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="chkPassOutputFile" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="cmdViewOutputFile" max="32767" attributes="0"/>
-                  <Component id="txtOutputFile" min="-2" pref="25" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="txtOutputFile" alignment="0" min="-2" pref="24" max="-2" attributes="0"/>
+                  <Component id="cmdViewOutputFile" min="-2" max="-2" attributes="0"/>
+                  <Component id="chkPassOutputFile" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="chkMoreArguments" min="-2" max="-2" attributes="0"/>
@@ -135,7 +155,7 @@
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" min="-2" pref="58" max="-2" attributes="0"/>
+              <Component id="jScrollPane1" min="-2" pref="84" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="1" max="-2" attributes="0"/>
@@ -152,12 +172,12 @@
                   <Component id="txtPython3Exe" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="cmdSelectPython3Exe" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="cmdOpenConsole" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="cmdRunScript" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -245,7 +265,7 @@
     <Component class="javax.swing.JCheckBox" name="chkPassWorkDir">
       <Properties>
         <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Pass the work folder as the first argument:"/>
+        <Property name="text" type="java.lang.String" value="Pass Work dir:"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkPassWorkDirActionPerformed"/>
@@ -422,5 +442,25 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JCheckBox" name="chkPassProjectBase">
+      <Properties>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="Pass Project base: "/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="txtProjectBase">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="./"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="cmdSelectProjectBase">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="..."/>
+        <Property name="toolTipText" type="java.lang.String" value="Select the the working directory"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSelectProjectBaseActionPerformed"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>
