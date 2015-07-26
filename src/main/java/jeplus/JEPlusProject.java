@@ -316,7 +316,8 @@ public class JEPlusProject implements Serializable {
         }
         String dir = fn.getAbsoluteFile().getParent();
         dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
-        proj.updateBaseDir(dir);
+        // proj.updateBaseDir(dir);
+        proj.setBaseDir(dir);
         if (proj.ParamFile != null) {
             // Load parameters from text file
             proj.importParameterTableFile(new File (RelativeDirUtil.checkAbsolutePath(proj.ParamFile, dir)));
@@ -381,7 +382,8 @@ public class JEPlusProject implements Serializable {
         // Set base dir
         String dir = file.getAbsoluteFile().getParent();
         dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
-        project.updateBaseDir(dir);
+        // project.updateBaseDir(dir);
+        project.setBaseDir(dir);
         // If parameter file is given, use the contents to override the parameters in the project
         if (project.ParamFile != null) {
             // Load parameters from text file, to replace the existing Parameters list and tree
