@@ -31,70 +31,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import jeplus.EPlusBatch;
 import jeplus.data.RVX;
+import jeplus.data.RVX_CSVitem;
 import jeplus.data.RVX_UserSuppliedItem;
-import static jeplus.postproc.PythonResultCollector.logger;
+import static jeplus.postproc.UserResultCollector.logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Yi
  */
-public class UserResultCollector extends ResultCollector {
+public class CsvResultCollector extends ResultCollector {
 
     /** Logger */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(UserResultCollector.class);
+    final static org.slf4j.Logger logger = LoggerFactory.getLogger(CsvResultCollector.class);
     
-    protected static final String SectionStart = "!-user spreadsheet";
-    protected static final String SectionEnd = "!-end user spreadsheet";
-    
-    public UserResultCollector (String Desc) {
+    public CsvResultCollector (String Desc) {
         super (Desc);
-    }
-
-    /**
-     * Parse result table list from RVI file and store the list in <code> ResultFiles </code>
-     * @param rvifile 
-     * @return List of result specifications
-     * @deprecated Function is replaced by getExpectedResultFiles(). 
-     */
-    @Override
-    public ArrayList<String[]> listResultFilesFromRVI (String rvifile) {
-        // get extra output specifications from rvi in the project
-        // The part starts with "!-User Spreadsheet" and ends with "!-End User Spreadsheet" (case insensitive)
-        // Contents of the section contain ';' delimited triple-segment rows, e.g.
-        // Table name; Spreadsheet file name; Column numbers to extract (0-based, e.g. 3,5,6,7,9)
-        ArrayList<String[]> sections;
-        try (BufferedReader fr = new BufferedReader (new FileReader (rvifile))) {
-            String line = fr.readLine();
-            boolean extra_on = false;
-            sections = new ArrayList<> ();
-            while (line != null) {
-                if (extra_on) {
-                    if (line.toLowerCase().startsWith(SectionEnd)) {
-                        extra_on = false;
-                    }else {
-                        line = line.substring(0, line.contains("!") ? line.indexOf("!") : line.length());
-                        if (line.trim().length() > 0) {
-                            String [] section = line.split(";");
-                            sections.add(section);
-                        }
-                    }
-                }
-                if (line.trim().toLowerCase().startsWith(SectionStart)) {
-                    extra_on = true;
-                }
-                line = fr.readLine();
-            }
-            ResultFiles.clear();
-            for (int i=0; i<sections.size(); i++) {
-                String fn = sections.get(i)[0] + ".csv";
-                ResultFiles.add(fn);
-            }
-            return sections;
-        }catch (Exception ex) {
-            logger.error("", ex);
-        }
-        return null;
     }
 
     @Override
@@ -107,12 +59,12 @@ public class UserResultCollector extends ResultCollector {
         ResultFiles.clear();
         try {
             RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
-            if (rvx.getUserSuppliedResults() != null) {
-                for (RVX_UserSuppliedItem item : rvx.getUserSuppliedResults()) {
+            if (rvx.getCSVs() != null) {
+                for (RVX_CSVitem item : rvx.getCSVs()) {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
                     ResWriter = new DefaultCSVWriter(null, fn);
-                    ResReader = new EPlusUserSpreadsheetReader (item);
+                    ResReader = new EPlusCsvReader (item);
                     ResultHeader = new HashMap <>();
                     ResultTable = new ArrayList <> ();
                     ResReader.readResult(JobOwner, JobOwner.getResolvedEnv().getParentDir(), ResultHeader, ResultTable);
@@ -130,8 +82,8 @@ public class UserResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx.getUserSuppliedResults() != null) {
-            for (RVX_UserSuppliedItem item : rvx.getUserSuppliedResults()) {
+        if (rvx.getCSVs() != null) {
+            for (RVX_CSVitem item : rvx.getCSVs()) {
                 list.add(item.getTableName() + ".csv");
             }
         }

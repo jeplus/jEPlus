@@ -415,6 +415,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemJESSClient">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Launch JESS Client"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemJESSClientActionPerformed"/>
@@ -423,6 +424,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemJEPlusEA">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Launch jEPlus+EA"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemJEPlusEAActionPerformed"/>

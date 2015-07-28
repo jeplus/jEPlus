@@ -39,6 +39,7 @@ import jeplus.data.RVX;
 import jeplus.gui.EPlusTextPanelOld;
 import jeplus.gui.JEPlusPrintablePanel;
 import jeplus.gui.JFrameAgentMonitor;
+import jeplus.postproc.CsvResultCollector;
 import jeplus.postproc.DefaultCSVWriter;
 import jeplus.postproc.DefaultIndexWriter;
 import jeplus.postproc.DefaultRVIResultCollector;
@@ -175,6 +176,8 @@ public abstract class EPlusAgent implements Runnable {
         rc = new EsoResultCollector ("ESO result collector");
         ResultCollectors.add(rc);
         rc = new SQLiteResultCollector ("SQLite result collector");
+        ResultCollectors.add(rc);
+        rc = new CsvResultCollector ("E+ CSV tables result collector");
         ResultCollectors.add(rc);
         rc = new UserResultCollector ("User supplied result collector");
         ResultCollectors.add(rc);

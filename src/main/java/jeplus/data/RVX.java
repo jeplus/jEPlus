@@ -23,8 +23,6 @@ import org.slf4j.LoggerFactory;
  */
 public class RVX implements Serializable {
     
-    
-
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(RVX.class);
     
@@ -44,6 +42,10 @@ public class RVX implements Serializable {
     private RVX_ScriptItem [] Scripts = null;
     public RVX_ScriptItem[] getScripts() { return Scripts; }
     public void setScripts(RVX_ScriptItem[] Scripts) { this.Scripts = Scripts; }
+
+    private RVX_CSVitem [] CSVs = null;
+    public RVX_CSVitem[] getCSVs() { return CSVs; }
+    public void setCSVs(RVX_CSVitem[] csvs) { this.CSVs = csvs; }
 
     private RVX_UserSuppliedItem [] UserSuppliedResults = null;
     public RVX_UserSuppliedItem[] getUserSuppliedResults() { return UserSuppliedResults; }

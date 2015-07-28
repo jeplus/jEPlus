@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import javax.swing.JPanel;
 import jeplus.EPlusBatch;
 import jeplus.EPlusTask;
+import jeplus.data.RVX_UserSuppliedItem;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
 
@@ -58,15 +59,22 @@ public class EPlusUserSpreadsheetReader implements IFResultReader {
     /** Transient spreadsheet file name */
     transient String Spreadsheet = null;
     /** Transient column list */
+    transient int HeaderRow = 0;
+    /** Transient column list */
+    transient int JobIndexColumn = 1;
+    /** Transient column list */
     transient int [] Columns = null;
     
     /**
      * Construct reader by filling the three fields from the passed-in string
-     * @param sqlspecs ';' delimited string containing three parts: [table name]; [',' delimited header string], and [sql command]
+     * @param specs 
      */
-    public EPlusUserSpreadsheetReader (String spreadsheet, String columns) {
+    public EPlusUserSpreadsheetReader (RVX_UserSuppliedItem specs) {
+        Spreadsheet = specs.getFileName();
+        HeaderRow = specs.getHeaderRow();
+        JobIndexColumn = specs.getJobIdColumn();
+        String columns = specs.getDataColumns();
         // Add user specified headers
-        Spreadsheet = spreadsheet;
         String [] cstrs = columns.split("\\s*,\\s*");
         Columns = new int [cstrs.length];
         for (int i=0; i<cstrs.length; i++) {
@@ -82,12 +90,13 @@ public class EPlusUserSpreadsheetReader implements IFResultReader {
     public int readResult(EPlusBatch manager, String dir, HashMap<String, Integer> header, ArrayList<ArrayList<String>> table) {
         // Initiate header, adding staple items
         header.clear();
-        header.put("#", Integer.valueOf(0));
-        header.put("Job_ID", Integer.valueOf(1));
-        header.put("Reserved", Integer.valueOf(2));
+        header.put("#", 0);
+        header.put("Job_ID", 1);
+        header.put("Reserved", 2);
         try (BufferedReader fr = new BufferedReader (new FileReader (RelativeDirUtil.checkAbsolutePath(Spreadsheet, manager.getProject().getBaseDir())))) {
             // Read first row of spreadsheet
-            String line = fr.readLine();
+            String line = "";
+            for (int i=0; i<HeaderRow; i++) { line = fr.readLine(); }
             String [] HeaderStrings = line.split("\\s*,\\s*");
             // Read in the rest of the spreadsheet
             ArrayList <String []> spreadsheet = new ArrayList <> ();
@@ -106,14 +115,11 @@ public class EPlusUserSpreadsheetReader implements IFResultReader {
             List <EPlusTask> JobQueue = manager.getAgent().getFinishedJobs();
             // Collect Job results
             int counter = 0;
-            for (int i = 0; i < JobQueue.size(); i++) {
-                // For each job, do:
-                EPlusTask job = JobQueue.get(i);
+            for (EPlusTask job : JobQueue) {
                 String job_id = job.getJobID();
                 // Scan spreadsheet
-                for (int j=0; j<spreadsheet.size(); j++) {
-                    String [] row = spreadsheet.get(j);
-                    Matcher m = Pattern.compile(row[1]).matcher(job_id);
+                for (String[] row : spreadsheet) {
+                    Matcher m = Pattern.compile(row[this.JobIndexColumn]).matcher(job_id);
                     if (m.matches()) {
                         ArrayList<String> newdatarow = new ArrayList<>();
                         newdatarow.add(Integer.toString(counter));

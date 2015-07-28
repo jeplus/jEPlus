@@ -1536,6 +1536,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuAction.add(jSeparator12);
 
         jMenuItemJESSClient.setText("Launch JESS Client");
+        jMenuItemJESSClient.setEnabled(false);
         jMenuItemJESSClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemJESSClientActionPerformed(evt);
@@ -1544,6 +1545,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuAction.add(jMenuItemJESSClient);
 
         jMenuItemJEPlusEA.setText("Launch jEPlus+EA");
+        jMenuItemJEPlusEA.setEnabled(false);
         jMenuItemJEPlusEA.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemJEPlusEAActionPerformed(evt);
@@ -2687,7 +2689,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 String path = fc.getSelectedFile().getPath() + File.separator;
                 JEPlusConfig.getDefaultInstance().setJESSClientDir(path);
+                fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
             }else {
+                fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 return;
             }
         }
@@ -2724,7 +2728,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 String path = fc.getSelectedFile().getPath() + File.separator;
                 JEPlusConfig.getDefaultInstance().setJEPlusEADir(path);
+                fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
             }else {
+                fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 return;
             }
         }
@@ -2746,7 +2752,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                 }
             }
         } catch (IOException ex) {
-            logger.error("Cannot run JESS_Client.", ex);
+            logger.error("Cannot run jEPlus+EA.", ex);
         }
     }//GEN-LAST:event_jMenuItemJEPlusEAActionPerformed
 
