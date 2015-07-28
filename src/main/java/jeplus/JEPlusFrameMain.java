@@ -1536,7 +1536,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuAction.add(jSeparator12);
 
         jMenuItemJESSClient.setText("Launch JESS Client");
-        jMenuItemJESSClient.setEnabled(false);
         jMenuItemJESSClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemJESSClientActionPerformed(evt);
@@ -1545,7 +1544,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuAction.add(jMenuItemJESSClient);
 
         jMenuItemJEPlusEA.setText("Launch jEPlus+EA");
-        jMenuItemJEPlusEA.setEnabled(false);
         jMenuItemJEPlusEA.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemJEPlusEAActionPerformed(evt);
@@ -2696,25 +2694,31 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             }
         }
         // Launch JESS Client
-        List<String> command = new ArrayList<> ();
-        command.add("java");
-        command.add("-jar");
-        command.add("JESS_Client.jar");
-        ProcessBuilder builder = new ProcessBuilder(command);
-        builder.directory(new File (JEPlusConfig.getDefaultInstance().getJESSClientDir()));
-        builder.redirectErrorStream(true);
-        try {
-            Process proc = builder.start();
-            // int ExitValue = proc.waitFor();
-            try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-                int res = ins.read();
-                while (res != -1) {
-                    res = ins.read();
+        new Thread(new Runnable() {
+            @Override
+            public void run () {
+                List<String> command = new ArrayList<> ();
+                command.add("java");
+                command.add("-jar");
+                command.add("JESS_Client.jar");
+                command.add(getProject().getBaseDir());
+                ProcessBuilder builder = new ProcessBuilder(command);
+                builder.directory(new File (JEPlusConfig.getDefaultInstance().getJESSClientDir()));
+                builder.redirectErrorStream(true);
+                try {
+                    Process proc = builder.start();
+                    // int ExitValue = proc.waitFor();
+                    try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+                        int res = ins.read();
+                        while (res != -1) {
+                            res = ins.read();
+                        }
+                    }
+                } catch (IOException ex) {
+                    logger.error("Cannot run JESS_Client.", ex);
                 }
             }
-        } catch (IOException ex) {
-            logger.error("Cannot run JESS_Client.", ex);
-        }
+        }, "JESS_Client").start();
     }//GEN-LAST:event_jMenuItemJESSClientActionPerformed
 
     private void jMenuItemJEPlusEAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemJEPlusEAActionPerformed
@@ -2735,25 +2739,31 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             }
         }
         // Launch JESS Client
-        List<String> command = new ArrayList<> ();
-        command.add("java");
-        command.add("-jar");
-        command.add("jEPlus+EA.jar");
-        ProcessBuilder builder = new ProcessBuilder(command);
-        builder.directory(new File (JEPlusConfig.getDefaultInstance().getJEPlusEADir()));
-        builder.redirectErrorStream(true);
-        try {
-            Process proc = builder.start();
-            // int ExitValue = proc.waitFor();
-            try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-                int res = ins.read();
-                while (res != -1) {
-                    res = ins.read();
+        new Thread(new Runnable() {
+            @Override
+            public void run () {
+                List<String> command = new ArrayList<> ();
+                command.add("java");
+                command.add("-jar");
+                command.add("jEPlus+EA.jar");
+                command.add(getCurrentProjectFile());
+                ProcessBuilder builder = new ProcessBuilder(command);
+                builder.directory(new File (JEPlusConfig.getDefaultInstance().getJEPlusEADir()));
+                builder.redirectErrorStream(true);
+                try {
+                    Process proc = builder.start();
+                    // int ExitValue = proc.waitFor();
+                    try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+                        int res = ins.read();
+                        while (res != -1) {
+                            res = ins.read();
+                        }
+                    }
+                } catch (IOException ex) {
+                    logger.error("Cannot run jEPlus+EA.", ex);
                 }
             }
-        } catch (IOException ex) {
-            logger.error("Cannot run jEPlus+EA.", ex);
-        }
+        }, "jEPlus+EA").start();
     }//GEN-LAST:event_jMenuItemJEPlusEAActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
