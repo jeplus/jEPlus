@@ -47,9 +47,9 @@ public class RVX implements Serializable {
     public RVX_CSVitem[] getCSVs() { return CSVs; }
     public void setCSVs(RVX_CSVitem[] csvs) { this.CSVs = csvs; }
 
-    private RVX_UserSuppliedItem [] UserSuppliedResults = null;
-    public RVX_UserSuppliedItem[] getUserSuppliedResults() { return UserSuppliedResults; }
-    public void setUserSuppliedResults(RVX_UserSuppliedItem[] usersupplied) { this.UserSuppliedResults = usersupplied; }
+    private RVX_UserSuppliedItem [] UserSupplied = null;
+    public RVX_UserSuppliedItem[] getUserSupplied() { return UserSupplied; }
+    public void setUserSupplied(RVX_UserSuppliedItem[] usersupplied) { this.UserSupplied = usersupplied; }
 
     
     

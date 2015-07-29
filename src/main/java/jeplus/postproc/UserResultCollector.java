@@ -32,7 +32,6 @@ import java.util.HashMap;
 import jeplus.EPlusBatch;
 import jeplus.data.RVX;
 import jeplus.data.RVX_UserSuppliedItem;
-import static jeplus.postproc.PythonResultCollector.logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -107,8 +106,8 @@ public class UserResultCollector extends ResultCollector {
         ResultFiles.clear();
         try {
             RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
-            if (rvx.getUserSuppliedResults() != null) {
-                for (RVX_UserSuppliedItem item : rvx.getUserSuppliedResults()) {
+            if (rvx.getUserSupplied() != null) {
+                for (RVX_UserSuppliedItem item : rvx.getUserSupplied()) {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
                     ResWriter = new DefaultCSVWriter(null, fn);
@@ -130,8 +129,8 @@ public class UserResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx.getUserSuppliedResults() != null) {
-            for (RVX_UserSuppliedItem item : rvx.getUserSuppliedResults()) {
+        if (rvx.getUserSupplied() != null) {
+            for (RVX_UserSuppliedItem item : rvx.getUserSupplied()) {
                 list.add(item.getTableName() + ".csv");
             }
         }

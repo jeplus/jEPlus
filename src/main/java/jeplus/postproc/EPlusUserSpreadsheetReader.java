@@ -96,7 +96,7 @@ public class EPlusUserSpreadsheetReader implements IFResultReader {
         try (BufferedReader fr = new BufferedReader (new FileReader (RelativeDirUtil.checkAbsolutePath(Spreadsheet, manager.getProject().getBaseDir())))) {
             // Read first row of spreadsheet
             String line = "";
-            for (int i=0; i<HeaderRow; i++) { line = fr.readLine(); }
+            for (int i=0; i<=HeaderRow; i++) { line = fr.readLine(); }
             String [] HeaderStrings = line.split("\\s*,\\s*");
             // Read in the rest of the spreadsheet
             ArrayList <String []> spreadsheet = new ArrayList <> ();

@@ -19,7 +19,6 @@ package jeplus.data;
 import java.io.Serializable;
 
 //	"userSupplied" : [
-
 //		{
 //			"fileName" : "ExternResultTable.csv",
 //			"headerRow" : 0,
