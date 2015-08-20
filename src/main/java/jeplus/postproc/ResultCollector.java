@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class ResultCollector {
 
     /** Logger */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(ResultCollector.class);
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(ResultCollector.class);
     
     /** Result collector description */
     String Description = "";
@@ -203,7 +203,7 @@ public class ResultCollector {
      * @return 
      */
     public ArrayList<String> getExpectedResultFiles (RVX rvx) {
-        return new ArrayList<String>();
+        return new ArrayList<>();
     }
     
     public ArrayList<String[]>  listResultFilesFromRVI (String rvifile) {

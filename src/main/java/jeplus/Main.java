@@ -25,6 +25,7 @@
 package jeplus;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -162,87 +163,100 @@ public class Main {
         boolean showGUI = true;
         // Prepare simulation manager
         if (prjfile != null) {
-            JEPlusProject project = JEPlusProject.loadAsXML(new File(prjfile));
-            EPlusBatch batch = new EPlusBatch (null, project);
-            // override output folder and number of threads
-            if (output != null) {
-                project.getExecSettings().setParentDir(output);
+            JEPlusProject project = null;
+            if (prjfile.endsWith(".jep")) {
+                project = JEPlusProject.loadAsXML(new File(prjfile));
+            }else if (prjfile.endsWith(".json")) {
+                try {
+                    project = JEPlusProject.loadFromJSON(new File(prjfile));
+                }catch (IOException ioe) {
+                    logger.error("Cannot open " + prjfile, ioe);
+                }
             }
-            project.getExecSettings().setNumThreads(nthread);
-            if (DefaultAgent == null) { // Default agent may have been set by external code
-                // set execution agent
-                DefaultAgent = new EPlusAgentLocal (project.getExecSettings());
-            }
-            batch.setAgent(DefaultAgent);
+            if (project != null) {
+                EPlusBatch batch = new EPlusBatch (null, project);
+                // override output folder and number of threads
+                if (output != null) {
+                    project.getExecSettings().setParentDir(output);
+                }
+                project.getExecSettings().setNumThreads(nthread);
+                if (DefaultAgent == null) { // Default agent may have been set by external code
+                    // set execution agent
+                    DefaultAgent = new EPlusAgentLocal (project.getExecSettings());
+                }
+                batch.setAgent(DefaultAgent);
 
-            // The following are batch mode options. Only one is effective at a time...
-            if (commandline.hasOption("all") || commandline.hasOption("sample") || commandline.hasOption("lhs") || 
-                commandline.hasOption("index") || commandline.hasOption("value") || commandline.hasOption("id") || 
-                commandline.hasOption("file")) {
-                    showGUI = false;
-                    // load E+ configuration
-                    JEPlusConfig.setDefaultInstance(new JEPlusConfig (cfgfile));
-                    // validate project
-                    EPlusBatchInfo info = batch.validateProject();
-                    System.err.println(info.getValidationErrorsText());
-                    if (info.isValidationSuccessful()) {
-                        if (commandline.hasOption("all")) {
-                                batch.buildJobs();
-                                batch.start();
-                        }else if (commandline.hasOption("sample")) {
-                                long randomseed;
-                                if (commandline.hasOption("seed")) {
-                                    try {
-                                        randomseed = Long.parseLong(commandline.getOptionValue("seed"));
-                                    }catch (NumberFormatException nfe) {
-                                        logger.error("Random seed is not a number. Seed is set to 0 (zero).", nfe);
-                                        randomseed = 0;
+                // The following are batch mode options. Only one is effective at a time...
+                if (commandline.hasOption("all") || commandline.hasOption("sample") || commandline.hasOption("lhs") || 
+                    commandline.hasOption("index") || commandline.hasOption("value") || commandline.hasOption("id") || 
+                    commandline.hasOption("file")) {
+                        showGUI = false;
+                        // load E+ configuration
+                        JEPlusConfig.setDefaultInstance(new JEPlusConfig (cfgfile));
+                        // validate project
+                        EPlusBatchInfo info = batch.validateProject();
+                        System.err.println(info.getValidationErrorsText());
+                        if (info.isValidationSuccessful()) {
+                            if (commandline.hasOption("all")) {
+                                    batch.buildJobs();
+                                    batch.start();
+                            }else if (commandline.hasOption("sample")) {
+                                    long randomseed;
+                                    if (commandline.hasOption("seed")) {
+                                        try {
+                                            randomseed = Long.parseLong(commandline.getOptionValue("seed"));
+                                        }catch (NumberFormatException nfe) {
+                                            logger.error("Random seed is not a number. Seed is set to 0 (zero).", nfe);
+                                            randomseed = 0;
+                                        }
+                                        project.getExecSettings().setRandomSeed(randomseed);
+                                    }else {
+                                        randomseed = project.getExecSettings().getRandomSeed();
                                     }
-                                    project.getExecSettings().setRandomSeed(randomseed);
-                                }else {
-                                    randomseed = project.getExecSettings().getRandomSeed();
-                                }
-                                int njobs = Integer.parseInt(commandline.getOptionValue("sample"));
-                                batch.runRandomSample(njobs, RandomSource.getRandomGenerator(randomseed));
-                        }else if (commandline.hasOption("lhs")) {
-                                long randomseed;
-                                if (commandline.hasOption("seed")) {
-                                    try {
-                                        randomseed = Long.parseLong(commandline.getOptionValue("seed"));
-                                    }catch (NumberFormatException nfe) {
-                                        logger.error("Random seed is not a number. Seed is set to 0 (zero).", nfe);
-                                        randomseed = 0;
+                                    int njobs = Integer.parseInt(commandline.getOptionValue("sample"));
+                                    batch.runRandomSample(njobs, RandomSource.getRandomGenerator(randomseed));
+                            }else if (commandline.hasOption("lhs")) {
+                                    long randomseed;
+                                    if (commandline.hasOption("seed")) {
+                                        try {
+                                            randomseed = Long.parseLong(commandline.getOptionValue("seed"));
+                                        }catch (NumberFormatException nfe) {
+                                            logger.error("Random seed is not a number. Seed is set to 0 (zero).", nfe);
+                                            randomseed = 0;
+                                        }
+                                        project.getExecSettings().setRandomSeed(randomseed);
+                                    }else {
+                                        randomseed = project.getExecSettings().getRandomSeed();
                                     }
-                                    project.getExecSettings().setRandomSeed(randomseed);
-                                }else {
-                                    randomseed = project.getExecSettings().getRandomSeed();
-                                }
-                                int njobs = Integer.parseInt(commandline.getOptionValue("lhs"));
-                                batch.runLHSample(njobs, RandomSource.getRandomGenerator(randomseed));
-                        }else if (commandline.hasOption("index")) {
-                                batch.prepareJobSet(EPlusBatch.JobStringType.INDEX, commandline.getOptionValue("index"));
-                                batch.start();
-                        }else if (commandline.hasOption("value")) {
-                                batch.prepareJobSet(EPlusBatch.JobStringType.VALUE, commandline.getOptionValue("value"));
-                                batch.start();
-                        }else if (commandline.hasOption("id")) {
-                                batch.prepareJobSet(EPlusBatch.JobStringType.ID, commandline.getOptionValue("id"));
-                                batch.start();
-                        }else if (commandline.hasOption("file")) {
-                                batch.prepareJobSet(EPlusBatch.JobStringType.FILE, commandline.getOptionValue("file"));
-                                batch.start();
-                        }
-                        do {
-                            try {
-                                Thread.sleep(1000);
-                            }catch (InterruptedException intex) {
-                                logger.info("Interruption detected. Simulation is still running.");
+                                    int njobs = Integer.parseInt(commandline.getOptionValue("lhs"));
+                                    batch.runLHSample(njobs, RandomSource.getRandomGenerator(randomseed));
+                            }else if (commandline.hasOption("index")) {
+                                    batch.prepareJobSet(EPlusBatch.JobStringType.INDEX, commandline.getOptionValue("index"));
+                                    batch.start();
+                            }else if (commandline.hasOption("value")) {
+                                    batch.prepareJobSet(EPlusBatch.JobStringType.VALUE, commandline.getOptionValue("value"));
+                                    batch.start();
+                            }else if (commandline.hasOption("id")) {
+                                    batch.prepareJobSet(EPlusBatch.JobStringType.ID, commandline.getOptionValue("id"));
+                                    batch.start();
+                            }else if (commandline.hasOption("file")) {
+                                    batch.prepareJobSet(EPlusBatch.JobStringType.FILE, commandline.getOptionValue("file"));
+                                    batch.start();
                             }
-                        }while (batch.isSimulationRunning());
-                        System.out.println("All jobs finished. jEPlus terminated normally.");
-                    }else {
-                        System.err.println("jEPlus cannot execute the jobs. Please make sure the project is valid.");
-                    }
+                            do {
+                                try {
+                                    Thread.sleep(1000);
+                                }catch (InterruptedException intex) {
+                                    logger.info("Interruption detected. Simulation is still running.");
+                                }
+                            }while (batch.isSimulationRunning());
+                            System.out.println("All jobs finished. jEPlus terminated normally.");
+                        }else {
+                            System.err.println("jEPlus cannot execute the jobs. Please make sure the project is valid.");
+                        }
+                }
+            }else {
+                System.err.println("jEPlus cannot open project from " + prjfile + ". Please make sure the project file is accessible and in either .jep or .json format.");
             }
         }
         
@@ -271,7 +285,7 @@ public class Main {
 
         Option job = Option.builder("job").argName( "project file" )
                                         .hasArg()
-                                        .desc(  "Open project file" )
+                                        .desc(  "Open project file in either XML (.jep) or JSON (.json) format" )
                                         .build();
         
         Option run_all = new Option( "all", "Execute all jobs in project" );

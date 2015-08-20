@@ -229,18 +229,11 @@ public class JEPlusProject implements Serializable {
         }
     }
 
-//    /**
-//     * Construct a project object from an external .jep file
-//     * @param projectfile The project file (.jep) to be loaded
-//     */
-//    public JEPlusProject (String projectfile) {
-//        this(loadAsXML(new File (projectfile)));
-//    }
-//
     // ================= File operations ==============================
     /**
      * Save the project to an object file
      * @param fn The File object associated with the file to which the contents will be saved
+     * @param proj The project object to be serialised
      * @return Successful or not
      */
     public static boolean serialize (File fn, JEPlusProject proj) {
@@ -668,6 +661,7 @@ public class JEPlusProject implements Serializable {
     /** 
      * Resolve the path to the project's work (a.k.a. parent) directory. If
      * relative path is used, it is relative to the project folder
+     * @return Resolved absolute paths
      */
     public String resolveWorkDir () {
         String dir = RelativeDirUtil.checkAbsolutePath(ExecSettings.getWorkDir(), BaseDir);
@@ -679,6 +673,7 @@ public class JEPlusProject implements Serializable {
      * Resolve the path to the PBS script to use for running this project. If
      * relative path is used, it is relative to the UserBaseDir rather than
      * the project folder
+     * @return Resolved absolute paths
      */
     public String resolvePBSscriptFile () {
         return RelativeDirUtil.checkAbsolutePath(ExecSettings.getPBSscriptFile(), UserBaseDir);
@@ -688,6 +683,7 @@ public class JEPlusProject implements Serializable {
      * Resolve the path to the server config file for running this project. If
      * relative path is used, it is relative to the UserBaseDir rather than
      * the project folder
+     * @return Resolved absolute paths
      */
     public String resolveServerConfigFile () {
         return RelativeDirUtil.checkAbsolutePath(ExecSettings.getServerConfigFile(), UserBaseDir);
@@ -696,6 +692,7 @@ public class JEPlusProject implements Serializable {
     /** 
      * Resolve the path to the IDF models of this project. If
      * relative path is used, it is relative to the project folder
+     * @return Resolved absolute paths
      */
     public String resolveIDFDir () {
         String dir = RelativeDirUtil.checkAbsolutePath(this.getIDFDir(), BaseDir);
@@ -706,6 +703,7 @@ public class JEPlusProject implements Serializable {
     /** 
      * Resolve the path to the RVI file of this project. If
      * relative path is used, it is relative to the project folder
+     * @return Resolved absolute paths
      */
     public String resolveRVIDir () {
         String dir = RelativeDirUtil.checkAbsolutePath(this.getRVIDir(), BaseDir);
@@ -716,6 +714,7 @@ public class JEPlusProject implements Serializable {
     /** 
      * Resolve the path to the weather files of this project. If
      * relative path is used, it is relative to the project folder
+     * @return Resolved absolute paths
      */
     public String resolveWeatherDir () {
         String dir = RelativeDirUtil.checkAbsolutePath(this.getWeatherDir(), BaseDir);
@@ -726,6 +725,7 @@ public class JEPlusProject implements Serializable {
     /** 
      * Resolve the path to the RVI file of this project. If
      * relative path is used, it is relative to the project folder
+     * @return Resolved absolute paths
      */
     public String resolveDCKDir () {
         String dir = RelativeDirUtil.checkAbsolutePath(this.getDCKDir(), BaseDir);
@@ -736,6 +736,7 @@ public class JEPlusProject implements Serializable {
     /** 
      * Resolve the path to the RVI file of this project. If
      * relative path is used, it is relative to the project folder
+     * @return Resolved absolute paths
      */
     public String resolveINSELDir () {
         String dir = RelativeDirUtil.checkAbsolutePath(this.getINSELDir(), BaseDir);

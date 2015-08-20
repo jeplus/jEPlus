@@ -137,7 +137,7 @@ public class SQLiteResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx.getSQLs() != null) {
+        if (rvx != null && rvx.getSQLs() != null) {
             for (RVX_SQLitem item : rvx.getSQLs()) {
                 list.add(item.getTableName() + ".csv");
             }

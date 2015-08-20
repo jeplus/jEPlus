@@ -24,16 +24,12 @@
  ***************************************************************************/
 package jeplus.postproc;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import jeplus.EPlusBatch;
 import jeplus.data.RVX;
 import jeplus.data.RVX_CSVitem;
-import jeplus.data.RVX_UserSuppliedItem;
-import static jeplus.postproc.UserResultCollector.logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -82,7 +78,7 @@ public class CsvResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx.getCSVs() != null) {
+        if (rvx != null && rvx.getCSVs() != null) {
             for (RVX_CSVitem item : rvx.getCSVs()) {
                 list.add(item.getTableName() + ".csv");
             }

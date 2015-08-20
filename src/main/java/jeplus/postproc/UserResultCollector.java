@@ -129,7 +129,7 @@ public class UserResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx.getUserSupplied() != null) {
+        if (rvx != null && rvx.getUserSupplied() != null) {
             for (RVX_UserSuppliedItem item : rvx.getUserSupplied()) {
                 list.add(item.getTableName() + ".csv");
             }

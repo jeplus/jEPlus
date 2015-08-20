@@ -619,6 +619,9 @@ public class JEPlusFrameMain extends JEPlusFrame {
 
     /**
      * Start batch operation
+     * @param file
+     * @param dir
+     * @return 
      */
     public boolean createJobList (String file, String dir) {
         if (this.validateBatchJobs()) {
@@ -651,6 +654,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
     /**
      * Start batch operation with a random sample of jobs
      * @param njobs The number of jobs to run
+     * @param lhs
      * @param randomsrc Random generator source. Null means no randomisation is required
      */
     public void startBatchRunSample (int njobs, boolean lhs, Random randomsrc) {

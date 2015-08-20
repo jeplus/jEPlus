@@ -88,7 +88,7 @@ public class EsoResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx.getRVIs() != null) {
+        if (rvx != null && rvx.getRVIs() != null) {
             for (RVX_RVIitem item : rvx.getRVIs()) {
                 list.add(item.getTableName() + ".csv");
             }

@@ -128,7 +128,7 @@ public class PythonResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx.getScripts() != null) {
+        if (rvx != null && rvx.getScripts() != null) {
             for (RVX_ScriptItem item : rvx.getScripts()) {
                 list.add(item.getTableName() + ".csv");
             }
