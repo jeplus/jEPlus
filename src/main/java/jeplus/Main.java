@@ -231,17 +231,13 @@ public class Main {
                                     int njobs = Integer.parseInt(commandline.getOptionValue("lhs"));
                                     batch.runLHSample(njobs, RandomSource.getRandomGenerator(randomseed));
                             }else if (commandline.hasOption("index")) {
-                                    batch.prepareJobSet(EPlusBatch.JobStringType.INDEX, commandline.getOptionValue("index"));
-                                    batch.start();
+                                    batch.runJobSet(EPlusBatch.JobStringType.INDEX, commandline.getOptionValue("index"));
                             }else if (commandline.hasOption("value")) {
-                                    batch.prepareJobSet(EPlusBatch.JobStringType.VALUE, commandline.getOptionValue("value"));
-                                    batch.start();
+                                    batch.runJobSet(EPlusBatch.JobStringType.VALUE, commandline.getOptionValue("value"));
                             }else if (commandline.hasOption("id")) {
-                                    batch.prepareJobSet(EPlusBatch.JobStringType.ID, commandline.getOptionValue("id"));
-                                    batch.start();
+                                    batch.runJobSet(EPlusBatch.JobStringType.ID, commandline.getOptionValue("id"));
                             }else if (commandline.hasOption("file")) {
-                                    batch.prepareJobSet(EPlusBatch.JobStringType.FILE, commandline.getOptionValue("file"));
-                                    batch.start();
+                                    batch.runJobSet(EPlusBatch.JobStringType.FILE, commandline.getOptionValue("file"));
                             }
                             do {
                                 try {

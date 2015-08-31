@@ -479,17 +479,23 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel {
         for (int i=0; i<list.size(); i++) {
             list.set(i, idfdir + list.get(i));
         }
-        if (Project.getRVIFile() != null) {
-            String rvifile = Project.resolveRVIDir() + Project.getRVIFile();
-            try {
-                RVX rvx = RVX.getRVX(rvifile);
-                if (rvx.getRVIs() != null && rvx.getRVIs().length > 0) {
-                    for (RVX_RVIitem item : rvx.getRVIs()) {
-                        list.add(RelativeDirUtil.checkAbsolutePath(item.getFileName(), Project.resolveRVIDir()));
-                    }
-                }
-            } catch (IOException ex) {
-                logger.error("Error loading rvi/rvx file " + rvifile, ex);
+//        if (Project.getRVIFile() != null) {
+//            String rvifile = Project.resolveRVIDir() + Project.getRVIFile();
+//            try {
+//                RVX rvx = RVX.getRVX(rvifile);
+//                if (rvx.getRVIs() != null && rvx.getRVIs().length > 0) {
+//                    for (RVX_RVIitem item : rvx.getRVIs()) {
+//                        list.add(RelativeDirUtil.checkAbsolutePath(item.getFileName(), Project.resolveRVIDir()));
+//                    }
+//                }
+//            } catch (IOException ex) {
+//                logger.error("Error loading rvi/rvx file " + rvifile, ex);
+//            }
+//        }
+        RVX rvx = Project.getRvx();
+        if (rvx != null && rvx.getRVIs() != null && rvx.getRVIs().length > 0) {
+            for (RVX_RVIitem item : rvx.getRVIs()) {
+                list.add(RelativeDirUtil.checkAbsolutePath(item.getFileName(), Project.resolveRVIDir()));
             }
         }
         txtStatus.setText(list.size() + " files found ...");

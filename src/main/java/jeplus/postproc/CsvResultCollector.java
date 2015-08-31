@@ -54,8 +54,9 @@ public class CsvResultCollector extends ResultCollector {
         int ResCollected = 0;
         ResultFiles.clear();
         try {
-            RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
-            if (rvx.getCSVs() != null) {
+            // RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
+            RVX rvx = JobOwner.getProject().getRvx();
+            if (rvx != null && rvx.getCSVs() != null) {
                 for (RVX_CSVitem item : rvx.getCSVs()) {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
@@ -69,7 +70,7 @@ public class CsvResultCollector extends ResultCollector {
                     ResCollected += ResultTable.size();
                 }
             }
-        }catch (IOException ex) {
+        }catch (Exception ex) {
             logger.error("Error reading RVX file " + JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile(), ex);
         }
         return ResCollected;

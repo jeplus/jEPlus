@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.TreeMap;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import javax.swing.JFrame;
@@ -122,7 +121,10 @@ public class EPlusBatch extends Thread {
     /** Flag for simulation running status */
     protected boolean SimulationRunning = false;
 
-    /** Result collector */
+    /** 
+     * Result collector 
+     * @deprecated Only used by EPlusPostFrameExt to collect simulation reports
+     */
     protected EPlusDefaultResultCollector Collector = null;
 
     /** Whether or not to use Job Archive to avoid repetition of simulation */
@@ -223,6 +225,11 @@ public class EPlusBatch extends Thread {
         this.GUI = GUI;
     }
 
+    /**
+     * 
+     * @return 
+     * @deprecated 
+     */
     public EPlusDefaultResultCollector getCollector() {
         return Collector;
     }
@@ -320,8 +327,21 @@ public class EPlusBatch extends Thread {
             setIdfFiles(Project.resolveIDFDir(), Project.getIDFTemplate());
             // Pares and validate Weather files
             setWthrFiles(Project.resolveWeatherDir(), Project.getWeatherFile());
-            // Check RVI file
-            Info.ValidationSuccessful &= checkFile (Project.resolveRVIDir() + Project.getRVIFile(), Info);
+            // Check RVX
+            if (Project.getRVIFile() != null) {
+                try {
+                    Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile()));
+                } catch (IOException ex) {
+                    logger.error("Error loading rvi/rvx file.", ex);
+                    Info.addValidationError("Cannot read rvi/rvx file " + Project.resolveRVIDir() + Project.getRVIFile());
+                    Info.ValidationSuccessful = false;
+                    Project.setRvx(null);
+                }
+            }
+            if (Project.getRvx() == null) {
+                Info.addValidationError("RVX is not available. No simulation result will be collected.");
+                Info.ValidationSuccessful = false;
+            }
         }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
             // Parse and validate DCK files
             setIdfFiles(Project.resolveDCKDir(), Project.getDCKTemplate());
@@ -1081,6 +1101,7 @@ public class EPlusBatch extends Thread {
      * buildJobs(String [][] jobArray) </code>
      * @param jobArray An array of jobs, see <code>buildJobs(String [][] jobArray) </code>
      * @return 
+     * @deprecated Not used?
      */
     public HashMap<String, ArrayList<ArrayList<double []>>>  simulateJobSet (String [][] jobArray) {
         runJobSet (jobArray);
@@ -1092,23 +1113,23 @@ public class EPlusBatch extends Thread {
         }catch (InterruptedException iex) {
             this.getAgent().setStopAgent(true);
         }
-        RVX rvx = null;
-        try {
-            rvx = RVX.getRVX(Project.getRVIDir() + Project.getRVIFile());
-        }catch (IOException ioe) {
-            logger.error("Error reading the project RVI/RVX file...", ioe);
-        }
+//        RVX rvx = null;
+//        try {
+//            rvx = RVX.getRVX(Project.getRVIDir() + Project.getRVIFile());
+//        }catch (IOException ioe) {
+//            logger.error("Error reading the project RVI/RVX file...", ioe);
+//        }
+        RVX rvx = Project.getRvx();
         return getSimulationResults(this.getAgent().getResultCollectors(), this.getResolvedEnv().getParentDir(), rvx, (this.isEnableArchive()?JobArchive:null));
     }
 
     /**
      * Build the given set of jobs but not start running. For the details of the jobArray, see <code>
      * buildJobs(String [][] jobArray) </code>
-     * @param type
-     * @param jobstr
+     * @param type Type of job string (INDEX, FILE, VALUE, or ID)
+     * @param jobstr The string containing the list of jobs
      */
     public void prepareJobSet (JobStringType type, String jobstr) {
-        if (! getBatchInfo().isValidationSuccessful()) validateProject();
         String [][] jobArray;
         switch (type) {
             case INDEX:
@@ -1164,15 +1185,43 @@ public class EPlusBatch extends Thread {
     }
 
     /**
+     * Run simulation on all jobs in the project 
+     */
+    public void runAll () {
+        validateProject();
+        if (getBatchInfo().isValidationSuccessful()) {
+            this.buildJobs();
+            // Start simulation
+            new Thread(this).start();
+        }
+    }
+
+    /**
+     * Run simulation on the jobs in the given job list string or file
+     * @param type Type of job string (INDEX, FILE, VALUE, or ID)
+     * @param jobstr The string containing the list of jobs
+     */
+    public void runJobSet (JobStringType type, String jobstr) {
+        validateProject();
+        if (getBatchInfo().isValidationSuccessful()) {
+            this.prepareJobSet(type, jobstr);
+            // Start simulation
+            new Thread(this).start();
+        }
+    }
+
+    /**
      * Simulate the given set of jobs. For the details of the jobArray, see <code>
      * buildJobs(String [][] jobArray) </code>
      * @param jobArray An array of jobs, see <code>
      * buildJobs(String [][] jobArray) </code>
      */
     public void runJobSet (String [][] jobArray) {
-        if (! getBatchInfo().isValidationSuccessful()) validateProject();
-        this.buildJobs(jobArray);
-        new Thread(this).start();
+        validateProject();
+        if (getBatchInfo().isValidationSuccessful()) {
+            this.buildJobs(jobArray);
+            new Thread(this).start();
+        }
     }
 
     /**
@@ -1197,9 +1246,12 @@ public class EPlusBatch extends Thread {
      * @param randomsrc Random generator
      */
     public void runRandomSample (int njobs, Random randomsrc) {
-        this.buildJobs(getRandomJobList(njobs, randomsrc));
-        // Start simulation
-        new Thread(this).start();
+        validateProject();
+        if (getBatchInfo().isValidationSuccessful()) {
+            this.buildJobs(getRandomJobList(njobs, randomsrc));
+            // Start simulation
+            new Thread(this).start();
+        }
     }
 
     /**
@@ -1234,7 +1286,6 @@ public class EPlusBatch extends Thread {
     }
 
     public String [][] getTestJobList () {
-        if (! getBatchInfo().isValidationSuccessful()) validateProject();
         int m = this.getNumberOfIDFs();
         int n = Info.ParamChains.size();
         String [][] jobs = new String [m * n] [Info.getSearchStrings().size() + 3];
@@ -1260,9 +1311,12 @@ public class EPlusBatch extends Thread {
     }
     
     public void runTest () {
-        this.buildJobs(getTestJobList());
-        // Start simulation
-        new Thread(this).start();
+        validateProject();
+        if (getBatchInfo().isValidationSuccessful()) {
+            this.buildJobs(getTestJobList());
+            // Start simulation
+            new Thread(this).start();
+        }
     }
     
     /**
@@ -1340,41 +1394,52 @@ public class EPlusBatch extends Thread {
             }
             for (String fn : fns) {
                 try (BufferedReader fr = new BufferedReader (new FileReader (result_folder + fn))) {
-                    fr.readLine();    // Skip the first line (headers)
-                    String line = fr.readLine();
-                    while (line != null && line.trim().length() > 0) {
+                    // Read the header row and work out how many data columns are expected
+                    int NDataCols = 0;
+                    String line = fr.readLine();    // the first line (headers)
+                    if (line != null && line.trim().length() > 0) {
                         String [] items = line.split("\\s*,\\s*");
-                        if (items.length > 3) {
-                            String job_id = items[1];
-                            ArrayList<ArrayList<double []>> JobResult;
-                            if (Results.containsKey(job_id)) {
-                                JobResult = Results.get(job_id);
-                            }else {
-                                JobResult = new ArrayList<>();
-                                Results.put(job_id, JobResult);
-                            }
-                            ArrayList<double []> rec;
-                            if (JobResult.size() > tabidx) {
-                                rec = JobResult.get(tabidx);
-                                if (rec == null) {
-                                    rec = new ArrayList<> ();
-                                    JobResult.set(tabidx, rec);
+                        NDataCols = Math.max(items.length - 3, 0);
+                        if (NDataCols > 0) {
+                            // continue reading
+                            line = fr.readLine();
+                            while (line != null && line.trim().length() > 0) {
+                                items = line.split("\\s*,\\s*");
+                                if (items.length > 3) {
+                                    String job_id = items[1];
+                                    ArrayList<ArrayList<double []>> JobResult;
+                                    if (Results.containsKey(job_id)) {
+                                        JobResult = Results.get(job_id);
+                                    }else {
+                                        JobResult = new ArrayList<>();
+                                        Results.put(job_id, JobResult);
+                                    }
+                                    ArrayList<double []> rec;
+                                    if (JobResult.size() > tabidx) {
+                                        rec = JobResult.get(tabidx);
+                                        if (rec == null) {
+                                            rec = new ArrayList<> ();
+                                            JobResult.set(tabidx, rec);
+                                        }
+                                    }else {
+                                        rec = new ArrayList<> ();
+                                        JobResult.add(rec);
+                                    }
+                                    double [] data = new double [NDataCols];
+                                    for (int k=0; k<NDataCols; k++) {
+                                        try {
+                                            data[k] = Double.parseDouble(items[k + 3]);
+                                        }catch (NumberFormatException nfe) {
+                                            data[k] = 0;
+                                        }catch (ArrayIndexOutOfBoundsException ex) {
+                                            data[k] = 0;
+                                        }
+                                    }
+                                    rec.add(data);
                                 }
-                            }else {
-                                rec = new ArrayList<> ();
-                                JobResult.add(rec);
+                                line = fr.readLine();
                             }
-                            double [] data = new double [items.length - 3];
-                            for (int k=3; k<items.length; k++) {
-                                try {
-                                    data[k-3] = Double.parseDouble(items[k]);
-                                }catch (NumberFormatException nfe) {
-                                    data[k-3] = 0;
-                                }
-                            }
-                            rec.add(data);
                         }
-                        line = fr.readLine();
                     }
                 }catch (Exception ex) {
                     logger.error("", ex);
@@ -1762,6 +1827,7 @@ public class EPlusBatch extends Thread {
      * @param projfn Name of the project file
      * @param showGUI
      * @return a new and initialised EPlusBatch object
+     * @deprecated Not used - don't know what this is for
      */
     public static EPlusBatch getSimManager (String projfn, boolean showGUI) {
         return getSimManager(JEPlusProject.loadAsXML(new File(projfn)), showGUI);
@@ -1772,6 +1838,7 @@ public class EPlusBatch extends Thread {
      * @param proj
      * @param showGUI
      * @return a new and initialised EPlusBatch object
+     * @deprecated Not used - don't know what this is for
      */
     public static EPlusBatch getSimManager (JEPlusProject proj, boolean showGUI) {
         // Create problem

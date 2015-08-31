@@ -105,8 +105,9 @@ public class UserResultCollector extends ResultCollector {
         int ResCollected = 0;
         ResultFiles.clear();
         try {
-            RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
-            if (rvx.getUserSupplied() != null) {
+            // RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
+            RVX rvx = JobOwner.getProject().getRvx();
+            if (rvx != null && rvx.getUserSupplied() != null) {
                 for (RVX_UserSuppliedItem item : rvx.getUserSupplied()) {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
@@ -120,7 +121,7 @@ public class UserResultCollector extends ResultCollector {
                     ResCollected += ResultTable.size();
                 }
             }
-        }catch (IOException ex) {
+        }catch (Exception ex) {
             logger.error("Error reading RVX file " + JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile(), ex);
         }
         return ResCollected;

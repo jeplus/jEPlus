@@ -89,7 +89,7 @@ public class JEPlusProject implements Serializable {
     transient private boolean ContentChanged = false;
     
     /** Base directory of the project, i.e. the location where the project file is saved */
-    transient protected String BaseDir = null;
+    protected String BaseDir = null;
     
     /** Project Type: E+ or TRNSYS */
     protected int ProjectType = -1; // set to illegal type
@@ -226,6 +226,7 @@ public class JEPlusProject implements Serializable {
             ExecSettings = new ExecutionOptions (proj.ExecSettings);
             Parameters = proj.Parameters;
             ParamTree = proj.ParamTree;
+            Rvx = proj.Rvx;
         }
     }
 

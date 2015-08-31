@@ -281,7 +281,7 @@ public class EPlusWorkEnv implements Serializable {
     }
     
     public boolean isRVX () {
-        return (RVIFile.toLowerCase().endsWith(EPlusConfig.getJEPlusRvxExt()));
+        return (RVIFile == null || RVIFile.toLowerCase().endsWith(EPlusConfig.getJEPlusRvxExt()));
     }
     
     @Override

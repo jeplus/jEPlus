@@ -181,19 +181,29 @@ public class EPlusSQLiteReader implements IFResultReader {
                     }
                 }
                 // add new data
-                for (int i=0; i<data.size(); i++) {
+                if (data.isEmpty()) {
                     ArrayList<String> row = new ArrayList<> ();
                     row.add(Integer.toString(table.size()));
                     row.add(job_id);
                     row.add(" ");
                     // add a new row in the data table
                     for (int j=3; j<header.size(); j++) row.add("-");
-                    // fill in data from the result file
-                    for (int j=0; j<data.get(i).length; j++) {
-                        row.set(index[j], data.get(i)[j].toString());
-                    }
-                    nResCollected ++;
                     table.add(row);
+                }else {
+                    for (int i=0; i<data.size(); i++) {
+                        ArrayList<String> row = new ArrayList<> ();
+                        row.add(Integer.toString(table.size()));
+                        row.add(job_id);
+                        row.add(" ");
+                        // add a new row in the data table
+                        for (int j=3; j<header.size(); j++) row.add("-");
+                        // fill in data from the result file
+                        for (int j=0; j<data.get(i).length; j++) {
+                            row.set(index[j], data.get(i)[j].toString());
+                        }
+                        nResCollected ++;
+                        table.add(row);
+                    }
                 }
             }
         } catch (Exception ex) {

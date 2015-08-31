@@ -64,8 +64,9 @@ public class EsoResultCollector extends ResultCollector {
         int ResCollected = 0;
         ResultFiles.clear();
         try {
-            RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
-            if (rvx.getRVIs() != null) {
+            // RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
+            RVX rvx = JobOwner.getProject().getRvx();
+            if (rvx != null && rvx.getRVIs() != null) {
                 for (RVX_RVIitem item : rvx.getRVIs()) {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
@@ -79,7 +80,7 @@ public class EsoResultCollector extends ResultCollector {
                     ResCollected += ResultTable.size();
                 }
             }
-        }catch (IOException ex) {
+        }catch (Exception ex) {
             logger.error("Error reading RVX file " + JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile(), ex);
         }
         return ResCollected;

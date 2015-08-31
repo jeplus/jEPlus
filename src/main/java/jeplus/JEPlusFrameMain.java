@@ -609,12 +609,11 @@ public class JEPlusFrameMain extends JEPlusFrame {
         }
         // Build jobs
         OutputPanel.appendContent("Building jobs ... ");
-        BatchManager.buildJobs();
-        OutputPanel.appendContent("" + BatchManager.getJobQueue().size() + " jobs created.\n");
-        OutputPanel.appendContent("Starting simulation ...\n");
-        // Start job
         ActingManager = BatchManager;
-        new Thread(ActingManager).start();
+        // Start job
+        ActingManager.runAll();
+        OutputPanel.appendContent("" + ActingManager.getJobQueue().size() + " jobs created.\n");
+        OutputPanel.appendContent("Starting simulation ...\n");
     }
 
     /**
@@ -707,8 +706,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
             TpnEditors.setSelectedComponent(OutputPanel);
         }
         ActingManager = BatchManager;
-        ActingManager.prepareJobSet(EPlusBatch.JobStringType.FILE, file);
-        new Thread(ActingManager).start();
+        ActingManager.runJobSet(EPlusBatch.JobStringType.FILE, file);
         OutputPanel.appendContent("" + ActingManager.getNumberOfJobs() + " jobs in " + file + " started ...\n");
     }
 
@@ -2938,7 +2936,6 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             DefaultDir = new File (Project.getBaseDir());
             // Batch options gui
             this.initBatchOptions();
-            this.setCurrentProjectFile(file.getPath());
         }
     }
 
