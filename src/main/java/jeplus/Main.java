@@ -139,11 +139,16 @@ public class Main {
      * @param commandline CommandLine arguments
      */
     public void mainFunction (CommandLine commandline) {
-        
+        // jE+ Configuration file
         String cfgfile = "jeplus.cfg";
         if (commandline.hasOption("cfg")) {
             cfgfile = commandline.getOptionValue("cfg");
         }
+        // load E+ configuration
+        boolean showSplash = false;
+        if (! new File (cfgfile).exists()) { showSplash = true; }
+        JEPlusConfig.setDefaultInstance(new JEPlusConfig (cfgfile));
+        // Set local threads
         int nthread = Runtime.getRuntime().availableProcessors();
         if (commandline.hasOption("local")) {
             try {
@@ -151,10 +156,12 @@ public class Main {
             }catch (Exception ex) {
             }
         }
+        // Get project file
         String prjfile = null;
         if (commandline.hasOption("job")) {
             prjfile = commandline.getOptionValue("job");
         }
+        // Get output folder
         String output = null;
         if (commandline.hasOption("output")) {
             output = commandline.getOptionValue("output");
@@ -191,8 +198,6 @@ public class Main {
                     commandline.hasOption("index") || commandline.hasOption("value") || commandline.hasOption("id") || 
                     commandline.hasOption("file")) {
                         showGUI = false;
-                        // load E+ configuration
-                        JEPlusConfig.setDefaultInstance(new JEPlusConfig (cfgfile));
                         // validate project
                         EPlusBatchInfo info = batch.validateProject();
                         System.err.println(info.getValidationErrorsText());
@@ -257,7 +262,7 @@ public class Main {
         }
         
         if (showGUI == true) {
-            JEPlusFrameMain.startGUI(new JEPlusFrameMain(), cfgfile, prjfile);
+            JEPlusFrameMain.startGUI(new JEPlusFrameMain(), prjfile, showSplash);
         }
     }
     

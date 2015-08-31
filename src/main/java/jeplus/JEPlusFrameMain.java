@@ -2979,8 +2979,10 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     /**
      * Initialise and load GUI
      * @param frame The Frame object to load
+     * @param prjfile File name of project to load
+     * @param showSplash Flag to show splash window or not
      */
-    public static void startGUI(final JEPlusFrameMain frame, final String cfgfile, final String prjfile) {
+    public static void startGUI(final JEPlusFrameMain frame, final String prjfile, final boolean showSplash) {
         if (frame != null) {
             // Note down the current main window instance
             CurrentMainWindow = frame;
@@ -2988,10 +2990,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             java.awt.EventQueue.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    boolean cfg_available = JEPlusConfig.getDefaultInstance().loadFromFile(cfgfile);
-                    if (cfg_available) {
-                        JEPlusConfig.getDefaultInstance().purgeScreenLogFile();
-                    }
+                    // Clear console log file content
+                    JEPlusConfig.getDefaultInstance().purgeScreenLogFile();
+                    // Set recent projects in menu
                     ArrayList<String> recent = JEPlusConfig.getRecentProjects();
                     if (recent != null) {
                         int idx = 0;
@@ -3012,7 +3013,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
 //                    // Start a new thread for output panel
 //                    new Thread (frame.OutputPanel).start();
                     // Load EnergyPlus settings
-                    if (! cfg_available ) {
+                    if (showSplash) {
                         showSplash(frame);
                         // this.cmdEditEPlusSettingsActionPerformed(null);
                     }

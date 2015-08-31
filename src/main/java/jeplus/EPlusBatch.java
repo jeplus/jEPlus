@@ -1821,47 +1821,5 @@ public class EPlusBatch extends Thread {
             logger.error("Error write derived results table to " + tablefile, ex);
         }
     }
-    
-    /**
-     * Build a simulation manager with the specified project file
-     * @param projfn Name of the project file
-     * @param showGUI
-     * @return a new and initialised EPlusBatch object
-     * @deprecated Not used - don't know what this is for
-     */
-    public static EPlusBatch getSimManager (String projfn, boolean showGUI) {
-        return getSimManager(JEPlusProject.loadAsXML(new File(projfn)), showGUI);
-    }
-
-    /**
-     * Build a simulation manager with the specified project file
-     * @param proj
-     * @param showGUI
-     * @return a new and initialised EPlusBatch object
-     * @deprecated Not used - don't know what this is for
-     */
-    public static EPlusBatch getSimManager (JEPlusProject proj, boolean showGUI) {
-        // Create problem
-        JEPlusProject Project = proj;
-        JEPlusFrameMain GUI = null;
-        if (showGUI) {
-            GUI = new JEPlusFrameMain ();
-            GUI.setDefaultCloseOperation(JEPlusFrameMain.DISPOSE_ON_CLOSE);
-            JEPlusFrameMain.startGUI(GUI, "jeplus.cfg", null);
-            GUI.setProject(Project, null);
-        }
-        EPlusBatch SimManager = new EPlusBatch (GUI, Project);
-        if (showGUI && GUI != null) GUI.setBatchManager(SimManager);
-        if (Project.getProjectType() == JEPlusProject.EPLUS) {
-            SimManager.setAgent(new EPlusAgentLocal (Project.getExecSettings()));
-        }else {
-            SimManager.setAgent(new TrnsysAgentLocal (Project.getExecSettings()));
-        }
-        System.out.println(SimManager.validateProject().getValidationErrorsText());
-        if (SimManager.getBatchInfo().isValidationSuccessful()) {
-            SimManager.buildJobs();
-            SimManager.setEnableArchive(true);
-        }
-        return SimManager;
-    }
+   
 }
