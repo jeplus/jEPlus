@@ -993,7 +993,7 @@ public class JEPlusProject implements Serializable {
                 fw.println("# Parameter definitions in a csv file. Column headings are as below");
                 fw.println("# ID, Name, Parameter Type, Description, Search String, Value Type, Value String, Selected Value Index");
                 fw.println("#           {0}                                         {0, 1, 2}                 {0, .... depending on number of values}");
-                fw.println("# Please note , or ' must not be used in data fields, e.g. {1, 2, 3} will cause errors; use { 1 2 3 } instead.");
+                fw.println("# ");
                 DefaultMutableTreeNode thisleaf = ParamTree.getFirstLeaf();
                 Object[] path = thisleaf.getUserObjectPath();
                 for (Object obj : path) {

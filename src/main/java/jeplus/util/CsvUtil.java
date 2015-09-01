@@ -113,6 +113,10 @@ public class CsvUtil {
         return buf.toArray(new String[0][]);
     }
 
+    public static String stripEnclosingQuotes (String text) {
+        return text.replaceAll("(^[\"\'])|([\"\']$)", "");
+    }
+    
     /**
      * Parse input text as CSV
      * @param text input text

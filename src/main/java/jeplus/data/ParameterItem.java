@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import jeplus.JEPlusProject;
+import jeplus.util.CsvUtil;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
 
@@ -155,13 +156,13 @@ public class ParameterItem implements Serializable, Cloneable {
     public ParameterItem (JEPlusProject project, String [] vals) {
         // Input sequence: ID, Name, Parameter Type, Description, Search String, Value Type, Value String, Selected Value Index
         try {
-            ID = vals[0];
-            Name = vals[1];
+            ID = CsvUtil.stripEnclosingQuotes(vals[0]);
+            Name = CsvUtil.stripEnclosingQuotes(vals[1]);
             ParamType = Integer.parseInt(vals[2]);
-            Description = vals[3];
-            SearchString = vals[4];
+            Description = CsvUtil.stripEnclosingQuotes(vals[3]);
+            SearchString = CsvUtil.stripEnclosingQuotes(vals[4]);
             Type = Integer.parseInt(vals[5]);
-            ValuesString = vals[6];
+            ValuesString = CsvUtil.stripEnclosingQuotes(vals[6]);
             SelectedAltValue = Integer.parseInt(vals[7]);
             ValueStringChanged = true;
             Project = project;
@@ -759,7 +760,7 @@ public class ParameterItem implements Serializable, Cloneable {
         StringBuilder buf = new StringBuilder (ID);
         buf.append(",").append(Name);
         buf.append(",").append(ParamType);
-        buf.append(",").append(Description);
+        buf.append(",\"").append(Description).append("\"");
         buf.append(",").append(SearchString);
         buf.append(",").append(Type);
         buf.append(",").append(ValuesString);
