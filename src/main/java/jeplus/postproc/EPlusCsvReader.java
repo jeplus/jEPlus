@@ -105,33 +105,44 @@ public class EPlusCsvReader implements IFResultReader {
                 line = fr.readLine();
             }
             // Locate table, then Column, then Row
-            boolean found_table = true, found_column = false, found_row = false;
+            boolean found_report = true, found_table = true, found_column = false, found_row = false;
             int ColId = 0;
             String Cell = "-";
+            if (CsvSpecs.getFromReport() != null && CsvSpecs.getFromReport().trim().length()>0) {
+                found_report = false;
+            }
             if (CsvSpecs.getFromTable() != null && CsvSpecs.getFromTable().trim().length()>0) {
                 found_table = false;
             }
             for (String [] row : spreadsheet) {
-                if (found_table) {
-                    // Check if the requested column is in the header
-                    if (! found_column) {
-                        for (int i=0; i<row.length; i++) {
-                            if (row[i].equalsIgnoreCase(CsvSpecs.getFromColumn())) {
-                                ColId = i;
-                                found_column = true;
+                if (found_report) {
+                    if (found_table) {
+                        // Check if the requested column is in the header
+                        if (! found_column) {
+                            for (int i=0; i<row.length; i++) {
+                                if (row[i].equalsIgnoreCase(CsvSpecs.getFromColumn())) {
+                                    ColId = i;
+                                    found_column = true;
+                                }
+                            }
+                        }else {
+                            // Now find the requested row with the row header
+                            if (row.length>2 && row.length > ColId && row[1].equalsIgnoreCase(CsvSpecs.getFromRow())) {
+                                found_row = true;
+                                Cell = row[ColId];
+                                break;
                             }
                         }
                     }else {
-                        // Now find the requested row with the row header
-                        if (row.length>2 && row.length > ColId && row[1].equalsIgnoreCase(CsvSpecs.getFromRow())) {
-                            found_row = true;
-                            Cell = row[ColId];
-                            break;
+                        if (row.length > 0 && row[0]!=null && row[0].equalsIgnoreCase(CsvSpecs.getFromTable())) {
+                            found_table = true;
                         }
                     }
                 }else {
-                    if (row.length > 0 && row[0]!=null && row[0].equalsIgnoreCase(CsvSpecs.getFromTable())) {
-                        found_table = true;
+                    if (row.length > 1 && 
+                        row[0]!=null && row[0].equalsIgnoreCase("REPORT:") &&
+                        row[1]!=null && row[1].equalsIgnoreCase(CsvSpecs.getFromReport())) {
+                            found_report = true;
                     }
                 }
             }

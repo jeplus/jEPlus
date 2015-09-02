@@ -21,6 +21,7 @@ import java.io.Serializable;
 //	"csvs" : [
 //		{
 //                      "sourceCsv"  : "eplustbl.csv",
+//                      "fromReport"  : "Annual Building Utility Performance Summary",
 //                      "fromTable"  : "Heating Coils",
 //                      "fromColumn" : "Nominal Total Capacity [W]",
 //                      "fromRow"    : "TEST AIR-TO-AIR HEAT PUMP HP HEATING COIL",
@@ -31,10 +32,11 @@ import java.io.Serializable;
 //	],
 public class RVX_CSVitem implements Serializable {
     private String SourceCsv = ""; 
+    private String FromReport = ""; 
     private String FromTable = ""; 
     private String FromColumn = ""; 
     private String FromRow = ""; 
-    private String TableName = "CsvTable.csv"; // E.g.
+    private String TableName = "CsvTable"; // E.g.
     private String ColumnHeaders = null; // E.g. "Temperature [K], Heating [kWh]"
     private boolean UsedInCalc = true;
 
@@ -44,6 +46,14 @@ public class RVX_CSVitem implements Serializable {
 
     public void setSourceCsv(String SourceCsv) {
         this.SourceCsv = SourceCsv;
+    }
+
+    public String getFromReport() {
+        return FromReport;
+    }
+
+    public void setFromReport(String FromReport) {
+        this.FromReport = FromReport;
     }
 
     public String getFromTable() {
