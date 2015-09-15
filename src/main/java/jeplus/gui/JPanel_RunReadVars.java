@@ -559,9 +559,8 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
             EPlusEditorPanel RviFilePanel = new EPlusEditorPanel(
                 MainFrame.getTpnEditors(),
                 fn,
-                EPlusConfig.getFileFilter(EPlusConfig.RVI),
                 templfn,
-                "text/EPlusRVI",
+                EPlusEditorPanel.FileType.RVI,
                 null);
             int ti = MainFrame.getTpnEditors().getTabCount();
             MainFrame.getTpnEditors().addTab(txtExtraRviFile.getText(), RviFilePanel);

@@ -568,9 +568,8 @@ public class JPanelRunPython extends javax.swing.JPanel {
             EPlusEditorPanel WthrFilePanel = new EPlusEditorPanel(
                     MainFrame.getTpnEditors(),
                     fn,
-                    EPlusConfig.getFileFilter(EPlusConfig.PYTHON),
                     templfn,
-                    SyntaxConstants.SYNTAX_STYLE_PYTHON,
+                    EPlusEditorPanel.FileType.PYTHON,
                     null);
             int ti = MainFrame.getTpnEditors().getTabCount();
             WthrFilePanel.setTabId(ti);

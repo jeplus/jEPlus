@@ -1,29 +1,24 @@
-/***************************************************************************
- *   jEPlus - EnergyPlus shell for parametric studies                      *
- *   Copyright (C) 2010  Yi Zhang <yizhanguk@googlemail.com>               *
- *                                                                         *
- *   This program is free software: you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation, either version 3 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                         *
- ***************************************************************************
- *                                                                         *
- * Change log:                                                             *
- *                                                                         *
- *  - Created                                                              *
- *                                                                         *
- ***************************************************************************/
+/**
+ * *************************************************************************
+ * jEPlus - EnergyPlus shell for parametric studies * Copyright (C) 2010 Yi
+ * Zhang <yizhanguk@googlemail.com> * * This program is free software: you can
+ * redistribute it and/or modify * it under the terms of the GNU General Public
+ * License as published by * the Free Software Foundation, either version 3 of
+ * the License, or * (at your option) any later version. * * This program is
+ * distributed in the hope that it will be useful, * but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of * MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the * GNU General Public License for more details. *
+ * * You should have received a copy of the GNU General Public License * along
+ * with this program. If not, see <http://www.gnu.org/licenses/>. * *
+ * ************************************************************************** *
+ * Change log: * * - Created * *
+ **************************************************************************
+ */
 package jeplus.gui;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.event.ActionEvent;
 import java.awt.Container;
 import java.awt.Dialog;
@@ -38,21 +33,24 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
+import jeplus.EPlusConfig;
+import jeplus.INSELConfig;
+import jeplus.JEPlusConfig;
 import jeplus.JEPlusProject;
-import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
+import jeplus.data.RVX;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.Theme;
-import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 import org.slf4j.LoggerFactory;
 
 /**
- * Text editor panel for editing various E+, TRNSYS, INSEL model files. This editor is based on 
- * Fifesoft's RSyntaxTextArea.
- * 
+ * Text editor panel for editing various E+, TRNSYS, INSEL model files. This
+ * editor is based on Fifesoft's RSyntaxTextArea.
+ *
  * @author Yi Zhang
  * @version 1.5
  * @since 1.5
@@ -62,32 +60,80 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
     /**
      * Logger
      */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusEditorPanel.class);
+    final static private org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusEditorPanel.class);
 
-    /** The container component of this panel */
+    public enum FileType {
+
+        IDF("text/EPlusIDF", JEPlusConfig.getFileFilter(JEPlusConfig.EPINPUT)),
+        EPW("text/EPlusEPW", JEPlusConfig.getFileFilter(JEPlusConfig.EPW)),
+        RVI("text/EPlusRVI", JEPlusConfig.getFileFilter(JEPlusConfig.RVI)),
+        RVX(SyntaxConstants.SYNTAX_STYLE_JSON, JEPlusConfig.getFileFilter(JEPlusConfig.RVX)),
+        JSON(SyntaxConstants.SYNTAX_STYLE_JSON, JEPlusConfig.getFileFilter(JEPlusConfig.JSON)),
+        PYTHON(SyntaxConstants.SYNTAX_STYLE_PYTHON, JEPlusConfig.getFileFilter(JEPlusConfig.PYTHON)),
+        CSV(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, JEPlusConfig.getFileFilter(JEPlusConfig.CSV)),
+        PLAIN(SyntaxConstants.SYNTAX_STYLE_NONE, JEPlusConfig.getFileFilter(JEPlusConfig.ALL)),
+        XML(SyntaxConstants.SYNTAX_STYLE_XML, JEPlusConfig.getFileFilter(JEPlusConfig.XML));
+
+        private final String RSTA_Style;
+        private final FileFilter Filter;
+
+        FileType(String style, FileFilter filter) {
+            this.RSTA_Style = style;
+            this.Filter = filter;
+        }
+
+        public String getRSTA_Style() {
+            return this.RSTA_Style;
+        }
+
+        public FileFilter getFileFilter() {
+            return this.Filter;
+        }
+    }
+
+    protected FileType ContentType = FileType.IDF;
+
+    /**
+     * The container component of this panel
+     */
     protected Container ContainerComponent = null;
 
-    /** Title of this TextPanel */
+    /**
+     * Title of this TextPanel
+     */
     protected String Title = null;
 
-    /** File chooser */
+    /**
+     * File chooser
+     */
     JFileChooser FC = new JFileChooser("./");
 
-    /** tab index for easy access */
+    /**
+     * tab index for easy access
+     */
     protected int TabId = 0;
 
-    /** Reference to the JEPlus Project, for up-to-date search strings */
+    /**
+     * Reference to the JEPlus Project, for up-to-date search strings
+     */
     protected JEPlusProject Project = null;
 
-    /** Current viewing/editing file name */
+    /**
+     * Current viewing/editing file name
+     */
     protected String CurrentFileName = null;
 
-    /** Has the content been changed by editing or not */
+    /**
+     * Has the content been changed by editing or not
+     */
     protected boolean ContentChanged = false;
 
-    /** Model for the text content */
+    /**
+     * Model for the text content
+     */
     private Document Document = null;
 
+    // ========= Getters and Setters =========
     public boolean isContentChanged() {
         return ContentChanged;
     }
@@ -116,7 +162,8 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
     public void setTabId(int TabId) {
         this.TabId = TabId;
     }
-    
+
+    // ========== End getters and setters ==========
     /**
      * Creates new form EPlusTextPanel
      */
@@ -129,39 +176,75 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
      * Create text panel with the specified title, text, and mode
      *
      * @param container Reference to the container of this panel
-     * @param title Title for this panel, to appear in the title field of a frame, or title of a tab
-     * @param filefilter 
-     * @param filename The name of the file to be openned
-     * @param style Syntax style string
+     * @param title Title for this panel, to appear in the title field of a
+     * frame, or title of a tab
+     * @param filename The name of the file to be opened
+     * @param type The predefined file type
      * @param project
      */
-    public EPlusEditorPanel(Container container, String title, FileFilter filefilter, String filename, String style, JEPlusProject project) {
+    public EPlusEditorPanel(Container container, String title, String filename, FileType type, JEPlusProject project) {
         initComponents();
-        initRSTA(style);
-        this.ContainerComponent = container;
-        this.cmdLoad.setEnabled(true);
-        this.cmdSave.setEnabled(true);
-        // this.cboSearchStrings.setEditable(true);
-        FC.setFileFilter(filefilter);
+        initRSTA(type.getRSTA_Style());
+        FC.setFileFilter(type.getFileFilter());
         FC.setMultiSelectionEnabled(false);
-        CurrentFileName = filename;
-        Project = project;
-        updateSearchStrings ();
+        this.ContainerComponent = container;
         this.Title = title;
-        String content = getFileContent(CurrentFileName);
-        this.rsTextArea.setText(content);
+        this.CurrentFileName = filename;
+        if (CurrentFileName != null) {
+            this.rsTextArea.setText(getFileContent(CurrentFileName));
+        }
+        this.ContentType = type;
         this.ContentChanged = false;
-        Document = rsTextArea.getDocument();
+        this.Project = project;
+        switch (ContentType) {
+            case IDF:
+                updateSearchStrings((Project == null) ? null : Project.getSearchStrings());
+                this.cmdLoad.setEnabled(true);
+                this.cmdCheck.setEnabled(false);
+                this.cmdSave.setEnabled(true);
+                break;
+            case EPW:
+            case RVI:
+                updateSearchStrings(null);
+                this.cmdLoad.setEnabled(false);
+                this.cmdCheck.setEnabled(false);
+                this.cmdSave.setEnabled(true);
+                break;
+            case RVX:
+                updateSearchStrings(RVX.quickIndex());
+                this.cmdLoad.setEnabled(false);
+                this.cmdCheck.setEnabled(true);
+                this.cmdSave.setEnabled(true);
+                break;
+            case JSON:
+                updateSearchStrings(null);
+                this.cmdLoad.setEnabled(false);
+                this.cmdCheck.setEnabled(true);
+                this.cmdSave.setEnabled(false);
+                break;
+            case PYTHON:
+            case CSV:
+            case XML:
+            case PLAIN:
+            default:
+                updateSearchStrings(null);
+                this.cmdLoad.setEnabled(true);
+                this.cmdCheck.setEnabled(false);
+                this.cmdSave.setEnabled(true);
+        }
+        // this.cboSearchStrings.setEditable(true);
+
+        this.Document = rsTextArea.getDocument();
         Document.addDocumentListener(this);
     }
 
     private void initRSTA(String syntaxstyle) {
-        
+
         rsTextArea.setCodeFoldingEnabled(true);
         rsTextArea.setAntiAliasingEnabled(true);
         // rsTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         rsTextArea.setSyntaxEditingStyle(syntaxstyle);
-        
+
         rTextScrollPane1.setFoldIndicatorEnabled(true);
         rTextScrollPane1.setLineNumbersEnabled(true);
 
@@ -176,16 +259,16 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         });
         prevButton.setActionCommand("FindPrev");
         prevButton.addActionListener(this);
-        
+
         try {
 //           Theme theme = Theme.load(getClass().getResourceAsStream("/jeplus/gui/themes/eclipse.xml"));
-           Theme theme = Theme.load(new FileInputStream("RSyntaxTheme.xml"));
-           theme.apply(rsTextArea);
+            Theme theme = Theme.load(new FileInputStream("RSyntaxTheme.xml"));
+            theme.apply(rsTextArea);
         } catch (IOException ioe) { // Never happens
-           logger.error("Failed to apply theme from RSyntaxTheme.xml. Default is used.", ioe);
+            logger.error("Failed to apply theme from RSyntaxTheme.xml. Default is used.", ioe);
         }
         setFont(rsTextArea, rsTextArea.getFont().deriveFont(13f));
-        
+
     }
 
     /**
@@ -214,7 +297,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         String command = e.getActionCommand();
         if (command != null && command.toLowerCase().equals("tab closing")) {
             closeTextPanel();
-        }else {
+        } else {
             boolean forward = "FindNext".equals(command);
 
             // Create an object defining our search parameters.
@@ -231,7 +314,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
 
             SearchResult found = SearchEngine.find(rsTextArea, context);
             if (!found.wasFound()) {
-                rsTextArea.setCaretPosition(forward ? 0 : rsTextArea.getDocument().getLength()-1);
+                rsTextArea.setCaretPosition(forward ? 0 : rsTextArea.getDocument().getLength() - 1);
                 found = SearchEngine.find(rsTextArea, context);
                 if (!found.wasFound()) {
                     JOptionPane.showMessageDialog(this, "Text not found");
@@ -265,9 +348,10 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
     }
 
     /**
-     * Utility to load content of a file into a String object
+     * Utility to save the string content to a file
+     *
      * @param filename String
-     * @return String
+     * @param content
      */
     public static void saveFileContent(String filename, String content) {
         try (OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(filename), "ISO-8859-1")) {
@@ -280,56 +364,81 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         }
     }
 
-    public final void updateSearchStrings () {
-        String [] searchstrings = (Project == null)? null : Project.getSearchStrings();
+    public final void updateSearchStrings(String[] searchstrings) {
         if (searchstrings != null) {
             Vector<String> SSs = new Vector<>();
             for (String searchstring : searchstrings) {
                 String[] sstrs = searchstring.split("\\s*\\|\\s*");
                 SSs.addAll(Arrays.asList(sstrs));
             }
-            this.cboSearchStrings.setModel(new DefaultComboBoxModel (SSs));
+            this.cboSearchStrings.setModel(new DefaultComboBoxModel(SSs));
             this.cboSearchStrings.setEnabled(true);
-        }else {
-            this.cboSearchStrings.setModel(new DefaultComboBoxModel ());
+        } else {
+            this.cboSearchStrings.setModel(new DefaultComboBoxModel());
             this.cboSearchStrings.setEnabled(false);
         }
     }
-    
-    /** Make changes to UI to notify content change */
-    public final void notifyContentChange (boolean contentchanged) {
+
+    /**
+     * Make changes to UI to notify content change
+     *
+     * @param contentchanged
+     */
+    public final void notifyContentChange(boolean contentchanged) {
         if (contentchanged) {
             this.cmdSave.setEnabled(true);
             if (ContainerComponent instanceof Frame) {
-                ((Frame)ContainerComponent).setTitle(getTitle() + "*");
-            }else if (ContainerComponent instanceof Dialog) {
-                ((Dialog)ContainerComponent).setTitle(getTitle() + "*");
-            }else if (ContainerComponent instanceof JTabbedPane) {
+                ((Frame) ContainerComponent).setTitle(getTitle() + "*");
+            } else if (ContainerComponent instanceof Dialog) {
+                ((Dialog) ContainerComponent).setTitle(getTitle() + "*");
+            } else if (ContainerComponent instanceof JTabbedPane) {
                 if (TabId > 0) {
                     //((JTabbedPane)ContainerComponent).setTitleAt(getTabId(), getTitle() + "*");
-                    JTabbedPane jtb = (JTabbedPane)ContainerComponent;
+                    JTabbedPane jtb = (JTabbedPane) ContainerComponent;
                     jtb.setTitleAt(jtb.indexOfComponent(this), getTitle() + "*");
                 }
             }
-        }else {
+        } else {
             this.cmdSave.setEnabled(false);
             if (ContainerComponent instanceof Frame) {
-                ((Frame)ContainerComponent).setTitle(getTitle());
-            }else if (ContainerComponent instanceof Dialog) {
-                ((Dialog)ContainerComponent).setTitle(getTitle());
-            }else if (ContainerComponent instanceof JTabbedPane) {
+                ((Frame) ContainerComponent).setTitle(getTitle());
+            } else if (ContainerComponent instanceof Dialog) {
+                ((Dialog) ContainerComponent).setTitle(getTitle());
+            } else if (ContainerComponent instanceof JTabbedPane) {
                 if (TabId > 0) {
                     //((JTabbedPane)ContainerComponent).setTitleAt(getTabId(), getTitle());
-                    JTabbedPane jtb = (JTabbedPane)ContainerComponent;
+                    JTabbedPane jtb = (JTabbedPane) ContainerComponent;
                     jtb.setTitleAt(jtb.indexOfComponent(this), getTitle());
                 }
             }
         }
     }
 
+    public void validateJSON(final String json) {
+        boolean valid = false;
+        String msg = null;
+        try {
+            final JsonParser parser = new ObjectMapper().getJsonFactory()
+                    .createJsonParser(json);
+            while (parser.nextToken() != null) {
+            }
+            valid = true;
+        } catch (JsonParseException jpe) {
+            msg = jpe.getLocalizedMessage();
+        } catch (IOException ioe) {
+            msg = ioe.getLocalizedMessage();
+        }
+        if (! valid) {
+            JOptionPane.showMessageDialog(this, "<html><p>JSON contents is not valid. Please check:</p><p>" + msg, "Success", JOptionPane.ERROR_MESSAGE);
+        }else {
+            JOptionPane.showMessageDialog(this, "JSON contents is valid!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
     /**
-     * This method is called from within the constructor to initialise the form. WARNING: Do NOT modify this code. The content of this
-     * method is always regenerated by the Form Editor.
+     * This method is called from within the constructor to initialise the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -339,6 +448,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         rsTextArea = new org.fife.ui.rsyntaxtextarea.RSyntaxTextArea();
         jToolBar1 = new javax.swing.JToolBar();
         cmdLoad = new javax.swing.JButton();
+        cmdCheck = new javax.swing.JButton();
         cmdSave = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JToolBar.Separator();
         jLabel2 = new javax.swing.JLabel();
@@ -378,6 +488,17 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
             }
         });
         jToolBar1.add(cmdLoad);
+
+        cmdCheck.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/check.png"))); // NOI18N
+        cmdCheck.setFocusable(false);
+        cmdCheck.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        cmdCheck.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        cmdCheck.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdCheckActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(cmdCheck);
 
         cmdSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/save1.png"))); // NOI18N
         cmdSave.setToolTipText("Save the current file");
@@ -477,9 +598,9 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         // Confirm save before open another file
         if (this.isContentChanged()) {
             int ans = JOptionPane.showConfirmDialog(this,
-                "The contents of " + CurrentFileName + " has been modified. Would you like to save the changes first?",
-                "Confirm saving ...",
-                JOptionPane.YES_NO_OPTION);
+                    "The contents of " + CurrentFileName + " has been modified. Would you like to save the changes first?",
+                    "Confirm saving ...",
+                    JOptionPane.YES_NO_OPTION);
             if (ans == JOptionPane.YES_OPTION) {
                 saveFileContent(this.CurrentFileName, rsTextArea.getText());
             }
@@ -490,7 +611,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
             String name = FC.getSelectedFile().getName();
             // Open idf/imf file
             rsTextArea.setText(getFileContent(CurrentFileName));
-            setContentChanged (false);
+            setContentChanged(false);
             this.Title = name;
             notifyContentChange(false);
         }
@@ -502,11 +623,18 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
     }//GEN-LAST:event_cboSearchStringsActionPerformed
 
     private void cmdRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
-        updateSearchStrings();
+        if (ContentType.equals(FileType.IDF)) {
+            updateSearchStrings((Project == null) ? null : Project.getSearchStrings());
+        }
     }//GEN-LAST:event_cmdRefreshActionPerformed
+
+    private void cmdCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCheckActionPerformed
+        validateJSON(this.rsTextArea.getText());
+    }//GEN-LAST:event_cmdCheckActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboSearchStrings;
+    private javax.swing.JButton cmdCheck;
     private javax.swing.JButton cmdLoad;
     private javax.swing.JButton cmdRefresh;
     private javax.swing.JButton cmdSave;
@@ -527,14 +655,14 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
 
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());            
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             // UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
             // UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
             // UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         } catch (Exception ex) {
             System.err.println(ex);
         }
-        
+
         JFrame frame = new JFrame("E+ idf TextPanel test");
         frame.getContentPane().add(new EPlusEditorPanel());
         //frame.getContentPane().add(new EPlusTextPanel (null, null, 1, null, null, null));
@@ -547,40 +675,39 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
 
     @Override
     public void insertUpdate(DocumentEvent e) {
-        setContentChanged (true);
+        setContentChanged(true);
     }
 
     @Override
     public void removeUpdate(DocumentEvent e) {
-        setContentChanged (true);
+        setContentChanged(true);
     }
 
     @Override
     public void changedUpdate(DocumentEvent e) {
     }
 
-    
     @Override
     public void closeTextPanel() {
         // Confirm save before open another file
         if (this.isContentChanged()) {
             int ans = JOptionPane.showConfirmDialog(this,
-                "The contents of " + CurrentFileName + " has been modified. \nDo you want to save the changes?",
-                "Save to file?",
-                JOptionPane.YES_NO_CANCEL_OPTION);
+                    "The contents of " + CurrentFileName + " has been modified. \nDo you want to save the changes?",
+                    "Save to file?",
+                    JOptionPane.YES_NO_CANCEL_OPTION);
             if (ans == JOptionPane.CANCEL_OPTION) {
                 return;
-            }else if (ans == JOptionPane.YES_OPTION) {
+            } else if (ans == JOptionPane.YES_OPTION) {
                 this.cmdSaveActionPerformed(null);
             }
         }
         if (ContainerComponent instanceof Frame) {
-            ((Frame)ContainerComponent).dispose();
-        }else if (ContainerComponent instanceof Dialog) {
-            ((Dialog)ContainerComponent).dispose();
-        }else if (ContainerComponent instanceof JTabbedPane && TabId > 0) {
+            ((Frame) ContainerComponent).dispose();
+        } else if (ContainerComponent instanceof Dialog) {
+            ((Dialog) ContainerComponent).dispose();
+        } else if (ContainerComponent instanceof JTabbedPane && TabId > 0) {
             //((JTabbedPane)ContainerComponent).remove(this.TabId);
-            ((JTabbedPane)ContainerComponent).remove(this);
+            ((JTabbedPane) ContainerComponent).remove(this);
             TabId = 0;
         }
     }

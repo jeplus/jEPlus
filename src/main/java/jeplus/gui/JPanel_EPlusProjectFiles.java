@@ -35,6 +35,7 @@ import jeplus.EPlusConfig;
 import jeplus.JEPlusFrameMain;
 import jeplus.JEPlusProject;
 import jeplus.util.RelativeDirUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 /**
@@ -374,21 +375,19 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
             MainGUI.getTpnEditors().setSelectedIndex(idx);
         } else {
             EPlusEditorPanel RviFilePanel;
-            if (this.chkReadVar.isSelected()) {
+            if (FilenameUtils.getExtension(fn).equals("rvx")) {
                 RviFilePanel = new EPlusEditorPanel(
                         MainGUI.getTpnEditors(),
                         fn,
-                        EPlusConfig.getFileFilter(EPlusConfig.RVX),
                         templfn,
-                        SyntaxConstants.SYNTAX_STYLE_JSON,
+                        EPlusEditorPanel.FileType.RVX,
                         null);
             }else {
                 RviFilePanel = new EPlusEditorPanel(
                         MainGUI.getTpnEditors(),
                         fn,
-                        EPlusConfig.getFileFilter(EPlusConfig.RVI),
                         templfn,
-                        "text/EPlusRVI",
+                        EPlusEditorPanel.FileType.RVI,
                         null);
             }
             int ti = MainGUI.getTpnEditors().getTabCount();
@@ -431,9 +430,8 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
             EPlusEditorPanel WthrFilePanel = new EPlusEditorPanel(
                     MainGUI.getTpnEditors(),
                     fn,
-                    EPlusConfig.getFileFilter(EPlusConfig.EPW),
                     templfn,
-                    "text/EPlusEPW",
+                    EPlusEditorPanel.FileType.EPW,
                     null);
             int ti = MainGUI.getTpnEditors().getTabCount();
             WthrFilePanel.setTabId(ti);
@@ -568,9 +566,8 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
             EPlusEditorPanel TemplFilePanel = new EPlusEditorPanel(
                     MainGUI.getTpnEditors(),
                     fn,
-                    EPlusConfig.getFileFilter(EPlusConfig.EPINPUT),
                     templfn,
-                    "text/EPlusIDF",
+                    EPlusEditorPanel.FileType.IDF,
                     Project);
             int ti = MainGUI.getTpnEditors().getTabCount();
             TemplFilePanel.setTabId(ti);

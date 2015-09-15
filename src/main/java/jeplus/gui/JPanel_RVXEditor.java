@@ -317,9 +317,8 @@ public class JPanel_RVXEditor extends javax.swing.JPanel {
             RviFilePanel = new EPlusEditorPanel(
                 MainGUI.getTpnEditors(),
                 fn,
-                EPlusConfig.getFileFilter(EPlusConfig.RVX),
                 templfn,
-                SyntaxConstants.SYNTAX_STYLE_JSON,
+                EPlusEditorPanel.FileType.RVX,
                 null);
             int ti = MainGUI.getTpnEditors().getTabCount();
             MainGUI.getTpnEditors().addTab(fn, RviFilePanel);

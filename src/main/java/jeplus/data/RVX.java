@@ -190,6 +190,14 @@ public class RVX implements Serializable {
         }
     }
     
+    /**
+     * Create a quick index of contents of this RVX. This is used by the RVX editor
+     * @return Array contains a list of keywords
+     */
+    public static String[] quickIndex() {
+        String [] list = {"rvis", "sqls", "csvs", "scripts", "userSupplied", "userVars", "constraints", "objectives"};
+        return list;
+    }
     
     /**
      * Tester
@@ -202,4 +210,5 @@ public class RVX implements Serializable {
         mapper.writeValue(new File("user-modified.json"), rvx);
         System.exit(0);
     }
+
 }

@@ -2617,9 +2617,8 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             EPlusEditorPanel XmlFilePanel = new EPlusEditorPanel(
                     this.getTpnEditors(),
                     templfn,
-                    EPlusConfig.getFileFilter(EPlusConfig.XML),
                     templfn,
-                    SyntaxConstants.SYNTAX_STYLE_XML,
+                    EPlusEditorPanel.FileType.XML,
                     null);
             int ti = this.getTpnEditors().getTabCount();
             this.getTpnEditors().addTab(templfn, XmlFilePanel);
