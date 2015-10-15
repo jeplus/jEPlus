@@ -44,44 +44,6 @@
         <Property name="text" type="java.lang.String" value="jobs"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JButton" name="cmdTestRun">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Test Run"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdTestRunActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JButton" name="cmdCollectTimeStamps">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Collect Time Stamps"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdCollectTimeStampsActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JButton" name="cmdOpenPostProcessorWindow">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Open Post-Processor Window"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdOpenPostProcessorWindowActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JMenuItem" name="jMenuItemCombineTable">
-      <Properties>
-        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/jeplus/images/page_lightning.png"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Create combined table ..."/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemCombineTableActionPerformed"/>
-      </Events>
-    </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBarMain">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenuFile">

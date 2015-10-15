@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class TRNSYSConfig extends EPlusConfig {
 
     /** Logger */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(TRNSYSConfig.class);
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(TRNSYSConfig.class);
 
     //public static final String FileSeparator = System.getProperty("file.separator");
     /**

@@ -30,7 +30,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import jeplus.data.ParameterItem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,10 +42,10 @@ import java.util.Random;
 import java.util.TreeMap;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-
 import javax.swing.JFrame;
 import javax.swing.tree.DefaultMutableTreeNode;
 import jeplus.agent.*;
+import jeplus.data.ParameterItem;
 import jeplus.data.Counter;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.FileList;
@@ -72,7 +71,7 @@ import org.slf4j.LoggerFactory;
 public class EPlusBatch extends Thread {
 
     /** Logger */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusBatch.class);
+    final static private org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusBatch.class);
 
     /**
      * Type of job strings used for identifying input format of the jobs strings
@@ -121,12 +120,6 @@ public class EPlusBatch extends Thread {
     /** Flag for simulation running status */
     protected boolean SimulationRunning = false;
 
-    /** 
-     * Result collector 
-     * @deprecated Only used by EPlusPostFrameExt to collect simulation reports
-     */
-    protected EPlusDefaultResultCollector Collector = null;
-
     /** Whether or not to use Job Archive to avoid repetition of simulation */
     protected boolean EnableArchive = false;
 
@@ -154,7 +147,6 @@ public class EPlusBatch extends Thread {
         BatchId = IDprefix + "_" + Project.getProjectID();
         //Project.resolveToEnv(Env);
         Info = new EPlusBatchInfo();
-        Collector = new EPlusDefaultResultCollector(this);
     }
 
 
@@ -223,15 +215,6 @@ public class EPlusBatch extends Thread {
 
     public void setGUI(JEPlusFrameMain GUI) {
         this.GUI = GUI;
-    }
-
-    /**
-     * 
-     * @return 
-     * @deprecated 
-     */
-    public EPlusDefaultResultCollector getCollector() {
-        return Collector;
     }
 
     public EPlusAgent getAgent() {
@@ -1429,9 +1412,7 @@ public class EPlusBatch extends Thread {
                                     for (int k=0; k<NDataCols; k++) {
                                         try {
                                             data[k] = Double.parseDouble(items[k + 3]);
-                                        }catch (NumberFormatException nfe) {
-                                            data[k] = 0;
-                                        }catch (ArrayIndexOutOfBoundsException ex) {
+                                        }catch (NumberFormatException | ArrayIndexOutOfBoundsException nfe) {
                                             data[k] = 0;
                                         }
                                     }

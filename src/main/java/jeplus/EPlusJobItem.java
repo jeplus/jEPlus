@@ -32,6 +32,15 @@ package jeplus;
  * @since 0.1
  */
 public interface EPlusJobItem {
+    /**
+     * Get the ID of this job
+     * @return Job ID string
+     */
     public String getJobID ();
+    
+    /**
+     * Set the ID string of this job
+     * @param id ID string of the job
+     */
     public void setJobID (String id);
 }

@@ -42,7 +42,7 @@ public class INSELWinTools {
 
     /**
      * Put the name of Output printers files in a list
-     * @printers String with the name of Output printers files in jEPlus format
+     * @param printers String with the name of Output printers files in jEPlus format
      * @return the name of the Output printers files in a list
      */
      public static ArrayList<String> getPrintersFunc(String printers) {
@@ -53,10 +53,10 @@ public class INSELWinTools {
                 int cont = PrintList[i].indexOf(".");                   
                 if (PrintList[i].indexOf(".", cont+1) != -1) {
                     String [] aux = PrintList[i].trim().split("\\s*[ ]\\s*");
-                    for (int j = 0; j < aux.length; j++) {
-                        if (!Printers.contains(aux[j])) {
-                            Printers.add(aux[j].toLowerCase());
-                        }    
+                    for (String aux1 : aux) {
+                        if (!Printers.contains(aux1)) {
+                            Printers.add(aux1.toLowerCase());
+                        }
                     }    
                 }else {
                     if (!Printers.contains(PrintList[i].trim())) {

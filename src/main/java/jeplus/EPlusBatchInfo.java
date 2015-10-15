@@ -30,9 +30,9 @@ import jeplus.data.FileList;
 import org.slf4j.LoggerFactory;
 
 /**
- * Object to capture batch simulation info and results - Experimental
+ * Object to capture batch simulation info and results
  * @author Yi Zhang
- * @version 0.1a
+ * @version 0.1
  * @since 0.1
  */
 public class EPlusBatchInfo {
@@ -49,6 +49,9 @@ public class EPlusBatchInfo {
     protected ArrayList<String> ShortNames = null;
     protected ArrayList<String> ValidationErrors = null;
 
+    /** 
+     * Default constructor
+     */
     public EPlusBatchInfo () {
         ParamChains = new ArrayList<> ();
         ParamList = new ArrayList<> ();
@@ -57,6 +60,8 @@ public class EPlusBatchInfo {
         ValidationErrors = new ArrayList<>();
     }
 
+    // =========== Getters and Setters ============
+    
     public FileList getModels() {
         return Models;
     }
@@ -125,18 +130,36 @@ public class EPlusBatchInfo {
         this.ValidationSuccessful = ValidationSuccessful;
     }
     
+    // =========== End getters and setters ============
+    
+    /**
+     * Is the project job batch valid or not, according to the validation result
+     * @return True if the batch is valid
+     */
     public boolean isValid() { return ValidationSuccessful; }
     
+    /**
+     * Append validation error message to the errors list
+     * @param desc The description of "error" to be added to the list
+     */
     public void addValidationError (String desc) { ValidationErrors.add(desc); }
     
+    /**
+     * Get the error message list as a text string
+     * @return Text of all error messages recorded
+     */
     public String getValidationErrorsText() {
         StringBuilder buf = new StringBuilder ("Validation " + (ValidationSuccessful? "successful: " : "failed") + "\n");
-        for (int i=0; i<ValidationErrors.size(); i++) {
-            buf.append(ValidationErrors.get(i)).append("\n");
+        for (String ValidationError : ValidationErrors) {
+            buf.append(ValidationError).append("\n");
         }
         return buf.toString(); 
     }
     
+    /**
+     * Get a list of search strings in an array form
+     * @return The array of search strings
+     */
     public String [] getSearchStringsArray () {
         String [] strs = null;
         if (SearchStrings != null) {
@@ -145,6 +168,10 @@ public class EPlusBatchInfo {
         return strs;
     }
 
+    /**
+     * List parameter chains in text form
+     * @return Text string of the parameter chains
+     */
     public String getParamChainsText () {
         StringBuilder buf = new StringBuilder ("Parameter Chains: ");
         if (ParamChains.size() > 0) {
@@ -163,6 +190,11 @@ public class EPlusBatchInfo {
         return buf.toString();
     }
     
+    /**
+     * Calculated the total number of jobs from parameter definitions. This function 
+     * takes into account if any parameter's value is fixed
+     * @return Total number of jobs in the current project
+     */
     public long getTotalNumberOfJobs () {
         long total = 0;
         if (Models != null && ParamChains.size() > 0) {
@@ -179,6 +211,11 @@ public class EPlusBatchInfo {
         return total;
     }
 
+    /**
+     * Calculated the total solution space from the parameter definitions. All
+     * parameter values are counted.
+     * @return The total search space size of the project
+     */
     public long getTotalSolutionSpace () {
         long total = 0;
         if (Models != null && ParamChains.size() > 0) {

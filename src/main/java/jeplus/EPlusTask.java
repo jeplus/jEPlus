@@ -34,9 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import static jeplus.EPlusBatch.logger;
-import jeplus.simpleparser.Parser;
-import jeplus.simpleparser.SimpleParserError;
 import jeplus.util.RelativeDirUtil;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
@@ -50,28 +47,23 @@ import org.slf4j.LoggerFactory;
 public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
 
     /** Logger */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusTask.class);
+    final static private org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusTask.class);
 
     static final long serialVersionUID = 1587629823039332802L;
     
-    // Instance members
-    /** Serial number of this task - not in use */
-    //protected int TaskNumber = 0;
     /** ID of this task */
     protected String TaskID = null;
     /** EnergyPlus working environment */
     protected EPlusWorkEnv WorkEnv = null;
-    /** Working directory of this task. Can be a combination of "label_id/" */
-    //protected String WorkingDir = null;
-    /** Search strings and their corresponding values are stored in a HashMap - has been replaced by ArrayList pair to save memory */
-    //protected HashMap<String, String> ParameterMap;
     /** Search strings ArrayList */
     protected ArrayList<String> SearchStringList;
     /** Alt values ArrayList */
     protected ArrayList<String> AltValueList;
-
+    /** Results can be attached to this Task */
     protected ArrayList<String> AttachedResults = new ArrayList<>();
+    /** Flag for execution status of this task */
     protected boolean Executed = false;
+    /** Flag for the availability of the result */
     protected boolean ResultAvailable = false;
 
     /**
@@ -106,7 +98,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         parseTagsAndVals(prevkey, prevval);
     }
 
-    protected void parseTagsAndVals (ArrayList<String> prevkey, ArrayList<String> prevval) {
+    protected final void parseTagsAndVals (ArrayList<String> prevkey, ArrayList<String> prevval) {
         // Parse search strings for hybrid parameters "@@a@@|@@b@@"
         SearchStringList = new ArrayList<> ();
         AltValueList = new ArrayList<> ();
@@ -194,12 +186,13 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
     /**
      * Extract results from the meter file in the output of E+. Records are
      * searched using the given id string. Results are stored in a HashMap.
+     * @param MeterID
      * @return Results found in E+ output file
      */
     public HashMap<String, double[][]> getResults(String[] MeterID) {
         HashMap<String, double[][]> map = new HashMap<>();
-        for (int i = 0; i < MeterID.length; i++) {
-            map.put(MeterID[i], EPlusWinTools.getMeter(getWorkingDir(), MeterID[i]));
+        for (String MeterID1 : MeterID) {
+            map.put(MeterID1, EPlusWinTools.getMeter(getWorkingDir(), MeterID1));
         }
         return map;
     }

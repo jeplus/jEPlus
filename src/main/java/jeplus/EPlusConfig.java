@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class EPlusConfig {
 
     /** Logger */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusConfig.class);
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusConfig.class);
 
     /** This is the working directory of the program */
     protected static String UserBaseDir = System.getProperty("user.dir") + File.separator;
@@ -825,7 +825,7 @@ public class EPlusConfig {
                     case MVI:
                         return "E+ readVarsESO mvi file (.MVI)";
                     case EPUSEROBJ:
-                        return "jE+ v0.5 obj file (.OBJ)";
+                        return "Java Object file (.OBJ)";
                     case EPUSERTXT:
                         return "jE+ user project export file (.TXT)";
                     case EPOUTPUT: // EnergyPlus output files. Used for deleting E+ files

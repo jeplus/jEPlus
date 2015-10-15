@@ -55,14 +55,12 @@ import jeplus.agent.InselAgentLocal;
 import jeplus.agent.TrnsysAgentLocal;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
-import jeplus.data.RVX;
 import jeplus.data.RandomSource;
 import jeplus.gui.*;
 import jeplus.postproc.ResultCollector;
 import jeplus.util.RelativeDirUtil;
 import org.apache.commons.io.FileUtils;
 import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.slf4j.LoggerFactory;
 
@@ -111,16 +109,12 @@ public class JEPlusFrameMain extends JEPlusFrame {
     // Utility panel - Run ReadVars
     protected JPanelRunPython jplPythonPanel;
 
-
-    // protected EPlusWorkEnv Env = new EPlusWorkEnv();
-    //protected ExecutionOptions ExecSettings = new ExecutionOptions ();
     protected EPlusBatch BatchManager = null;
     protected EPlusBatch ActingManager = null;
     protected ArrayList <EPlusAgent> EPlusExecAgents = new ArrayList <> ();
     protected ArrayList <EPlusAgent> TrnsysExecAgents = new ArrayList <> ();
     protected ArrayList <EPlusAgent> InselExecAgents = new ArrayList <> ();
     protected ArrayList <EPlusAgent> ExecAgents = EPlusExecAgents;
-    protected JEPlusFrame ExtFrame = null;
 
     protected boolean SimulationRunning = false;
     protected int FrameCloseOperation = JFrame.EXIT_ON_CLOSE;
@@ -209,16 +203,13 @@ public class JEPlusFrameMain extends JEPlusFrame {
     public void setSimulationRunning(boolean SimulationRunning) {
         this.SimulationRunning = SimulationRunning;
         if (SimulationRunning) {
-            cmdTestRun.setEnabled(false);
             cmdStart.setActionCommand("stop");
             cmdStart.setText(BatchManager.getAgent().getStopButtonText());
             cboExecutionType.setEnabled(false);
             jMenuItemStop.setEnabled(true);
             // Enable view results
             this.jMenuViewResult.setEnabled(false);
-            this.jMenuItemCombineTable.setEnabled(false);
         }else {
-            cmdTestRun.setEnabled(true);
             cmdStart.setActionCommand("start");
             cmdStart.setText(BatchManager.getAgent().getStartButtonText());
             cboExecutionType.setEnabled(true);
@@ -231,21 +222,21 @@ public class JEPlusFrameMain extends JEPlusFrame {
             this.addMenuItemResultFile("RunTimes.csv");
             if (this.Project.getProjectType() == JEPlusProject.EPLUS) {
                 ArrayList<ResultCollector> rcs = BatchManager.getAgent().getResultCollectors();
-                for (int i=0; i<rcs.size(); i++) {
-                    for (int j=0; j<rcs.get(i).getResultFiles().size(); j++) {
-                        this.addMenuItemResultFile(rcs.get(i).getResultFiles().get(j));
+                for (ResultCollector rc : rcs) {
+                    for (int j = 0; j < rc.getResultFiles().size(); j++) {
+                        this.addMenuItemResultFile(rc.getResultFiles().get(j));
                     }
                 }
             }else if (this.Project.getProjectType() == JEPlusProject.TRNSYS) {
                 List<String> TRNSYSResultFile = TRNSYSWinTools.getPrintersFunc(Project.getOutputFileNames());
-                for (int j = 0; j < TRNSYSResultFile.size(); j++) {
-                    String [] name = TRNSYSResultFile.get(j).split("\\s*[.]\\s*");
+                for (String names : TRNSYSResultFile) {
+                    String[] name = names.split("\\s*[.]\\s*");
                     this.addMenuItemResultFile("SimResults_" + name[0] + ".csv");
                 }
             }else if (this.Project.getProjectType() == JEPlusProject.INSEL) {
                 List<String> INSELResultFile = INSELWinTools.getPrintersFunc(Project.getOutputFileNames());
-                for (int j = 0; j < INSELResultFile.size(); j++) {
-                    String [] name = INSELResultFile.get(j).split("\\s*[.]\\s*");
+                for (String names : INSELResultFile) {
+                    String[] name = names.split("\\s*[.]\\s*");
                     this.addMenuItemResultFile("SimResults_" + name[0] + ".csv");
                 }
             }
@@ -253,7 +244,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
             this.addMenuItemResultFile("AllCombinedResults.csv");
             this.addMenuItemResultFile("AllDerivedResults.csv");
             this.jMenuViewResult.setEnabled(true);
-            this.jMenuItemCombineTable.setEnabled(true);
         }
     }
 
@@ -273,10 +263,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
         this.ActingManager = ActingManager;
     }
 
-
-    public void setExtFrame (JEPlusFrame frame) {
-        ExtFrame = frame;
-    }
 
     public ArrayList<EPlusAgent> getExecAgents() {
         return ExecAgents;
@@ -307,14 +293,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
 
     // =============== End getters and setters ===============
     
-    /**
-     * Provided for enable extra (experimental) buttons
-     */
-    public void enableExtButtons () {
-        this.cmdOpenPostProcessorWindow.setEnabled(true);
-        this.cmdCollectTimeStamps.setEnabled(true);
-    }
-
     /**
      * Provided for saving Project as an object file
      */
@@ -771,10 +749,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
         rdoTestFirstN = new javax.swing.JRadioButton();
         txtTestFirstN = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
-        cmdTestRun = new javax.swing.JButton();
-        cmdCollectTimeStamps = new javax.swing.JButton();
-        cmdOpenPostProcessorWindow = new javax.swing.JButton();
-        jMenuItemCombineTable = new javax.swing.JMenuItem();
         jSplitPane1 = new javax.swing.JSplitPane();
         tpnMain = new javax.swing.JTabbedPane();
         pnlProject = new javax.swing.JPanel();
@@ -896,38 +870,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
         txtTestFirstN.setEnabled(false);
 
         jLabel9.setText("jobs");
-
-        cmdTestRun.setText("Test Run");
-        cmdTestRun.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdTestRunActionPerformed(evt);
-            }
-        });
-
-        cmdCollectTimeStamps.setText("Collect Time Stamps");
-        cmdCollectTimeStamps.setEnabled(false);
-        cmdCollectTimeStamps.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdCollectTimeStampsActionPerformed(evt);
-            }
-        });
-
-        cmdOpenPostProcessorWindow.setText("Open Post-Processor Window");
-        cmdOpenPostProcessorWindow.setEnabled(false);
-        cmdOpenPostProcessorWindow.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdOpenPostProcessorWindowActionPerformed(evt);
-            }
-        });
-
-        jMenuItemCombineTable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_lightning.png"))); // NOI18N
-        jMenuItemCombineTable.setText("Create combined table ...");
-        jMenuItemCombineTable.setEnabled(false);
-        jMenuItemCombineTable.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemCombineTableActionPerformed(evt);
-            }
-        });
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1000, 740));
@@ -1849,57 +1791,6 @@ private void cboExecutionTypeActionPerformed(java.awt.event.ActionEvent evt) {//
     //this.update(this.getGraphics());
 }//GEN-LAST:event_cboExecutionTypeActionPerformed
 
-private void cmdTestRunActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdTestRunActionPerformed
-
-    // Disable Test button
-    cmdTestRun.setEnabled(false);
-
-    for (int i=1; i<TpnEditors.getTabCount(); i++) {
-            try {
-                EPlusTextPanel etp = (EPlusTextPanel)TpnEditors.getComponentAt(i);
-                if (etp.isContentChanged()) {
-                    TpnEditors.setSelectedIndex(i);
-                    int ans = JOptionPane.showConfirmDialog(this,
-                        "The contents of " + etp.getTitle() + " has been modified. Would you like to save the changes first?",
-                        "Confirm saving ...",
-                        JOptionPane.YES_NO_OPTION);
-                    if (ans == JOptionPane.YES_OPTION) {
-                        etp.saveFileContent();
-                    }
-                }
-            }catch (ClassCastException cce) {
-
-            }
-        }
-        // while (tabTexts.getTabCount() > 1) tabTexts.removeTabAt(1);
-        if (! validateBatchJobs()) {
-            if (BatchManager.getBatchInfo().ValidationSuccessful)
-                JOptionPane.showMessageDialog(this,
-                        "General parameter tree composition, parameter names and search strings are OK.\n" +
-                        "Compiling JobGroup failed! Please check the alternative values of each parameter.",
-                        "Validation failed", JOptionPane.INFORMATION_MESSAGE);
-            else
-                JOptionPane.showMessageDialog(this, BatchManager.getBatchInfo().getValidationErrors(),
-                        "Validation failed", JOptionPane.INFORMATION_MESSAGE);
-            // Enable test button
-            cmdTestRun.setEnabled(true);
-        }else {
-            if (this.rdoTestChains.isSelected()) {
-                startBatchRunTest ();
-            }else if (this.rdoTestFirstN.isSelected()) {
-                startBatchRunSample (Integer.parseInt(this.txtTestFirstN.getText()), false, null);
-            }else if (this.rdoTestRandomN.isSelected()) {
-                Long seed = 0L;
-                try {
-                    seed = Long.parseLong(txtRandomSeed.getText());
-                    if (seed < 0) seed = new Date().getTime();
-                }catch (Exception ex) {}
-                startBatchRunSample (Integer.parseInt(this.txtTestRandomN.getText()), false,
-                        new Random (seed));
-            }
-        }
-}//GEN-LAST:event_cmdTestRunActionPerformed
-
 private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
         // Save the project file before exit?
         String cfn = this.CurrentProjectFile;
@@ -2169,17 +2060,6 @@ private void jMenuItemStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN
     BatchManager.getAgent().setStopAgent(true);
 }//GEN-LAST:event_jMenuItemStopActionPerformed
 
-private void cmdOpenPostProcessorWindowActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOpenPostProcessorWindowActionPerformed
-    if (ExtFrame != null) {
-        ExtFrame.setProject(Project, ActingManager);
-        ExtFrame.setVisible(true);
-    }
-}//GEN-LAST:event_cmdOpenPostProcessorWindowActionPerformed
-
-private void cmdCollectTimeStampsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollectTimeStampsActionPerformed
-    EPlusPostProcessor.collectTimeStamps(ActingManager, Project.getExecSettings().getWorkDir(), Project.getExecSettings().getWorkDir() + "/job_time_stamps.csv");
-}//GEN-LAST:event_cmdCollectTimeStampsActionPerformed
-
 private void jMenuItemMemoryUsageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemMemoryUsageActionPerformed
         JDialog dialog = new JDialog ((JFrame)null, "Memory Usage");
         JPanel_MemoryUsage panel = new JPanel_MemoryUsage ("./");
@@ -2425,40 +2305,6 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             this.initProjectSection();
             this.cboExecutionTypeActionPerformed(null);
     }//GEN-LAST:event_jMenuItemToAbsoluteActionPerformed
-
-    private void jMenuItemCombineTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCombineTableActionPerformed
-        // Select a file to save
-        // fc = new JFileChooser ();
-        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.CSV));
-        fc.setSelectedFile(new File(""));
-        fc.setCurrentDirectory(DefaultDir);
-
-        if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            String file = fc.getSelectedFile().getPath();
-            if (! file.toLowerCase().endsWith(".csv")) {
-                file = file.concat(".csv");
-            }
-            RVX rvx = BatchManager.getProject().getRvx();
-            EPlusBatch.writeCombinedResultTable(BatchManager.getAgent().getResultCollectors(), 
-                    BatchManager.getResolvedEnv().getParentDir(), 
-                    rvx,
-                    file);
-            // Save derivative results too
-            EPlusBatch.writeDerivedResultTable(BatchManager.getAgent().getResultCollectors(), 
-                    BatchManager.getResolvedEnv().getParentDir(), 
-                    rvx,
-                    "DerivedResults.csv");
-            // Open it in associated application
-            try {
-                Desktop.getDesktop().open(new File(file));
-            }catch (Exception ex) {
-                logger.error("Desktop.open is not supported.", ex);
-                JOptionPane.showMessageDialog(this, "Combined result table has been saved to " + file, "Combined table saved", JOptionPane.INFORMATION_MESSAGE);
-            }
-        }
-        fc.resetChoosableFileFilters();
-        fc.setSelectedFile(new File(""));
-    }//GEN-LAST:event_jMenuItemCombineTableActionPerformed
 
     private void jMenuItemExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportTableActionPerformed
         // Select a file to open
@@ -2774,12 +2620,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JComboBox cboExecutionType;
     private javax.swing.JComboBox cboProjectType;
     private javax.swing.JCheckBox chkLHS;
-    private javax.swing.JButton cmdCollectTimeStamps;
     private javax.swing.JButton cmdEditJobListFile;
-    private javax.swing.JButton cmdOpenPostProcessorWindow;
     private javax.swing.JButton cmdSelectJobListFile;
     private javax.swing.JButton cmdStart;
-    private javax.swing.JButton cmdTestRun;
     private javax.swing.JButton cmdValidate;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel27;
@@ -2793,7 +2636,6 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JMenu jMenuHelp;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItemAbout;
-    private javax.swing.JMenuItem jMenuItemCombineTable;
     private javax.swing.JMenuItem jMenuItemCreateIndex;
     private javax.swing.JMenuItem jMenuItemCreateJobList;
     private javax.swing.JMenuItem jMenuItemDefaultLaF;

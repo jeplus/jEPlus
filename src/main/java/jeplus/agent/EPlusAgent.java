@@ -40,10 +40,7 @@ import jeplus.gui.EPlusTextPanelOld;
 import jeplus.gui.JEPlusPrintablePanel;
 import jeplus.gui.JFrameAgentMonitor;
 import jeplus.postproc.CsvResultCollector;
-import jeplus.postproc.DefaultCSVWriter;
-import jeplus.postproc.DefaultIndexWriter;
 import jeplus.postproc.DefaultRVIResultCollector;
-import jeplus.postproc.EPlusOutputReader;
 import jeplus.postproc.EsoResultCollector;
 import jeplus.postproc.PythonResultCollector;
 import jeplus.postproc.ResultCollector;
@@ -104,11 +101,6 @@ public abstract class EPlusAgent implements Runnable {
     /** List of currently employed processors */
     protected List<Thread> Processors = null;
 
-//    /** Jobs result reports */
-//    protected Vector<String> JobResultReports = new Vector<String>();
-//    /** Jobs result values */
-//    protected Vector<ArrayList<String>> JobResultValues = new Vector<ArrayList<String>>();
-
     // States and signals
 
     /** Flag for that the agent is ready to serve */
@@ -167,6 +159,10 @@ public abstract class EPlusAgent implements Runnable {
         Settings.setNumThreads(Math.max(1, nproc));
     }
 
+    /**
+     * This function assigns all the available result collectors to the performing
+     * agent. The order of the RCs is significant.
+     */
     protected void attachDefaultCollector () {
         // clear existing collectors
         ResultCollectors.clear();
@@ -254,14 +250,6 @@ public abstract class EPlusAgent implements Runnable {
     public List<EPlusTask> getJobQueue() {
         return JobQueue;
     }
-
-//    public Vector<String> getJobResultReports() {
-//        return JobResultReports;
-//    }
-//
-//    public Vector<ArrayList<String>> getJobResultValues() {
-//        return JobResultValues;
-//    }
 
     public int getPlatformType() {
         return PlatformType;
@@ -377,8 +365,9 @@ public abstract class EPlusAgent implements Runnable {
         if (RejectedJobs.size() > 0) RejectedJobs.clear();
     }
 
-        /**
+    /**
      * Start the agent 
+     * @param panel
      */
     public void initializeAgent(JEPlusPrintablePanel panel) {
         GUIPanel = panel;
@@ -393,8 +382,7 @@ public abstract class EPlusAgent implements Runnable {
         EPlusWorkEnv Env = this.getJobOwner().getResolvedEnv();
         // For each result collector
         int nres;
-        for (int i=0; i<ResultCollectors.size(); i++) {
-            ResultCollector rc = ResultCollectors.get(i);
+        for (ResultCollector rc : ResultCollectors) {
             if (Env.KeepJobDir) {
                 // collect reports
                 nres = rc.collectReports(getJobOwner(), false);

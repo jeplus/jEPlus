@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author yzhang
  */
-public class JEPlusConfig extends INSELConfig {
+public class JEPlusConfig extends RadianceConfig {
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusConfig.class);
@@ -119,6 +119,10 @@ public class JEPlusConfig extends INSELConfig {
         TRNSYSEXE = prop.getProperty("TRNSYSEXE", TRNSYSBinDir + getDefTRNSYSEXEC());
         InselBinDir = prop.getProperty("InselBinDir", getDefInselBinDir());
         InselEXEC = prop.getProperty("InselEXE", InselBinDir + getDefInselEXEC());
+        RadianceBinDir = prop.getProperty("RadianceBinDir", null);
+        RadianceLibDir = prop.getProperty("RadianceLibDir", null);
+        DaySimBinDir = prop.getProperty("DaySimBinDir", null);
+        DaySimLibDir = prop.getProperty("DaySimLibDir", null);
         //NThreads = Integer.parseInt(prop.getProperty("NThreads", "0"));
         ScreenFile = prop.getProperty("ScreenFile", "console.log");
         if (ScreenFile.trim().length() == 0) {
@@ -168,6 +172,18 @@ public class JEPlusConfig extends INSELConfig {
             }
             if (JEPlusEADir != null) {
                 prop.setProperty("JEPlusEADir", JEPlusEADir);
+            }
+            if (RadianceBinDir != null) {
+                prop.setProperty("RadianceBinDir", RadianceBinDir);
+            }
+            if (RadianceLibDir != null) {
+                prop.setProperty("RadianceLibDir", RadianceLibDir);
+            }
+            if (DaySimBinDir != null) {
+                prop.setProperty("DaySimBinDir", DaySimBinDir);
+            }
+            if (DaySimLibDir != null) {
+                prop.setProperty("DaySimLibDir", DaySimLibDir);
             }
             for (int i=0; i<Math.min(NRecentProjs, RecentProjects.size()); i++) {
                 if (RecentProjects.get(i) != null) prop.setProperty("RecentProject" + i, RecentProjects.get(i));

@@ -52,50 +52,19 @@ public class EPlusTaskGroup implements EPlusJobItem {
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusTaskGroup.class);
 
-    public static final int SERIAL = 1;
-    public static final int PARALLEL = 0;
-    /** Type of the batch runs */
-    public int BatchType = PARALLEL;
-    
-    //protected static long GlobalJobCount = 0;
-    protected static final String JobNameFormat = "%09d"; // nine characters long padded with zero.
-    //public static void resetJobCounter () { GlobalJobCount = 0; }
-    
-    /** Input state file as the initial states of the model - not in use */
-    // public String InitStates = null;
-    /** Output state file as the result states of the model - not in use */
-    // public String ResultStates = null;
+    /** nine characters long padded with zero. This if for auto naming jobs */
+    protected static final String JobNameFormat = "%09d"; 
     
     /** Label of this task group */
     String GroupLabel = null;
     /** Work environment of EnergyPlus. This is to be shared among tasks in the same group */
     EPlusWorkEnv WorkEnv = null;
-    /** Search strings and their corresponding values are stored in a HashMap - to be replaced by ArrayList pair to save memory */
-    // protected HashMap<String, String> ParameterMap;
     /** Search strings ArrayList */
     protected ArrayList<String> SearchStringList;
     /** Alt values ArrayList */
     protected ArrayList<String> AltValueList;
     /** The current variable to be evaluated in the sub-jobs */
     protected ParameterItem CurrentVariable = null;
-//    /** The search string of the current variable to be used in the sub-jobs */
-//    protected String CurSearchString;
-//    /** The alternative values of the current variable to be evaluated in the sub-jobs */
-//    protected String [] CurAltValues;
-    
-    /** The job queue */
-    //ArrayList<EPlusJobItem> Jobs = new ArrayList<EPlusJobItem>();
-
-//    /**
-//     * Construct an EnergyPlus task group
-//     * @param label The label of this task group, normally the short form of the variable name
-//     */
-//    public EPlusTaskGroup(EPlusWorkEnv env, String label, HashMap<String, String> prevmap) {
-//        WorkEnv = env;
-//        GroupLabel = label;
-//        ParameterMap = (prevmap == null) ? new HashMap<String, String>() : prevmap;
-//    }
-
 
     /**
      * Construct an EnergyPlus task group

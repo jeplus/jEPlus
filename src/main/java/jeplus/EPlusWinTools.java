@@ -55,6 +55,7 @@ public class EPlusWinTools {
     
     /**
      * Read IDD_Version from the IDD file specified in EPlusConfig
+     * @param config EPlus Configuration file specifies where to find the binaries
      * @return Version number is a string
      */
     public String getEPlusIDDVersion (EPlusConfig config) {
@@ -81,7 +82,7 @@ public class EPlusWinTools {
      * @param IDFTemplate The template IDF file that contains the search strings
      * @param searchstrings The list of search strings to be looked up
      * @param newvals The list of new values to be used to replace the search strings
-     * @param WorkDir The working directory in which the new IDF file will be saved.
+     * @param TargetDir The working directory in which the new IDF file will be saved.
      * @return state of execution
      * @deprecated Use the one with the same name
      */
@@ -167,6 +168,7 @@ public class EPlusWinTools {
      * file with the newvals strings, and save the new file in the working directory
      * with the default EP-Macro input file name ("in.imf" at present).
      * @param IDFTemplate The template IDF file that contains the search strings
+     * @param fileprefix FilePrefix string used in "##fileprefix" of IMF
      * @param searchstrings The list of search strings to be looked up
      * @param newvals The list of new values to be used to replace the search strings
      * @param WorkDir The working directory in which the new IDF file will be saved.
@@ -242,6 +244,7 @@ public class EPlusWinTools {
 
     /**
      * Write the EnergyPlus .INI file in the working directory
+     * @param workdir The location where Energy+.ini to be written
      * @param EPlusDir EnergyPlus directory
      * @return -1 if failed
      */
@@ -256,6 +259,16 @@ public class EPlusWinTools {
         return 0;
     }
 
+    /**
+     * Clean up working directory after simulation, based on the options to keep
+     * working files and the list of files to delete.
+     * @param workdir The working directory to be cleared
+     * @param keepeplus Flag for keeping all EnergyPlus output files
+     * @param keepjeplus Flag for keeping all intermediate jEPlus files
+     * @param keepdir Flag for keeping the working directory
+     * @param filesToDelete A [,;: ] separated list of file names to be deleted from the directory
+     * @return Clean up successful or not. False is return if error occurs when deleting any file 
+     */
     public static boolean cleanupWorkDir(String workdir, boolean keepeplus, boolean keepjeplus, boolean keepdir, String filesToDelete) {
         boolean success = true;
 
@@ -264,26 +277,34 @@ public class EPlusWinTools {
         if (dir.exists()) {
             if (!keepdir) {
                 File [] files = dir.listFiles();
-                for (int i=0; i<files.length; i++) files[i].delete();
+                for (File file : files) {
+                    file.delete();
+                }
                 success = dir.delete();
             } else {
                 if (! keepjeplus) {
                     File [] files = dir.listFiles(EPlusConfig.getIOFileFilter(EPlusConfig.JEPLUS_INTERM));
-                    for (int i=0; i<files.length; i++) success &= files[i].delete();
+                    for (File file : files) {
+                        success &= file.delete();
+                    }
                 }
                 if (! keepeplus) {
                     File [] files = dir.listFiles(EPlusConfig.getIOFileFilter(EPlusConfig.EPOUTPUT));
-                    for (int i=0; i<files.length; i++) success &= files[i].delete();
+                    for (File file : files) {
+                        success &= file.delete();
+                    }
                 }
             }
             if (filesToDelete != null) {
                 String [] patterns = filesToDelete.split("\\s*[,;: ]\\s*");
                 OrFileFilter filter = new OrFileFilter ();
-                for (int i=0; i<patterns.length; i++) {
-                    filter.addFileFilter(new WildcardFileFilter (patterns[i]));
+                for (String pattern : patterns) {
+                    filter.addFileFilter(new WildcardFileFilter(pattern));
                 }
                 File [] files = dir.listFiles((FileFilter)filter);
-                for (int i=0; i<files.length; i++) success &= files[i].delete();
+                for (File file : files) {
+                    success &= file.delete();
+                }
             }
         }
         return success;
@@ -291,6 +312,7 @@ public class EPlusWinTools {
 
     /**
      * Create working directory and prepare input files for simulation
+     * @param config Not used in this function
      * @param workdir The directory to be created
      * @return Preparation successful or not
      */
@@ -301,7 +323,7 @@ public class EPlusWinTools {
         if (!dir.exists()) {
             success = dir.mkdirs();
         } else if (!dir.isDirectory()) {
-            System.err.println(dir.toString() + " is present but not a directory.");
+            logger.error(dir.toString() + " is present but not a directory.");
             return false;
         }
         return success;
@@ -331,7 +353,7 @@ public class EPlusWinTools {
             success &= fileCopy(rvifile, workdir + EPlusConfig.getEPDefRvi());
         }
         if (! success)
-            System.err.println("EPlusWinTools.prepareWorkDir(): cannot copy all neccessray files to the working directory.");
+            logger.error("EPlusWinTools.prepareWorkDir(): cannot copy all neccessray files to the working directory.");
         return success;
     }
 
@@ -394,6 +416,7 @@ public class EPlusWinTools {
 
     /**
      * Call EPlus executable file to run the simulation
+     * @param config EPlus Configuration containing info of the binaries
      * @param WorkDir The working directory where the input files are stored and the output files to be generated
      * @return the exit code
      */
@@ -683,7 +706,7 @@ public class EPlusWinTools {
             }
         }else {
             // Some error message
-            System.err.println("Either the start or the target version is wrong. Please make sure the relevant transition files are available, and the target version is higher than the start version");
+            logger.error("Either the start or the target version is wrong. Please make sure the relevant transition files are available, and the target version is higher than the start version");
             ok = false;
         }
         
@@ -698,22 +721,22 @@ public class EPlusWinTools {
             String CmdLine = binfolder + File.separator + "Transition-" + fromVer + "-to-" + toVer + " \"" + listfile + "\"";
             EPProc = Runtime.getRuntime().exec(CmdLine, null, new File(binfolder));
 
-            BufferedReader ins = new BufferedReader(new InputStreamReader(EPProc.getInputStream()));
-            if (logstream != null) {
-                logstream.println("Calling VersionTransition with Command line: " + binfolder + ">" + CmdLine);
-
-                String res = ins.readLine();
-                while (res != null) {
-                    logstream.println(res);
-                    res = ins.readLine();
-                }
-            }else {
-                int res = ins.read();
-                while (res != -1) {
-                    res = ins.read();
+            try (BufferedReader ins = new BufferedReader(new InputStreamReader(EPProc.getInputStream()))) {
+                if (logstream != null) {
+                    logstream.println("Calling VersionTransition with Command line: " + binfolder + ">" + CmdLine);
+                    
+                    String res = ins.readLine();
+                    while (res != null) {
+                        logstream.println(res);
+                        res = ins.readLine();
+                    }
+                }else {
+                    int res = ins.read();
+                    while (res != -1) {
+                        res = ins.read();
+                    }
                 }
             }
-            ins.close();
             EPProc.waitFor();
             int ExitValue = EPProc.exitValue(); 
             if (logstream != null) {
@@ -749,8 +772,8 @@ public class EPlusWinTools {
             OrFileFilter filter = new OrFileFilter ();
             filter.addFileFilter(new WildcardFileFilter (pattern));
             File [] files = dir.listFiles((FileFilter)filter);
-            for (int i=0; i<files.length; i++) {
-                list.add(files[i].getName().substring(0, 6));
+            for (File file : files) {
+                list.add(file.getName().substring(0, 6));
             }
         }
         return list;
@@ -765,19 +788,19 @@ public class EPlusWinTools {
             if (filters != null) {
                 String [] patterns = filters.split("\\s*[,;: ]\\s*");
                 OrFileFilter filter = new OrFileFilter ();
-                for (int i=0; i<patterns.length; i++) {
-                    filter.addFileFilter(new WildcardFileFilter (patterns[i]));
+                for (String pattern : patterns) {
+                    filter.addFileFilter(new WildcardFileFilter(pattern));
                 }
                 File [] files = folder.listFiles((FileFilter)filter);
-                for (int i=0; i<files.length; i++) {
-                    list.add(files[i].getAbsolutePath());
+                for (File file : files) {
+                    list.add(file.getAbsolutePath());
                 }
             }
             // Scan sub-folders
             File[] listOfAllFiles = folder.listFiles();
-            for (int i = 0; i < listOfAllFiles.length; i++) {
-                if (listOfAllFiles[i].isDirectory()) {
-                    scanFolderForFiles (listOfAllFiles[i], filters, list);
+            for (File file : listOfAllFiles) {
+                if (file.isDirectory()) {
+                    scanFolderForFiles(file, filters, list);
                 }
             }            
         }
@@ -786,6 +809,8 @@ public class EPlusWinTools {
     /**
      * Test if a given file is available in the given directory as an indicator
      * of successful run.
+     * @param filename File name to test
+     * @param workdir Expected location of the file
      * @return boolean True if the file is present at the specified location
      */
     public static boolean isFileAvailable(String filename, String workdir) {
@@ -795,6 +820,7 @@ public class EPlusWinTools {
     /**
      * Test if eplusout.eso is available in the given directory as an indicator
      * of successful run.
+     * @param workdir Expected location of the file
      * @return boolean True if eplusout.eso is present
      */
     public static boolean isEsoAvailable(String workdir) {
@@ -805,6 +831,7 @@ public class EPlusWinTools {
     /**
      * Test if eplusout.csv is available in the given directory as an indicator
      * of successful run.
+     * @param workdir Expected location of the file
      * @return boolean True if eplusout.csv is present
      */
     public static boolean isCsvAvailable(String workdir) {

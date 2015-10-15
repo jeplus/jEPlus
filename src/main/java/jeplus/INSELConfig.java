@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class INSELConfig extends TRNSYSConfig {
 
     /** Logger */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(INSELConfig.class);
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(INSELConfig.class);
 
     //public static final String FileSeparator = System.getProperty("file.separator");
     
