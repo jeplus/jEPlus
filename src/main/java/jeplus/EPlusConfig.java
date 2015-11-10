@@ -30,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.Serializable;
 import java.util.Properties;
 import javax.swing.filechooser.FileFilter;
 import jeplus.util.RelativeDirUtil;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * @version 0.5c
  * @since 0.1
  */
-public class EPlusConfig {
+public class EPlusConfig implements Serializable {
 
     /** Logger */
     private final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusConfig.class);
@@ -855,7 +856,7 @@ public class EPlusConfig {
                     case XML:
                         return "XML document (.xml)";
                     case RVX:
-                        return "XML document (.rvx)";
+                        return "JSON RVX (.rvx)";
                     default:
                         return "Filter not implemented";
                 }

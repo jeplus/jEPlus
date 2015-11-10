@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import jeplus.util.ProcessWrapper;
 import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.slf4j.LoggerFactory;
@@ -497,6 +498,18 @@ public class EPlusWinTools {
      * @return the result code represents the state of execution steps. >=0 means successful
      */
     public static int runEPlus(EPlusConfig config, String WorkDir, boolean useReadVars) {
+        return runEPlus(config, WorkDir, useReadVars, null);
+    }
+
+    /**
+     * Call EPlus executable file to run the simulation
+     * @param config
+     * @param WorkDir The working directory where the input files are stored and the output files to be generated
+     * @param useReadVars Whether or not to use readvars after simulation
+     * @param process Reference to the actual execution process for external access
+     * @return the result code represents the state of execution steps. >=0 means successful
+     */
+    public static int runEPlus(EPlusConfig config, String WorkDir, boolean useReadVars, ProcessWrapper process) {
         
         // Copy IDD, or better, create an INI pointing to the correct IDD. INI will work only on Windows systems
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
@@ -549,6 +562,9 @@ public class EPlusWinTools {
             // ProgramControl,
             //    1 ; !- Number of Threads Allowed
             EPProc = Runtime.getRuntime().exec(CmdLine, new String [] {"EP_OMP_NUM_THREADS=1"}, new File(WorkDir));
+            if (process != null) {
+                process.setWrappedProc(EPProc);
+            }
             // Console logger
             try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
                 if (outs != null) {

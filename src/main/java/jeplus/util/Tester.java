@@ -18,6 +18,9 @@ package jeplus.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import jeplus.EPlusWinTools;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusProject;
 
@@ -27,6 +30,39 @@ import jeplus.JEPlusProject;
  */
 public class Tester {
     public static void main (String [] args) throws IOException {
+        
+        final JEPlusConfig config = JEPlusConfig.getNewInstance("D:\\4\\jEPlus_v1.5.2\\jeplus_v72.cfg");
+        final String workdir = "D:\\4\\jEPlus_v1.5.2\\std_job_v72";
+        final ProcessWrapper wrapper = new ProcessWrapper ();
+        new Thread (new Runnable () {
+            @Override
+            public void run () {
+                EPlusWinTools.runEPlus(config, workdir, false, wrapper);
+            }
+        }).start();
+        System.out.println("E+ started...");
+        while (true) {
+            if (wrapper.getWrappedProc() != null) {
+                System.out.println("Got the process, waiting 10s before killing it...");
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Tester.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                wrapper.getWrappedProc().destroy();
+                System.out.println("Process killed.");
+                break;
+            }
+            System.out.println("Waiting for process to start...");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Tester.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        System.out.println("Done");
+        System.exit(0);
+        
         JEPlusConfig.getDefaultInstance().saveAsJSON (new File("D:\\4\\jEPlus_v1.5.2\\test_config.json"));
         System.exit(0);
         

@@ -30,7 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import javax.imageio.ImageIO;
 import jeplus.data.DaySimModel;
+import jeplus.util.ProcessWrapper;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.log4j.PropertyConfigurator;
@@ -146,6 +148,22 @@ public class RadianceWinTools {
      * @return the result code represents the state of execution steps. >=0 means successful
      */
     public static int runRtrace (RadianceConfig config, String WorkDir, String args, String model, String in, String out, String err) {
+        return runRtrace (config, WorkDir, args, model, in, out, err, null);
+    }
+    
+    /**
+     * Call Rtrace to run the simulation
+     * @param config Radiance Configuration
+     * @param WorkDir The working directory where the input files are stored and the output files to be generated
+     * @param args
+     * @param model
+     * @param in
+     * @param out
+     * @param err
+     * @param process
+     * @return the result code represents the state of execution steps. >=0 means successful
+     */
+    public static int runRtrace (RadianceConfig config, String WorkDir, String args, String model, String in, String out, String err, ProcessWrapper process) {
 
         int ExitValue = -99;
 
@@ -166,6 +184,9 @@ public class RadianceWinTools {
             builder.redirectInput(new File(WorkDir + File.separator + in));
 
             Process proc = builder.start();
+            if (process != null) {
+                process.setWrappedProc(proc);
+            }
             ExitValue = proc.waitFor();
         } catch (IOException | InterruptedException ex) {
             logger.error("Error occoured when executing Rtrace", ex);
@@ -184,23 +205,40 @@ public class RadianceWinTools {
      * @param in
      * @param out
      * @param err
-     * @param jpg Switch for converting scene to jpg or not
+     * @param png Switch for converting scene to jpg or not
      * @return the result code represents the state of execution steps. >=0 means successful
      */
-    public static int runRpict (RadianceConfig config, String WorkDir, String args, String model, String in, String out, String err, boolean jpg) {
+    public static int runRpict (RadianceConfig config, String WorkDir, String args, String model, String in, String out, String err, boolean png) {
+        return runRpict (config, WorkDir, args, model, in, out, err, png, null);
+    }
+    
+    /**
+     * Call Rpict to run the simulation
+     * @param config Radiance Configuration
+     * @param WorkDir The working directory where the input files are stored and the output files to be generated
+     * @param args
+     * @param model
+     * @param in
+     * @param out
+     * @param err
+     * @param png Switch for converting scene to jpg or not
+     * @param process
+     * @return the result code represents the state of execution steps. >=0 means successful
+     */
+    public static int runRpict (RadianceConfig config, String WorkDir, String args, String model, String in, String out, String err, boolean png, ProcessWrapper process) {
 
         int ExitValue = -99;
 
         // Call rpict
-        try {
-            StringBuilder buf = new StringBuilder (config.getResolvedRadianceBinDir());
-            buf.append(File.separator).append("rpict");
+        StringBuilder buf = new StringBuilder (config.getResolvedRadianceBinDir());
+        buf.append(File.separator).append("rpict");
 
-            List<String> command = new ArrayList<> ();
-            command.add(buf.toString());
-            String [] arglist = args.split("\\s+");
-            command.addAll(Arrays.asList(arglist));
-            command.add(model);
+        List<String> command = new ArrayList<> ();
+        command.add(buf.toString());
+        String [] arglist = args.split("\\s+");
+        command.addAll(Arrays.asList(arglist));
+        command.add(model);
+        try {
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.directory(new File (WorkDir));
             builder.environment().put("RAYPATH", config.getResolvedRadianceLibDir());
@@ -210,63 +248,77 @@ public class RadianceWinTools {
                 builder.redirectInput(new File(WorkDir + File.separator + in));
             }
             Process proc = builder.start();
+            if (process != null) {
+                process.setWrappedProc(proc);
+            }
             ExitValue = proc.waitFor();
         } catch (IOException | InterruptedException ex) {
             logger.error("Error occoured when executing Rpict", ex);
         }
         
-        if (jpg) {
-
-            // Filter scene
-            try {
-                StringBuilder buf = new StringBuilder (config.getResolvedRadianceBinDir());
-                buf.append(File.separator).append("pfilt");
-
-                List<String> command = new ArrayList<> ();
-                command.add(buf.toString());
-                String [] arglist = "-1 -e -3".split("\\s+");
-                command.addAll(Arrays.asList(arglist));
-                command.add(out);
-                ProcessBuilder builder = new ProcessBuilder(command);
-                builder.directory(new File (WorkDir));
-                builder.environment().put("RAYPATH", config.getResolvedRadianceLibDir());
-                builder.redirectError(new File(WorkDir + File.separator + err));
-                builder.redirectOutput(new File(WorkDir + File.separator + out + ".flt"));
-                Process proc = builder.start();
-                ExitValue = proc.waitFor();
-            } catch (IOException | InterruptedException ex) {
-                logger.error("Error occoured when executing pfilt", ex);
-            }
-
-            // Convert to bmp
-            try {
-                StringBuilder buf = new StringBuilder (config.getResolvedRadianceBinDir());
-                buf.append(File.separator).append("ra_bmp");
-
-                List<String> command = new ArrayList<> ();
-                command.add(buf.toString());
-                String [] arglist = "-g 1.0".split("\\s+");
-                command.addAll(Arrays.asList(arglist));
-                command.add(out + ".flt");
-                command.add(out + ".bmp");
-                ProcessBuilder builder = new ProcessBuilder(command);
-                builder.directory(new File (WorkDir));
-                builder.environment().put("RAYPATH", config.getResolvedRadianceLibDir());
-                builder.redirectError(ProcessBuilder.Redirect.appendTo(new File(WorkDir + File.separator + err)));
-                Process proc = builder.start();
-                ExitValue = proc.waitFor();
-            } catch (IOException | InterruptedException ex) {
-                logger.error("Error occoured when executing ra_bmp", ex);
-            }
+        if (png) {
+            // Sweep everything with the same extension as out. This is for handling
+            // -o option in rpict
+            String ext = FilenameUtils.getExtension(out);
+            File [] files = new File(WorkDir).listFiles((FileFilter)new WildcardFileFilter("*." + ext));
+            for (File file : files) {
+                String outname = file.getName();
             
-            // Convert to jpg
-            BufferedImage input_image = null; 
-            try {
-                input_image = ImageIO.read(new File(WorkDir + File.separator + out + ".bmp")); //read bmp into input_image object
-                File outputfile = new File(WorkDir + File.separator + out + ".jpg"); //create new outputfile object
-                ImageIO.write(input_image, "jpg", outputfile); //write JPG output to file 
-            }catch (Exception ex) {
-                logger.error ("Error converting bmp to jpg.", ex);
+                // Filter scene
+                try {
+                    buf = new StringBuilder (config.getResolvedRadianceBinDir());
+                    buf.append(File.separator).append("pfilt");
+
+                    command = new ArrayList<> ();
+                    command.add(buf.toString());
+                    // String [] arglist = "-1 -e -3".split("\\s+");
+                    // command.addAll(Arrays.asList(arglist));
+                    command.add(outname);
+                    ProcessBuilder builder = new ProcessBuilder(command);
+                    builder.directory(new File (WorkDir));
+                    builder.environment().put("RAYPATH", config.getResolvedRadianceLibDir());
+                    builder.redirectError(new File(WorkDir + File.separator + err));
+                    builder.redirectOutput(new File(WorkDir + File.separator + outname + ".flt"));
+                    Process proc = builder.start();
+                    ExitValue = proc.waitFor();
+                } catch (IOException | InterruptedException ex) {
+                    logger.error("Error occoured when executing pfilt", ex);
+                }
+
+                // Convert to bmp
+                try {
+                    buf = new StringBuilder (config.getResolvedRadianceBinDir());
+                    buf.append(File.separator).append("ra_bmp");
+
+                    command = new ArrayList<> ();
+                    command.add(buf.toString());
+                    //String [] arglist = "-g 1.0".split("\\s+");
+                    //command.addAll(Arrays.asList(arglist));
+                    command.add(outname + ".flt");
+                    command.add(outname + ".bmp");
+                    ProcessBuilder builder = new ProcessBuilder(command);
+                    builder.directory(new File (WorkDir));
+                    builder.environment().put("RAYPATH", config.getResolvedRadianceLibDir());
+                    builder.redirectError(ProcessBuilder.Redirect.appendTo(new File(WorkDir + File.separator + err)));
+                    Process proc = builder.start();
+                    ExitValue = proc.waitFor();
+                } catch (IOException | InterruptedException ex) {
+                    logger.error("Error occoured when executing ra_bmp", ex);
+                }
+
+                // Convert to png
+                BufferedImage input_image = null; 
+                try {
+                    input_image = ImageIO.read(new File(WorkDir + File.separator + outname + ".bmp")); //read bmp into input_image object
+                    File outputfile = new File(WorkDir + File.separator + outname + ".png"); //create new outputfile object
+                    ImageIO.write(input_image, "png", outputfile); //write PNG output to file 
+                }catch (Exception ex) {
+                    logger.error ("Error converting bmp to png.", ex);
+                }
+
+                // Remove flt and bmp
+                new File(WorkDir + File.separator + outname + ".flt").delete();
+                new File(WorkDir + File.separator + outname + ".bmp").delete();
             }
         }
         // Return Radiance exit value
@@ -284,6 +336,21 @@ public class RadianceWinTools {
      * @return the result code represents the state of execution steps. >=0 means successful
      */
     public static int runGen_DC (RadianceConfig config, String WorkDir, String model, String in, String out, String err) {
+        return runGen_DC(config, WorkDir, model, in, out, err, null);
+    }
+    
+    /**
+     * Call DaySim gen_dc to run the simulation
+     * @param config Radiance Configuration
+     * @param WorkDir The working directory where the input files are stored and the output files to be generated
+     * @param model
+     * @param in
+     * @param out
+     * @param err
+     * @param process
+     * @return the result code represents the state of execution steps. >=0 means successful
+     */
+    public static int runGen_DC (RadianceConfig config, String WorkDir, String model, String in, String out, String err, ProcessWrapper process) {
 
         int ExitValue = -99;
         
@@ -313,12 +380,19 @@ public class RadianceWinTools {
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.directory(new File (WorkDir));
             builder.environment().put("RAYPATH", config.getResolvedDaySimLibDir());
-            builder.redirectError(new File(WorkDir + File.separator + err));
             builder.redirectOutput(new File(WorkDir + File.separator + out));
+            if (err == null || out.equals(err)) {
+                builder.redirectErrorStream(true);
+            }else {
+                builder.redirectError(new File(WorkDir + File.separator + err));
+            }
             if (in != null) {
                 builder.redirectInput(new File(WorkDir + File.separator + in));
             }
             Process proc = builder.start();
+            if (process != null) {
+                process.setWrappedProc(proc);
+            }
             ExitValue = proc.waitFor();
         } catch (IOException | InterruptedException ex) {
             logger.error("Error occoured when executing DaySim gen_dc", ex);
@@ -339,6 +413,21 @@ public class RadianceWinTools {
      * @return the result code represents the state of execution steps. >=0 means successful
      */
     public static int runDaySim (RadianceConfig config, String WorkDir, String model, String in, String out, String err) {
+        return runDaySim(config, WorkDir, model, in, out, err, null);
+    }
+    
+    /**
+     * Call a sequence of DaySim programs to run the simulation
+     * @param config Radiance Configuration
+     * @param WorkDir The working directory where the input files are stored and the output files to be generated
+     * @param model
+     * @param in
+     * @param out
+     * @param err
+     * @param process
+     * @return the result code represents the state of execution steps. >=0 means successful
+     */
+    public static int runDaySim (RadianceConfig config, String WorkDir, String model, String in, String out, String err, ProcessWrapper process) {
 
         int ExitValue = -99;
         
@@ -374,6 +463,9 @@ public class RadianceWinTools {
                 builder.redirectInput(new File(WorkDir + File.separator + in));
             }
             Process proc = builder.start();
+            if (process != null) {
+                process.setWrappedProc(proc);
+            }
             ExitValue = proc.waitFor();
         } catch (IOException | InterruptedException ex) {
             logger.error("Error occoured when executing gen_dc", ex);
@@ -396,6 +488,9 @@ public class RadianceWinTools {
                 builder.redirectInput(new File(WorkDir + File.separator + in));
             }
             Process proc = builder.start();
+            if (process != null) {
+                process.setWrappedProc(proc);
+            }
             ExitValue = proc.waitFor();
         } catch (IOException | InterruptedException ex) {
             logger.error("Error occoured when executing ds_illum", ex);

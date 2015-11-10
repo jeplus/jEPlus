@@ -434,4 +434,12 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         this.run();
     }
 
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public String toString () {
+        return this.TaskID;
+    }
 }
