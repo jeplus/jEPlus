@@ -91,7 +91,7 @@ public class EsoResultCollector extends ResultCollector {
         ArrayList<String> list = new ArrayList<> ();
         if (rvx != null && rvx.getRVIs() != null) {
             for (RVX_RVIitem item : rvx.getRVIs()) {
-                list.add(item.getTableName() + ".csv");
+                if (item.isUsedInCalc()) list.add(item.getTableName() + ".csv");
             }
         }
         return list;

@@ -1329,9 +1329,15 @@ public class EPlusBatch extends Thread {
         // row 2 and on - data: comma delimitted text, starting with line id, job id, date, data ....
 
         ArrayList<String> Results = new ArrayList<> ();
+        int cCount = 0;
         for (ResultCollector rc : rcs) {
             ArrayList<String> fns;
-            if (rc.getResultFiles().isEmpty()) {
+//            if (rc.getResultFiles().isEmpty()) {
+//                fns = rc.getExpectedResultFiles(rvx);
+//            } else {
+//                fns = rc.getResultFiles();
+//            }
+            if (rvx != null) {
                 fns = rc.getExpectedResultFiles(rvx);
             } else {
                 fns = rc.getResultFiles();
@@ -1342,7 +1348,8 @@ public class EPlusBatch extends Thread {
                     if (line != null && line.trim().length() > 0) {
                         String [] items = line.split("\\s*,\\s*");
                         for (int k=3; k<items.length; k++) {
-                            Results.add(items[k].trim());
+                            Results.add("c" + cCount + ": " + items[k].trim());
+                            cCount ++;
                         }
                     }
                 }catch (Exception ex) {
@@ -1370,7 +1377,13 @@ public class EPlusBatch extends Thread {
         int tabidx = 0;
         for (ResultCollector rc : rcs) {
             ArrayList<String> fns;
-            if (rc.getResultFiles().isEmpty()) {
+//            if (rc.getResultFiles().isEmpty()) {
+//                fns = rc.getExpectedResultFiles(rvx);
+//            } else {
+//                fns = rc.getResultFiles();
+//            }
+            // Changed to RVX defined
+            if (rvx != null) {
                 fns = rc.getExpectedResultFiles(rvx);
             } else {
                 fns = rc.getResultFiles();
@@ -1717,33 +1730,46 @@ public class EPlusBatch extends Thread {
                 }
             }
             // Result table headers
-            if (rc.getResReader() != null && rc.getResWriter() != null) {
-                for (int j = 0; j < rc.getResultFiles().size(); j++) {
-                    String fn = result_folder + rc.getResultFiles().get(j);
-                    try (BufferedReader fr = new BufferedReader (new FileReader (fn));) {
-                        String line = fr.readLine();
-                        if (line != null && line.trim().length() > 0) {
-                            String [] items = line.split("\\s*,\\s*");
-                            if (items.length >= 2) { // Contains job_id
-                                StringBuilder row;
-                                if (table.containsKey(items[1])) {
-                                    row = table.get(items[1]);
-                                }else {
-                                    row = new StringBuilder ();
-                                    table.put(items[1], row);
-                                }
-                                for (int k=3; k<items.length; k++) {
-                                    row.append(",").append("c").append(cCount).append(": ").append(items[k]);
-                                    cCount ++;
-                                }
-                            }
-                        }
-                    }catch (Exception ex) {
-                        logger.error("", ex);
-                    }
-                }
-            }
+//            if (rc.getResReader() != null && rc.getResWriter() != null) {
+//                for (int j = 0; j < rc.getResultFiles().size(); j++) {
+//                    String fn = result_folder + rc.getResultFiles().get(j);
+//                    try (BufferedReader fr = new BufferedReader (new FileReader (fn));) {
+//                        String line = fr.readLine();
+//                        if (line != null && line.trim().length() > 0) {
+//                            String [] items = line.split("\\s*,\\s*");
+//                            if (items.length >= 2) { // Contains job_id
+//                                StringBuilder row;
+//                                if (table.containsKey(items[1])) {
+//                                    row = table.get(items[1]);
+//                                }else {
+//                                    row = new StringBuilder ();
+//                                    table.put(items[1], row);
+//                                }
+//                                for (int k=3; k<items.length; k++) {
+//                                    row.append(",").append("c").append(cCount).append(": ").append(items[k]);
+//                                    cCount ++;
+//                                }
+//                            }
+//                        }
+//                    }catch (Exception ex) {
+//                        logger.error("", ex);
+//                    }
+//                }
+//            }
         }
+        
+        ArrayList <String> res_header = EPlusBatch.getSimulationResultHeaders(rcs, result_folder, rvx);
+        StringBuilder header_row = null;
+        if (table.containsKey("Job_ID")) {
+            header_row = table.get("Job_ID");
+        }else {
+            header_row = new StringBuilder ("Job_ID");
+            table.put("Job_ID", header_row);
+        }
+        for (String col : res_header) {
+            header_row.append(",").append(col);
+        }
+        
         // Fill in results
         HashMap<String, ArrayList<ArrayList<double []>>> data = getSimulationResults(rcs, result_folder, rvx, null);
         for (String key: data.keySet()) {

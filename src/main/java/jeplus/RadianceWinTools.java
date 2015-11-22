@@ -178,7 +178,7 @@ public class RadianceWinTools {
             command.add(model);
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.directory(new File (WorkDir));
-            builder.environment().put("RAYPATH", config.getResolvedRadianceLibDir());
+            builder.environment().put("RAYPATH", "." + File.pathSeparator + config.getResolvedRadianceLibDir());
             builder.redirectError(new File(WorkDir + File.separator + err));
             builder.redirectOutput(new File(WorkDir + File.separator + out));
             builder.redirectInput(new File(WorkDir + File.separator + in));
@@ -241,7 +241,7 @@ public class RadianceWinTools {
         try {
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.directory(new File (WorkDir));
-            builder.environment().put("RAYPATH", config.getResolvedRadianceLibDir());
+            builder.environment().put("RAYPATH", "." + File.pathSeparator + config.getResolvedRadianceLibDir());
             builder.redirectError(new File(WorkDir + File.separator + err));
             builder.redirectOutput(new File(WorkDir + File.separator + out));
             if (in != null) {
@@ -276,7 +276,7 @@ public class RadianceWinTools {
                     command.add(outname);
                     ProcessBuilder builder = new ProcessBuilder(command);
                     builder.directory(new File (WorkDir));
-                    builder.environment().put("RAYPATH", config.getResolvedRadianceLibDir());
+                    builder.environment().put("RAYPATH", "." + File.pathSeparator + config.getResolvedRadianceLibDir());
                     builder.redirectError(new File(WorkDir + File.separator + err));
                     builder.redirectOutput(new File(WorkDir + File.separator + outname + ".flt"));
                     Process proc = builder.start();
@@ -298,7 +298,7 @@ public class RadianceWinTools {
                     command.add(outname + ".bmp");
                     ProcessBuilder builder = new ProcessBuilder(command);
                     builder.directory(new File (WorkDir));
-                    builder.environment().put("RAYPATH", config.getResolvedRadianceLibDir());
+                    builder.environment().put("RAYPATH", "." + File.pathSeparator + config.getResolvedRadianceLibDir());
                     builder.redirectError(ProcessBuilder.Redirect.appendTo(new File(WorkDir + File.separator + err)));
                     Process proc = builder.start();
                     ExitValue = proc.waitFor();
@@ -379,7 +379,7 @@ public class RadianceWinTools {
             command.add(model);
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.directory(new File (WorkDir));
-            builder.environment().put("RAYPATH", config.getResolvedDaySimLibDir());
+            builder.environment().put("RAYPATH", "." + File.pathSeparator + config.getResolvedDaySimLibDir());
             builder.redirectOutput(new File(WorkDir + File.separator + out));
             if (err == null || out.equals(err)) {
                 builder.redirectErrorStream(true);
@@ -456,7 +456,7 @@ public class RadianceWinTools {
             command.add(model);
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.directory(new File (WorkDir));
-            builder.environment().put("RAYPATH", config.getResolvedDaySimLibDir());
+            builder.environment().put("RAYPATH", "." + File.pathSeparator + config.getResolvedDaySimLibDir());
             builder.redirectError(new File(WorkDir + File.separator + err));
             builder.redirectOutput(new File(WorkDir + File.separator + out));
             if (in != null) {
@@ -481,7 +481,7 @@ public class RadianceWinTools {
             command.add(model);
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.directory(new File (WorkDir));
-            builder.environment().put("RAYPATH", config.getResolvedDaySimLibDir());
+            builder.environment().put("RAYPATH", "." + File.pathSeparator + config.getResolvedDaySimLibDir());
             builder.redirectError(ProcessBuilder.Redirect.appendTo(new File(WorkDir + File.separator + err)));
             builder.redirectOutput(ProcessBuilder.Redirect.appendTo(new File(WorkDir + File.separator + out)));
             if (in != null) {
@@ -506,7 +506,7 @@ public class RadianceWinTools {
             command.add(model);
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.directory(new File (WorkDir));
-            builder.environment().put("RAYPATH", config.getResolvedDaySimLibDir());
+            builder.environment().put("RAYPATH", "." + File.pathSeparator + config.getResolvedDaySimLibDir());
             builder.redirectError( ProcessBuilder.Redirect.appendTo(new File(WorkDir + File.separator + err)));
             builder.redirectOutput(ProcessBuilder.Redirect.appendTo(new File(WorkDir + File.separator + out)));
             if (in != null) {

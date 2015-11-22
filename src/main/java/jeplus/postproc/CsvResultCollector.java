@@ -81,7 +81,7 @@ public class CsvResultCollector extends ResultCollector {
         ArrayList<String> list = new ArrayList<> ();
         if (rvx != null && rvx.getCSVs() != null) {
             for (RVX_CSVitem item : rvx.getCSVs()) {
-                list.add(item.getTableName() + ".csv");
+                if (item.isUsedInCalc()) list.add(item.getTableName() + ".csv");
             }
         }
         return list;

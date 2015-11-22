@@ -140,7 +140,7 @@ public class SQLiteResultCollector extends ResultCollector {
         ArrayList<String> list = new ArrayList<> ();
         if (rvx != null && rvx.getSQLs() != null) {
             for (RVX_SQLitem item : rvx.getSQLs()) {
-                list.add(item.getTableName() + ".csv");
+                if (item.isUsedInCalc()) list.add(item.getTableName() + ".csv");
             }
         }
         return list;
