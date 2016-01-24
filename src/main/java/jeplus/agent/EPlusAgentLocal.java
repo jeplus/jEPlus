@@ -210,7 +210,7 @@ public class EPlusAgentLocal extends EPlusAgent {
 
         // Start collecting results
         writeLog("Collecting results ...");
-        runResultCollection ();
+        runResultCollection (true);
 
         // Done
         writeLog("All done!");

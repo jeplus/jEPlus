@@ -137,7 +137,7 @@ public class RVX_Constraint implements Serializable {
         } else if (initval >= LB && initval <= UB) {
             val = 0.;
         } else if (initval > Min && initval < LB) {
-            val = (initval - Min) / (LB - Min);
+            val = (LB - initval) / (LB - Min);
         } else if (initval > UB && initval < Max) {
             val = (initval - UB) / (Max - UB);
         }

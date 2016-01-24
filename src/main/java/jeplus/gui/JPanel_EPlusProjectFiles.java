@@ -25,6 +25,7 @@
 package jeplus.gui;
 
 import java.io.File;
+import java.io.IOException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -35,14 +36,20 @@ import jeplus.EPlusConfig;
 import jeplus.JEPlusFrameMain;
 import jeplus.JEPlusProject;
 import jeplus.util.RelativeDirUtil;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author zyyz
  */
 public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
+
+    /**
+     * Logger
+     */
+    final private static org.slf4j.Logger logger = LoggerFactory.getLogger(JPanel_TrnsysProjectFiles.class);
 
     JEPlusFrameMain MainGUI = null;
     protected JEPlusProject Project = null;
@@ -356,18 +363,47 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
 
         // Test if the template file is present
         String fn = (String) cboRviFile.getSelectedItem();
+        if (fn.startsWith("Select ")) {
+            fn = "my.rvx";
+        }
         String templfn = RelativeDirUtil.checkAbsolutePath(txtRviDir.getText() + fn, Project.getBaseDir());
         File ftmpl = new File(templfn);
         if (!ftmpl.exists()) {
             int n = JOptionPane.showConfirmDialog(
                     this,
-                    "<html><p><center>The RVI/MVI file " + templfn + " does not exist."
-                    + "Do you want to select one?</center></p><p> Select 'NO' to create this file. </p>",
+                    "<html><p><center>" + templfn + " does not exist."
+                    + "Do you want to copy one from an existing file?</center></p>"
+                    + "<p> Alternatively, select 'NO' to create this file. </p>",
                     "RVI file not available",
                     JOptionPane.YES_NO_OPTION);
             if (n == JOptionPane.YES_OPTION) {
-                this.cmdSelectRVIFileActionPerformed(null);
-                templfn = txtRviDir.getText() + (String) cboRviFile.getSelectedItem();
+                // Select a file to open
+                if (this.chkReadVar.isSelected()) {
+                    MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVX));
+                }else {
+                    MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVI));
+                }
+                MainGUI.getFileChooser().setMultiSelectionEnabled(false);
+                MainGUI.getFileChooser().setSelectedFile(new File(""));
+                String rvidir = RelativeDirUtil.checkAbsolutePath(txtRviDir.getText(), Project.getBaseDir());
+                MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir));
+                if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                    File file = MainGUI.getFileChooser().getSelectedFile();
+                    try {
+                        FileUtils.copyFile(file, new File(templfn));
+                        cboRviFile.setModel(new DefaultComboBoxModel(new String[]{fn}));
+                        Project.setRVIDir(txtRviDir.getText());
+                        Project.setRVIFile(fn);
+                    } catch (IOException ex) {
+                        logger.error("Error copying RVX from source.", ex);
+                    }
+                }
+                MainGUI.getFileChooser().resetChoosableFileFilters();
+                MainGUI.getFileChooser().setSelectedFile(new File(""));
+            }else if (n == JOptionPane.NO_OPTION) {
+                
+            }else {
+                return;
             }
         }
         int idx = MainGUI.getTpnEditors().indexOfTab(fn);

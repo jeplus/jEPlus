@@ -376,8 +376,9 @@ public abstract class EPlusAgent implements Runnable {
 
     /**
      * Run result collection procedure in each attached result collectors
+     * @param compile Compile combined data tables or not
      */
-    public void runResultCollection () {
+    public void runResultCollection (boolean compile) {
         // Get work environment
         EPlusWorkEnv Env = this.getJobOwner().getResolvedEnv();
         // For each result collector
@@ -406,13 +407,14 @@ public abstract class EPlusAgent implements Runnable {
                 }
             }
         }
-        RVX rvx = this.getJobOwner().getProject().getRvx();
-        // Combine results into combined table and derivatives table
-        EPlusBatch.writeCombinedResultTable(getResultCollectors(), this.getJobOwner().getResolvedEnv().getParentDir(), rvx, "AllCombinedResults.csv");
-        writeLog("Combined result table AllCombinedResults.csv is created.");
-        EPlusBatch.writeDerivedResultTable(getResultCollectors(), this.getJobOwner().getResolvedEnv().getParentDir(), rvx, "AllDerivedResults.csv");
-        writeLog("Derivative result table AllDerivedResults.csv is created.");
-       
+        if (compile) {
+            RVX rvx = this.getJobOwner().getProject().getRvx();
+            // Combine results into combined table and derivatives table
+            EPlusBatch.writeCombinedResultTable(getResultCollectors(), this.getJobOwner().getResolvedEnv().getParentDir(), rvx, "AllCombinedResults.csv");
+            writeLog("Combined result table AllCombinedResults.csv is created.");
+            EPlusBatch.writeDerivedResultTable(getResultCollectors(), this.getJobOwner().getResolvedEnv().getParentDir(), rvx, "AllDerivedResults.csv");
+            writeLog("Derivative result table AllDerivedResults.csv is created.");
+        }       
     }
     
     /**

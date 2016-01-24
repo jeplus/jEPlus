@@ -56,6 +56,7 @@ import jeplus.data.RVX_UserVar;
 import jeplus.postproc.ResultCollector;
 import jeplus.simpleparser.Parser;
 import jeplus.simpleparser.SimpleParserError;
+import jeplus.util.CsvUtil;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
 
@@ -1128,28 +1129,30 @@ public class EPlusBatch extends Thread {
                 this.buildJobs(jobArray);
                 break;
             case FILE: // in an external file, job strings must be in a VALUE form. Each end-of-line is treated as a ";". '#' or '!' Comment lines are filtered.
-                try {
-                    BufferedReader fr = new BufferedReader (new FileReader (jobstr));
-                    StringBuilder buf = new StringBuilder ();
-                    String line = fr.readLine();
-                    while (line !=  null) {
-                        if (line.contains("#")) {
-                            line = line.substring(0, line.indexOf("#"));
-                        }
-                        if (line.contains("!")) {
-                            line = line.substring(0, line.indexOf("!"));
-                        }
-                        line = line.trim();
-                        if (line.length() > 0)
-                            buf.append(line).append(line.endsWith(";") ? "" : ";");
-                        line = fr.readLine();
-                    }
-                    jobstr = buf.toString();
-                }catch (Exception ex) {
-                    logger.error("", ex);
-                    jobstr = "";
-                }
+//                try {
+//                    BufferedReader fr = new BufferedReader (new FileReader (jobstr));
+//                    StringBuilder buf = new StringBuilder ();
+//                    String line = fr.readLine();
+//                    while (line !=  null) {
+//                        if (line.contains("#")) {
+//                            line = line.substring(0, line.indexOf("#"));
+//                        }
+//                        if (line.contains("!")) {
+//                            line = line.substring(0, line.indexOf("!"));
+//                        }
+//                        line = line.trim();
+//                        if (line.length() > 0)
+//                            buf.append(line).append(line.endsWith(";") ? "" : ";");
+//                        line = fr.readLine();
+//                    }
+//                }catch (Exception ex) {
+//                    logger.error("", ex);
+//                    jobstr = "";
+//                }
                 // no break here, to have the new jobStr processed as VALUE
+                jobArray = CsvUtil.parseCSVwithComments(new File (jobstr));
+                this.buildJobs(jobArray);
+                break;
             case VALUE:
                 jobs = jobstr.split("\\s*;\\s*");
                 jobArray = new String [jobs.length][];

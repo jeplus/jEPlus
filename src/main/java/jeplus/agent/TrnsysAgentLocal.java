@@ -165,7 +165,7 @@ public class TrnsysAgentLocal extends EPlusAgentLocal {
 
         // Start collecting results
         writeLog("Collecting results ...");
-        runResultCollection();
+        runResultCollection(true);
         
         // Done
         writeLog("Done!");
@@ -182,7 +182,7 @@ public class TrnsysAgentLocal extends EPlusAgentLocal {
      * Run result collection procedure. In the case for TRNSYS, collectors are constructed within this function
      */
     @Override
-    public void runResultCollection () {
+    public void runResultCollection (boolean compile) {
         // Get work environment
         EPlusWorkEnv Env = this.getJobOwner().getResolvedEnv();
         // Clear collectors list first
@@ -203,7 +203,7 @@ public class TrnsysAgentLocal extends EPlusAgentLocal {
             rc.setResWriter(new DefaultCSVWriter (null, "SimResults" + "_" + name[0] + ".csv"));
             ResultCollectors.add(rc);
         }
-        super.runResultCollection();
+        super.runResultCollection(compile);
     }
     
     @Override
