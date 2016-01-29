@@ -64,6 +64,8 @@ public class EPlusUserSpreadsheetReader implements IFResultReader {
     transient int JobIndexColumn = 1;
     /** Transient column list */
     transient int [] Columns = null;
+    /** Transient default value for missing records */
+    transient double MissingValue = 0;
     
     /**
      * Construct reader by filling the three fields from the passed-in string
@@ -84,6 +86,7 @@ public class EPlusUserSpreadsheetReader implements IFResultReader {
                 Columns[i] = -1;
             }
         }
+        MissingValue = specs.getMissingValue();
     }
 
     @Override
@@ -117,7 +120,8 @@ public class EPlusUserSpreadsheetReader implements IFResultReader {
             int counter = 0;
             for (EPlusTask job : JobQueue) {
                 String job_id = job.getJobID();
-                // Scan spreadsheet
+                // Scan spreadsheet, stop matching after first is found
+                boolean found = false;
                 for (String[] row : spreadsheet) {
                     Matcher m = Pattern.compile(row[this.JobIndexColumn]).matcher(job_id);
                     if (m.matches()) {
@@ -130,7 +134,20 @@ public class EPlusUserSpreadsheetReader implements IFResultReader {
                         }
                         table.add(newdatarow);
                         counter ++;
+                        found = true;
+                        break;
                     }
+                }
+                if (! found) {
+                    ArrayList<String> newdatarow = new ArrayList<>();
+                    newdatarow.add(Integer.toString(counter));
+                    newdatarow.add(job_id);
+                    newdatarow.add("-");
+                    for (int k=0; k<Columns.length; k++) {
+                        newdatarow.add(Double.toString(this.MissingValue));
+                    }
+                    table.add(newdatarow);
+                    counter ++;
                 }
             } // done with loading
             return counter;

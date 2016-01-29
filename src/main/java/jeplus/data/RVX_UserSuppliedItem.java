@@ -24,6 +24,7 @@ import java.io.Serializable;
 //			"headerRow" : 0,
 //			"jobIdColumn" : 1,
 //			"dataColumns" : "3 4",
+//                      "missingValue" : 0,
 //			"tableName" : "UserResults"
 //		}
 //	],
@@ -32,6 +33,7 @@ public class RVX_UserSuppliedItem implements Serializable {
     private int HeaderRow = 0;
     private int JobIdColumn = 1;
     private String DataColumns = "3";
+    private double MissingValue = 0;
     private String TableName = "UserResults";
 
     public String getFileName() {
@@ -72,6 +74,14 @@ public class RVX_UserSuppliedItem implements Serializable {
 
     public void setTableName(String TableName) {
         this.TableName = TableName;
+    }
+
+    public double getMissingValue() {
+        return MissingValue;
+    }
+
+    public void setMissingValue(double MissingValue) {
+        this.MissingValue = MissingValue;
     }
     
 }
