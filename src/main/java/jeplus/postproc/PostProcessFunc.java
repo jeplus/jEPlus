@@ -1,6 +1,6 @@
 /***************************************************************************
  *   jEPlus - EnergyPlus shell for parametric studies                      *
- *   Copyright (C) 2010  Yi Zhang <yizhanguk@gmail.com>                    *
+ *   Copyright (C) 2010  Yi Zhang <yi@jeplus.org>                          *
  *                                                                         *
  *   This program is free software: you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -14,12 +14,6 @@
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                         *
- ***************************************************************************
- *                                                                         *
- * Change log:                                                             *
- *                                                                         *
- *  - Created                                                              *
  *                                                                         *
  ***************************************************************************/
 package jeplus.postproc;
@@ -38,12 +32,18 @@ public abstract class PostProcessFunc {
                                                              "LinkingTRNSYS post-process function copies outputs in a folder to be easily read as inputs in TRNSYS projects."
                                                            };
     
-    /** Get Name of Post-Proccess Function */
+    /** 
+     * Get Name of Post-Proccess Function
+     * @return The names of functions
+     */
     public static String [] getPosProcFunc() {
         return PosProcFunc;   
     }
 
-    /** Get Description of Post-Proccess Function */
+    /** 
+     * Get Description of Post-Proccess Function 
+     * @return Description of the function
+     */
     public static String [] getPosProcFuncDescription() {
         return PosProcFuncDescription;   
     }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *   jEPlus - EnergyPlus shell for parametric studies                      *
- *   Copyright (C) 2010  Yi Zhang <yizhanguk@googlemail.com>               *
+ *   Copyright (C) 2010  Yi Zhang <yi@jeplus.org>                          *
  *                                                                         *
  *   This program is free software: you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -14,17 +14,6 @@
  *                                                                         *
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                         *
- ***************************************************************************
- *                                                                         *
- * Change log:                                                             *
- *                                                                         *
- *  - Created
- *  - 2010-06-09 Corrected a bug that ExpandObjects' directory does not
- *               update with the E+ root directory
- *  - 2010-11-01 Split initSection1() into 3 functions, ie. initSettings(),
- *               checkSettings(), and updateSettings(); added a member to
- *               identify the title of this panel
  *                                                                         *
  ***************************************************************************/
 package jeplus.gui; //

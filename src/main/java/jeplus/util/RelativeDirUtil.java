@@ -1,6 +1,6 @@
 /***************************************************************************
  *   jEPlus - EnergyPlus shell for parametric studies                      *
- *   Copyright (C) 2010  Yi Zhang <yizhanguk@gmail.com>                    *
+ *   Copyright (C) 2010  Yi Zhang <yi@jeplus.org>                          *
  *                                                                         *
  *   This program is free software: you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -15,18 +15,7 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *                                                                         *
- ***************************************************************************
- *                                                                         *
- * Change log:                                                             *
- *                                                                         *
- *  - Created                                                              *
- *  - 20/12/2010: in getRelativePath(), both input parameters are paths in *
- *                matchPathLists(), if two lists are identical, return "./"*
- *  - 05/10/2011: String checkAbsolutePath(String                          *
- *                thispath, String BaseDir); for detecting a relative path *
- *                and converting it to an absolute path using the specified*
- *                base directory                                           *
- ************************************************************************* */
+ ***************************************************************************/
 package jeplus.util;
 
 import java.io.*;

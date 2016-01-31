@@ -1,6 +1,6 @@
 /***************************************************************************
  *   jEPlus - EnergyPlus shell for parametric studies                      *
- *   Copyright (C) 2010  Yi Zhang <yizhanguk@googlemail.com>               *
+ *   Copyright (C) 2010  Yi Zhang <yi@jeplus.org>                          *
  *                                                                         *
  *   This program is free software: you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -15,12 +15,6 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *                                                                         *
- ***************************************************************************
- *                                                                         *
- * Change log:                                                             *
- *                                                                         *
- *  - Created  2011-10-01                                                  *
- *                                                                         *
  ***************************************************************************/
 package jeplus.util;
 
@@ -33,7 +27,7 @@ import java.util.ArrayList;
 import org.slf4j.LoggerFactory;
 
 /**
- * Utilities for simple descriptive stats from csv files
+ * Utilities for reading from, writing to, and calculating simple descriptive stats from csv files
  * @author yzhang
  */
 public class CsvUtil {

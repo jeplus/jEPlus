@@ -1,6 +1,6 @@
 /***************************************************************************
  *   jEPlus - EnergyPlus shell for parametric studies                      *
- *   Copyright (C) 2010  Yi Zhang <yizhanguk@gmail.com>               *
+ *   Copyright (C) 2010  Yi Zhang <yi@jeplus.org>                          *
  *                                                                         *
  *   This program is free software: you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -15,19 +15,11 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *                                                                         *
- ***************************************************************************
- *                                                                         *
- * Change log:                                                             *
- *                                                                         *
- *  - Created                                                              *
- *                                                                         *
  ***************************************************************************/
 package jeplus.gui;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;

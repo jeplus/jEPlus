@@ -1,6 +1,6 @@
 /***************************************************************************
  *   jEPlus - EnergyPlus shell for parametric studies                      *
- *   Copyright (C) 2010  Yi Zhang <yizhanguk@googlemail.com>               *
+ *   Copyright (C) 2010  Yi Zhang <yi@jeplus.org>                          *
  *                                                                         *
  *   This program is free software: you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -15,15 +15,6 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *                                                                         *
- ***************************************************************************
- *                                                                         *
- * Change log:                                                             *
- *                                                                         *
- *  - Created                                                              *
- * 22/03/2013                                                              *
- *  - Added support for search string and value sets                       *
- *  - Added text qualifier (" ") support                                   *
- *                                                                         *
  ***************************************************************************/
 package jeplus.data;
 
@@ -33,7 +24,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 import jeplus.JEPlusProject;
 import jeplus.util.CsvUtil;
 import jeplus.util.RelativeDirUtil;
