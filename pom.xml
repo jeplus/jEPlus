@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.ensims</groupId>
     <artifactId>jeplus</artifactId>
-    <version>2.0.0</version>
+    <version>1.7.0</version>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
@@ -108,5 +108,5 @@
         </plugins>
     </build>
     <name>jeplus</name>
-    <description>jEPlus Version 2 </description>
+    <description>jEPlus Version 1.7</description>
 </project>
