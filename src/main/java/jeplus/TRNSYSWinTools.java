@@ -46,7 +46,7 @@ public class TRNSYSWinTools {
     /**
      * Put the name of Output printers files in a list
      *
-     * @printers String with the name of Output printers files in jEPlus format
+     * @param printers String with the name of Output printers files in jEPlus format
      * @return the name of the Output printers files in a list
      */
     public static ArrayList<String> getPrintersFunc(String printers) {
@@ -80,14 +80,14 @@ public class TRNSYSWinTools {
      * @param WorkDir The working directory in which the new DCK file will be saved
      * @param searchstrings The list of search strings to be looked up
      * @param newvals The list of new values to be used to replace the search strings
-     * @param printers The printers in the dck model
+     * @param Printers The printers in the dck model
      * @return Assign line modified
      */
     public static String TRNSYSUpdateAssign(String line, String DCKDir, String WorkDir, String[] searchstrings, String[] newvals, ArrayList<String> Printers) {
 
         // Parse Assign statement
         String[] args = new String[0];
-        if (line.indexOf("\"") != -1) {
+        if (line.contains("\"")) {
             args = line.trim().split("\\s*\"\\s*");
         } else {
             args = line.trim().split("\\s* \\s*");
@@ -103,7 +103,7 @@ public class TRNSYSWinTools {
                     String line2 = insassign.readLine();
                     while (line2 != null) {
                         for (int j = 0; j < searchstrings.length; j++) {
-                            if ((!ok) && (line2.indexOf(searchstrings[j]) != -1)) {
+                            if ((!ok) && (line2.contains(searchstrings[j]))) {
                                 ok = true;
                             }
                             line2 = line2.replaceAll(searchstrings[j], newvals[j]);
@@ -148,7 +148,7 @@ public class TRNSYSWinTools {
 
         // Parse Assign statement - file name should reside in a pair of " " or immediately after "ASSIGN"
         String[] args = new String[0];
-        if (line.indexOf("\"") != -1) {
+        if (line.contains("\"")) {
             args = line.trim().split("\\s*\"\\s*");
         } else {
             args = line.trim().split("\\s* \\s*");
@@ -195,6 +195,8 @@ public class TRNSYSWinTools {
      * @param fn The target DCK file
      * @param DCKTemplate The template DCK file that contains the search strings
      * @param TargetDir The working directory in which the new DCK file will be saved
+     * @param DCKDir
+     * @param a
      * @return state of execution
      */
     public static boolean TRNSYSUpdateInclude(String fn, String TargetDir, String DCKTemplate, String DCKDir, boolean a) {
@@ -207,7 +209,7 @@ public class TRNSYSWinTools {
             String line = ins.readLine();
             while (line != null) {
                 if (line.trim().startsWith("INCLUDE")) {
-                    String include = line.trim().substring(7).toString().trim().replaceAll("\"", "");
+                    String include = line.trim().substring(7).trim().replaceAll("\"", "");
                     if (include.indexOf(" ") > 0) {
                         include = include.substring(0, include.indexOf(" ")).replaceAll("\"", "");
                     }
@@ -245,8 +247,13 @@ public class TRNSYSWinTools {
      * Update the DCK template file with the absolute directory for INCLUDE calls
      *
      * @param DCKin The template DCK file that contains the search strings
-     * @return state of execution
+     * @param TemplateBaseDir
+     * @param DCKout
+     * @param printers
+     * @param WorkingDir
+     * @return 
      */
+  
     public static boolean TRNSYSUpdateInclude(String DCKin, String TemplateBaseDir, String DCKout, String WorkingDir, String printers) {
 
         boolean success = true;
@@ -268,7 +275,7 @@ public class TRNSYSWinTools {
                     // Look for Include command
                     if (line.trim().startsWith("INCLUDE")) {
                         String[] include = new String[0];
-                        if (line.indexOf("\"") != -1) {
+                        if (line.contains("\"")) {
                             include = line.trim().split("\\s*\"\\s*");
                         } else {
                             include = line.trim().split("\\s* \\s*");
@@ -292,7 +299,7 @@ public class TRNSYSWinTools {
                                     if (line2.trim().startsWith("ASSIGN")) {
                                         // Parse Assign statement
                                         String[] args = new String[0];
-                                        if (line2.indexOf("\"") != -1) {
+                                        if (line2.contains("\"")) {
                                             args = line2.trim().split("\\s*\"\\s*");
                                         } else {
                                             args = line2.trim().split("\\s* \\s*");
@@ -305,11 +312,11 @@ public class TRNSYSWinTools {
                                             includepath = cmd;
                                         }
                                         includepath = includepath.substring(0, includepath.lastIndexOf(File.separator) + 1);
-                                        if (!Printers.contains(new File(args[1].trim().toLowerCase()).getName().toString())) {
+                                        if (!Printers.contains(new File(args[1].trim().toLowerCase()).getName())) {
                                             String fullpath = RelativeDirUtil.checkAbsolutePath(args[1].trim(), includepath);
                                             line2 = args[0].trim() + " \"" + fullpath.trim() + "\" " + args[2].trim();
                                         } else {
-                                            line2 = args[0].trim() + " \"" + new File(args[1].trim()).getName().toString() + "\" " + args[2].trim();
+                                            line2 = args[0].trim() + " \"" + new File(args[1].trim()).getName() + "\" " + args[2].trim();
                                         }
                                     }
                                     outs.println(line2);
@@ -317,7 +324,7 @@ public class TRNSYSWinTools {
                                 }
                                 inc.close();
                             } catch (Exception ex) {
-                                ex.printStackTrace();
+                                logger.error("", ex);
                                 success = false;
                                 outs.println("*     --> INCLUDE FILE IS NOT VALID OR NOT EDITABLE <--");
                             }
@@ -338,7 +345,7 @@ public class TRNSYSWinTools {
 //            infile.delete();
 //            outfile.renameTo(new File(DCKin));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("", e);
             success = false;
         }
         return success;
@@ -348,6 +355,7 @@ public class TRNSYSWinTools {
      * Save the changes of the part INCLUDE from the DCK template to the original INCLUDE file(s)
      *
      * @param DCKTemplate The template DCK file that contains the search strings
+     * @param DCKDir
      * @return state of execution
      */
     public static boolean TRNSYSSaveIncludeChanges(String DCKTemplate, String DCKDir) {
@@ -365,7 +373,7 @@ public class TRNSYSWinTools {
                     line = ins.readLine();
                     PrintWriter outs = new PrintWriter(new FileWriter(incDir));
                     while ((line != null) && (!line.trim().startsWith("*     --> END OF INCLUDE FILE: "))) {
-                        if (line.indexOf("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *") == -1) {
+                        if (!line.contains("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *")) {
                             outs.println(line);
                         }
                         line = ins.readLine();
@@ -378,7 +386,7 @@ public class TRNSYSWinTools {
             ins.close();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("", e);
             success = false;
         }
         return success;
@@ -391,8 +399,9 @@ public class TRNSYSWinTools {
      * @param fn The target DCK file without the extension
      * @param DCKTemplate The template DCK file that contains the search strings
      * @param searchstrings The list of search strings to be looked up
+     * @param DCKDir
      * @param newvals The list of new values to be used to replace the search strings
-     * @param TarjetDir The working directory in which the new DCK file will be saved
+     * @param TargetDir The working directory in which the new DCK file will be saved
      * @return state of execution
      */
     public static boolean updateDCKFile(String fn, String TargetDir, String DCKTemplate, String DCKDir, String[] searchstrings, String[] newvals) {
@@ -407,11 +416,11 @@ public class TRNSYSWinTools {
             int n = searchstrings.length;
             while (line != null) {
                 for (int i = 0; i < n; i++) {
-                    if ((line.indexOf(searchstrings[i]) != -1) && (line.trim().startsWith("ASSIGN"))) {
-                        String fileto = RelativeDirUtil.checkAbsolutePath(new File(newvals[i]).getName().toString(), TargetDir);
+                    if ((line.contains(searchstrings[i])) && (line.trim().startsWith("ASSIGN"))) {
+                        String fileto = RelativeDirUtil.checkAbsolutePath(new File(newvals[i]).getName(), TargetDir);
                         String filefrom = RelativeDirUtil.checkAbsolutePath(newvals[i], DCKDir);
                         success = fileCopy(filefrom, fileto);
-                        String LogicalNumber = line.trim().substring(6).toString().trim();
+                        String LogicalNumber = line.trim().substring(6).trim();
                         LogicalNumber = LogicalNumber.substring(LogicalNumber.indexOf(" ")).trim();
                         if (LogicalNumber.indexOf(" ") > 0) {
                             LogicalNumber = LogicalNumber.substring(0, LogicalNumber.indexOf(" "));
@@ -427,7 +436,7 @@ public class TRNSYSWinTools {
             outs.flush();
             outs.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("", e);
             success = false;
         }
 
@@ -476,7 +485,7 @@ public class TRNSYSWinTools {
 
                         boolean ok = false;
                         String[] include = new String[0];
-                        if (line.indexOf("\"") != -1) {
+                        if (line.contains("\"")) {
                             include = line.trim().split("\\s*\"\\s*");
                         } else {
                             include = line.trim().split("\\s* \\s*");
@@ -489,7 +498,7 @@ public class TRNSYSWinTools {
                             String line2 = inc.readLine();
                             while (line2 != null) {
                                 for (int j = 0; j < searchstrings.length; j++) {
-                                    if ((!ok) && (line2.indexOf(searchstrings[j]) != -1)) {
+                                    if ((!ok) && (line2.contains(searchstrings[j]))) {
                                         ok = true;
                                     }
                                     line2 = line2.replaceAll(searchstrings[j], newvals[j]);
@@ -505,7 +514,7 @@ public class TRNSYSWinTools {
                             outc.close();
                             inc.close();
                         } catch (Exception ex) {
-                            ex.printStackTrace();
+                            logger.error("", ex);
                             success = false;
                         }
                         if (ok) {
@@ -529,7 +538,7 @@ public class TRNSYSWinTools {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("", e);
             success = false;
         }
 
@@ -546,36 +555,36 @@ public class TRNSYSWinTools {
         if (dir.exists()) {
             if (!keepdir) {
                 File[] files = dir.listFiles();
-                for (int i = 0; i < files.length; i++) {
-                    files[i].delete();
+                for (File file : files) {
+                    file.delete();
                 }
                 success = dir.delete();
             } else {
                 if (!keepjeplus) {
                     File[] files = dir.listFiles();
-                    for (int i = 0; i < files.length; i++) {
-                        if ((jeplus.contains(files[i].getName())) && (files[i].getName().indexOf(TRNSYSConfig.getTRNSYSDefLST()) == -1)) {
-                            success &= files[i].delete();
+                    for (File file : files) {
+                        if ((jeplus.contains(file.getName())) && (!file.getName().contains(TRNSYSConfig.getTRNSYSDefLST()))) {
+                            success &= file.delete();
                         }
                     }
                 }
                 if (!keepeplus) {
                     File[] files = dir.listFiles();
-                    for (int i = 0; i < files.length; i++) {
-                        if ((!jeplus.contains(files[i].getName())) && (!getPrintersFunc(printers).contains(files[i].getName().toLowerCase())) && (files[i].getName().indexOf(TRNSYSConfig.getTRNSYSDefLST()) == -1)) {
-                            success &= files[i].delete();
+                    for (File file : files) {
+                        if ((!jeplus.contains(file.getName())) && (!getPrintersFunc(printers).contains(file.getName().toLowerCase())) && (!file.getName().contains(TRNSYSConfig.getTRNSYSDefLST()))) {
+                            success &= file.delete();
                         }
                     }
                 }
                 if (filesToDelete != null) {
                     String[] patterns = filesToDelete.split("\\s*[,;: ]\\s*");
                     OrFileFilter filter = new OrFileFilter();
-                    for (int i = 0; i < patterns.length; i++) {
-                        filter.addFileFilter(new WildcardFileFilter(patterns[i]));
+                    for (String pattern : patterns) {
+                        filter.addFileFilter(new WildcardFileFilter(pattern));
                     }
                     File[] files = dir.listFiles((FileFilter) filter);
-                    for (int i = 0; i < files.length; i++) {
-                        success &= files[i].delete();
+                    for (File file : files) {
+                        success &= file.delete();
                     }
                 }
             }
@@ -605,8 +614,8 @@ public class TRNSYSWinTools {
             // if (! success)
             // System.err.println("TRNSYSWinTools.prepareWorkDir(): cannot copy all neccessray files to the working directory.");
             File[] files = dir.listFiles();
-            for (int i = 0; i < files.length; i++) {
-                files[i].delete();
+            for (File file : files) {
+                file.delete();
             }
         }
         return success;
@@ -631,7 +640,7 @@ public class TRNSYSWinTools {
             in.close();
             out.close();
         } catch (Exception ee) {
-            ee.printStackTrace();
+            logger.error("Error copying " + from + " to " + to, ee);
             success = false;
         }
         return success;
@@ -651,7 +660,7 @@ public class TRNSYSWinTools {
             fw.close();
             return true;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Error creating " + dir + (dir.endsWith(File.separator) ? "" : File.separator) + marker, ex);
         }
         return false;
     }
@@ -671,7 +680,7 @@ public class TRNSYSWinTools {
             }
             return true;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Error deleting " + dir + (dir.endsWith(File.separator) ? "" : File.separator) + marker, ex);
         }
         return false;
     }
@@ -679,49 +688,42 @@ public class TRNSYSWinTools {
     /**
      * Call TRNSYS executable file to run the simulation
      *
+     * @param config TRNSYS configuration instance
      * @param WorkDir The working directory where the input files are stored and the output files to be generated
-     * @param useReadVars Whether or not to use readvars after simulation
+     * @param dckfile The dck file to execute
      * @return the result code represents the state of execution steps. >=0 means successful
      */
     public static int runTRNSYS(TRNSYSConfig config, String WorkDir, String dckfile) {
 
         int ExitValue = -99;
 
+        Process EPProc = null;
         try {
-            Process EPProc = null;
-
-            // Run EnergyPlus executable
+            // Run TRNSYS executable
             String CmdLine = config.getResolvedTRNSYSEXEC() + " " + dckfile + " /n /h";
-            // Requested by Ewen Raballand on 14-2-2014
-            // String CmdLine = config.getResolvedTRNSYSEXEC() + " " + dckfile + " /n";
             EPProc = Runtime.getRuntime().exec(CmdLine, null, new File(WorkDir));
-
-            BufferedReader ins = new BufferedReader(new InputStreamReader(EPProc.getInputStream()));
-            BufferedWriter outs = new BufferedWriter(new FileWriter(config.ScreenFile, true));
-            outs.newLine();
-            outs.write("Calling TRNexe - " + (new SimpleDateFormat()).format(new Date()));
-            outs.newLine();
-            outs.write("Command line: " + WorkDir + ">" + CmdLine);
-            outs.newLine();
-
-            int res = ins.read();
-            while (res != -1) {
-                outs.write(res);
-                res = ins.read();
+            // Console logger
+            try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
+                if (outs != null) {
+                    outs.println();
+                    outs.println("# Calling TRNexe - " + (new SimpleDateFormat()).format(new Date()));
+                    outs.println("# Command line: " + WorkDir + ">" + CmdLine);
+                    outs.flush();
+                }
+                StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
+                StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
+                p_out.start();
+                p_err.start();
+                ExitValue = EPProc.waitFor();
+                p_out.join();
+                p_err.join();
+                if (outs != null) {
+                    outs.println("# TRNSYS executable returns: " + ExitValue);
+                    outs.flush();
+                }
             }
-            ins.close();
-            outs.newLine();
-            outs.flush();
-            outs.close();
-
-            EPProc.waitFor();
-            ExitValue += EPProc.exitValue(); // What's TRNSYS exit value?
-
-            // set it to successful
-            ExitValue = 0;
         } catch (Exception e) {
-            System.err.println("TRNSYSWinTools.runTRNSYS(): "
-                    + e.toString());
+            logger.error("Error executing TRNSYS executable.", e);
         }
 
         // Return Radiance exit value
@@ -730,17 +732,17 @@ public class TRNSYSWinTools {
 
     /**
      * Test if any of the given files in jEPlus format is available in the given directory as an indicator of successful run.
-     *
+     * @param FileNames A list of file names to check
+     * @param workdir The directory in which the files are expected
      * @return boolean True if the file is present at the specified location
      */
     public static boolean isAnyFileAvailable(String FileNames, String workdir) {
-        boolean found = true;
-        ArrayList<String> filename = getPrintersFunc(FileNames);
-        for (int i = 0; i < filename.size(); i++) {
-            if (new File(workdir + filename.get(i)).exists()) {
-                found = true & found;
-            } else {
-                found = false & found;
+        boolean found = false;
+        ArrayList<String> filenames = getPrintersFunc(FileNames);
+        for (String filename : filenames) {
+            if (new File(workdir + filename).exists()) {
+                found = true;
+                break;
             }
         }
         return found;

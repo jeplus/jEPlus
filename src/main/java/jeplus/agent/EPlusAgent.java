@@ -34,11 +34,12 @@ import jeplus.gui.EPlusTextPanelOld;
 import jeplus.gui.JEPlusPrintablePanel;
 import jeplus.gui.JFrameAgentMonitor;
 import jeplus.postproc.CsvResultCollector;
-import jeplus.postproc.DefaultRVIResultCollector;
+import jeplus.postproc.DefaultReportCollector;
 import jeplus.postproc.EsoResultCollector;
 import jeplus.postproc.PythonResultCollector;
 import jeplus.postproc.ResultCollector;
 import jeplus.postproc.SQLiteResultCollector;
+import jeplus.postproc.TrnsysResultCollector;
 import jeplus.postproc.UserResultCollector;
 import org.slf4j.LoggerFactory;
 
@@ -161,7 +162,7 @@ public abstract class EPlusAgent implements Runnable {
         // clear existing collectors
         ResultCollectors.clear();
         // attach default result collector
-        ResultCollector rc = new DefaultRVIResultCollector ("Standard RVI result collector");
+        ResultCollector rc = new DefaultReportCollector ("Standard report collector");
         ResultCollectors.add(rc);
         rc = new EsoResultCollector ("ESO result collector");
         ResultCollectors.add(rc);
@@ -172,6 +173,8 @@ public abstract class EPlusAgent implements Runnable {
         rc = new UserResultCollector ("User supplied result collector");
         ResultCollectors.add(rc);
         rc = new PythonResultCollector ("Python script result collector");
+        ResultCollectors.add(rc);
+        rc = new TrnsysResultCollector ("TRNSYS result collector");
         ResultCollectors.add(rc);
     }
 

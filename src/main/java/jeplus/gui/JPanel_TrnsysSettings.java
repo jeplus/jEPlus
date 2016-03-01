@@ -109,6 +109,7 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
         txtTrnsysEXE = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
+        cmdSave = new javax.swing.JButton();
 
         jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel16.setText("Console log file");
@@ -148,6 +149,13 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("<html><center>Please make sure TRNSYS is properly installed, with all user libraries and license accessible.</center></html>");
 
+        cmdSave.setText("Save Configuration");
+        cmdSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdSaveActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -168,7 +176,10 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(cmdSelectTRNexe, 0, 1, Short.MAX_VALUE)
                             .addComponent(cmdSelectEPlusDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 396, Short.MAX_VALUE))
+                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(cmdSave, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -186,9 +197,11 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
                     .addComponent(txtTrnsysEXE, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5)
                     .addComponent(cmdSelectTRNexe))
-                .addGap(8, 8, 8)
-                .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmdSave)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -222,8 +235,13 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 }//GEN-LAST:event_cmdSelectEPlusDirActionPerformed
 
+    private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
+        Config.saveToFile("");
+    }//GEN-LAST:event_cmdSaveActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cmdSave;
     private javax.swing.JButton cmdSelectEPlusDir;
     private javax.swing.JButton cmdSelectTRNexe;
     private javax.swing.JLabel jLabel15;

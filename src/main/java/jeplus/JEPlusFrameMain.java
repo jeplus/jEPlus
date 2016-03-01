@@ -47,6 +47,7 @@ import jeplus.agent.InselAgentLocal;
 import jeplus.agent.TrnsysAgentLocal;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
+import jeplus.data.RVX;
 import jeplus.data.RandomSource;
 import jeplus.gui.*;
 import jeplus.postproc.ResultCollector;
@@ -1651,6 +1652,14 @@ public class JEPlusFrameMain extends JEPlusFrame {
             }
 
             boolean OkToStart = true;
+            // Reload RVX
+            try {
+                Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile()));
+            }catch (IOException ioe) {
+                logger.error("Error reloading RVX from " + Project.resolveRVIDir() + Project.getRVIFile(), ioe);
+                Project.setRvx(new RVX());
+            }
+            
             // Validate jobs if the execution agent requires it
             if (ExecAgents.get(this.cboExecutionType.getSelectedIndex()).isValidationRequired()) {
                 // Validate the jobs before start

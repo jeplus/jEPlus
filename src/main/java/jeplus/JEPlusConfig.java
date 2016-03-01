@@ -164,7 +164,9 @@ public class JEPlusConfig extends RadianceConfig {
             prop.setProperty("TRNSYSEXE", TRNSYSEXE);
             prop.setProperty("InselBinDir", InselBinDir);
             prop.setProperty("InselEXE", InselEXEC);
-            prop.setProperty("ScreenFile", ScreenFile);
+            if (ScreenFile != null) {
+                prop.setProperty("ScreenFile", ScreenFile);
+            }
             if (EPlusVerConvDir != null) {
                 prop.setProperty("EPlusVerConvDir", EPlusVerConvDir);
             }

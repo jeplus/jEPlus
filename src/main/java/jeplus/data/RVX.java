@@ -55,13 +55,20 @@ public class RVX implements Serializable {
     public RVX_ScriptItem[] getScripts() { return Scripts; }
     public void setScripts(RVX_ScriptItem[] Scripts) { this.Scripts = Scripts; }
 
+    
     private RVX_CSVitem [] CSVs = null;
     public RVX_CSVitem[] getCSVs() { return CSVs; }
     public void setCSVs(RVX_CSVitem[] csvs) { this.CSVs = csvs; }
 
+    
     private RVX_UserSuppliedItem [] UserSupplied = null;
     public RVX_UserSuppliedItem[] getUserSupplied() { return UserSupplied; }
     public void setUserSupplied(RVX_UserSuppliedItem[] usersupplied) { this.UserSupplied = usersupplied; }
+
+    
+    private RVX_TRNSYSitem [] TRNs = null;
+    public RVX_TRNSYSitem[] getTRNs() { return TRNs; }
+    public void setTRNs(RVX_TRNSYSitem[] TRNs) { this.TRNs = TRNs; }
 
     
     

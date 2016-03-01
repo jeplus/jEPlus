@@ -173,12 +173,22 @@ public class ResultCollector {
     }
     
     // ================== End Getters and Setters ===================
+    
+    /**
+     * Set the type of project to this collector. It is primarily used for report
+     * collection
+     * @param type Project type id in JEPlusProject class
+     */
+    public void setProjectType (int type) {
+        // To be overridden by subclasses to select reader type
+    }
 
     public int collectReports (EPlusBatch JobOwner, boolean onthefly) {
         if (onthefly) {
             // Method not implemented
             throw new UnsupportedOperationException("Not supported yet.");
         }else {
+            setProjectType (JobOwner.getProject().getProjectType());
             if (RepReader != null && RepWriter != null) {
                 ReportHeader = new ArrayList<>();
                 ReportTable = new ArrayList<>();

@@ -38,7 +38,10 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
     protected final JFileChooser fc = new JFileChooser("./");
     protected JEPlusConfig Config = JEPlusConfig.getDefaultInstance();
     
-    /** Set an alternative configuration to this panel */
+    /** 
+     * Set an alternative configuration to this panel
+     * @param config 
+     */
     public void setConfig(JEPlusConfig config) {
         Config = config;
         initSettings();
@@ -141,6 +144,7 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
         jLabel6 = new javax.swing.JLabel();
         cmdEnergyPlusDetails = new javax.swing.JButton();
         lblInformation = new javax.swing.JLabel();
+        cmdSave = new javax.swing.JButton();
 
         cmdSelectEPlusDir.setText("...");
         cmdSelectEPlusDir.setToolTipText("Select the folder where EnergyPlus.exe and Energy+.idd are located");
@@ -168,6 +172,13 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
         lblInformation.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         lblInformation.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
 
+        cmdSave.setText("Save Configuration");
+        cmdSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdSaveActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -183,7 +194,10 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
                         .addComponent(cmdSelectEPlusDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmdEnergyPlusDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(lblInformation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lblInformation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(cmdSave, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -196,8 +210,10 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
                     .addComponent(cmdSelectEPlusDir)
                     .addComponent(cmdEnergyPlusDetails))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblInformation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(lblInformation)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmdSave)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -243,9 +259,14 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
         dialog.setVisible(true);
     }//GEN-LAST:event_cmdEnergyPlusDetailsActionPerformed
 
+    private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
+        Config.saveToFile("");
+    }//GEN-LAST:event_cmdSaveActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdEnergyPlusDetails;
+    private javax.swing.JButton cmdSave;
     private javax.swing.JButton cmdSelectEPlusDir;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel lblInformation;

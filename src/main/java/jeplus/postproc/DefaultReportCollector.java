@@ -19,6 +19,7 @@
 package jeplus.postproc;
 
 import java.util.ArrayList;
+import jeplus.JEPlusProject;
 import jeplus.data.RVX;
 import org.slf4j.LoggerFactory;
 
@@ -26,23 +27,24 @@ import org.slf4j.LoggerFactory;
  * This default RVI result collector reads the indexes and simulation reports.
  * @author Yi
  */
-public class DefaultRVIResultCollector extends ResultCollector {
+public class DefaultReportCollector extends ResultCollector {
 
     /** Logger */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(DefaultRVIResultCollector.class);
+    final static org.slf4j.Logger logger = LoggerFactory.getLogger(DefaultReportCollector.class);
+    
+    EPlusOutputReader EPlusReportReader = new EPlusOutputReader();
+    TRNSYSOutputReader TRNSYSReportReader = new TRNSYSOutputReader("");
+    
     
     /**
      * Empty constructor. Actual assignment of readers and writers are done in the <code>collectResutls()</code> function
      * @param Desc Description of this collector
      */
-    public DefaultRVIResultCollector (String Desc) {
+    public DefaultReportCollector (String Desc) {
         super (Desc);
         DefaultCSVWriter csvwriter = new DefaultCSVWriter("RunTimes.csv", "SimResults.csv");
-        EPlusOutputReader defreader = new EPlusOutputReader();
-        this.RepReader = defreader;
+        this.RepReader = null;
         this.RepWriter = csvwriter;
-        // this.ResReader = defreader;
-        this.ResWriter = csvwriter;
         this.IdxWriter = new DefaultIndexWriter ("SimJobIndex.csv");
     }
 
@@ -52,4 +54,25 @@ public class DefaultRVIResultCollector extends ResultCollector {
         // This collector deals with index and reports only
         return list;
     }
+    
+    /**
+     * Set the type of project to this collector. It is primarily used for report
+     * collection
+     * @param type Project type id in JEPlusProject class
+     */
+    @Override
+    public void setProjectType (int type) {
+        switch (type) {
+            case JEPlusProject.EPLUS:
+                RepReader = EPlusReportReader;
+                break;
+            case JEPlusProject.TRNSYS:
+                RepReader = TRNSYSReportReader;
+                break;
+            default:
+                RepReader = null;
+        }
+    }
+
+    
 }

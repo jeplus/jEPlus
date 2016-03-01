@@ -25,7 +25,9 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import jeplus.*;
+import static jeplus.EPlusConfig.RVX;
 import jeplus.data.ExecutionOptions;
+import jeplus.data.RVX;
 import jeplus.gui.JPanel_TrnsysSettings;
 import jeplus.postproc.*;
 
@@ -177,25 +179,28 @@ public class TrnsysAgentLocal extends EPlusAgentLocal {
      */
     @Override
     public void runResultCollection (boolean compile) {
-        // Get work environment
-        EPlusWorkEnv Env = this.getJobOwner().getResolvedEnv();
+        RVX rvx = this.getJobOwner().getProject().getRvx();
         // Clear collectors list first
         ResultCollectors.clear();
-        // Report and index collector
-        ResultCollector rc = new ResultCollector ("TRNSYS report collector");
-        rc.setRepReader(new TRNSYSOutputReader (null));
-        rc.setRepWriter(new DefaultCSVWriter ("RunTimes.csv", null));
-        rc.setIdxWriter(new DefaultIndexWriter ("SimJobIndex.csv"));
-        ResultCollectors.add(rc);
-        // Result collectors
-        String OutputResultFiles = this.getJobOwner().getResolvedEnv().getOutputFileNames();
-        List<String> TRNSYSResultFile = TRNSYSWinTools.getPrintersFunc(OutputResultFiles);
-        for (int j = 0; j < TRNSYSResultFile.size(); j++) {
-            String [] name = TRNSYSResultFile.get(j).split("\\s*[.]\\s*");
-            rc = new ResultCollector ("TRNSYS result collector");
-            rc.setResReader(new TRNSYSOutputReader (TRNSYSResultFile.get(j)));
-            rc.setResWriter(new DefaultCSVWriter (null, "SimResults" + "_" + name[0] + ".csv"));
+        if (rvx == null || rvx.getTRNs() == null || rvx.getTRNs().length == 0) {
+            // Report and index collector
+            ResultCollector rc = new ResultCollector ("TRNSYS report collector");
+            rc.setRepReader(new TRNSYSOutputReader (null));
+            rc.setRepWriter(new DefaultCSVWriter ("RunTimes.csv", null));
+            rc.setIdxWriter(new DefaultIndexWriter ("SimJobIndex.csv"));
             ResultCollectors.add(rc);
+            // Result collectors
+            String OutputResultFiles = this.getJobOwner().getResolvedEnv().getOutputFileNames();
+            List<String> TRNSYSResultFile = TRNSYSWinTools.getPrintersFunc(OutputResultFiles);
+            for (int j = 0; j < TRNSYSResultFile.size(); j++) {
+                String [] name = TRNSYSResultFile.get(j).split("\\s*[.]\\s*");
+                rc = new ResultCollector ("TRNSYS result collector");
+                rc.setResReader(new TRNSYSOutputReader (TRNSYSResultFile.get(j)));
+                rc.setResWriter(new DefaultCSVWriter (null, "SimResults" + "_" + name[0] + ".csv"));
+                ResultCollectors.add(rc);
+            }
+        }else {
+            this.attachDefaultCollector();
         }
         super.runResultCollection(compile);
     }
