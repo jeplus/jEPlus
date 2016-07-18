@@ -945,7 +945,8 @@
                                       </Group>
                                       <Component id="rdoAllJobs" alignment="1" max="32767" attributes="0"/>
                                       <Group type="102" alignment="1" attributes="0">
-                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                          <Component id="chkOverride" max="32767" attributes="0"/>
+                                          <EmptySpace type="separate" max="-2" attributes="0"/>
                                           <Component id="cmdStart" min="-2" pref="130" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
@@ -977,9 +978,12 @@
                                   </Group>
                                   <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
                                   <Component id="rdoAllJobs" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="cmdStart" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace pref="116" max="32767" attributes="0"/>
+                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="3" attributes="0">
+                                      <Component id="cmdStart" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="chkOverride" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace pref="115" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>
@@ -1105,6 +1109,14 @@
                           <Events>
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkLHSActionPerformed"/>
                           </Events>
+                        </Component>
+                        <Component class="javax.swing.JCheckBox" name="chkOverride">
+                          <Properties>
+                            <Property name="selected" type="boolean" value="true"/>
+                            <Property name="text" type="java.lang.String" value="Override existing results"/>
+                            <Property name="toolTipText" type="java.lang.String" value="If unchecked, jEPlus will skip the cases whose results are already present in the output folder."/>
+                            <Property name="enabled" type="boolean" value="false"/>
+                          </Properties>
                         </Component>
                       </SubComponents>
                     </Container>

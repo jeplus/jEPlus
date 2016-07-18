@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import javax.script.ScriptEngine;
@@ -941,16 +942,16 @@ public class EPlusBatch extends Thread {
         // Clear job queue first
         JobQueue.clear();
         if (Info == null || ! Info.isValid()) {
-            System.err.println("EPlusBatch.buildJobs(): Project has not been validated or is invalid.");
+            logger.error("EPlusBatch.buildJobs(): Project has not been validated or is invalid.");
             return -4;
         }
         if (jobArray == null || jobArray.length < 1 || jobArray[0] == null) {
-            System.err.println("EPlusBatch.buildJobs(): Invalid job array.");
+            logger.error("EPlusBatch.buildJobs(): Invalid job array.");
             return -5;
         }
         String [] searchstr = Info.getSearchStringsArray();
         if (searchstr.length != jobArray[0].length - 3) {
-            System.err.println("EPlusBatch.buildJobs(): Supplied job array does not comply with project definition. "
+            logger.error("EPlusBatch.buildJobs(): Supplied job array does not comply with project definition. "
                     + searchstr.length + " variables are present, whereas " + jobArray[0].length + " values are given.");
             return -6;
         }
@@ -1023,6 +1024,83 @@ public class EPlusBatch extends Thread {
                     }
                     JobQueue.add(Task);
                 }
+            }
+        }
+        return JobQueue.size();
+    }
+
+    /**
+     * A Primitive form of buildJobs() that creates a task group from the input
+     * material. The definition of the jobs relies on the Project object attached
+     * to this Batch. The input job array contains only parameter values organised
+     * in 2-D array, in which each row representing one job.
+     * - The first element of each row is the job id string used for identifying the job;
+     * - The second element is the index of weather file, i.e. the i-th weather file in the project's weather list
+     * - The third element of each row is the index of the IDF template to be used;
+     * The width of the array equals the depth of the parameter tree plus 3.
+     * @param jobs The map contains the job names and the parameter values (as Object)
+     * for the jobs.
+     * @return Number of jobs created
+     */
+    public int buildJobs(Map<String, Map<String, Object>> jobs) {
+        // Clear job queue first
+        JobQueue.clear();
+        if (Info == null || ! Info.isValid()) {
+            logger.error("EPlusBatch.buildJobs(): Project has not been validated or is invalid.");
+            return -4;
+        }
+        if (jobs == null || jobs.size() < 1) {
+            logger.error("EPlusBatch.buildJobs(): Invalid job map.");
+            return -5;
+        }
+        
+        // env is needed to carry individual job settings
+        EPlusWorkEnv env = new EPlusWorkEnv();
+        Project.resolveToEnv(env);
+        if (Info != null && Info.isValid()) {
+            Object [] params = Project.getParamTree().getFirstLeaf().getUserObjectPath();
+            for (String jobid : jobs.keySet()) {
+                Map<String, Object> job = jobs.get(jobid);
+                // Create a new instance of env by duplication
+                env = new EPlusWorkEnv(env);
+                EPlusTask Task = null;
+                // Weather file first
+                if (job.containsKey("W")) {
+                    env.WeatherFile = job.get("W").toString();
+                }else {
+                    // If not specified, default to the first weather file
+                    env.WeatherFile = WthrFiles.get(0);
+                }
+                // Model file next
+                if (job.containsKey("T")) {
+                    env.IDFTemplate = job.get("T").toString();
+                }else {
+                    // If not specified, default to the first weather file
+                    env.IDFTemplate = IdfFiles.get(0);
+                }
+                env.EPlusVersion = IDFmodel.getEPlusVersionInIDF (env.IDFDir + env.IDFTemplate);
+                // Parameters now
+                ArrayList<String> keys = new ArrayList<> ();
+                ArrayList<String> vals = new ArrayList<> ();
+                for (Object param : params) {
+                    ParameterItem item = (ParameterItem) param;
+                    keys.add(item.getSearchString());
+                    if (job.containsKey(item.getID())) {
+                        vals.add(job.get(item.getID()).toString());
+                    }else {
+                        vals.add(item.getAlternativeValues()[0]);
+                    }
+                }
+                keys.trimToSize();
+                vals.trimToSize();
+                if (env.getProjectType() == JEPlusProject.EPLUS) {
+                    Task = new EPlusTask(env, jobid, keys, vals);
+                }else if (env.getProjectType() == JEPlusProject.TRNSYS) {
+                    Task = new TRNSYSTask(env, jobid, keys, vals);
+                }else if (env.getProjectType() == JEPlusProject.INSEL) {
+                    Task = new INSELTask(env, jobid, keys, vals);
+                }
+                JobQueue.add(Task);
             }
         }
         return JobQueue.size();
@@ -1200,6 +1278,19 @@ public class EPlusBatch extends Thread {
         validateProject();
         if (getBatchInfo().isValidationSuccessful()) {
             this.buildJobs(jobArray);
+            new Thread(this).start();
+        }
+    }
+
+    /**
+     * Simulate the given set of jobs. For the details of the jobArray, see <code>
+     * buildJobs(String [][] jobArray) </code>
+     * @param jobs A map of jobs
+     */
+    public void runJobSet (Map<String, Map<String, Object>> jobs) {
+        validateProject();
+        if (getBatchInfo().isValidationSuccessful()) {
+            this.buildJobs(jobs);
             new Thread(this).start();
         }
     }

@@ -35,7 +35,11 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
     protected String title = "TRNSYS Executables";
     protected final JFileChooser fc = new JFileChooser("./");
     protected JEPlusConfig Config = JEPlusConfig.getDefaultInstance();;
-    public void setConfig(JEPlusConfig config) {Config = config;}
+    public void setConfig(JEPlusConfig config) {
+        Config = config;
+        initSettings();
+        checkSettings();
+    }
 
     /** Creates new form JPanel_EPlusSettings */
     public JPanel_TrnsysSettings() {

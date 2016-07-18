@@ -774,6 +774,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         cmdSelectJobListFile = new javax.swing.JButton();
         cmdEditJobListFile = new javax.swing.JButton();
         chkLHS = new javax.swing.JCheckBox();
+        chkOverride = new javax.swing.JCheckBox();
         pnlUtilities = new javax.swing.JPanel();
         TpnUtilities = new javax.swing.JTabbedPane();
         TpnEditors = new javax.swing.JTabbedPane();
@@ -1077,6 +1078,11 @@ public class JEPlusFrameMain extends JEPlusFrame {
             }
         });
 
+        chkOverride.setSelected(true);
+        chkOverride.setText("Override existing results");
+        chkOverride.setToolTipText("If unchecked, jEPlus will skip the cases whose results are already present in the output folder.");
+        chkOverride.setEnabled(false);
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -1107,7 +1113,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
                         .addComponent(cmdEditJobListFile, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(rdoAllJobs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(chkOverride, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(cmdStart, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -1132,9 +1139,11 @@ public class JEPlusFrameMain extends JEPlusFrame {
                     .addComponent(cmdEditJobListFile))
                 .addGap(7, 7, 7)
                 .addComponent(rdoAllJobs)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmdStart)
-                .addContainerGap(116, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmdStart)
+                    .addComponent(chkOverride))
+                .addContainerGap(115, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -2621,6 +2630,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JComboBox cboExecutionType;
     private javax.swing.JComboBox cboProjectType;
     private javax.swing.JCheckBox chkLHS;
+    private javax.swing.JCheckBox chkOverride;
     private javax.swing.JButton cmdEditJobListFile;
     private javax.swing.JButton cmdSelectJobListFile;
     private javax.swing.JButton cmdStart;

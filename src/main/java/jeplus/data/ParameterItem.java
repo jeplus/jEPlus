@@ -87,7 +87,7 @@ public class ParameterItem implements Serializable, Cloneable {
     protected int SelectedAltValue = 0; // 0-use all; 1-the 1st value; 2-the 2nd value ...
     
     /** Reference to project in order to get access to its base dir - for loading parameter from file */
-    transient protected JEPlusProject Project;
+    protected JEPlusProject Project;
 
     /**
      * Construct an empty entry
