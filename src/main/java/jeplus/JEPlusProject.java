@@ -37,6 +37,8 @@ import jeplus.data.RandomSource;
 import jeplus.data.RouletteWheel;
 import jeplus.util.CsvUtil;
 import jeplus.util.RelativeDirUtil;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.distribution.LogNormalDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.TriangularDistribution;
 import org.apache.commons.math3.random.SobolSequenceGenerator;
@@ -793,6 +795,7 @@ public class JEPlusProject implements Serializable {
         env.INSELDir = this.resolveINSELDir();
         env.INSELTemplate = INSELTemplate;
         env.OutputFileNames = OutputFileNames;
+        env.ProjectBaseDir = this.BaseDir;
         env.ParentDir = this.resolveWorkDir();
         env.KeepEPlusFiles = ExecSettings.isKeepEPlusFiles();
         env.KeepJEPlusFiles = ExecSettings.isKeepJEPlusFiles();
@@ -1034,43 +1037,12 @@ public class JEPlusProject implements Serializable {
         
         // Get all parameters (inc. idf and weather) and their distributions
         if (ParamTree != null) {
-            DefaultMutableTreeNode thisleaf = ParamTree.getFirstLeaf();
-            Object[] path = thisleaf.getUserObjectPath();
-            int length = path.length + 3; // tree depth plus JobID (reserved space), IDF and Weather
-            String [][] SampledValues = new String [length][];
-            int n_alt;
-            // First element is reserved for job id
-            // Weather
-            n_alt = this.parseFileListString(this.resolveWeatherDir(), this.getWeatherFile()).size();
-            int [] SampledIndex = this.defaultLHSdiscreteSample(LHSsize, n_alt, randomsrc);
-            SampledValues [1] = new String [LHSsize];
-            for (int j=0; j<LHSsize; j++) {
-                SampledValues[1][j] = Integer.toString(SampledIndex[j]);
-            }
-            // IDF
-            n_alt = this.parseFileListString(this.resolveIDFDir(), this.getIDFTemplate()).size();
-            SampledIndex = this.defaultLHSdiscreteSample(LHSsize, n_alt, randomsrc);
-            SampledValues [2] = new String [LHSsize];
-            for (int j=0; j<LHSsize; j++) {
-                SampledValues[2][j] = Integer.toString(SampledIndex[j]);
-            }
-            
-            // Parameters
-            for (int i=3; i<length; i++) {
-                ParameterItem Param = ((ParameterItem) path[i-3]);
-                if (Param.getValuesString().startsWith("@sample")) {
-                    // A distribution definition
-                    SampledValues [i] = this.defaultLHSdistributionSample(LHSsize, Param.getValuesString(), Param.getType(), randomsrc);
-                }else {
-                    // distribution undefined; normal parameter
-                    n_alt = Param.getNAltValues();
-                    SampledIndex = this.defaultLHSdiscreteSample(LHSsize, n_alt, randomsrc);
-                    SampledValues [i] = new String [LHSsize];
-                    for (int j=0; j<LHSsize; j++) {
-                        SampledValues[i][j] = Param.getAlternativeValues()[SampledIndex[j]];
-                    }
-                }
-            }
+            // Create sample for each parameter
+            String [][] SampledValues = getSampleInEqualProbSegments(LHSsize, randomsrc);
+            // debug
+            logger.debug(Arrays.deepToString(SampledValues));
+            //
+            int length = SampledValues.length;
             // Shuffle the sample value vector of each parameter
             for (int i=1; i<length; i++) {
                 Collections.shuffle(Arrays.asList(SampledValues[i]), randomsrc);
@@ -1087,6 +1059,86 @@ public class JEPlusProject implements Serializable {
             return JobList;
         }
         return null;
+    }
+    
+    public String [][] getSobolJobList (int LHSsize, Random randomsrc) {
+        
+        if (randomsrc == null) randomsrc = RandomSource.getRandomGenerator();
+        
+        String [][] JobList = new String [LHSsize][];
+        
+        // Get all parameters (inc. idf and weather) and their distributions
+        if (ParamTree != null) {
+            // Create sample for each parameter
+            String [][] SampledValues = getSampleInEqualProbSegments(LHSsize, randomsrc);
+            int length = SampledValues.length;
+            // Generate Sobol sequence
+            SobolSequenceGenerator SSG = new SobolSequenceGenerator(length - 1);
+            // SSG.skipTo(1000);
+            // Shuffle the sample value vector of each parameter
+//            for (int i=1; i<length; i++) {
+//                Collections.shuffle(Arrays.asList(SampledValues[i]), randomsrc);
+//            }
+            // n jobs are created by taking a value from each parameter's vector 
+            // sequentially
+            for (int i=0; i<LHSsize; i++) {
+                double [] vector = SSG.nextVector();
+                JobList[i] = new String [length];
+                JobList[i][0] = new Formatter().format("SOBOL-%06d", i).toString();  // Job id
+                for (int j=1; j<length; j++) {
+                    JobList[i][j] = SampledValues[j][Math.round((float)vector[j-1] * LHSsize)];
+                }
+            }
+            return JobList;
+        }
+        return null;
+    }
+    
+    /**
+     * 
+     * @param sampleSize
+     * @param randomsrc
+     * @return 
+     */
+    private String [][] getSampleInEqualProbSegments (int sampleSize, Random randomsrc) {
+        DefaultMutableTreeNode thisleaf = ParamTree.getFirstLeaf();
+        Object[] path = thisleaf.getUserObjectPath();
+        int length = path.length + 3; // tree depth plus JobID (reserved space), IDF and Weather
+        String [][] SampledValues = new String [length][];
+        int n_alt;
+        // First element is reserved for job id
+        // Weather
+        n_alt = this.parseFileListString(this.resolveWeatherDir(), this.getWeatherFile()).size();
+        int [] SampledIndex = this.defaultLHSdiscreteSample(sampleSize, n_alt, randomsrc);
+        SampledValues [1] = new String [sampleSize];
+        for (int j=0; j<sampleSize; j++) {
+            SampledValues[1][j] = Integer.toString(SampledIndex[j]);
+        }
+        // IDF
+        n_alt = this.parseFileListString(this.resolveIDFDir(), this.getIDFTemplate()).size();
+        SampledIndex = this.defaultLHSdiscreteSample(sampleSize, n_alt, randomsrc);
+        SampledValues [2] = new String [sampleSize];
+        for (int j=0; j<sampleSize; j++) {
+            SampledValues[2][j] = Integer.toString(SampledIndex[j]);
+        }
+
+        // Parameters
+        for (int i=3; i<length; i++) {
+            ParameterItem Param = ((ParameterItem) path[i-3]);
+            if (Param.getValuesString().startsWith("@sample")) {
+                // A distribution definition
+                SampledValues [i] = this.defaultLHSdistributionSample(sampleSize, Param.getValuesString(), Param.getType(), randomsrc);
+            }else {
+                // distribution undefined; normal parameter
+                n_alt = Param.getNAltValues();
+                SampledIndex = this.defaultLHSdiscreteSample(sampleSize, n_alt, randomsrc);
+                SampledValues [i] = new String [sampleSize];
+                for (int j=0; j<sampleSize; j++) {
+                    SampledValues[i][j] = Param.getAlternativeValues()[SampledIndex[j]];
+                }
+            }
+        }
+        return SampledValues;
     }
 
     private int [] defaultLHSdiscreteSample (int n, int n_alt, Random randomsrc) {
@@ -1144,6 +1196,49 @@ public class JEPlusProject implements Serializable {
                     double mean = Double.parseDouble(params[1]);
                     double sd = Double.parseDouble(params[2]);
                     NormalDistribution Dist = new NormalDistribution (mean, sd);
+                    double bin = 1.0 / n;
+                    for (int i=0; i<n; i++) {
+                        double a = Dist.inverseCumulativeProbability((i == 0) ? bin/10 : i*bin);            // lb of each bin
+                        double b = Dist.inverseCumulativeProbability((i == n-1) ? 1.-bin/n : (i+1)*bin);    // ub of each bin
+                        double v = randomsrc.nextDouble() * (b - a) + a;
+                        if (type == ParameterItem.DOUBLE) {
+                            list.add(Double.toString(v));
+                        }else if (type == ParameterItem.INTEGER) {
+                            // Warning: for integer, binomial distribution should be used.
+                            // the following function is provided just for convenience
+                            list.add(Long.toString(Math.round(v)));
+                        }
+                    }
+                    break;
+                }
+            case "lognormal":
+            case "ln":
+                {
+                    // requires mean, sd, n
+                    double mean = Double.parseDouble(params[1]);
+                    double sd = Double.parseDouble(params[2]);
+                    LogNormalDistribution Dist = new LogNormalDistribution (mean, sd);
+                    double bin = 1.0 / n;
+                    for (int i=0; i<n; i++) {
+                        double a = Dist.inverseCumulativeProbability((i == 0) ? bin/10 : i*bin);            // lb of each bin
+                        double b = Dist.inverseCumulativeProbability((i == n-1) ? 1.-bin/n : (i+1)*bin);    // ub of each bin
+                        double v = randomsrc.nextDouble() * (b - a) + a;
+                        if (type == ParameterItem.DOUBLE) {
+                            list.add(Double.toString(v));
+                        }else if (type == ParameterItem.INTEGER) {
+                            // Warning: for integer, binomial distribution should be used.
+                            // the following function is provided just for convenience
+                            list.add(Long.toString(Math.round(v)));
+                        }
+                    }
+                    break;
+                }
+            case "exponential":
+            case "e":
+                {
+                    // requires mean, sd, n
+                    double mean = Double.parseDouble(params[1]);
+                    ExponentialDistribution Dist = new ExponentialDistribution (mean);
                     double bin = 1.0 / n;
                     for (int i=0; i<n; i++) {
                         double a = Dist.inverseCumulativeProbability((i == 0) ? bin/10 : i*bin);            // lb of each bin

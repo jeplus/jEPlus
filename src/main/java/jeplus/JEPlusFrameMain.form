@@ -44,6 +44,15 @@
         <Property name="text" type="java.lang.String" value="jobs"/>
       </Properties>
     </Component>
+    <Component class="javax.swing.JCheckBox" name="chkLHS">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="LHS"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkLHSActionPerformed"/>
+      </Events>
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBarMain">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenuFile">
@@ -424,6 +433,19 @@
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator8">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemConfig">
+              <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/jeplus/images/folder_explore.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Configure External Programs ..."/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemConfigActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator13">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemVersionConverter">
               <Properties>
@@ -922,17 +944,17 @@
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Component id="rdoTestChains" alignment="0" pref="507" max="32767" attributes="1"/>
                                       <Group type="102" alignment="0" attributes="0">
-                                          <Component id="rdoTestRandomN" min="-2" pref="136" max="-2" attributes="1"/>
-                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="rdoTestRandomN" min="-2" max="-2" attributes="1"/>
+                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                           <Component id="txtTestRandomN" min="-2" pref="47" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="jLabel5" min="-2" pref="37" max="-2" attributes="0"/>
-                                          <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                                          <Component id="chkLHS" max="-2" attributes="0"/>
+                                          <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                          <Component id="jLabel4" min="-2" pref="93" max="-2" attributes="0"/>
+                                          <Component id="cboSampleOpt" max="32767" attributes="0"/>
+                                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                                          <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="txtRandomSeed" max="32767" attributes="0"/>
+                                          <Component id="txtRandomSeed" min="-2" pref="81" max="-2" attributes="0"/>
                                       </Group>
                                       <Group type="102" alignment="0" attributes="0">
                                           <Component id="rdoJobListFile" min="-2" max="-2" attributes="0"/>
@@ -962,10 +984,10 @@
                                   <Group type="103" groupAlignment="3" attributes="0">
                                       <Component id="rdoTestRandomN" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="txtTestRandomN" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="chkLHS" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="txtRandomSeed" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      <Component id="cboSampleOpt" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
@@ -1023,7 +1045,7 @@
                         </Component>
                         <Component class="javax.swing.JLabel" name="jLabel5">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value=" jobs"/>
+                            <Property name="text" type="java.lang.String" value=" jobs, using: "/>
                           </Properties>
                         </Component>
                         <Component class="javax.swing.JTextField" name="txtRandomSeed">
@@ -1101,15 +1123,6 @@
                             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdEditJobListFileActionPerformed"/>
                           </Events>
                         </Component>
-                        <Component class="javax.swing.JCheckBox" name="chkLHS">
-                          <Properties>
-                            <Property name="text" type="java.lang.String" value="LHS"/>
-                            <Property name="enabled" type="boolean" value="false"/>
-                          </Properties>
-                          <Events>
-                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkLHSActionPerformed"/>
-                          </Events>
-                        </Component>
                         <Component class="javax.swing.JCheckBox" name="chkOverride">
                           <Properties>
                             <Property name="selected" type="boolean" value="true"/>
@@ -1117,6 +1130,21 @@
                             <Property name="toolTipText" type="java.lang.String" value="If unchecked, jEPlus will skip the cases whose results are already present in the output folder."/>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
+                        </Component>
+                        <Component class="javax.swing.JComboBox" name="cboSampleOpt">
+                          <Properties>
+                            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+                              <StringArray count="4">
+                                <StringItem index="0" value="Item 1"/>
+                                <StringItem index="1" value="Item 2"/>
+                                <StringItem index="2" value="Item 3"/>
+                                <StringItem index="3" value="Item 4"/>
+                              </StringArray>
+                            </Property>
+                          </Properties>
+                          <Events>
+                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cboSampleOptActionPerformed"/>
+                          </Events>
                         </Component>
                       </SubComponents>
                     </Container>

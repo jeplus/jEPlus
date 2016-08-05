@@ -213,7 +213,7 @@ public class Main {
                                         randomseed = project.getExecSettings().getRandomSeed();
                                     }
                                     int njobs = Integer.parseInt(commandline.getOptionValue("sample"));
-                                    batch.runRandomSample(njobs, RandomSource.getRandomGenerator(randomseed));
+                                    batch.runSample(EPlusBatch.SampleType.PSEUDO, njobs, RandomSource.getRandomGenerator(randomseed));
                             }else if (commandline.hasOption("lhs")) {
                                     long randomseed;
                                     if (commandline.hasOption("seed")) {
@@ -228,7 +228,22 @@ public class Main {
                                         randomseed = project.getExecSettings().getRandomSeed();
                                     }
                                     int njobs = Integer.parseInt(commandline.getOptionValue("lhs"));
-                                    batch.runLHSample(njobs, RandomSource.getRandomGenerator(randomseed));
+                                    batch.runSample(EPlusBatch.SampleType.LHS, njobs, RandomSource.getRandomGenerator(randomseed));
+                            }else if (commandline.hasOption("sobol")) {
+                                    long randomseed;
+                                    if (commandline.hasOption("seed")) {
+                                        try {
+                                            randomseed = Long.parseLong(commandline.getOptionValue("seed"));
+                                        }catch (NumberFormatException nfe) {
+                                            logger.error("Random seed is not a number. Seed is set to 0 (zero).", nfe);
+                                            randomseed = 0;
+                                        }
+                                        project.getExecSettings().setRandomSeed(randomseed);
+                                    }else {
+                                        randomseed = project.getExecSettings().getRandomSeed();
+                                    }
+                                    int njobs = Integer.parseInt(commandline.getOptionValue("lhs"));
+                                    batch.runSample(EPlusBatch.SampleType.SOBOL, njobs, RandomSource.getRandomGenerator(randomseed));
                             }else if (commandline.hasOption("index")) {
                                     batch.runJobSet(EPlusBatch.JobStringType.INDEX, commandline.getOptionValue("index"));
                             }else if (commandline.hasOption("value")) {
@@ -293,6 +308,10 @@ public class Main {
                                         .hasArg()
                                         .desc(  "Execute a Latin Hypercube sample in project. Effective with -job" )
                                         .build();
+        Option run_sobol   = Option.builder("sobol").argName( "sample size" )
+                                        .hasArg()
+                                        .desc(  "Execute a Sobol sample in project. Effective with -job" )
+                                        .build();
         Option random_seed   = Option.builder("seed").argName( "random seed" )
                                         .hasArg()
                                         .desc(  "Use the given random seed for sampling. If seed is not specified, jEPlus uses the seed saved in the project. This option is effective only with -sample and -lhs" )
@@ -335,6 +354,7 @@ public class Main {
         options.addOption( run_all );
         options.addOption( run_sample );
         options.addOption( run_lhs );
+        options.addOption( run_sobol );
         options.addOption( random_seed );
         options.addOption( run_index );
         options.addOption( run_value );

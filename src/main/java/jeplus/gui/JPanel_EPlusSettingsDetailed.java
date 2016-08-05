@@ -44,9 +44,14 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
     }
     protected Window HostWindow = null;
 
-    /** Creates new form JPanel_EPlusSettings */
-    public JPanel_EPlusSettingsDetailed(Window hostwindow) {
+    /** 
+     * Creates new form JPanel_EPlusSettings
+     * @param hostwindow 
+     * @param config 
+     */
+    public JPanel_EPlusSettingsDetailed(Window hostwindow, JEPlusConfig config) {
         initComponents();
+        Config = config;
         initSettings();
         checkSettings();
         HostWindow = hostwindow;

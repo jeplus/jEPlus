@@ -20,6 +20,7 @@ package jeplus.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
+import jeplus.EPlusBatch;
 
 /**
  * Data object representing execution options model
@@ -98,6 +99,8 @@ public class ExecutionOptions implements Serializable {
     protected int NumberOfJobs = 0;
     /** Use Latin Hypercube sampling or not */
     protected boolean UseLHS = false;
+    /** Sampling option */
+    protected EPlusBatch.SampleType SampleOpt = EPlusBatch.SampleType.PSEUDO;
     /** Random seed */
     protected long RandomSeed = 0;
     /** job list file */
@@ -181,6 +184,7 @@ public class ExecutionOptions implements Serializable {
         SubSet = obj.SubSet;
         NumberOfJobs = obj.NumberOfJobs;
         UseLHS = obj.UseLHS;
+        SampleOpt = obj.SampleOpt;
         RandomSeed = obj.RandomSeed;
         JobListFile = obj.JobListFile;
     }
@@ -369,6 +373,14 @@ public class ExecutionOptions implements Serializable {
 
     public void setUseLHS(boolean UseLHS) {
         this.UseLHS = UseLHS;
+    }
+
+    public EPlusBatch.SampleType getSampleOpt() {
+        return SampleOpt;
+    }
+
+    public void setSampleOpt(EPlusBatch.SampleType SampleOpt) {
+        this.SampleOpt = SampleOpt;
     }
 
 }

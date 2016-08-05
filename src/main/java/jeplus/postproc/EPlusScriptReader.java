@@ -69,15 +69,13 @@ public class EPlusScriptReader implements IFResultReader {
     public int readResult(EPlusBatch manager, String dir, HashMap<String, Integer> header, ArrayList<ArrayList<String>> table) {
         // Initiate header
         header.clear();
-        header.put("#", Integer.valueOf(0));
-        header.put("Job_ID", Integer.valueOf(1));
+        header.put("#", 0);
+        header.put("Job_ID", 1);
         // Get finished jobs
         List <EPlusTask> JobQueue = manager.getAgent().getFinishedJobs();
         // Collect Job results
         int counter = 0;
-        for (int i = 0; i < JobQueue.size(); i++) {
-            // For each job, do:
-            EPlusTask job = JobQueue.get(i);
+        for (EPlusTask job : JobQueue) {
             String job_id = job.getJobID();
             if (readResult(dir, job_id, header, table) > 0) counter ++;
         } // done with loading
@@ -115,7 +113,7 @@ public class EPlusScriptReader implements IFResultReader {
                                 header.put(headings[j], index[j]);
                                 for (int k=0; k<table.size(); k++) table.get(k).add("-");
                             }else {
-                                index[j] = header.get(headings[j]).intValue();
+                                index[j] = header.get(headings[j]);
                             }
                         }
                         // the rest is data

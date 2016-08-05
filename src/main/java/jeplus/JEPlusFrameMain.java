@@ -74,7 +74,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
     
     protected NumberFormat LargeIntFormatter = new DecimalFormat("###,###,###,###,###,###");
 
-    public final static String version = "1.6.3";
+    public final static String version = "1.6.4_beta";
     public final static String version_ps = "_1_6";
     public final static String osName = System.getProperty( "os.name" );
     protected static String VersionInfo = "jEPlus (version " + version + ") for " + osName;
@@ -101,6 +101,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
     protected JPanel_RunReadVars jplReadVarsPanel;
     // Utility panel - Run ReadVars
     protected JPanelRunPython jplPythonPanel;
+    // Program config panel
+    protected JPanelProgConfiguration ConfigPanel;
 
     protected EPlusBatch BatchManager = null;
     protected EPlusBatch ActingManager = null;
@@ -137,6 +139,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
         String [] options = {ExecAgents.get(0).getAgentID()};
         this.cboExecutionType.setModel(new DefaultComboBoxModel (options));
         this.cboExecutionTypeActionPerformed(null);
+        
+        this.cboSampleOpt.setModel(new DefaultComboBoxModel (EPlusBatch.SampleType.values()));
 
         OutputPanel = new EPlusTextPanelOld ("Output", EPlusTextPanel.VIEWER_MODE);
         // Start a new thread for output panel
@@ -391,6 +395,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         this.txtTestRandomN.setText(Integer.toString(Project.ExecSettings.getNumberOfJobs()));
         this.txtRandomSeed.setText(Long.toString(Project.ExecSettings.getRandomSeed()));
         this.chkLHS.setSelected(Project.ExecSettings.isUseLHS());
+        this.cboSampleOpt.setSelectedItem(Project.ExecSettings.getSampleOpt());
         switch (Project.ExecSettings.getSubSet()) {
             case ExecutionOptions.CHAINS: 
                 this.rdoTestChains.setSelected(true);
@@ -624,10 +629,10 @@ public class JEPlusFrameMain extends JEPlusFrame {
     /**
      * Start batch operation with a random sample of jobs
      * @param njobs The number of jobs to run
-     * @param lhs
+     * @param opt
      * @param randomsrc Random generator source. Null means no randomisation is required
      */
-    public void startBatchRunSample (int njobs, boolean lhs, Random randomsrc) {
+    public void startBatchRunSample (int njobs, EPlusBatch.SampleType opt, Random randomsrc) {
         // Update display
         if (OutputPanel == null) {
             OutputPanel = new EPlusTextPanelOld("Output", EPlusTextPanel.VIEWER_MODE);
@@ -637,11 +642,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         }else {
             TpnEditors.setSelectedComponent(OutputPanel);
         }
-        if (lhs) {
-            ActingManager = BatchManager;
-            ActingManager.runLHSample(njobs, randomsrc);
-            OutputPanel.appendContent("A LHS sample of " + ActingManager.getNumberOfJobs() + " jobs has started ...\n");
-        }else {
+        if (opt == EPlusBatch.SampleType.PSEUDO) {
             // Check batch size 
             if (BatchManager.getBatchInfo().getTotalNumberOfJobs() > 1000000) {
                 // Project is too large
@@ -656,10 +657,10 @@ public class JEPlusFrameMain extends JEPlusFrame {
                 }
             }
             OutputPanel.appendContent("Start sampling. Please waite ... \n");
-            ActingManager = BatchManager;
-            ActingManager.runRandomSample(njobs, randomsrc);
-            OutputPanel.appendContent("A test sample of " + njobs + " jobs has started ...\n");
         }
+        ActingManager = BatchManager;
+        ActingManager.runSample(opt, njobs, randomsrc);
+        OutputPanel.appendContent("A " + opt + " sample of " + njobs + " jobs has started ...\n");
     }
 
     /**
@@ -742,6 +743,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         rdoTestFirstN = new javax.swing.JRadioButton();
         txtTestFirstN = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
+        chkLHS = new javax.swing.JCheckBox();
         jSplitPane1 = new javax.swing.JSplitPane();
         tpnMain = new javax.swing.JTabbedPane();
         pnlProject = new javax.swing.JPanel();
@@ -773,8 +775,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
         txtJobListFile = new javax.swing.JTextField();
         cmdSelectJobListFile = new javax.swing.JButton();
         cmdEditJobListFile = new javax.swing.JButton();
-        chkLHS = new javax.swing.JCheckBox();
         chkOverride = new javax.swing.JCheckBox();
+        cboSampleOpt = new javax.swing.JComboBox();
         pnlUtilities = new javax.swing.JPanel();
         TpnUtilities = new javax.swing.JTabbedPane();
         TpnEditors = new javax.swing.JTabbedPane();
@@ -822,6 +824,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuItemViewErr = new javax.swing.JMenuItem();
         jMenuItemViewLog = new javax.swing.JMenuItem();
         jSeparator8 = new javax.swing.JPopupMenu.Separator();
+        jMenuItemConfig = new javax.swing.JMenuItem();
+        jSeparator13 = new javax.swing.JPopupMenu.Separator();
         jMenuItemVersionConverter = new javax.swing.JMenuItem();
         jMenuItemRunPython = new javax.swing.JMenuItem();
         jMenuItemRunReadVars = new javax.swing.JMenuItem();
@@ -864,6 +868,14 @@ public class JEPlusFrameMain extends JEPlusFrame {
         txtTestFirstN.setEnabled(false);
 
         jLabel9.setText("jobs");
+
+        chkLHS.setText("LHS");
+        chkLHS.setEnabled(false);
+        chkLHS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkLHSActionPerformed(evt);
+            }
+        });
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1000, 740));
@@ -1013,7 +1025,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         txtTestRandomN.setToolTipText("Sample size");
         txtTestRandomN.setEnabled(false);
 
-        jLabel5.setText(" jobs");
+        jLabel5.setText(" jobs, using: ");
 
         txtRandomSeed.setText("12345");
         txtRandomSeed.setToolTipText("Set a random seed to fix the job sequence. If a negative value is specified, the current time is used as the seed.");
@@ -1070,18 +1082,17 @@ public class JEPlusFrameMain extends JEPlusFrame {
             }
         });
 
-        chkLHS.setText("LHS");
-        chkLHS.setEnabled(false);
-        chkLHS.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkLHSActionPerformed(evt);
-            }
-        });
-
         chkOverride.setSelected(true);
         chkOverride.setText("Override existing results");
         chkOverride.setToolTipText("If unchecked, jEPlus will skip the cases whose results are already present in the output folder.");
         chkOverride.setEnabled(false);
+
+        cboSampleOpt.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cboSampleOpt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboSampleOptActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -1092,17 +1103,17 @@ public class JEPlusFrameMain extends JEPlusFrame {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rdoTestChains, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(rdoTestRandomN, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(rdoTestRandomN)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtTestRandomN, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(6, 6, 6)
-                        .addComponent(chkLHS)
+                        .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cboSampleOpt, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtRandomSeed))
+                        .addComponent(txtRandomSeed, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(rdoJobListFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1126,10 +1137,10 @@ public class JEPlusFrameMain extends JEPlusFrame {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdoTestRandomN)
                     .addComponent(txtTestRandomN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkLHS)
                     .addComponent(txtRandomSeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4)
-                    .addComponent(jLabel5))
+                    .addComponent(jLabel5)
+                    .addComponent(cboSampleOpt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1523,6 +1534,16 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuTools.add(jMenuItemViewLog);
         jMenuTools.add(jSeparator8);
 
+        jMenuItemConfig.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/folder_explore.png"))); // NOI18N
+        jMenuItemConfig.setText("Configure External Programs ...");
+        jMenuItemConfig.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemConfigActionPerformed(evt);
+            }
+        });
+        jMenuTools.add(jMenuItemConfig);
+        jMenuTools.add(jSeparator13);
+
         jMenuItemVersionConverter.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/go-up.png"))); // NOI18N
         jMenuItemVersionConverter.setText("IDF Version Converter ...");
         jMenuItemVersionConverter.addActionListener(new java.awt.event.ActionListener() {
@@ -1748,7 +1769,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
                             Project.ExecSettings.setRandomSeed(seed);
 
                             startBatchRunSample (Project.ExecSettings.getNumberOfJobs(), 
-                                    Project.ExecSettings.isUseLHS(),
+                                    Project.ExecSettings.getSampleOpt(),
                                     RandomSource.getRandomGenerator(Project.ExecSettings.getRandomSeed()));
                             break;
                         case ExecutionOptions.FILE:
@@ -2623,12 +2644,29 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         }, "jEPlus+EA").start();
     }//GEN-LAST:event_jMenuItemJEPlusEAActionPerformed
 
+    private void jMenuItemConfigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemConfigActionPerformed
+        JDialog ConfigDialog = new JDialog (this, "Configuration file: ", true);
+        ConfigPanel = new JPanelProgConfiguration(ConfigDialog);
+        ConfigPanel.setConfig(JEPlusConfig.getDefaultInstance());
+        ConfigDialog.getContentPane().add(ConfigPanel);
+        ConfigDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        ConfigDialog.setTitle(ConfigDialog.getTitle() + ConfigPanel.getConfigFile());
+        ConfigDialog.pack();
+        ConfigDialog.setLocationRelativeTo(this);
+        ConfigDialog.setVisible(true);
+    }//GEN-LAST:event_jMenuItemConfigActionPerformed
+
+    private void cboSampleOptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboSampleOptActionPerformed
+        Project.getExecSettings().setSampleOpt((EPlusBatch.SampleType)cboSampleOpt.getSelectedItem());
+    }//GEN-LAST:event_cboSampleOptActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane TpnEditors;
     private javax.swing.JTabbedPane TpnUtilities;
     private javax.swing.ButtonGroup btg;
     private javax.swing.JComboBox cboExecutionType;
     private javax.swing.JComboBox cboProjectType;
+    private javax.swing.JComboBox cboSampleOpt;
     private javax.swing.JCheckBox chkLHS;
     private javax.swing.JCheckBox chkOverride;
     private javax.swing.JButton cmdEditJobListFile;
@@ -2647,6 +2685,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JMenu jMenuHelp;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItemAbout;
+    private javax.swing.JMenuItem jMenuItemConfig;
     private javax.swing.JMenuItem jMenuItemCreateIndex;
     private javax.swing.JMenuItem jMenuItemCreateJobList;
     private javax.swing.JMenuItem jMenuItemDefaultLaF;
@@ -2693,6 +2732,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPopupMenu.Separator jSeparator10;
     private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator12;
+    private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;

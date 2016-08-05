@@ -22,11 +22,13 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import jeplus.util.PythonTools;
 import jeplus.util.RelativeDirUtil;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,72 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
 
     static final long serialVersionUID = 1587629823039332802L;
     
+    public static class PythonFunc {
+        String PyVersion = null;
+        String ScriptFile = null;
+        ArrayList<String> Args = null;
+        
+        public PythonFunc (String ver, String script, ArrayList<String> args) {
+            PyVersion = ver;
+            ScriptFile = script;
+            Args = args;
+        }
+
+        public String getPyVersion() {
+            return PyVersion;
+        }
+
+        public void setPyVersion(String PyVersion) {
+            this.PyVersion = PyVersion;
+        }
+
+        public String getScriptFile() {
+            return ScriptFile;
+        }
+
+        public void setScriptFile(String ScriptFile) {
+            this.ScriptFile = ScriptFile;
+        }
+
+        public ArrayList<String> getArgs() {
+            return Args;
+        }
+
+        public void setArgs(ArrayList<String> Args) {
+            this.Args = Args;
+        }
+        
+        /**
+         * String that has been trimmed off "call(" and ")"
+         * @param entry 
+         * @return A new PythonFunc instance
+         */
+        public static PythonFunc fromString (String entry) {
+            String [] fields = entry.split("\\s*,\\s*");
+            ArrayList<String> args = new ArrayList<> ();
+            for (int i=2; i<fields.length; i++) {
+                args.add(fields[i]);
+            }
+            return new PythonFunc (fields[0], fields[1], args);
+        }
+        
+        /**
+         * 
+         * @return 
+         */
+        @Override
+        public String toString () {
+            StringBuilder buf = new StringBuilder("call(");
+            buf.append(PyVersion);
+            buf.append(", ").append(ScriptFile);
+            for (String Arg : Args) {
+                buf.append(", ").append(Arg);
+            }
+            buf.append(")");
+            return buf.toString();
+        }
+    }
+    
     /** ID of this task */
     protected String TaskID = null;
     /** EnergyPlus working environment */
@@ -52,6 +120,8 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
     protected ArrayList<String> SearchStringList;
     /** Alt values ArrayList */
     protected ArrayList<String> AltValueList;
+    /** List of Python scripts to execute before calling E+ binary */
+    protected ArrayList<PythonFunc> Scripts;
     /** Results can be attached to this Task */
     protected ArrayList<String> AttachedResults = new ArrayList<>();
     /** Flag for execution status of this task */
@@ -95,6 +165,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         // Parse search strings for hybrid parameters "@@a@@|@@b@@"
         SearchStringList = new ArrayList<> ();
         AltValueList = new ArrayList<> ();
+        Scripts = new ArrayList<> ();
         // Initialize Jython script engine
         ScriptEngine engine = JEPlusProject.getScript_Engine();
         
@@ -130,6 +201,11 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                     }catch (ScriptException spe) {
                         logger.error("Error evaluating expression " + formula + ".");
                     }
+                // If starts with "call(", create a script record and add "script" to vstrs
+                } else if (formula.startsWith("call(")) {
+                    formula = formula.substring(5, formula.length() - 1);
+                    Scripts.add(PythonFunc.fromString(formula));
+                    vstrs[j] = "script";
                 }
                 // Add the result string to the list
                 AltValueList.add(vstrs[j]);
@@ -390,6 +466,50 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         return ok;
     }
 
+    protected boolean runPythonScriptOnIDF () {
+        boolean ok = true;
+        // Get path to job folder
+        String job_dir = getWorkingDir();
+        // Run Python script
+        JEPlusConfig config = JEPlusConfig.getDefaultInstance();
+        // Create an inverted index
+        HashMap<String, Integer> index = new HashMap<> ();
+        for (int i=0; i<SearchStringList.size(); i++) {
+            index.put (SearchStringList.get(i), i);
+        }
+        // Run scripts
+        for (PythonFunc script : Scripts) {
+            // Get args
+            StringBuilder buf = new StringBuilder ();
+            for (int i=0; i<script.getArgs().size(); i++) {
+                if (i > 0) {
+                    buf.append(",");
+                }
+                if (index.containsKey(script.getArgs().get(i))) {
+                    buf.append(AltValueList.get(index.get(script.getArgs().get(i))));
+                }else {
+                    buf.append(script.getArgs().get(i));
+                }
+            }
+            String args = buf.toString();
+            // Call Python
+            try (PrintStream outs = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + config.getScreenFile(), true));) {
+                PythonTools.runPython(
+                        config, 
+                        RelativeDirUtil.checkAbsolutePath(script.getScriptFile(), WorkEnv.getProjectBaseDir()), 
+                        script.getPyVersion(), 
+                        WorkEnv.getProjectBaseDir(), 
+                        job_dir, 
+                        JEPlusConfig.getDefaultInstance().getEPlusBinDir(),
+                        args,
+                        outs);
+            }catch (IOException ioe) {
+                logger.error("Error writing to log steam.", ioe);
+            }
+        }
+        return ok;
+    }
+    
     /**
      * Execute this task in local machine
      */
@@ -402,6 +522,8 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         ok = ok && EPlusWinTools.copyWorkFiles(getWorkingDir(), WorkEnv.WeatherDir + WorkEnv.WeatherFile, WorkEnv.isRVX() ? null : WorkEnv.RVIDir + WorkEnv.RVIFile);
         // Write IDF file
         ok = ok && this.preprocessInputFile(JEPlusConfig.getDefaultInstance());
+        // Run Python script 
+        ok = ok && this.runPythonScriptOnIDF ();
         // Ready to run EPlus
         if (ok) {
             int code = EPlusWinTools.runEPlus(JEPlusConfig.getDefaultInstance(), getWorkingDir(), false);

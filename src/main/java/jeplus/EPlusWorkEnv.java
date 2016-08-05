@@ -63,6 +63,8 @@ public class EPlusWorkEnv implements Serializable {
     /** Output file names that contain results for each simulation; used for TRNSYS */
     protected String OutputFileNames = "trnsysout.csv";
 
+    /** Base directory of the project */
+    public String ProjectBaseDir = "./";
     /** The local parent directory to the jobs */
     public String ParentDir = "./";
     /** Whether or not to keep job directory */
@@ -89,6 +91,7 @@ public class EPlusWorkEnv implements Serializable {
         IDFTemplate = env.IDFTemplate;
         WeatherDir = env.WeatherDir;
         WeatherFile = env.WeatherFile;
+        ProjectBaseDir = env.ProjectBaseDir;
         ParentDir = env.ParentDir;
         UseReadVars = env.UseReadVars;
         RVIDir = env.RVIDir;
@@ -160,6 +163,14 @@ public class EPlusWorkEnv implements Serializable {
 
     public void setForceRerun(boolean ForceRerun) {
         this.ForceRerun = ForceRerun;
+    }
+
+    public String getProjectBaseDir() {
+        return ProjectBaseDir;
+    }
+
+    public void setProjectBaseDir(String ProjectBaseDir) {
+        this.ProjectBaseDir = ProjectBaseDir;
     }
 
     public String getParentDir() {

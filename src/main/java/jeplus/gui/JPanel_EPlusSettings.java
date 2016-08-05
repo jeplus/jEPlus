@@ -241,7 +241,7 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
     private void cmdEnergyPlusDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnergyPlusDetailsActionPerformed
         JDialog dialog = new JDialog (JEPlusFrameMain.getCurrentMainGUI(), "Set EnergyPlus binaries", true);
         dialog.setLocationRelativeTo(this);
-        dialog.getContentPane().add(new JPanel_EPlusSettingsDetailed (dialog));
+        dialog.getContentPane().add(new JPanel_EPlusSettingsDetailed (dialog, Config));
         // Add dialog closing listener
         dialog.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override

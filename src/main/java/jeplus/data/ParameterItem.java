@@ -27,6 +27,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import jeplus.JEPlusProject;
 import jeplus.util.CsvUtil;
 import jeplus.util.RelativeDirUtil;
+import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.distribution.LogNormalDistribution;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -391,6 +393,21 @@ public class ParameterItem implements Serializable, Cloneable {
                             int start = sections[i].indexOf("(") + 1;
                             int end = sections[i].lastIndexOf(")");
                             vals = mergeLists(vals, createFormula (sections[i].substring(start, end).trim()), COMBINE, true);
+                        }else if (sections[i].toLowerCase().startsWith("@jython")) {
+                            // Exclusive type. If present, other vals are ignored
+                            int start = sections[i].indexOf("(") + 1;
+                            int end = sections[i].lastIndexOf(")");
+                            vals = createScript ("jython", sections[i].substring(start, end).trim());
+                        }else if (sections[i].toLowerCase().startsWith("@python2")) {
+                            // Exclusive type. If present, other vals are ignored
+                            int start = sections[i].indexOf("(") + 1;
+                            int end = sections[i].lastIndexOf(")");
+                            vals = createScript ("python2", sections[i].substring(start, end).trim());
+                        }else if (sections[i].toLowerCase().startsWith("@python3")) {
+                            // Exclusive type. If present, other vals are ignored
+                            int start = sections[i].indexOf("(") + 1;
+                            int end = sections[i].lastIndexOf(")");
+                            vals = createScript ("python3", sections[i].substring(start, end).trim());
                         }
                     }
                 }
@@ -634,6 +651,53 @@ public class ParameterItem implements Serializable, Cloneable {
                     }
                     break;
                 }
+            case "lognormal":
+            case "ln":
+                {
+                    // requires mean, sd, n
+                    double mean = Double.parseDouble(params[1]);
+                    double sd = Double.parseDouble(params[2]);
+                    int n = Integer.parseInt(params[3]);
+                    if (this.Type == DISCRETE) {
+                        // list.add(params[1]);
+                        list = null;
+                    }else {
+                        LogNormalDistribution lndist = new LogNormalDistribution(mean, sd);
+                        // Which RNG is used??
+                        double [] sample = lndist.sample(n);
+                        for (int i=0; i<n; i++) {
+                            if (this.Type == DOUBLE) {
+                                list.add(Double.toString(sample[i]));
+                            }else if (this.Type == INTEGER) {
+                                list.add(Long.toString(Math.round(sample[i])));
+                            }
+                        }
+                    }
+                    break;
+                }
+            case "exponential":
+            case "e":
+                {
+                    // requires mean, n
+                    double mean = Double.parseDouble(params[1]);
+                    int n = Integer.parseInt(params[2]);
+                    if (this.Type == DISCRETE) {
+                        // list.add(params[1]);
+                        list = null;
+                    }else {
+                        ExponentialDistribution lndist = new ExponentialDistribution(mean);
+                        // Which RNG is used??
+                        double [] sample = lndist.sample(n);
+                        for (int i=0; i<n; i++) {
+                            if (this.Type == DOUBLE) {
+                                list.add(Double.toString(sample[i]));
+                            }else if (this.Type == INTEGER) {
+                                list.add(Long.toString(Math.round(sample[i])));
+                            }
+                        }
+                    }
+                    break;
+                }
             case "triangular":
             case "tr":
                 {
@@ -727,6 +791,41 @@ public class ParameterItem implements Serializable, Cloneable {
             bufstr = newstr;
         }
         return new String [] {"?=" + newstr};
+    }
+
+    private String [] createScript (String type, String funcstr) {
+        // scan for parameter ids in the given string, and replace them with the corresponding search tag
+        // 1. locate this parameter in the tree
+        Enumeration nodes = Project.getParamTree().depthFirstEnumeration();
+        DefaultMutableTreeNode thisnode = Project.getParamTree();
+        while (nodes.hasMoreElements()) {
+            thisnode = (DefaultMutableTreeNode)nodes.nextElement();
+            if (thisnode.getUserObject()== this) {
+                break;
+            }
+        }
+        Object [] items = thisnode.getUserObjectPath();
+        // 2. split function string into func name and args
+        String [] args = funcstr.split("\\s*,\\s*");
+        // 3. get a map from parameter id to search tags
+        HashMap<String, String> tagmap = new HashMap<> ();
+        for (int i=0; i<items.length-1; i++) {
+            ParameterItem item = (ParameterItem)items[i];
+            tagmap.put(item.getID(), item.getSearchString());
+        }
+        // 4. create script def string
+        StringBuilder buf = new StringBuilder ("call(").append(type);
+        buf.append(", ").append(args[0]);
+        for (int i=1; i<args.length; i++) {
+            buf.append(", "); 
+            if (tagmap.containsKey(args[i])) {
+                buf.append(tagmap.get(args[i]));
+            }else {
+                buf.append(args[i]);
+            }
+        }
+        buf.append(")");
+        return new String [] {buf.toString()};
     }
 
     /**

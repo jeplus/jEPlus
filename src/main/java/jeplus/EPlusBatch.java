@@ -78,6 +78,12 @@ public class EPlusBatch extends Thread {
         ID,
         FILE
     };
+    
+    public static enum SampleType {
+        PSEUDO,
+        LHS,
+        SOBOL
+    };
 
     protected String IDprefixEP = "EP";
     protected String IDprefixTRN = "TR";
@@ -1299,31 +1305,64 @@ public class EPlusBatch extends Thread {
      * Run simulation on a Latin Hypercube sample. For each parameter, if 
      * probability distribution function is not defined, it is treated as 
      * uniform discrete distribution.
+     * @param opt
      * @param n Sample size of LHS. 5 x number of variables is recommended
      * @param randomsrc
      */
-    public void runLHSample (int n, Random randomsrc) {
+    public void runSample (SampleType opt, int n, Random randomsrc) {
         validateProject();
         if (getBatchInfo().isValidationSuccessful()) {
+            // Get the sample set
+            String [][] sample;
+            long [] samplen;
+            switch (opt) {
+                case LHS:
+                    sample = Project.getLHSJobList(n, randomsrc);
+                    this.buildJobs(sample);
+                    break;
+                case SOBOL:
+                    sample = Project.getSobolJobList(n, randomsrc);
+                    this.buildJobs(sample);
+                    break;
+                case PSEUDO:
+                default:
+                    samplen = this.getRandomJobList(n, randomsrc);
+                    this.buildJobs(samplen);
+            }
             // Run jobs
-            this.buildJobs(Project.getLHSJobList(n, randomsrc));
             new Thread(this).start();
         }
     }
 
-    /**
-     * Run simulation on a set of randomly selected samples. 
-     * @param njobs Sample size
-     * @param randomsrc Random generator
-     */
-    public void runRandomSample (int njobs, Random randomsrc) {
-        validateProject();
-        if (getBatchInfo().isValidationSuccessful()) {
-            this.buildJobs(getRandomJobList(njobs, randomsrc));
-            // Start simulation
-            new Thread(this).start();
-        }
-    }
+//    /**
+//     * Run simulation on a Latin Hypercube sample. For each parameter, if 
+//     * probability distribution function is not defined, it is treated as 
+//     * uniform discrete distribution.
+//     * @param n Sample size of LHS. 5 x number of variables is recommended
+//     * @param randomsrc
+//     */
+//    public void runLHSample (int n, Random randomsrc) {
+//        validateProject();
+//        if (getBatchInfo().isValidationSuccessful()) {
+//            // Run jobs
+//            this.buildJobs(Project.getLHSJobList(n, randomsrc));
+//            new Thread(this).start();
+//        }
+//    }
+//
+//    /**
+//     * Run simulation on a set of randomly selected samples. 
+//     * @param njobs Sample size
+//     * @param randomsrc Random generator
+//     */
+//    public void runRandomSample (int njobs, Random randomsrc) {
+//        validateProject();
+//        if (getBatchInfo().isValidationSuccessful()) {
+//            this.buildJobs(getRandomJobList(njobs, randomsrc));
+//            // Start simulation
+//            new Thread(this).start();
+//        }
+//    }
 
     /**
      * Create a random sample by shuffling existing jobs
