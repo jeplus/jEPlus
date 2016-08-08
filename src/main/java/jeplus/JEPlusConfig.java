@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Properties;
 import static jeplus.EPlusConfig.getDefEPlusBinDir;
+import jeplus.event.IF_ConfigChangedEventHandler;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -41,6 +42,16 @@ public class JEPlusConfig extends RadianceConfig {
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusConfig.class);
+    
+    protected ArrayList<IF_ConfigChangedEventHandler> Listeners = new ArrayList<> ();
+    public void addListener (IF_ConfigChangedEventHandler listener) { Listeners.add(listener); }
+    public void removeListener (IF_ConfigChangedEventHandler listener) { Listeners.remove(listener); }
+    public void removeAllListeners () { Listeners.clear(); }
+    public void fireConfigChangedEvent () {
+        for (IF_ConfigChangedEventHandler item : Listeners) {
+            if (item != null) { item.configChanged(Config); }
+        }
+    }
 
     protected final static int NRecentProjs = 5;
     protected static ArrayList<String> RecentProjects = new ArrayList<>();
@@ -57,31 +68,42 @@ public class JEPlusConfig extends RadianceConfig {
     public static JEPlusConfig getNewInstance (String fn) {
         return new JEPlusConfig(fn);
     }
-    
-    public static JEPlusConfig buildNewInstance (String pathtobin) {
-        JEPlusConfig config = new JEPlusConfig();
-        config.setEPlusBinDir(pathtobin + "/");
-        config.setEPlusEPMacro(pathtobin + "/" + getDefEPlusEPMacro());
-        config.setEPlusEXEC(pathtobin + "/" + getDefEPlusEXEC());
-        config.setEPlusExpandObjects(pathtobin + "/" + getDefEPlusExpandObjects());
-        config.setEPlusReadVars(pathtobin + "/" + getDefEPlusReadVars());
-        config.setScreenFile("console.log"); // no screen log by default
-        return config;
-    }
+
     
     /** Reference to configure file */
     protected String CurrentConfigFile = "jeplus.cfg";
     @JsonIgnore
     public String getCurrentConfigFile () { return CurrentConfigFile; }
     
+    protected String EPlusVerConvDir = null;
+    public String getEPlusVerConvDir() { return EPlusVerConvDir; }
+    public void setEPlusVerConvDir(String EPlusVerConvDir) { this.EPlusVerConvDir = EPlusVerConvDir; fireConfigChangedEvent ();}
+
+    protected String Python2EXE = null;
+    public String getPython2EXE() { return Python2EXE; }
+    public void setPython2EXE(String Python2EXE) { this.Python2EXE = Python2EXE; fireConfigChangedEvent ();}
+
+    protected String Python3EXE = null;
+    public String getPython3EXE() { return Python3EXE; }
+    public void setPython3EXE(String Python3EXE) { this.Python3EXE = Python3EXE; fireConfigChangedEvent ();}
+
+    protected String PythonArgv = null;
+    public String getPythonArgv() { return PythonArgv; }
+    public void setPythonArgv(String PythonArgv) { this.PythonArgv = PythonArgv; }
+
+    protected String PythonScript = null;
+    public String getPythonScript() { return PythonScript; }
+    public void setPythonScript(String PythonScript) { this.PythonScript = PythonScript; }
+
     protected String JESSClientDir = null;
     public String getJESSClientDir() {return JESSClientDir;}
-    public void setJESSClientDir(String JESSClientDir) {this.JESSClientDir = JESSClientDir;}
+    public void setJESSClientDir(String JESSClientDir) { this.JESSClientDir = JESSClientDir; fireConfigChangedEvent ();}
     
     protected String JEPlusEADir = null;
     public String getJEPlusEADir() {return JEPlusEADir;}
-    public void setJEPlusEADir(String JEPlusEADir) {this.JEPlusEADir = JEPlusEADir;}
+    public void setJEPlusEADir(String JEPlusEADir) { this.JEPlusEADir = JEPlusEADir; fireConfigChangedEvent ();}
     
+
     /**
      * Default constructor
      */
@@ -98,6 +120,115 @@ public class JEPlusConfig extends RadianceConfig {
         loadFromFile (fn);
     }
 
+    
+    // ========= Getters and Setters =========
+    
+    /** Set Bin Directory
+     * @param dir */
+    @Override
+    public void setEPlusBinDir(String dir) {
+        EPlusBinDir = dir;
+        EPlusEPMacroEXE = EPlusBinDir + EPlusConfig.getDefEPlusEPMacro();
+        EPlusExpandObjectsEXE = EPlusBinDir + EPlusConfig.getDefEPlusExpandObjects();
+        EPlusEXE = EPlusBinDir + EPlusConfig.getDefEPlusEXEC();
+        EPlusReadVarsEXE = EPlusBinDir + EPlusConfig.getDefEPlusReadVars();
+        fireConfigChangedEvent ();
+    }
+
+    /** 
+     * Set EnergyPlus executable
+     * @param name 
+     */
+    @Override
+    public void setEPlusEXEC(String name) {
+        EPlusEXE = name;
+        fireConfigChangedEvent ();
+    }
+
+    /** 
+     * Set EnergyPlus ReadVarsESO executable
+     * @param name 
+     */
+    @Override
+    public void setEPlusReadVars(String name) {
+        EPlusReadVarsEXE = name;
+        fireConfigChangedEvent ();
+    }
+
+    /** 
+     * Set EnergyPlus EPMacro executable
+     * @param name 
+     */
+    @Override
+    public void setEPlusEPMacro(String name) {
+        EPlusEPMacroEXE = name;
+        fireConfigChangedEvent ();
+    }
+
+    /** 
+     * Set EnergyPlus ExpandObjects executable
+     * @param name 
+     */
+    @Override
+    public void setEPlusExpandObjects(String name) {
+        EPlusExpandObjectsEXE = name;
+        fireConfigChangedEvent ();
+    }
+
+    /** 
+     * set Screen capture file name
+     * @param ScreenFile 
+     */
+    @Override
+    public void setScreenFile(String ScreenFile) {
+        this.ScreenFile = ScreenFile;
+        fireConfigChangedEvent ();
+    }
+
+    /**
+     * Set Bin Directory
+     * @param dir
+     */
+    @Override
+    public void setTRNYSBinDir(String dir) {
+        TRNSYSBinDir = dir;
+        TRNSYSEXE = new File (TRNSYSBinDir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath();
+        fireConfigChangedEvent ();
+    }
+
+    /**
+     * Set TRNSYS executable
+     * @param name
+     */
+    @Override
+    public void setTRNSYSEXEC(String name) {
+        TRNSYSEXE = name;
+        fireConfigChangedEvent ();
+    }
+
+    /**
+     * Set Bin Directory
+     * @param dir
+     */
+    @Override
+    public void setInselBinDir(String dir) {
+        InselBinDir = dir;
+        InselEXEC = new File (InselBinDir + INSELConfig.getDefInselEXEC()).getAbsolutePath();
+        fireConfigChangedEvent ();
+    }
+
+    /**
+     * Set TRNSYS executable
+     * @param name
+     */
+    @Override
+    public void setInselEXEC(String name) {
+        InselEXEC = name;
+        fireConfigChangedEvent ();
+    }
+
+    
+    // ========= End =========
     /**
      * Load configuration from text file (java property format)
      * @param fn Configure file name
@@ -144,6 +275,7 @@ public class JEPlusConfig extends RadianceConfig {
         for (int i=0; i<NRecentProjs; i++) {
             RecentProjects.add(prop.getProperty("RecentProject" + i, null));
         }
+        fireConfigChangedEvent ();
         return true;
     }
 

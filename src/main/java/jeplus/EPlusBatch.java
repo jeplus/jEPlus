@@ -80,7 +80,7 @@ public class EPlusBatch extends Thread {
     };
     
     public static enum SampleType {
-        PSEUDO,
+        SHUFFLE,
         LHS,
         SOBOL
     };
@@ -1324,7 +1324,7 @@ public class EPlusBatch extends Thread {
                     sample = Project.getSobolJobList(n, randomsrc);
                     this.buildJobs(sample);
                     break;
-                case PSEUDO:
+                case SHUFFLE:
                 default:
                     samplen = this.getRandomJobList(n, randomsrc);
                     this.buildJobs(samplen);

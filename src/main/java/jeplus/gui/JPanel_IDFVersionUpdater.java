@@ -37,6 +37,7 @@ import jeplus.JEPlusFrameMain;
 import jeplus.JEPlusProject;
 import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX;
+import jeplus.event.IF_ConfigChangedEventHandler;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author zyyz
  */
-public class JPanel_IDFVersionUpdater extends javax.swing.JPanel {
+public class JPanel_IDFVersionUpdater extends javax.swing.JPanel implements IF_ConfigChangedEventHandler {
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JPanel_IDFVersionUpdater.class);
@@ -71,6 +72,7 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel {
         if (Config.getEPlusVerConvDir() != null) {
             this.setConverterFolder(Config.getEPlusVerConvDir());
         }
+        Config.addListener(this);
         setProject (project);
     }
 
@@ -100,7 +102,6 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel {
             cboTargetVersion.setSelectedIndex(cboTargetVersion.getItemCount() - 1);
             txtConverterFolder.setForeground(Color.black);
             ConverterAvailable = true;
-            Config.setEPlusVerConvDir(dir);
         }        
     }
     
@@ -519,7 +520,8 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel {
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fc.setMultiSelectionEnabled(false);
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            setConverterFolder(fc.getSelectedFile().getAbsolutePath());
+            String dir = fc.getSelectedFile().getAbsolutePath();
+            Config.setEPlusVerConvDir(dir);
         }
     }//GEN-LAST:event_cmdSelectConverterFolderActionPerformed
 
@@ -564,5 +566,10 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+    }
+
+    @Override
+    public void configChanged(JEPlusConfig config) {
+        setConverterFolder(Config.getEPlusVerConvDir());
     }
 }

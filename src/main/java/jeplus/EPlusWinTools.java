@@ -22,10 +22,12 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static jeplus.JEPlusFrameMain.logger;
 import jeplus.util.ProcessWrapper;
 import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -658,6 +660,36 @@ public class EPlusWinTools {
         }
         return ExitValue;
         
+    }
+    
+    public static String runJavaProgram (final String dir, final String jar, final String[] cmdline) {
+        List<String> command = new ArrayList<> ();
+        command.add("java");
+        command.add("-jar");
+        command.add(dir + (dir.endsWith(File.separator) ? "" : File.separator) + jar);
+        command.addAll(Arrays.asList(cmdline));
+        ProcessBuilder builder = new ProcessBuilder(command);
+        builder.directory(new File (dir));
+        builder.redirectErrorStream(true);
+        try {
+            Process proc = builder.start();
+            // int ExitValue = proc.waitFor();
+            StringBuilder buf = new StringBuilder();
+            try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+                String res = ins.readLine();
+                while (res != null) {
+                    buf.append(res);
+                    res = ins.readLine();
+                }
+            }
+            if (proc.exitValue() != 0) {
+                return "Error: " + buf.toString();
+            }
+            return buf.toString();
+        } catch (IOException ex) {
+            logger.error("Cannot run Java program.", ex);
+        }
+        return "Error: failed to run the specified Java program.";
     }
     
     public static boolean updateVersion (String startversion, String targetversion, String binfolder, String listfile, boolean backup, boolean keepversions, PrintStream logstream) {

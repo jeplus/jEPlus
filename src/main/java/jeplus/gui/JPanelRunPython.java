@@ -31,8 +31,8 @@ import jeplus.EPlusConfig;
 import jeplus.EPlusTask;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusFrameMain;
+import jeplus.event.IF_ConfigChangedEventHandler;
 import jeplus.util.PythonTools;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yi
  */
-public class JPanelRunPython extends javax.swing.JPanel {
+public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChangedEventHandler {
   
     /** Logger */
     final static Logger logger = LoggerFactory.getLogger(JPanelRunPython.class);
@@ -50,8 +50,6 @@ public class JPanelRunPython extends javax.swing.JPanel {
     protected EPlusTextPanelOld OutputViewer = null;
     protected String CurrentWorkDir = "./";
     protected JEPlusConfig Config = null;
-    protected String Python2Exe = null;
-    protected String Python3Exe = null;
 
     private DocumentListener DL = null;
     
@@ -62,13 +60,22 @@ public class JPanelRunPython extends javax.swing.JPanel {
      * @param workdir
      */
     public JPanelRunPython(JEPlusFrameMain hostframe, JEPlusConfig config, String workdir) {
-        MainFrame = hostframe;
-        Config = config;
         initComponents();
         initDL();
+        MainFrame = hostframe;
         OutputViewer = MainFrame.getOutputPanel();
+        Config = config;
+        Config.addListener(this);
+        CurrentWorkDir = workdir;
+        updateDisplay();
     }
 
+    public void setCurrentWorkDir(String CurrentWorkDir) {
+        this.CurrentWorkDir = CurrentWorkDir;
+        updateDisplay();
+    }
+
+    
     /**
      * initialises the parameter tree, by setting up tree nodes and tree model
      */
@@ -137,17 +144,14 @@ public class JPanelRunPython extends javax.swing.JPanel {
         return buf.toString();
     } 
     
-    public final void updateDisplay (String workdir) {
-        CurrentWorkDir = workdir;
-        this.txtWorkDir.setText(workdir);
+    public final void updateDisplay () {
+        this.txtWorkDir.setText(CurrentWorkDir);
         this.txtProjectBase.setText(MainFrame.getProject().getBaseDir());
         this.cmdSyncJobListActionPerformed(null);
         this.txtMoreArguments.setText(Config.getPythonArgv() == null ? "" : Config.getPythonArgv());
         this.txtScriptFileName.setText(Config.getPythonScript() == null ? "" : Config.getPythonScript());
-        Python2Exe = Config.getPython2EXE() == null ? null : Config.getPython2EXE();
-        this.txtPython2Exe.setText(Python2Exe == null ? "Select Python exe..." : Python2Exe);
-        Python3Exe = Config.getPython3EXE() == null ? null : Config.getPython3EXE();
-        this.txtPython3Exe.setText(Python3Exe == null ? "Select Python exe..." : Python3Exe);
+        this.txtPython2Exe.setText(Config.getPython2EXE() == null ? "Select Python exe..." : Config.getPython2EXE());
+        this.txtPython3Exe.setText(Config.getPython3EXE() == null ? "Select Python exe..." : Config.getPython3EXE());
     }
     
     /**
@@ -462,17 +466,15 @@ public class JPanelRunPython extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtProjectBase, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(chkPassProjectBase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cmdSelectProjectBase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkPassProjectBase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cmdSelectProjectBase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtProjectBase))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
                     .addComponent(chkPassWorkDir, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(txtWorkDir))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkPassJobList)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -645,8 +647,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             txtPython2Exe.setText(file.getAbsolutePath());
-            Python2Exe = file.getAbsolutePath();
-            Config.setPython2EXE(Python2Exe);
+            Config.setPython2EXE(file.getAbsolutePath());
         }
         fc.resetChoosableFileFilters();
         fc.setSelectedFiles(null);
@@ -662,8 +663,7 @@ public class JPanelRunPython extends javax.swing.JPanel {
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             txtPython3Exe.setText(file.getAbsolutePath());
-            Python3Exe = file.getAbsolutePath();
-            Config.setPython3EXE(Python3Exe);
+            Config.setPython3EXE(file.getAbsolutePath());
         }
         fc.resetChoosableFileFilters();
         fc.setSelectedFiles(null);
@@ -763,4 +763,9 @@ public class JPanelRunPython extends javax.swing.JPanel {
     private javax.swing.JTextField txtWorkDir;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void configChanged(JEPlusConfig config) {
+        updateDisplay();
+    }
 }

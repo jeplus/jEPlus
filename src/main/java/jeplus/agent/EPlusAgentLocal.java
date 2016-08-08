@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import jeplus.*;
 import jeplus.data.ExecutionOptions;
 import jeplus.gui.JFrameAgentLocalMonitor;
@@ -48,29 +47,10 @@ public class EPlusAgentLocal extends EPlusAgent {
         super("Local batch simulation controller", settings);
         this.QueueCapacity = 10000;
         this.attachDefaultCollector();
+        SettingsPanel = new jeplus.gui.JPanel_EPlusSettings (JEPlusConfig.getDefaultInstance());
+        OptionsPanel = new JPanel_LocalControllerOptions (Settings);
     }
     
-    /**
-     * Test if there is more capacity available
-     * @return True if there are processors available
-     */
-    @Override
-    public boolean isAvailable() {
-        return this.JobQueue.size() < this.QueueCapacity;
-    }
-
-    /**
-     * Add a job to the job queue. Note the capacity of the queue is NOT strictly
-     * observed.
-     * @param job a new job to be executed
-     * @return Total number of jobs in the queue
-     */
-    @Override
-    public int addJob(EPlusTask job) {
-        JobQueue.add(job);
-        return JobQueue.size();
-    }
-
     @Override
     public void showAgentMonitorGUI (boolean show, boolean reset) {
         if (show) {
@@ -226,29 +206,6 @@ public class EPlusAgentLocal extends EPlusAgent {
         if (State == AgentState.RUNNING || State == AgentState.PAUSED) {
             this.State = State;
         }
-    }
-
-    @Override
-    public String getStatus() {
-        StringBuilder buf = new StringBuilder (getAgentID());
-        buf.append(" is ").append(State);
-        buf.append(" [Que=").append(this.getJobQueue().size());
-        buf.append(", Run=").append(this.getProcessors().size()); // or RunningJobs?
-        buf.append(", Fin=").append(this.getFinishedJobs().size());
-        buf.append("]");
-        //buf.append(" Elapsed time = ").append(DateUtility.showElapsedTime(StartTime.getTime(), true));
-        return buf.toString();
-    }
-
-    @Override
-    public JPanel getSettingsPanel(JEPlusFrameMain hostframe) {
-        jeplus.gui.JPanel_EPlusSettings panel = new jeplus.gui.JPanel_EPlusSettings ();
-        return panel;
-    }
-
-    @Override
-    public JPanel getOptionsPanel(JEPlusFrameMain hostframe) {
-        return new JPanel_LocalControllerOptions (this.Settings);
     }
 
     @Override

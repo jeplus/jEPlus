@@ -24,8 +24,8 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JFileChooser;
-import jeplus.EPlusConfig;
 import jeplus.JEPlusConfig;
+import jeplus.event.IF_ConfigChangedEventHandler;
 
 /**
  * JPanel_EPlusSettings.java - This is the view of EPlusConfig record
@@ -33,11 +33,11 @@ import jeplus.JEPlusConfig;
  * @version 0.6
  * @since 0.5b
  */
-public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements TitledJPanel {
+public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements TitledJPanel, IF_ConfigChangedEventHandler {
 
     protected String title = "E+ Executables";
     protected final JFileChooser fc = new JFileChooser("./");
-    protected JEPlusConfig Config = JEPlusConfig.getDefaultInstance();
+    protected JEPlusConfig Config = null;
     public void setConfig(JEPlusConfig config) {
         Config = config;
         initSettings();
@@ -110,19 +110,6 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
         if (! ((log.exists() && log.isFile() && log.canWrite()) || ! log.exists())) txtScreenLog.setForeground(Color.red);
         else txtScreenLog.setForeground(Color.black);
     }
-
-    /**
-     * update record for directory and file names
-     */
-    protected final void updateSettings () {
-        Config.setEPlusBinDir(txtBinDir.getText());
-        Config.setEPlusEXEC(txtEPlusEXE.getText());
-        Config.setEPlusReadVars(txtReadVarEXE.getText());
-        Config.setEPlusEPMacro(txtEPMacroEXE.getText());
-        Config.setEPlusExpandObjects(txtExpandObjectsEXE.getText());
-        Config.setScreenFile(txtScreenLog.getText());
-    }
-
 
     /** This method is called from within the constructor to
      * initialise the form.
@@ -364,12 +351,12 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
             Config.setEPlusBinDir(bindir);
-            Config.setEPlusEPMacro(bindir + EPlusConfig.getDefEPlusEPMacro());
-            Config.setEPlusExpandObjects(bindir + EPlusConfig.getDefEPlusExpandObjects());
-            Config.setEPlusEXEC(bindir + EPlusConfig.getDefEPlusEXEC());
-            Config.setEPlusReadVars(bindir + EPlusConfig.getDefEPlusReadVars());
-            initSettings();
-            checkSettings();
+//            Config.setEPlusEPMacro(bindir + EPlusConfig.getDefEPlusEPMacro());
+//            Config.setEPlusExpandObjects(bindir + EPlusConfig.getDefEPlusExpandObjects());
+//            Config.setEPlusEXEC(bindir + EPlusConfig.getDefEPlusEXEC());
+//            Config.setEPlusReadVars(bindir + EPlusConfig.getDefEPlusReadVars());
+//            initSettings();
+//            checkSettings();
         }
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 }//GEN-LAST:event_cmdSelectEPlusDirActionPerformed
@@ -416,5 +403,11 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
     private javax.swing.JTextField txtReadVarEXE;
     private javax.swing.JTextField txtScreenLog;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void configChanged(JEPlusConfig config) {
+        initSettings();
+        checkSettings();
+    }
 
 }

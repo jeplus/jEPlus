@@ -25,7 +25,6 @@ import javax.swing.JFileChooser;
 import jeplus.EPlusConfig;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusFrameMain;
-import jeplus.event.IF_ConfigChangedEventHandler;
 
 /**
  * JPanel_EPlusSettings.java - This is the view of EPlusConfig record
@@ -33,37 +32,27 @@ import jeplus.event.IF_ConfigChangedEventHandler;
  * @version 0.6
  * @since 0.5b
  */
-public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJPanel, IF_ConfigChangedEventHandler {
+public class JPanel_EPlusSettings_Save extends javax.swing.JPanel implements TitledJPanel {
 
     protected String title = "E+ Executables";
     protected final JFileChooser fc = new JFileChooser("./");
-    protected JEPlusConfig Config;
+    protected JEPlusConfig Config = JEPlusConfig.getDefaultInstance();
     
     /** 
      * Set an alternative configuration to this panel
      * @param config 
      */
-    public final void setConfig(JEPlusConfig config) {
+    public void setConfig(JEPlusConfig config) {
         Config = config;
         initSettings();
         checkSettings();
-        Config.addListener(this);
     }
 
-    /** 
-     * Creates new form JPanel_EPlusSettings
-     */
-    public JPanel_EPlusSettings() {
+    /** Creates new form JPanel_EPlusSettings */
+    public JPanel_EPlusSettings_Save() {
         initComponents();
-    }
-
-    /** 
-     * Creates new form JPanel_EPlusSettings
-     * @param config 
-     */
-    public JPanel_EPlusSettings(JEPlusConfig config) {
-        initComponents();
-        setConfig(config);
+        initSettings();
+        checkSettings();
     }
 
     /**
@@ -155,6 +144,7 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
         jLabel6 = new javax.swing.JLabel();
         cmdEnergyPlusDetails = new javax.swing.JButton();
         lblInformation = new javax.swing.JLabel();
+        cmdSave = new javax.swing.JButton();
 
         cmdSelectEPlusDir.setText("...");
         cmdSelectEPlusDir.setToolTipText("Select the folder where EnergyPlus.exe and Energy+.idd are located");
@@ -182,6 +172,13 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
         lblInformation.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         lblInformation.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
 
+        cmdSave.setText("Save Configuration");
+        cmdSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdSaveActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -197,7 +194,10 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
                         .addComponent(cmdSelectEPlusDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmdEnergyPlusDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(lblInformation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lblInformation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(cmdSave, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -211,6 +211,8 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
                     .addComponent(cmdEnergyPlusDetails))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblInformation)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmdSave)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -225,12 +227,12 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
             Config.setEPlusBinDir(bindir);
-//            Config.setEPlusEPMacro(bindir + EPlusConfig.getDefEPlusEPMacro());
-//            Config.setEPlusExpandObjects(bindir + EPlusConfig.getDefEPlusExpandObjects());
-//            Config.setEPlusEXEC(bindir + EPlusConfig.getDefEPlusEXEC());
-//            Config.setEPlusReadVars(bindir + EPlusConfig.getDefEPlusReadVars());
-//            initSettings();
-//            checkSettings();
+            Config.setEPlusEPMacro(bindir + EPlusConfig.getDefEPlusEPMacro());
+            Config.setEPlusExpandObjects(bindir + EPlusConfig.getDefEPlusExpandObjects());
+            Config.setEPlusEXEC(bindir + EPlusConfig.getDefEPlusEXEC());
+            Config.setEPlusReadVars(bindir + EPlusConfig.getDefEPlusReadVars());
+            initSettings();
+            checkSettings();
             Config.saveToFile(Config.getCurrentConfigFile());
         }
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -239,41 +241,36 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
     private void cmdEnergyPlusDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnergyPlusDetailsActionPerformed
         JDialog dialog = new JDialog (JEPlusFrameMain.getCurrentMainGUI(), "Set EnergyPlus binaries", true);
         dialog.setLocationRelativeTo(this);
-        final JPanel_EPlusSettingsDetailed detPanel = new JPanel_EPlusSettingsDetailed (dialog, Config);
-        Config.addListener(detPanel);
-        dialog.getContentPane().add(detPanel);
+        dialog.getContentPane().add(new JPanel_EPlusSettingsDetailed (dialog, Config));
         // Add dialog closing listener
         dialog.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent evt) {
-//                initSettings();
-//                checkSettings();
-                Config.removeListener(detPanel);
+                initSettings();
+                checkSettings();
             }
             @Override
             public void windowClosed(java.awt.event.WindowEvent evt) {
-//                initSettings();
-//                checkSettings();
-                Config.removeListener(detPanel);
+                initSettings();
+                checkSettings();
             }
         });
         dialog.setSize(500, 260);
         dialog.setVisible(true);
     }//GEN-LAST:event_cmdEnergyPlusDetailsActionPerformed
 
+    private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
+        Config.saveToFile("");
+    }//GEN-LAST:event_cmdSaveActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdEnergyPlusDetails;
+    private javax.swing.JButton cmdSave;
     private javax.swing.JButton cmdSelectEPlusDir;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel lblInformation;
     private javax.swing.JTextField txtBinDir;
     // End of variables declaration//GEN-END:variables
-
-    @Override
-    public void configChanged(JEPlusConfig config) {
-        initSettings();
-        checkSettings();
-    }
 
 }

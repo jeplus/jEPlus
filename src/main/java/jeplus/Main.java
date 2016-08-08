@@ -213,7 +213,7 @@ public class Main {
                                         randomseed = project.getExecSettings().getRandomSeed();
                                     }
                                     int njobs = Integer.parseInt(commandline.getOptionValue("sample"));
-                                    batch.runSample(EPlusBatch.SampleType.PSEUDO, njobs, RandomSource.getRandomGenerator(randomseed));
+                                    batch.runSample(EPlusBatch.SampleType.SHUFFLE, njobs, RandomSource.getRandomGenerator(randomseed));
                             }else if (commandline.hasOption("lhs")) {
                                     long randomseed;
                                     if (commandline.hasOption("seed")) {

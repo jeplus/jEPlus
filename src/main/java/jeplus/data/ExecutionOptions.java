@@ -100,7 +100,7 @@ public class ExecutionOptions implements Serializable {
     /** Use Latin Hypercube sampling or not */
     protected boolean UseLHS = false;
     /** Sampling option */
-    protected EPlusBatch.SampleType SampleOpt = EPlusBatch.SampleType.PSEUDO;
+    protected EPlusBatch.SampleType SampleOpt = EPlusBatch.SampleType.SHUFFLE;
     /** Random seed */
     protected long RandomSeed = 0;
     /** job list file */

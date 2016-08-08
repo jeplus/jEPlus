@@ -208,7 +208,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/jeplus/images/cross.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Reset tree"/>
+                <Property name="text" type="java.lang.String" value="Reset parameter tree"/>
                 <Property name="toolTipText" type="java.lang.String" value="Clear the parameter tree"/>
               </Properties>
               <Events>
@@ -386,6 +386,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemJESSClient">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Launch JESS Client"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemJESSClientActionPerformed"/>
@@ -394,6 +395,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemJEPlusEA">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Launch jEPlus+EA"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemJEPlusEAActionPerformed"/>
@@ -406,6 +408,17 @@
             <Property name="text" type="java.lang.String" value="Tools "/>
           </Properties>
           <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemConfig">
+              <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/jeplus/images/hammer_screwdriver.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Configure External Programs ..."/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemConfigActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JSeparator" name="jSeparator4">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemViewErr">
@@ -433,19 +446,6 @@
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator8">
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItemConfig">
-              <Properties>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/jeplus/images/folder_explore.png"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Configure External Programs ..."/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemConfigActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator13">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemVersionConverter">
               <Properties>
@@ -518,17 +518,6 @@
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemEditorThemeActionPerformed"/>
               </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator11">
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem2">
-              <Properties>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/jeplus/images/hammer_screwdriver.png"/>
-                </Property>
-                <Property name="text" type="java.lang.String" value="Options (jeplus.cfg)"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
             </MenuItem>
           </SubComponents>
         </Menu>

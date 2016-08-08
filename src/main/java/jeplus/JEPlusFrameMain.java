@@ -74,8 +74,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
     
     protected NumberFormat LargeIntFormatter = new DecimalFormat("###,###,###,###,###,###");
 
-    public final static String version = "1.6.4_beta";
-    public final static String version_ps = "_1_6";
+    public final static String version = "1.7.0_beta";
+    public final static String version_ps = "_1_7";
     public final static String osName = System.getProperty( "os.name" );
     protected static String VersionInfo = "jEPlus (version " + version + ") for " + osName;
     
@@ -95,6 +95,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
     protected JPanel_TrnsysProjectFiles TrnsysProjectFilesPanel = new JPanel_TrnsysProjectFiles();
     // Project file panel for Trnsys
     protected JPanel_InselProjectFiles InselProjectFilesPanel = new JPanel_InselProjectFiles();
+    // Utility panel - External program configuration
+    protected JPanelProgConfiguration jplProgConfPanel;
     // Utility panel - IDF converter
     protected JPanel_IDFVersionUpdater jplIDFConvPanel;
     // Utility panel - Run Python
@@ -149,9 +151,11 @@ public class JEPlusFrameMain extends JEPlusFrame {
         TpnEditors.add(OutputPanel);
         TpnEditors.setSelectedComponent(OutputPanel);
         
+        jplProgConfPanel = new JPanelProgConfiguration (null, JEPlusConfig.getDefaultInstance());
         jplIDFConvPanel = new JPanel_IDFVersionUpdater (this, JEPlusConfig.getDefaultInstance(), this.getProject());
         jplPythonPanel = new JPanelRunPython (this, JEPlusConfig.getDefaultInstance(), getProject() == null ? "./" : getProject().resolveWorkDir());
         jplReadVarsPanel = new JPanel_RunReadVars(this);
+//        TpnUtilities.add("Configure Programs", jplProgConfPanel);
         TpnUtilities.add("Run Python", jplPythonPanel);
         TpnUtilities.add("IDF Converter", jplIDFConvPanel);
         TpnUtilities.add("Run ReadVars", jplReadVarsPanel);
@@ -642,7 +646,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         }else {
             TpnEditors.setSelectedComponent(OutputPanel);
         }
-        if (opt == EPlusBatch.SampleType.PSEUDO) {
+        if (opt == EPlusBatch.SampleType.SHUFFLE) {
             // Check batch size 
             if (BatchManager.getBatchInfo().getTotalNumberOfJobs() > 1000000) {
                 // Project is too large
@@ -820,12 +824,11 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuItemJESSClient = new javax.swing.JMenuItem();
         jMenuItemJEPlusEA = new javax.swing.JMenuItem();
         jMenuTools = new javax.swing.JMenu();
+        jMenuItemConfig = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JSeparator();
         jMenuItemViewErr = new javax.swing.JMenuItem();
         jMenuItemViewLog = new javax.swing.JMenuItem();
         jSeparator8 = new javax.swing.JPopupMenu.Separator();
-        jMenuItemConfig = new javax.swing.JMenuItem();
-        jSeparator13 = new javax.swing.JPopupMenu.Separator();
         jMenuItemVersionConverter = new javax.swing.JMenuItem();
         jMenuItemRunPython = new javax.swing.JMenuItem();
         jMenuItemRunReadVars = new javax.swing.JMenuItem();
@@ -833,8 +836,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuItemMemoryUsage = new javax.swing.JMenuItem();
         jMenuItemDefaultLaF = new javax.swing.JMenuItem();
         jMenuItemEditorTheme = new javax.swing.JMenuItem();
-        jSeparator11 = new javax.swing.JPopupMenu.Separator();
-        jMenuItem2 = new javax.swing.JMenuItem();
         jMenuHelp = new javax.swing.JMenu();
         jMenuItemUserGuide = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
@@ -1349,7 +1350,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuEdit.add(jMenuItemExportTable);
 
         jMenuItemResetTree.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/cross.png"))); // NOI18N
-        jMenuItemResetTree.setText("Reset tree");
+        jMenuItemResetTree.setText("Reset parameter tree");
         jMenuItemResetTree.setToolTipText("Clear the parameter tree");
         jMenuItemResetTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1493,6 +1494,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuAction.add(jSeparator12);
 
         jMenuItemJESSClient.setText("Launch JESS Client");
+        jMenuItemJESSClient.setEnabled(false);
         jMenuItemJESSClient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemJESSClientActionPerformed(evt);
@@ -1501,6 +1503,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuAction.add(jMenuItemJESSClient);
 
         jMenuItemJEPlusEA.setText("Launch jEPlus+EA");
+        jMenuItemJEPlusEA.setEnabled(false);
         jMenuItemJEPlusEA.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemJEPlusEAActionPerformed(evt);
@@ -1511,6 +1514,15 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jMenuBarMain.add(jMenuAction);
 
         jMenuTools.setText("Tools ");
+
+        jMenuItemConfig.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/hammer_screwdriver.png"))); // NOI18N
+        jMenuItemConfig.setText("Configure External Programs ...");
+        jMenuItemConfig.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemConfigActionPerformed(evt);
+            }
+        });
+        jMenuTools.add(jMenuItemConfig);
         jMenuTools.add(jSeparator4);
 
         jMenuItemViewErr.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/bug.png"))); // NOI18N
@@ -1533,16 +1545,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
         });
         jMenuTools.add(jMenuItemViewLog);
         jMenuTools.add(jSeparator8);
-
-        jMenuItemConfig.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/folder_explore.png"))); // NOI18N
-        jMenuItemConfig.setText("Configure External Programs ...");
-        jMenuItemConfig.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemConfigActionPerformed(evt);
-            }
-        });
-        jMenuTools.add(jMenuItemConfig);
-        jMenuTools.add(jSeparator13);
 
         jMenuItemVersionConverter.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/go-up.png"))); // NOI18N
         jMenuItemVersionConverter.setText("IDF Version Converter ...");
@@ -1602,12 +1604,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
             }
         });
         jMenuTools.add(jMenuItemEditorTheme);
-        jMenuTools.add(jSeparator11);
-
-        jMenuItem2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/hammer_screwdriver.png"))); // NOI18N
-        jMenuItem2.setText("Options (jeplus.cfg)");
-        jMenuItem2.setEnabled(false);
-        jMenuTools.add(jMenuItem2);
 
         jMenuBarMain.add(jMenuTools);
 
@@ -1814,9 +1810,9 @@ private void cboExecutionTypeActionPerformed(java.awt.event.ActionEvent evt) {//
     agent.setSettings(Project.getExecSettings());
     Project.getExecSettings().setExecutionType(agent.getExecutionType());
     this.jplSettings.removeAll();
-    this.jplSettings.add(agent.getSettingsPanel(this));
+    this.jplSettings.add(agent.getSettingsPanel());
     this.jplOptions.removeAll();
-    this.jplOptions.add(agent.getOptionsPanel(this));
+    this.jplOptions.add(agent.getOptionsPanel());
     this.cmdStart.setText(agent.getStartButtonText());
     this.pack();
     //this.update(this.getGraphics());
@@ -2256,9 +2252,12 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private void tpnMainStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tpnMainStateChanged
         // If it is post-process tab, update its content
         if (tpnMain.getSelectedComponent() == this.pnlUtilities) {
+//            this.jplProgConfPanel.initSettings();
             this.jplReadVarsPanel.initContents();
             this.jplIDFConvPanel.setProject(Project);
-            this.jplPythonPanel.updateDisplay(Project.resolveWorkDir());
+            this.jplPythonPanel.setCurrentWorkDir(Project.resolveWorkDir());
+        }else if (tpnMain.getSelectedComponent() == this.pnlExecution) {
+            
         }
     }//GEN-LAST:event_tpnMainStateChanged
 
@@ -2557,7 +2556,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private void jMenuItemJESSClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemJESSClientActionPerformed
         // Check if JESS Client folder is available
         if (JEPlusConfig.getDefaultInstance().getJESSClientDir() == null) {
+            String ori = fc.getDialogTitle();
             // Select a file to open
+            fc.setDialogTitle("Choose where JESS Client is located");
             fc.resetChoosableFileFilters();
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             fc.setCurrentDirectory(new File("./"));
@@ -2566,8 +2567,10 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                 String path = fc.getSelectedFile().getPath() + File.separator;
                 JEPlusConfig.getDefaultInstance().setJESSClientDir(path);
                 fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                fc.setDialogTitle(ori);
             }else {
                 fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                fc.setDialogTitle(ori);
                 return;
             }
         }
@@ -2578,7 +2581,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                 List<String> command = new ArrayList<> ();
                 command.add("java");
                 command.add("-jar");
-                command.add("JESS_Client.jar");
+                command.add("jess_client_v3.jar");
                 command.add(getProject().getBaseDir());
                 ProcessBuilder builder = new ProcessBuilder(command);
                 builder.directory(new File (JEPlusConfig.getDefaultInstance().getJESSClientDir()));
@@ -2646,12 +2649,15 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
 
     private void jMenuItemConfigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemConfigActionPerformed
         JDialog ConfigDialog = new JDialog (this, "Configuration file: ", true);
-        ConfigPanel = new JPanelProgConfiguration(ConfigDialog);
-        ConfigPanel.setConfig(JEPlusConfig.getDefaultInstance());
-        ConfigDialog.getContentPane().add(ConfigPanel);
+        if (jplProgConfPanel == null) {
+            jplProgConfPanel = new JPanelProgConfiguration(ConfigDialog, JEPlusConfig.getDefaultInstance());
+        }
+        jplProgConfPanel.setHostWindow(ConfigDialog);
+        ConfigDialog.getContentPane().add(jplProgConfPanel);
         ConfigDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        ConfigDialog.setTitle(ConfigDialog.getTitle() + ConfigPanel.getConfigFile());
+        ConfigDialog.setTitle(ConfigDialog.getTitle() + jplProgConfPanel.getConfigFile());
         ConfigDialog.pack();
+        ConfigDialog.setSize(900, 650);
         ConfigDialog.setLocationRelativeTo(this);
         ConfigDialog.setVisible(true);
     }//GEN-LAST:event_jMenuItemConfigActionPerformed
@@ -2683,7 +2689,6 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JMenu jMenuEdit;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenu jMenuHelp;
-    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItemAbout;
     private javax.swing.JMenuItem jMenuItemConfig;
     private javax.swing.JMenuItem jMenuItemCreateIndex;
@@ -2730,9 +2735,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private jeplus.gui.JPanel_EPlusProjectFiles jPanel_EPlusProjectFiles2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator10;
-    private javax.swing.JPopupMenu.Separator jSeparator11;
     private javax.swing.JPopupMenu.Separator jSeparator12;
-    private javax.swing.JPopupMenu.Separator jSeparator13;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;

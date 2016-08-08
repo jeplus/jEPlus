@@ -21,8 +21,8 @@ package jeplus.gui; //
 import java.awt.Color;
 import java.io.File;
 import javax.swing.JFileChooser;
-import jeplus.INSELConfig;
 import jeplus.JEPlusConfig;
+import jeplus.event.IF_ConfigChangedEventHandler;
 
 /**
  * JPanel_EPlusSettings.java - This is the view of TRNSYSConfig record
@@ -30,22 +30,25 @@ import jeplus.JEPlusConfig;
  * @version 0.6
  * @since 0.5b
  */
-public class JPanel_InselSettings extends javax.swing.JPanel implements TitledJPanel {
+public class JPanel_InselSettings extends javax.swing.JPanel implements TitledJPanel, IF_ConfigChangedEventHandler {
 
     protected String title = "INSEL Executables";
     protected final JFileChooser fc = new JFileChooser("./");
     protected JEPlusConfig Config = JEPlusConfig.getDefaultInstance();;
-    public void setConfig(JEPlusConfig config) {
+    public final void setConfig(JEPlusConfig config) {
         Config = config;
         initSettings();
         checkSettings();
+        Config.addListener(this);
     }
 
-    /** Creates new form JPanel_EPlusSettings */
-    public JPanel_InselSettings() {
+    /** 
+     * Creates new form JPanel_InselSettings
+     * @param config 
+     */
+    public JPanel_InselSettings(JEPlusConfig config) {
         initComponents();
-        initSettings();
-        checkSettings();
+        setConfig(config);
     }
 
     /**
@@ -84,15 +87,6 @@ public class JPanel_InselSettings extends javax.swing.JPanel implements TitledJP
         if (! new File(txtInselEXE.getText()).exists()) txtInselEXE.setForeground(Color.red);
         else txtInselEXE.setForeground(Color.black);
     }
-
-    /**
-     * update record for directory and file names
-     */
-    protected final void updateSettings () {
-        Config.setInselBinDir(txtBinDir.getText());
-        Config.setInselEXEC(txtInselEXE.getText());
-    }
-
 
     /** This method is called from within the constructor to
      * initialise the form.
@@ -232,9 +226,9 @@ public class JPanel_InselSettings extends javax.swing.JPanel implements TitledJP
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
             Config.setInselBinDir(bindir);
-            Config.setInselEXEC(new File (bindir + INSELConfig.getDefInselEXEC()).getAbsolutePath());
-            initSettings();
-            checkSettings();
+//            Config.setInselEXEC(new File (bindir + INSELConfig.getDefInselEXEC()).getAbsolutePath());
+//            initSettings();
+//            checkSettings();
         }
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 }//GEN-LAST:event_cmdSelectINSELDirActionPerformed
@@ -257,5 +251,11 @@ public class JPanel_InselSettings extends javax.swing.JPanel implements TitledJP
     private javax.swing.JTextField txtInselEXE;
     private javax.swing.JTextField txtScreenLog;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void configChanged(JEPlusConfig config) {
+        initSettings();
+        checkSettings();
+    }
 
 }

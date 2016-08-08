@@ -22,11 +22,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import jeplus.*;
 import jeplus.data.ExecutionOptions;
-import jeplus.gui.JPanel_InselSettings;
+import jeplus.gui.JFrameAgentLocalMonitor;
+import jeplus.gui.JPanel_LocalControllerOptions;
 import jeplus.postproc.*;
 
 /**
@@ -38,16 +39,62 @@ import jeplus.postproc.*;
  * @version 0.5b
  * @since 0.5b
  */
-public class InselAgentLocal extends EPlusAgentLocal {
+public class InselAgentLocal extends EPlusAgent {
 
     /**
      * Construct with Exec settings
      * @param settings Reference to an existing Exec settings instance
      */
     public InselAgentLocal (ExecutionOptions settings) {
-        super(settings);
+        super("Local batch simulation controller", settings);
+        this.QueueCapacity = 10000;
+        this.attachDefaultCollector();
+        SettingsPanel = new jeplus.gui.JPanel_InselSettings (JEPlusConfig.getDefaultInstance());
+        OptionsPanel = new JPanel_LocalControllerOptions (Settings);
     }
 
+    @Override
+    public int getExecutionType() {
+        return ExecutionOptions.INTERNAL_CONTROLLER;
+    }
+
+    /**
+     * Set state of the agent. Only Running and Paused are accepted
+     * @param State 
+     */
+    @Override
+    public void setState(AgentState State) {
+        if (State == AgentState.RUNNING || State == AgentState.PAUSED) {
+            this.State = State;
+        }
+    }
+
+    @Override
+    public void showAgentMonitorGUI (boolean show, boolean reset) {
+        if (show) {
+            if (MonitorGUI == null) {
+                MonitorGUI = new JFrameAgentLocalMonitor (this);
+                MonitorGUI.setTitle("Simulation Agent Local");
+                MonitorGUI.setSize(600, 530);
+                MonitorGUI.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+            }
+            if (reset) {
+                MonitorGUI.reset();
+            }
+            MonitorGUI.pack();
+            if (! MonitorGUI.isVisible()) {
+                MonitorGUI.setVisible(true);
+            }
+            if (! MonitorGUI.isActive()) {
+                MonitorGUI.requestFocus();
+            }
+        }else {
+            if (MonitorGUI != null && MonitorGUI.isVisible()) {
+                MonitorGUI.setVisible(false);
+            }
+        }
+    }
+    
     /**
      * Start the agent in a separate thread
      */
@@ -200,13 +247,6 @@ public class InselAgentLocal extends EPlusAgentLocal {
         super.runResultCollection(compile);
     }
     
-    @Override
-    public JPanel getSettingsPanel(JEPlusFrameMain hostframe) {
-        JPanel_InselSettings panel = new JPanel_InselSettings ();
-        panel.setConfig(JEPlusConfig.getDefaultInstance());
-        return panel;
-    }
-
     /**
      * Check the local EnergyPlus installation settings.
      * @return True if everything is in place

@@ -74,7 +74,7 @@ public class INSELConfig extends TRNSYSConfig {
     public INSELConfig() {
         super ();
         InselBinDir = getDefInselBinDir();
-        InselEXEC = TRNSYSBinDir + getDefInselEXEC();
+        InselEXEC = InselBinDir + getDefInselEXEC();
         ScreenFile = "console.log";
     }
 

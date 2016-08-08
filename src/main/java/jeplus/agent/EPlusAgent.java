@@ -27,7 +27,6 @@ import javax.swing.JPanel;
 import jeplus.EPlusBatch;
 import jeplus.EPlusTask;
 import jeplus.EPlusWorkEnv;
-import jeplus.JEPlusFrameMain;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.RVX;
 import jeplus.gui.EPlusTextPanelOld;
@@ -129,6 +128,9 @@ public abstract class EPlusAgent implements Runnable {
 
     /** Agent's monitor GUI */
     JFrameAgentMonitor MonitorGUI = null;
+    
+    JPanel SettingsPanel = null;
+    JPanel OptionsPanel = null;
 
     // Constructor(s)
 
@@ -144,6 +146,7 @@ public abstract class EPlusAgent implements Runnable {
 
     /**
      * Construct Agent with specified max capacity
+     * @param id
      * @param capacity Max capacity of this agent's job queue. -1 means no limit
      * @param nproc Number of parallel processes
      */
@@ -190,17 +193,19 @@ public abstract class EPlusAgent implements Runnable {
 
     /**
      * Create and return a settings panel for editing the agent settings
-     * @param hostframe The host frame in which this panel is going to reside
      * @return editor as a JPanel
      */
-    abstract public JPanel getSettingsPanel (JEPlusFrameMain hostframe);
+    public JPanel getSettingsPanel () {
+        return this.SettingsPanel;
+    }
 
     /**
      * Create and return an options panel for editing the agent options
-     * @param hostframe The host frame in which this panel is going to reside
      * @return editor as a JPanel
      */
-    abstract public JPanel getOptionsPanel (JEPlusFrameMain hostframe);
+    public JPanel getOptionsPanel () {
+        return this.OptionsPanel;
+    }
 
     public String getStartButtonText() {
         return StartButtonText;
@@ -317,16 +322,23 @@ public abstract class EPlusAgent implements Runnable {
 
     /**
      * Test if there is more capacity available
-     * @return True if
+     * @return True if there are processors available
      */
-    abstract public boolean isAvailable();
+    public boolean isAvailable() {
+        return this.JobQueue.size() < this.QueueCapacity;
+    }
+
 
     /**
-     * Add a job to be handled immediately
+     * Add a job to the job queue. Note the capacity of the queue is NOT strictly
+     * observed.
      * @param job a new job to be executed
-     * @return The total number jobs in the queue
+     * @return Total number of jobs in the queue
      */
-    public abstract int addJob(EPlusTask job);
+    public int addJob(EPlusTask job) {
+        JobQueue.add(job);
+        return JobQueue.size();
+    }
 
     /**
      * Add a group of jobs at once
@@ -342,8 +354,15 @@ public abstract class EPlusAgent implements Runnable {
      * Report the status of the Agent
      * @return A string describing the status of the agent
      */
-    public String getStatus () {
-        return this.AgentID;
+    public String getStatus() {
+        StringBuilder buf = new StringBuilder (getAgentID());
+        buf.append(" is ").append(State);
+        buf.append(" [Que=").append(this.getJobQueue().size());
+        buf.append(", Run=").append(this.getProcessors().size()); // or RunningJobs?
+        buf.append(", Fin=").append(this.getFinishedJobs().size());
+        buf.append("]");
+        //buf.append(" Elapsed time = ").append(DateUtility.showElapsedTime(StartTime.getTime(), true));
+        return buf.toString();
     }
 
     /**

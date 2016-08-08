@@ -114,20 +114,16 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="txtProjectBase" alignment="1" max="32767" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="chkPassProjectBase" alignment="3" max="32767" attributes="0"/>
-                      <Component id="cmdSelectProjectBase" max="32767" attributes="0"/>
-                  </Group>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="chkPassProjectBase" alignment="3" max="32767" attributes="0"/>
+                  <Component id="cmdSelectProjectBase" max="32767" attributes="0"/>
+                  <Component id="txtProjectBase" max="32767" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="cmdSelectWorkDir" alignment="0" pref="25" max="32767" attributes="0"/>
                   <Component id="chkPassWorkDir" alignment="1" min="-2" max="-2" attributes="0"/>
-                  <Group type="103" alignment="1" groupAlignment="3" attributes="0">
-                      <Component id="txtWorkDir" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
-                      <Component id="cmdSelectWorkDir" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
-                  </Group>
+                  <Component id="txtWorkDir" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="chkPassJobList" min="-2" max="-2" attributes="0"/>

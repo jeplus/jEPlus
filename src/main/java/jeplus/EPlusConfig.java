@@ -139,11 +139,6 @@ public class EPlusConfig implements Serializable {
     protected String EPlusEXE = null;
     protected String EPlusReadVarsEXE = null;
     protected String EPlusExpandObjectsEXE = null;
-    protected String EPlusVerConvDir = null;
-    protected String Python2EXE = null;
-    protected String Python3EXE = null;
-    protected String PythonArgv = null;
-    protected String PythonScript = null;
     protected String ScreenFile = "console.log";
     protected int    NThreads = 0;
 
@@ -253,46 +248,6 @@ public class EPlusConfig implements Serializable {
     /** Set EnergyPlus ReadVarsESO executable */
     public void setEPlusReadVars(String name) {
         EPlusReadVarsEXE = name;
-    }
-
-    public String getEPlusVerConvDir() {
-        return EPlusVerConvDir;
-    }
-
-    public void setEPlusVerConvDir(String EPlusVerConvDir) {
-        this.EPlusVerConvDir = EPlusVerConvDir;
-    }
-
-    public String getPython2EXE() {
-        return Python2EXE;
-    }
-
-    public void setPython2EXE(String Python2EXE) {
-        this.Python2EXE = Python2EXE;
-    }
-
-    public String getPython3EXE() {
-        return Python3EXE;
-    }
-
-    public void setPython3EXE(String Python3EXE) {
-        this.Python3EXE = Python3EXE;
-    }
-
-    public String getPythonArgv() {
-        return PythonArgv;
-    }
-
-    public void setPythonArgv(String PythonArgv) {
-        this.PythonArgv = PythonArgv;
-    }
-
-    public String getPythonScript() {
-        return PythonScript;
-    }
-
-    public void setPythonScript(String PythonScript) {
-        this.PythonScript = PythonScript;
     }
 
     /** Get Default EnergyPlus EPMacro executable */
