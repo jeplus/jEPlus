@@ -190,7 +190,7 @@ public class Main {
                 // The following are batch mode options. Only one is effective at a time...
                 if (commandline.hasOption("all") || commandline.hasOption("sample") || commandline.hasOption("lhs") || 
                     commandline.hasOption("index") || commandline.hasOption("value") || commandline.hasOption("id") || 
-                    commandline.hasOption("file")) {
+                    commandline.hasOption("sobol") || commandline.hasOption("file")) {
                         showGUI = false;
                         // validate project
                         EPlusBatchInfo info = batch.validateProject();
@@ -242,7 +242,7 @@ public class Main {
                                     }else {
                                         randomseed = project.getExecSettings().getRandomSeed();
                                     }
-                                    int njobs = Integer.parseInt(commandline.getOptionValue("lhs"));
+                                    int njobs = Integer.parseInt(commandline.getOptionValue("sobol"));
                                     batch.runSample(EPlusBatch.SampleType.SOBOL, njobs, RandomSource.getRandomGenerator(randomseed));
                             }else if (commandline.hasOption("index")) {
                                     batch.runJobSet(EPlusBatch.JobStringType.INDEX, commandline.getOptionValue("index"));
