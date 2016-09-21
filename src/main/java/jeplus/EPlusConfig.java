@@ -819,18 +819,20 @@ public class EPlusConfig implements Serializable {
      * @return the version string
      */
     public String getEPlusVersion () {
-        try (BufferedReader fi = new BufferedReader (new FileReader (getEPlusBinDir() + getEPDefIDD()))) {
-            String line = fi.readLine();
-            while (line != null) {
-                if (line.trim().startsWith("!IDD_Version ")) {
-                    fi.close();
-                    return line.trim().substring(13);
+        if (new File(getEPlusBinDir() + getEPDefIDD()).exists()) {
+            try (BufferedReader fi = new BufferedReader (new FileReader (getEPlusBinDir() + getEPDefIDD()))) {
+                String line = fi.readLine();
+                while (line != null) {
+                    if (line.trim().startsWith("!IDD_Version ")) {
+                        fi.close();
+                        return line.trim().substring(13);
+                    }
+                    line = fi.readLine();
                 }
-                line = fi.readLine();
+            }catch (Exception ex) {
+                logger.error("Error parsing IDD file for E+ version info.", ex);
             }
-        }catch (Exception ex) {
-            logger.error("Error parsing IDD file for E+ version info.", ex);
         }
-        return null;
+        return "Unavailable";
     }
 }
