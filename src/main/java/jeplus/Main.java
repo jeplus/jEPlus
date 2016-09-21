@@ -314,7 +314,7 @@ public class Main {
                                         .build();
         Option random_seed   = Option.builder("seed").argName( "random seed" )
                                         .hasArg()
-                                        .desc(  "Use the given random seed for sampling. If seed is not specified, jEPlus uses the seed saved in the project. This option is effective only with -sample and -lhs" )
+                                        .desc(  "Use the given random seed for sampling. If seed is not specified, jEPlus uses the seed saved in the project. This option is effective only with -sample, -lhs and -sobol" )
                                         .build();
         Option run_index   = Option.builder("index").argName( "job indexes" )
                                         .hasArg()
@@ -340,10 +340,6 @@ public class Main {
                                         .hasArg()
                                         .desc(  "Use specified number of local threads for parallel execution." )
                                         .build();
-        Option post   = Option.builder("post").argName( "post-process script" )
-                                        .hasArg()
-                                        .desc(  "Python script file for post-processing after simulation." )
-                                        .build();
 
         Options options = (opts == null) ? new Options() : opts;
 
@@ -362,7 +358,6 @@ public class Main {
         options.addOption( run_file );
         options.addOption( output_folder );
         options.addOption( local );
-        options.addOption(post);
         
         return options;
     }

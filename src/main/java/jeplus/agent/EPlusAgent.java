@@ -203,9 +203,7 @@ public abstract class EPlusAgent implements Runnable {
      * Create and return an options panel for editing the agent options
      * @return editor as a JPanel
      */
-    public JPanel getOptionsPanel () {
-        return this.OptionsPanel;
-    }
+    abstract public JPanel getOptionsPanel ();
 
     public String getStartButtonText() {
         return StartButtonText;

@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import jeplus.*;
 import jeplus.data.ExecutionOptions;
 import jeplus.gui.JFrameAgentLocalMonitor;
@@ -50,7 +51,15 @@ public class InselAgentLocal extends EPlusAgent {
         this.QueueCapacity = 10000;
         this.attachDefaultCollector();
         SettingsPanel = new jeplus.gui.JPanel_InselSettings (JEPlusConfig.getDefaultInstance());
-        OptionsPanel = new JPanel_LocalControllerOptions (Settings);
+    }
+
+    /**
+     * Create and return an options panel for editing the agent options
+     * @return editor as a JPanel
+     */
+    @Override
+    public JPanel getOptionsPanel () {
+        return new JPanel_LocalControllerOptions (Settings);
     }
 
     @Override

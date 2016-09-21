@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import jeplus.*;
 import jeplus.data.ExecutionOptions;
 import jeplus.gui.JFrameAgentLocalMonitor;
@@ -48,9 +49,17 @@ public class EPlusAgentLocal extends EPlusAgent {
         this.QueueCapacity = 10000;
         this.attachDefaultCollector();
         SettingsPanel = new jeplus.gui.JPanel_EPlusSettings (JEPlusConfig.getDefaultInstance());
-        OptionsPanel = new JPanel_LocalControllerOptions (Settings);
     }
     
+    /**
+     * Create and return an options panel for editing the agent options
+     * @return editor as a JPanel
+     */
+    @Override
+    public JPanel getOptionsPanel () {
+        return new JPanel_LocalControllerOptions (Settings);
+    }
+
     @Override
     public void showAgentMonitorGUI (boolean show, boolean reset) {
         if (show) {
