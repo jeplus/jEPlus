@@ -495,7 +495,7 @@ public class EPlusBatch extends Thread {
             // Write table header
             StringBuffer buf = new StringBuffer(headers.get(0));
             for (int i = 1; i < headers.size(); i++) {
-                buf.append(", ").append(headers.get(i));
+                buf.append(",").append(headers.get(i));
             }
 
             // Print Jobs
@@ -508,10 +508,10 @@ public class EPlusBatch extends Thread {
                         fw.println(buf.toString());                        
                     }
                     buf = new StringBuffer();
-                    buf.append(i).append(", ");
-                    buf.append(job.getJobID()).append(", ");
-                    buf.append(job.getWorkEnv().getWeatherFile()).append(", ");
-                    buf.append(job.getWorkEnv().getIDFTemplate()).append(", ");
+                    buf.append(i).append(",");
+                    buf.append(job.getJobID()).append(",");
+                    buf.append(job.getWorkEnv().getWeatherFile()).append(",");
+                    buf.append(job.getWorkEnv().getIDFTemplate()).append(",");
                 }else if (job.getWorkEnv().getProjectType() == JEPlusProject.TRNSYS){
                     if (i==0) {
                         // Print table header
@@ -519,9 +519,9 @@ public class EPlusBatch extends Thread {
                         fw.println(buf.toString());                        
                     }
                     buf = new StringBuffer();
-                    buf.append(i).append(", ");
-                    buf.append(job.getJobID()).append(", ");
-                    buf.append(job.getWorkEnv().getDCKTemplate()).append(", ");
+                    buf.append(i).append(",");
+                    buf.append(job.getJobID()).append(",");
+                    buf.append(job.getWorkEnv().getDCKTemplate()).append(",");
                 }else if (job.getWorkEnv().getProjectType() == JEPlusProject.INSEL){
                     if (i==0) {
                         // Print table header
@@ -529,16 +529,16 @@ public class EPlusBatch extends Thread {
                         fw.println(buf.toString());                        
                     }
                     buf = new StringBuffer();
-                    buf.append(i).append(", ");
-                    buf.append(job.getJobID()).append(", ");
-                    buf.append(job.getWorkEnv().getINSELTemplate()).append(", ");
+                    buf.append(i).append(",");
+                    buf.append(job.getJobID()).append(",");
+                    buf.append(job.getWorkEnv().getINSELTemplate()).append(",");
                 }
                 for (int j=0; j<job.SearchStringList.size(); j++) {
                     map.put(job.SearchStringList.get(j), job.AltValueList.get(j));                        
                 }
                 for (int j=0; j<allsstrs.size(); j++) {
                     buf.append(map.get(allsstrs.get(j)));
-                    if (j < allsstrs.size()-1) buf.append(", ");                        
+                    if (j < allsstrs.size()-1) buf.append(",");                        
                 }
                 fw.println(buf.toString());
                 nResCollected ++;

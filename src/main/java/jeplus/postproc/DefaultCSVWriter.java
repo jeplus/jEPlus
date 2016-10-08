@@ -74,7 +74,7 @@ public class DefaultCSVWriter implements IFReportWriter, IFResultWriter {
             }
             String [] Headers = InvMap.values().toArray(new String [0]);
             for (int i=0; i<Headers.length; i++) {
-                if (i>0) fw.print(", ");
+                if (i>0) fw.print(",");
                 fw.print(Headers[i]);
             }
             fw.println();
@@ -82,7 +82,7 @@ public class DefaultCSVWriter implements IFReportWriter, IFResultWriter {
             for (int i=0; i<table.size(); i++) {
                 ArrayList<String> row = table.get(i);
                 for (int j=0; j<row.size(); j++) {
-                    if (j > 0) fw.print(", ");
+                    if (j > 0) fw.print(",");
                     fw.print(row.get(j));
                 }
                 fw.println();
@@ -99,7 +99,7 @@ public class DefaultCSVWriter implements IFReportWriter, IFResultWriter {
     public void writeReport(EPlusBatch manager, ArrayList<String> header, ArrayList<ArrayList<String>> table) {
         try (PrintWriter fw = new PrintWriter (new FileWriter (manager.getResolvedEnv().getParentDir() + ReportCSV))) {
             for (int i=0; i<header.size(); i++) {
-                if (i>0) fw.print(", ");
+                if (i>0) fw.print(",");
                 fw.print(header.get(i));
             }
             fw.println();
@@ -107,7 +107,7 @@ public class DefaultCSVWriter implements IFReportWriter, IFResultWriter {
             for (int i=0; i<table.size(); i++) {
                 ArrayList<String> row = table.get(i);
                 for (int j=0; j<row.size(); j++) {
-                    if (j > 0) fw.print(", ");
+                    if (j > 0) fw.print(",");
                     fw.print(row.get(j));
                 }
                 fw.println();

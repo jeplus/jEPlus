@@ -119,9 +119,9 @@ public class EPlusOutputReader implements IFReportReader, IFResultReader {
                     }else if (thisseg.endsWith("Severe Errors")) {
                         vals[4] = thisseg.substring(0, thisseg.indexOf(" "));
                     }else if (thisseg.startsWith("Elapsed Time")) {
-                        vals[5] = thisseg.substring(thisseg.indexOf("=")+1, thisseg.indexOf("hr "));
-                        vals[6] = thisseg.substring(thisseg.indexOf("hr ")+3, thisseg.indexOf("min"));
-                        vals[7] = thisseg.substring(thisseg.indexOf("min ")+4, thisseg.indexOf("sec"));
+                        vals[5] = Integer.valueOf(thisseg.substring(thisseg.indexOf("=")+1, thisseg.indexOf("hr "))).toString();
+                        vals[6] = Integer.valueOf(thisseg.substring(thisseg.indexOf("hr ")+3, thisseg.indexOf("min"))).toString();
+                        vals[7] = thisseg.substring(thisseg.indexOf("min ")+4, thisseg.indexOf("sec")).trim();
                     }
                 }
                 table.add(new ArrayList<>(Arrays.asList(vals)));
