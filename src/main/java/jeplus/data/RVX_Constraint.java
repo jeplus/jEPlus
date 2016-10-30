@@ -134,10 +134,10 @@ public class RVX_Constraint implements Serializable {
      */
     public double scale(double initval) {
         double val = 0;
-        if (initval <= Min || initval >= Max) {
-            val = 1.;
-        } else if (initval >= LB && initval <= UB) {
+        if (initval >= LB && initval <= UB) {
             val = 0.;
+        } else if (initval <= Min || initval >= Max) {
+            val = 1.;
         } else if (initval > Min && initval < LB) {
             val = (LB - initval) / (LB - Min);
         } else if (initval > UB && initval < Max) {
