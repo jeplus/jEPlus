@@ -20,6 +20,7 @@ package jeplus.postproc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import jeplus.EPlusBatch;
 import jeplus.data.RVX;
 import org.slf4j.LoggerFactory;
@@ -239,5 +240,30 @@ public class ResultCollector {
     
     public boolean collectIndexes (EPlusBatch JobOwner) {
         return IdxWriter == null ? false : IdxWriter.writeIndex(JobOwner);
+    }
+    
+    /**
+     * This function assigns all the available result collectors to the list, 
+     * as being used by the simulation agents. The order of the RCs is significant.
+     * @return List of available result collectors in specific order
+     */
+    public static ArrayList<ResultCollector> getDefaultCollectors () {
+        ArrayList<ResultCollector> ResultCollectors = new ArrayList<>();
+        // attach default result collector
+        ResultCollector rc = new DefaultReportCollector ("Standard report collector");
+        ResultCollectors.add(rc);
+        rc = new EsoResultCollector ("ESO result collector");
+        ResultCollectors.add(rc);
+        rc = new SQLiteResultCollector ("SQLite result collector");
+        ResultCollectors.add(rc);
+        rc = new CsvResultCollector ("E+ CSV tables result collector");
+        ResultCollectors.add(rc);
+        rc = new UserResultCollector ("User supplied result collector");
+        ResultCollectors.add(rc);
+        rc = new PythonResultCollector ("Python script result collector");
+        ResultCollectors.add(rc);
+        rc = new TrnsysResultCollector ("TRNSYS result collector");
+        ResultCollectors.add(rc);
+        return ResultCollectors;
     }
 }

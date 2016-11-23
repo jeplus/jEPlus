@@ -1516,7 +1516,7 @@ public class EPlusBatch extends Thread {
                 fns = rc.getResultFiles();
             }
             for (String fn : fns) {
-                try (BufferedReader fr = new BufferedReader (new FileReader (result_folder + fn))) {
+                try (BufferedReader fr = new BufferedReader (new FileReader (new File(result_folder, fn)))) {
                     // Read the header row and work out how many data columns are expected
                     int NDataCols = 0;
                     String line = fr.readLine();    // the first line (headers)
