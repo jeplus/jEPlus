@@ -805,14 +805,16 @@ public class EPlusWinTools {
     
     public static List<String> getInstalledTransitionVersions (String binfolder) {
         ArrayList <String> list = new ArrayList<> ();
-        File dir = new File (binfolder);
-        if (dir.exists() && dir.isDirectory()) {
-            String pattern = "V?-?-?-Energy+.idd";
-            OrFileFilter filter = new OrFileFilter ();
-            filter.addFileFilter(new WildcardFileFilter (pattern));
-            File [] files = dir.listFiles((FileFilter)filter);
-            for (File file : files) {
-                list.add(file.getName().substring(0, 6));
+        if (binfolder != null) {
+            File dir = new File (binfolder);
+            if (dir.exists() && dir.isDirectory()) {
+                String pattern = "V?-?-?-Energy+.idd";
+                OrFileFilter filter = new OrFileFilter ();
+                filter.addFileFilter(new WildcardFileFilter (pattern));
+                File [] files = dir.listFiles((FileFilter)filter);
+                for (File file : files) {
+                    list.add(file.getName().substring(0, 6));
+                }
             }
         }
         return list;
