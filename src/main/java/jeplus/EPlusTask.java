@@ -466,7 +466,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         return ok;
     }
 
-    protected boolean runPythonScriptOnIDF () {
+    public boolean runPythonScriptOnIDF () {
         boolean ok = true;
         // Get path to job folder
         String job_dir = getWorkingDir();
