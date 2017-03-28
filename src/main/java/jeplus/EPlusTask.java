@@ -46,7 +46,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
 
     static final long serialVersionUID = 1587629823039332802L;
     
-    public static class PythonFunc {
+    public static class PythonFunc implements Serializable {
         String PyVersion = null;
         String ScriptFile = null;
         ArrayList<String> Args = null;
