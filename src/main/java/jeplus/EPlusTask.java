@@ -244,6 +244,10 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         return SearchStringList;
     }
 
+    public boolean hasScripts () {
+        return !Scripts.isEmpty();
+    }
+    
     /**
      * Working Directory of this job is created on the fly, to save memory
      * @return A directory name comprises of the parent dir and the job id
