@@ -470,12 +470,12 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         return ok;
     }
 
-    public boolean runPythonScriptOnIDF () {
+    public boolean runPythonScriptOnIDF (JEPlusConfig config) {
         boolean ok = true;
         // Get path to job folder
         String job_dir = getWorkingDir();
-        // Run Python script
-        JEPlusConfig config = JEPlusConfig.getDefaultInstance();
+        // Default config instance contains Python exe info for running Python script
+        JEPlusConfig default_config = JEPlusConfig.getDefaultInstance();
         // Create an inverted index
         HashMap<String, Integer> index = new HashMap<> ();
         for (int i=0; i<SearchStringList.size(); i++) {
@@ -499,12 +499,12 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
             // Call Python
             try (PrintStream outs = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + config.getScreenFile(), true));) {
                 PythonTools.runPython(
-                        config, 
+                        default_config, 
                         RelativeDirUtil.checkAbsolutePath(script.getScriptFile(), WorkEnv.getProjectBaseDir()), 
                         script.getPyVersion(), 
                         WorkEnv.getProjectBaseDir(), 
                         job_dir, 
-                        JEPlusConfig.getDefaultInstance().getEPlusBinDir(),
+                        config.getResolvedEPlusBinDir(),
                         args,
                         outs);
             }catch (IOException ioe) {
@@ -527,7 +527,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         // Write IDF file
         ok = ok && this.preprocessInputFile(JEPlusConfig.getDefaultInstance());
         // Run Python script 
-        ok = ok && this.runPythonScriptOnIDF ();
+        ok = ok && this.runPythonScriptOnIDF (JEPlusConfig.getDefaultInstance());
         // Ready to run EPlus
         if (ok) {
             int code = EPlusWinTools.runEPlus(JEPlusConfig.getDefaultInstance(), getWorkingDir(), false);
