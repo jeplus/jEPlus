@@ -56,14 +56,14 @@ public class JEPlusProject implements Serializable {
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusProject.class);
     
     /** ScriptEngine used by all evaluators */
-    protected static final ScriptEngine Script_Engine = new ScriptEngineManager().getEngineByName("python");
+    protected static final ScriptEngine Script_Engine = new ScriptEngineManager().getEngineByName("javascript");
     static {
         // Set up script engine
-        try {
-            Script_Engine.eval("import math");
-        }catch (ScriptException sce) {
-            logger.error("Script engine error when importing math module.", sce);
-        }
+//        try {
+//            Script_Engine.eval("import math");
+//        }catch (ScriptException sce) {
+//            logger.error("Script engine error when importing math module.", sce);
+//        }
     }
     
     public static ScriptEngine getScript_Engine() {

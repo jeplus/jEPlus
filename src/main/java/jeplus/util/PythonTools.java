@@ -26,10 +26,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import jeplus.JEPlusConfig;
-import org.python.core.PyException;
-import org.python.core.PyString;
-import org.python.core.PySystemState;
-import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,30 +54,31 @@ public class PythonTools {
 
         String CurrentWorkDir = (arg1 != null && arg1.trim().length()>0) ? arg1 : "./";
         if (version.equalsIgnoreCase("jython")) {
-            StringBuilder buf = new StringBuilder (scriptfile);
-            if (arg0 != null && arg0.trim().length()>0) buf.append(", ").append(arg0);
-            buf.append(", ").append(CurrentWorkDir);
-            if (arg2 != null && arg2.trim().length()>0) buf.append(", ").append(arg2);
-            if (arg3 != null && arg3.trim().length()>0) buf.append(", ").append(arg3);
-            if (moreargs != null && moreargs.trim().length()>0) buf.append(", ").append(moreargs);
-            String [] args = buf.toString().split("\\s*,\\s*");
-            PythonInterpreter.initialize(System.getProperties(), System.getProperties(), args);
-            PySystemState state = new PySystemState();
-            state.argv.clear();
-            for (String arg : args) {
-                state.argv.append (new PyString (arg));
-            }
-            PythonInterpreter interp = new PythonInterpreter(null, state);
-            interp.setOut(stream);
-            interp.setErr(stream);
-            try {
-                interp.execfile(scriptfile);
-            }catch (PyException pye) {
-                stream.println();
-                stream.println(pye.toString());
-            }
-            interp.cleanup();
-            
+//            StringBuilder buf = new StringBuilder (scriptfile);
+//            if (arg0 != null && arg0.trim().length()>0) buf.append(", ").append(arg0);
+//            buf.append(", ").append(CurrentWorkDir);
+//            if (arg2 != null && arg2.trim().length()>0) buf.append(", ").append(arg2);
+//            if (arg3 != null && arg3.trim().length()>0) buf.append(", ").append(arg3);
+//            if (moreargs != null && moreargs.trim().length()>0) buf.append(", ").append(moreargs);
+//            String [] args = buf.toString().split("\\s*,\\s*");
+//            PythonInterpreter.initialize(System.getProperties(), System.getProperties(), args);
+//            PySystemState state = new PySystemState();
+//            state.argv.clear();
+//            for (String arg : args) {
+//                state.argv.append (new PyString (arg));
+//            }
+//            PythonInterpreter interp = new PythonInterpreter(null, state);
+//            interp.setOut(stream);
+//            interp.setErr(stream);
+//            try {
+//                interp.execfile(scriptfile);
+//            }catch (PyException pye) {
+//                stream.println();
+//                stream.println(pye.toString());
+//            }
+//            interp.cleanup();
+            stream.println("Jython is no longer supported! Use external Python2 or Python3 instead.");
+            logger.error("Jython is no longer supported! Use external Python2 or Python3 instead.");
         }else {
             String PythonExe;
             if (version.equalsIgnoreCase("python2")) {
@@ -153,28 +150,30 @@ public class PythonTools {
         String CurrentWorkDir = (arg1 != null && arg1.trim().length()>0) ? arg1 : "./";
         String AdditionalDir = (arg2 != null && arg2.trim().length()>0) ? arg2 : "./";
         if (version.equalsIgnoreCase("jython")) {
-            StringBuilder buf = new StringBuilder (scriptfile);
-            if (arg0 != null && arg0.trim().length()>0) buf.append(";").append(arg0);
-            buf.append(";").append(CurrentWorkDir);
-            if (param_args != null && param_args.trim().length()>0) buf.append(";").append(param_args);
-            buf.append(";").append(AdditionalDir);
-            String [] args = buf.toString().split("\\s*;\\s*");
-            PythonInterpreter.initialize(System.getProperties(), System.getProperties(), args);
-            PySystemState state = new PySystemState();
-            state.argv.clear();
-            for (String arg : args) {
-                state.argv.append (new PyString (arg));
-            }
-            PythonInterpreter interp = new PythonInterpreter(null, state);
-            interp.setOut(stream);
-            interp.setErr(stream);
-            try {
-                interp.execfile(scriptfile);
-            }catch (PyException pye) {
-                stream.println("Error running jython script file " + scriptfile);
-                stream.println(pye.toString());
-            }
-            interp.cleanup();
+//            StringBuilder buf = new StringBuilder (scriptfile);
+//            if (arg0 != null && arg0.trim().length()>0) buf.append(";").append(arg0);
+//            buf.append(";").append(CurrentWorkDir);
+//            if (param_args != null && param_args.trim().length()>0) buf.append(";").append(param_args);
+//            buf.append(";").append(AdditionalDir);
+//            String [] args = buf.toString().split("\\s*;\\s*");
+//            PythonInterpreter.initialize(System.getProperties(), System.getProperties(), args);
+//            PySystemState state = new PySystemState();
+//            state.argv.clear();
+//            for (String arg : args) {
+//                state.argv.append (new PyString (arg));
+//            }
+//            PythonInterpreter interp = new PythonInterpreter(null, state);
+//            interp.setOut(stream);
+//            interp.setErr(stream);
+//            try {
+//                interp.execfile(scriptfile);
+//            }catch (PyException pye) {
+//                stream.println("Error running jython script file " + scriptfile);
+//                stream.println(pye.toString());
+//            }
+//            interp.cleanup();
+            stream.println("Jython is no longer supported! Use external Python2 or Python3 instead.");
+            logger.error("Jython is no longer supported! Use external Python2 or Python3 instead.");
             
         }else {
             String PythonExe;
@@ -238,7 +237,8 @@ public class PythonTools {
     public static String getPythonVersion (JEPlusConfig config, String version) {
         String PythonExe;
         if (version.equalsIgnoreCase("jython")) {
-            return "Jython 2.7.0";
+            // return "Jython 2.7.0";
+            return "No longer supported";
         } else if (version.equalsIgnoreCase("python2")) {
             PythonExe = config.getPython2EXE() == null ? null : config.getPython2EXE();
         }else {

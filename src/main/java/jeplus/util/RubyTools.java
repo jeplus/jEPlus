@@ -26,10 +26,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import jeplus.JEPlusConfig;
-import org.python.core.PyException;
-import org.python.core.PyString;
-import org.python.core.PySystemState;
-import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,28 +55,30 @@ public class RubyTools {
 
         String CurrentWorkDir = (arg0 != null && arg0.trim().length()>0) ? arg0 : "./";
         if (version.equalsIgnoreCase("jruby")) {
-            StringBuilder buf = new StringBuilder (scriptfile);
-            buf.append(", ").append(CurrentWorkDir);
-            if (arg1 != null && arg1.trim().length()>0) buf.append(", ").append(arg1);
-            if (arg2 != null && arg2.trim().length()>0) buf.append(", ").append(arg2);
-            if (moreargs != null && moreargs.trim().length()>0) buf.append(", ").append(moreargs);
-            String [] args = buf.toString().split("\\s*,\\s*");
-            PythonInterpreter.initialize(System.getProperties(), System.getProperties(), args);
-            PySystemState state = new PySystemState();
-            state.argv.clear();
-            for (String arg : args) {
-                state.argv.append (new PyString (arg));
-            }
-            PythonInterpreter interp = new PythonInterpreter(null, state);
-            interp.setOut(stream);
-            interp.setErr(stream);
-            try {
-                interp.execfile(scriptfile);
-            }catch (PyException pye) {
-                stream.println();
-                stream.println(pye.toString());
-            }
-            interp.cleanup();
+//            StringBuilder buf = new StringBuilder (scriptfile);
+//            buf.append(", ").append(CurrentWorkDir);
+//            if (arg1 != null && arg1.trim().length()>0) buf.append(", ").append(arg1);
+//            if (arg2 != null && arg2.trim().length()>0) buf.append(", ").append(arg2);
+//            if (moreargs != null && moreargs.trim().length()>0) buf.append(", ").append(moreargs);
+//            String [] args = buf.toString().split("\\s*,\\s*");
+//            PythonInterpreter.initialize(System.getProperties(), System.getProperties(), args);
+//            PySystemState state = new PySystemState();
+//            state.argv.clear();
+//            for (String arg : args) {
+//                state.argv.append (new PyString (arg));
+//            }
+//            PythonInterpreter interp = new PythonInterpreter(null, state);
+//            interp.setOut(stream);
+//            interp.setErr(stream);
+//            try {
+//                interp.execfile(scriptfile);
+//            }catch (PyException pye) {
+//                stream.println();
+//                stream.println(pye.toString());
+//            }
+//            interp.cleanup();
+            stream.println("JRuby is no longer supported! Use external Ruby instead.");
+            logger.error("JRuby is no longer supported! Use external Ruby instead.");
             
         }else {
             String PythonExe;
