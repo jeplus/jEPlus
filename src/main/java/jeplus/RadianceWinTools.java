@@ -526,8 +526,10 @@ public class RadianceWinTools {
         PropertyConfigurator.configure("D:\\4\\jEPlus_v1.6.0\\log4j.cfg");
         
         JEPlusConfig Config = new JEPlusConfig ();
-        Config.setRadianceBinDir("C:\\Program Files (x86)\\Radiance\\bin");
-        Config.setRadianceLibDir("C:\\Program Files (x86)\\Radiance\\lib");
+        RadianceConfig radcfg = new RadianceConfig ();
+        radcfg.setRadianceBinDir("C:\\Program Files (x86)\\Radiance\\bin");
+        radcfg.setRadianceLibDir("C:\\Program Files (x86)\\Radiance\\lib");
+        Config.getRadianceConfigs().put("v4.2", radcfg);
         
 //        runRtrace(
 //                Config, 
@@ -539,7 +541,7 @@ public class RadianceWinTools {
 //                "trace.err"
 //                );
         runRpict(
-                Config, 
+                Config.getRadianceConfigs().get("v4.2"), 
                 "C:\\jess_test\\temp\\zyyz\\11720", 
                 /* "−vp 15.52623 22.5462 18.84981 −vd -1 −.5 -1 -ab 4 -ad 1024 -aa .22 -ar 512 -as 512", */
                 "-vtv -vp -.5 -5 1.15 -vd 0.5 5 0 -vh 45 -vv 45 -pa 1.0 -pj 0.02 -pd 0.0 -pm 0.0 -ps 1 -w+ -i- -bv+ -dt 0.050 -dc 0.50 -dj 0.0 -ds 0.250 -dr 1 -dp 512 -dv+ -st 0.150 -ab 4 -ar 128 -ad 1500 -as 500 -aa 0.15 -av 0.0 0.0 0.0 -aw 0 -lw 0.004 -ss 1.0 -lr -10 -u- -x 1024 -y 1024 -t 60",

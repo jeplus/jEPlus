@@ -134,14 +134,14 @@ public class Main {
      */
     public void mainFunction (CommandLine commandline) {
         // jE+ Configuration file
-        String cfgfile = "jeplus.cfg";
+        String cfgfile = JEPlusConfig.DefaultConfigFile;
         if (commandline.hasOption("cfg")) {
             cfgfile = commandline.getOptionValue("cfg");
         }
         // load E+ configuration
         boolean showSplash = false;
         if (! new File (cfgfile).exists()) { showSplash = true; }
-        JEPlusConfig.setDefaultInstance(new JEPlusConfig (cfgfile));
+        JEPlusConfig.setDefaultInstance(JEPlusConfig.getNewInstance(cfgfile));
         // Set local threads
         int nthread = Runtime.getRuntime().availableProcessors();
         if (commandline.hasOption("local")) {

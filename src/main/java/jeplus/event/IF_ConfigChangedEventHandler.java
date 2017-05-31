@@ -16,12 +16,12 @@
  */
 package jeplus.event;
 
-import jeplus.JEPlusConfig;
+import jeplus.ConfigFileNames;
 
 /**
  *
  * @author Yi
  */
 public interface IF_ConfigChangedEventHandler {
-    public void configChanged (JEPlusConfig config);
+    public void configChanged (ConfigFileNames config);
 }

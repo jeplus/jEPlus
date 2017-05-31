@@ -154,7 +154,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         jplProgConfPanel = new JPanelProgConfiguration (null, JEPlusConfig.getDefaultInstance());
         jplIDFConvPanel = new JPanel_IDFVersionUpdater (this, JEPlusConfig.getDefaultInstance(), this.getProject());
         jplPythonPanel = new JPanelRunPython (this, JEPlusConfig.getDefaultInstance(), getProject() == null ? "./" : getProject().resolveWorkDir());
-        jplReadVarsPanel = new JPanel_RunReadVars(this);
+        jplReadVarsPanel = new JPanel_RunReadVars(this, JEPlusConfig.getDefaultInstance());
 //        TpnUtilities.add("Configure Programs", jplProgConfPanel);
         TpnUtilities.add("Run Python", jplPythonPanel);
         TpnUtilities.add("IDF Converter", jplIDFConvPanel);
@@ -287,8 +287,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
 
     public void setCurrentProjectFile(String CurrentProjectFile) {
         this.CurrentProjectFile = CurrentProjectFile;
-        if (! JEPlusConfig.getRecentProjects().contains(CurrentProjectFile))
-            JEPlusConfig.getRecentProjects().add(0, CurrentProjectFile);
+        if (! JEPlusConfig.getDefaultInstance().getRecentProjects().contains(CurrentProjectFile))
+            JEPlusConfig.getDefaultInstance().getRecentProjects().add(0, CurrentProjectFile);
         this.setTitle(getVersionInfo() + " - " + CurrentProjectFile);
     }
 
@@ -762,7 +762,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         cboExecutionType = new javax.swing.JComboBox();
         jLabel27 = new javax.swing.JLabel();
         jplSettings = new javax.swing.JPanel();
-        jplEPlusSettings = new jeplus.gui.JPanel_EPlusSettings();
+        jplEPlusSettings = new org.netbeans.modules.form.InvalidComponent();
         jplOptions = new javax.swing.JPanel();
         jplLocalControllerSettings = new jeplus.gui.JPanel_LocalControllerOptions();
         jPanel3 = new javax.swing.JPanel();
@@ -1842,7 +1842,7 @@ private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN
 
         // Save EnergyPlus settings
         String currentdate = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date());
-        JEPlusConfig.getDefaultInstance().saveToFile("jEPlus configuration generated at " + currentdate);
+        JEPlusConfig.getDefaultInstance().saveAsJSON(new File(JEPlusConfig.DefaultConfigFile));
         // Exit
         if (this.getFrameCloseOperation() == JEPlusFrameMain.EXIT_ON_CLOSE) {
             System.exit(-1);
@@ -2745,7 +2745,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JSplitPane jSplitPane1;
-    private jeplus.gui.JPanel_EPlusSettings jplEPlusSettings;
+    private org.netbeans.modules.form.InvalidComponent jplEPlusSettings;
     private jeplus.gui.JPanel_LocalControllerOptions jplLocalControllerSettings;
     private javax.swing.JPanel jplOptions;
     private javax.swing.JPanel jplProjectFilesPanelHolder;
@@ -2888,7 +2888,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                     // Clear console log file content
                     JEPlusConfig.getDefaultInstance().purgeScreenLogFile();
                     // Set recent projects in menu
-                    ArrayList<String> recent = JEPlusConfig.getRecentProjects();
+                    ArrayList<String> recent = JEPlusConfig.getDefaultInstance().getRecentProjects();
                     if (recent != null) {
                         int idx = 0;
                         for (int i=0; i<recent.size(); i++) {

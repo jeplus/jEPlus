@@ -30,6 +30,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import jeplus.ConfigFileNames;
 import jeplus.EPlusWinTools;
 import jeplus.IDFmodel;
 import jeplus.JEPlusConfig;
@@ -569,7 +570,7 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel implements IF_C
     }
 
     @Override
-    public void configChanged(JEPlusConfig config) {
-        setConverterFolder(Config.getEPlusVerConvDir());
+    public void configChanged(ConfigFileNames config) {
+        setConverterFolder(((JEPlusConfig)Config).getEPlusVerConvDir());
     }
 }

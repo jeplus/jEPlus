@@ -21,12 +21,15 @@ package jeplus.gui;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Vector;
 import javax.swing.JFileChooser;
 import jeplus.EPlusConfig;
 import javax.swing.*;
+import jeplus.ConfigFileNames;
 import jeplus.EPlusPostProcessor;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusFrameMain;
+import jeplus.event.IF_ConfigChangedEventHandler;
 import jeplus.postproc.PostProcessFunc;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
@@ -35,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yi
  */
-public class JPanel_RunReadVars extends javax.swing.JPanel {
+public class JPanel_RunReadVars extends javax.swing.JPanel implements IF_ConfigChangedEventHandler {
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JPanel_RunReadVars.class);
@@ -48,14 +51,29 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
     //PostProcFunc
     protected int PostProcFunc = 0;
     
+    protected JEPlusConfig Config = null;
+    protected String SelectedVersion = null;
+    
 
     /**
      * Creates new form JPanel_RunReadVars
      * @param hostframe
+     * @param cfg
      */
-    public JPanel_RunReadVars(JEPlusFrameMain hostframe) {
+    public JPanel_RunReadVars(JEPlusFrameMain hostframe, JEPlusConfig cfg) {
         initComponents();
         MainFrame = hostframe;
+        setConfig(cfg);
+    }
+
+    public final void setConfig(JEPlusConfig config) {
+        if (Config != config) {
+            if (Config != null) {
+                Config.removeListener(this);
+            }
+            Config = config;
+            Config.addListener(this);
+        }
         initContents();
     }
 
@@ -75,12 +93,17 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
         return fn;
     }
     
-    public void initContents () {
+    public final void initContents () {
+        this.cboEPlusVersion.setModel(new DefaultComboBoxModel (new Vector(Config.getEPlusConfigs().keySet())));
         // PostResultDir = MainFrame.getProject().getExecSettings().getParentDir();
         PostResultDir = MainFrame.getProject().resolveWorkDir();
         this.txtResultDir.setText(PostResultDir);
-        txtReadVarsCmdLine.setText("\"" + JEPlusConfig.getDefaultInstance().getResolvedReadVars() + "\" \"" + 
+        txtReadVarsCmdLine.setText("\"" + getSelectedReadVars() + "\" \"" + 
                         txtExtraRviFile.getText() + "\" unlimited " + cboReadVarsFrequency.getSelectedItem());
+    }
+    
+    private String getSelectedReadVars() {
+        return Config.getEPlusConfigs().get(SelectedVersion).getResolvedReadVars();
     }
 
     /**
@@ -120,6 +143,8 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
         jLabel7 = new javax.swing.JLabel();
         txtResultDir = new javax.swing.JTextField();
         cmdSelectResultDir = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
+        cboEPlusVersion = new javax.swing.JComboBox();
         jPanel10 = new javax.swing.JPanel();
         cboProcFunc = new javax.swing.JComboBox();
         jLabel42 = new javax.swing.JLabel();
@@ -335,18 +360,24 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
             }
         });
 
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jLabel2.setText("Use E+ version: ");
+
+        cboEPlusVersion.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel9Layout.createSequentialGroup()
-                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel41, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel9Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
-                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jLabel41, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkProjectJobsOnly, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -364,13 +395,20 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
                     .addGroup(jPanel9Layout.createSequentialGroup()
                         .addComponent(txtResultDir)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdSelectResultDir, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(cmdSelectResultDir, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel9Layout.createSequentialGroup()
+                        .addComponent(cboEPlusVersion, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel9Layout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(cboEPlusVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtResultDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -392,7 +430,7 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
                     .addComponent(jLabel41))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkProjectJobsOnly)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder("Post Process Function"));
@@ -434,7 +472,7 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
                         .addComponent(jLabel42, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cboProcFunc, javax.swing.GroupLayout.PREFERRED_SIZE, 257, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 43, Short.MAX_VALUE))))
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel10Layout.setVerticalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -463,12 +501,12 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -540,7 +578,7 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             txtExtraRviFile.setText(file.getPath());
-            txtReadVarsCmdLine.setText("\"" + JEPlusConfig.getDefaultInstance().getResolvedReadVars() + "\" \"" +
+            txtReadVarsCmdLine.setText("\"" + getSelectedReadVars() + "\" \"" +
                 txtExtraRviFile.getText() + "\" unlimited " + cboReadVarsFrequency.getSelectedItem());
         }
         fc.resetChoosableFileFilters();
@@ -584,22 +622,22 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
     }//GEN-LAST:event_cmdEditExtraRviActionPerformed
 
     private void txtExtraRviFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtExtraRviFileActionPerformed
-        txtReadVarsCmdLine.setText("\"" + JEPlusConfig.getDefaultInstance().getResolvedReadVars() + "\" \"" +
+        txtReadVarsCmdLine.setText("\"" + getSelectedReadVars() + "\" \"" +
             txtExtraRviFile.getText() + "\" unlimited " + cboReadVarsFrequency.getSelectedItem());
     }//GEN-LAST:event_txtExtraRviFileActionPerformed
 
     private void txtExtraRviFileFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtExtraRviFileFocusLost
-        txtReadVarsCmdLine.setText("\"" + JEPlusConfig.getDefaultInstance().getResolvedReadVars() + "\" \"" +
+        txtReadVarsCmdLine.setText("\"" + getSelectedReadVars() + "\" \"" +
             txtExtraRviFile.getText() + "\" unlimited " + cboReadVarsFrequency.getSelectedItem());
     }//GEN-LAST:event_txtExtraRviFileFocusLost
 
     private void cboReadVarsFrequencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboReadVarsFrequencyActionPerformed
-        txtReadVarsCmdLine.setText("\"" + JEPlusConfig.getDefaultInstance().getResolvedReadVars() + "\" \"" +
+        txtReadVarsCmdLine.setText("\"" + getSelectedReadVars() + "\" \"" +
             txtExtraRviFile.getText() + "\" unlimited " + cboReadVarsFrequency.getSelectedItem());
     }//GEN-LAST:event_cboReadVarsFrequencyActionPerformed
 
     private void cboReadVarsFrequencyPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_cboReadVarsFrequencyPropertyChange
-        txtReadVarsCmdLine.setText("\"" + JEPlusConfig.getDefaultInstance().getResolvedReadVars() + "\" \"" +
+        txtReadVarsCmdLine.setText("\"" + getSelectedReadVars() + "\" \"" +
             txtExtraRviFile.getText() + "\" unlimited " + cboReadVarsFrequency.getSelectedItem());
     }//GEN-LAST:event_cboReadVarsFrequencyPropertyChange
 
@@ -656,6 +694,7 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox cboEPlusVersion;
     private javax.swing.JComboBox cboProcFunc;
     private javax.swing.JComboBox cboReadVarsFrequency;
     private javax.swing.JCheckBox chkCollectRunTimes;
@@ -670,6 +709,7 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
     private javax.swing.JButton cmdSelectResultDir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel40;
     private javax.swing.JLabel jLabel41;
@@ -691,4 +731,9 @@ public class JPanel_RunReadVars extends javax.swing.JPanel {
     private javax.swing.JTextField txtResultDir;
     private javax.swing.JTextField txtStatsFilePrefix;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void configChanged(ConfigFileNames config) {
+        this.setConfig((JEPlusConfig)Config);
+    }
 }

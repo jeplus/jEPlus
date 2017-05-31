@@ -21,6 +21,7 @@ package jeplus.postproc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import jeplus.EPlusBatch;
+import jeplus.JEPlusConfig;
 import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX;
 import jeplus.util.RelativeDirUtil;
@@ -64,7 +65,13 @@ public class EsoResultCollector extends ResultCollector {
                     String fn = item.getTableName() + ".csv";
                     ResultFiles.add(fn);
                     ResWriter = new DefaultCSVWriter(null, fn);
-                    ResReader = new EPlusRVIReader(RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getResolvedEnv().getRVIDir()), item.getFrequency(), fn, item.isUsedInCalc());
+                    ResReader = new EPlusRVIReader(
+                            JEPlusConfig.getDefaultInstance().getEPlusConfigs().get(JobOwner.getProject().getEPlusModelVersion()),
+                            RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getResolvedEnv().getRVIDir()), 
+                            item.getFrequency(), 
+                            fn, 
+                            item.isUsedInCalc()
+                    );
                     ResultHeader = new HashMap <>();
                     ResultTable = new ArrayList <> ();
                     ResReader.readResult(JobOwner, JobOwner.getResolvedEnv().getParentDir(), ResultHeader, ResultTable);

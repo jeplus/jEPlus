@@ -21,7 +21,9 @@ package jeplus.gui; //
 import java.awt.Color;
 import java.io.File;
 import javax.swing.JFileChooser;
+import jeplus.ConfigFileNames;
 import jeplus.JEPlusConfig;
+import jeplus.TRNSYSConfig;
 import jeplus.event.IF_ConfigChangedEventHandler;
 
 /**
@@ -34,19 +36,24 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
 
     protected String title = "TRNSYS Executables";
     protected final JFileChooser fc = new JFileChooser("./");
-    protected JEPlusConfig Config = JEPlusConfig.getDefaultInstance();;
-    public final void setConfig(JEPlusConfig config) {
-        Config = config;
+    protected TRNSYSConfig Config = new TRNSYSConfig();
+    public final void setConfig(TRNSYSConfig config) {
+        if (Config != config) {
+            if (Config != null) {
+                Config.removeListener(this);
+            }
+            Config = config;
+            Config.addListener(this);
+        }
         initSettings();
         checkSettings();
-        Config.addListener(this);
     }
 
     /** 
      * Creates new form JPanel_TrnsysSettings
      * @param config 
      */
-    public JPanel_TrnsysSettings(JEPlusConfig config) {
+    public JPanel_TrnsysSettings(TRNSYSConfig config) {
         initComponents();
         setConfig(config);
     }
@@ -234,7 +241,7 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
 }//GEN-LAST:event_cmdSelectEPlusDirActionPerformed
 
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
-        Config.saveToFile("");
+//        Config.saveToFile("");
     }//GEN-LAST:event_cmdSaveActionPerformed
 
 
@@ -253,9 +260,8 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void configChanged(JEPlusConfig config) {
-        initSettings();
-        checkSettings();
+    public void configChanged(ConfigFileNames config) {
+        this.setConfig((TRNSYSConfig)config);
     }
 
 }

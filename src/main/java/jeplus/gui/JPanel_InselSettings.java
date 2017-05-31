@@ -21,7 +21,8 @@ package jeplus.gui; //
 import java.awt.Color;
 import java.io.File;
 import javax.swing.JFileChooser;
-import jeplus.JEPlusConfig;
+import jeplus.ConfigFileNames;
+import jeplus.INSELConfig;
 import jeplus.event.IF_ConfigChangedEventHandler;
 
 /**
@@ -34,19 +35,24 @@ public class JPanel_InselSettings extends javax.swing.JPanel implements TitledJP
 
     protected String title = "INSEL Executables";
     protected final JFileChooser fc = new JFileChooser("./");
-    protected JEPlusConfig Config = JEPlusConfig.getDefaultInstance();;
-    public final void setConfig(JEPlusConfig config) {
-        Config = config;
+    protected INSELConfig Config = new INSELConfig();
+    public final void setConfig(INSELConfig config) {
+        if (Config != config) {
+            if (Config != null) {
+                Config.removeListener(this);
+            }
+            Config = config;
+            Config.addListener(this);
+        }
         initSettings();
         checkSettings();
-        Config.addListener(this);
     }
 
     /** 
      * Creates new form JPanel_InselSettings
      * @param config 
      */
-    public JPanel_InselSettings(JEPlusConfig config) {
+    public JPanel_InselSettings(INSELConfig config) {
         initComponents();
         setConfig(config);
     }
@@ -234,7 +240,7 @@ public class JPanel_InselSettings extends javax.swing.JPanel implements TitledJP
 }//GEN-LAST:event_cmdSelectINSELDirActionPerformed
 
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
-        Config.saveToFile("");
+//        Config.saveToFile("");
     }//GEN-LAST:event_cmdSaveActionPerformed
 
 
@@ -253,9 +259,8 @@ public class JPanel_InselSettings extends javax.swing.JPanel implements TitledJP
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void configChanged(JEPlusConfig config) {
-        initSettings();
-        checkSettings();
+    public void configChanged(ConfigFileNames config) {
+        this.setConfig((INSELConfig)config);
     }
 
 }

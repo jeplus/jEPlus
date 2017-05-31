@@ -24,7 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Properties;
 import javax.swing.filechooser.FileFilter;
-import static jeplus.EPlusConfig.UserBaseDir;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.6
  * @since 1.6
  */
-public class RadianceConfig extends INSELConfig {
+public class RadianceConfig extends ConfigFileNames {
 
     /** Logger */
     private final static org.slf4j.Logger logger = LoggerFactory.getLogger(RadianceConfig.class);
@@ -140,7 +139,6 @@ public class RadianceConfig extends INSELConfig {
         return dir;
     }
     
-    @Override
     public boolean loadFromFile(String fn) {
         Properties prop = new Properties();
         try {
@@ -183,7 +181,7 @@ public class RadianceConfig extends INSELConfig {
                         case RAY:
                             return extension.equals(OctreeExt) || extension.equals(RadExt);
                         default:
-                            return INSELConfig.getFileFilter(type).accept(f);
+                            return ConfigFileNames.getFileFilter(type).accept(f);
                     }
                 }
                 return false;
@@ -202,7 +200,7 @@ public class RadianceConfig extends INSELConfig {
                     case RAY:
                         return "Radiance files (*.rad *.oct)";
                     default:
-                        return INSELConfig.getFileFilter(type).getDescription();
+                        return ConfigFileNames.getFileFilter(type).getDescription();
                 }
 
             }

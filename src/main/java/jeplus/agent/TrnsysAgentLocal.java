@@ -42,6 +42,8 @@ import jeplus.postproc.*;
  * @since 0.5b
  */
 public class TrnsysAgentLocal extends EPlusAgent {
+    
+    protected TRNSYSConfig Config = null;
 
     /**
      * Construct with Exec settings
@@ -51,7 +53,8 @@ public class TrnsysAgentLocal extends EPlusAgent {
         super("Local batch simulation controller", settings);
         this.QueueCapacity = 10000;
         this.attachDefaultCollector();
-        SettingsPanel = new jeplus.gui.JPanel_TrnsysSettings (JEPlusConfig.getDefaultInstance());
+        Config = JEPlusConfig.getDefaultInstance().getTRNSYSConfigs().get("TRNSYS");
+        SettingsPanel = new jeplus.gui.JPanel_TrnsysSettings (Config);
     }
 
     /**
@@ -266,8 +269,8 @@ public class TrnsysAgentLocal extends EPlusAgent {
      */
     @Override
     public boolean checkAgentSettings() {
-        String bindir = JEPlusConfig.getDefaultInstance().getResolvedTRNSYSBinDir();
-        String exe = JEPlusConfig.getDefaultInstance().getResolvedTRNSYSEXEC();
+        String bindir = Config.getResolvedTRNSYSBinDir();
+        String exe = Config.getResolvedTRNSYSEXEC();
 
         boolean success = new File(exe).exists();
         if (! success) {

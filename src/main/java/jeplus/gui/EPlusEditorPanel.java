@@ -36,8 +36,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.EPlusConfig;
-import jeplus.INSELConfig;
-import jeplus.JEPlusConfig;
 import jeplus.JEPlusProject;
 import jeplus.data.RVX;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -66,15 +64,15 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
 
     public enum FileType {
 
-        IDF("text/EPlusIDF", JEPlusConfig.getFileFilter(JEPlusConfig.EPINPUT)),
-        EPW("text/EPlusEPW", JEPlusConfig.getFileFilter(JEPlusConfig.EPW)),
-        RVI("text/EPlusRVI", JEPlusConfig.getFileFilter(JEPlusConfig.RVI)),
-        RVX(SyntaxConstants.SYNTAX_STYLE_JSON, JEPlusConfig.getFileFilter(JEPlusConfig.RVX)),
-        JSON(SyntaxConstants.SYNTAX_STYLE_JSON, JEPlusConfig.getFileFilter(JEPlusConfig.JSON)),
-        PYTHON(SyntaxConstants.SYNTAX_STYLE_PYTHON, JEPlusConfig.getFileFilter(JEPlusConfig.PYTHON)),
-        CSV(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, JEPlusConfig.getFileFilter(JEPlusConfig.CSV)),
-        PLAIN(SyntaxConstants.SYNTAX_STYLE_NONE, JEPlusConfig.getFileFilter(JEPlusConfig.ALL)),
-        XML(SyntaxConstants.SYNTAX_STYLE_XML, JEPlusConfig.getFileFilter(JEPlusConfig.XML));
+        IDF("text/EPlusIDF", EPlusConfig.getFileFilter(EPlusConfig.EPINPUT)),
+        EPW("text/EPlusEPW", EPlusConfig.getFileFilter(EPlusConfig.EPW)),
+        RVI("text/EPlusRVI", EPlusConfig.getFileFilter(EPlusConfig.RVI)),
+        RVX(SyntaxConstants.SYNTAX_STYLE_JSON, EPlusConfig.getFileFilter(EPlusConfig.RVX)),
+        JSON(SyntaxConstants.SYNTAX_STYLE_JSON, EPlusConfig.getFileFilter(EPlusConfig.JSON)),
+        PYTHON(SyntaxConstants.SYNTAX_STYLE_PYTHON, EPlusConfig.getFileFilter(EPlusConfig.PYTHON)),
+        CSV(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, EPlusConfig.getFileFilter(EPlusConfig.CSV)),
+        PLAIN(SyntaxConstants.SYNTAX_STYLE_NONE, EPlusConfig.getFileFilter(EPlusConfig.ALL)),
+        XML(SyntaxConstants.SYNTAX_STYLE_XML, EPlusConfig.getFileFilter(EPlusConfig.XML));
 
         private final String RSTA_Style;
         private final FileFilter Filter;
@@ -661,7 +659,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
             // UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
             // UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
             // UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (Exception ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
             System.err.println(ex);
         }
 

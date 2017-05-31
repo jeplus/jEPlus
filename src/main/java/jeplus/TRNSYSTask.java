@@ -76,8 +76,7 @@ public class TRNSYSTask extends EPlusTask {
      * Preprocess the input file (.dck/.trd)
      * @return Operation successful or not
      */
-    @Override
-    public boolean preprocessInputFile (JEPlusConfig config) {
+    public boolean preprocessInputFile () {
         boolean ok = true;
         String[] SearchStrings = SearchStringList.toArray(new String[0]);
         String[] Newvals = AltValueList.toArray(new String[0]);
@@ -93,13 +92,15 @@ public class TRNSYSTask extends EPlusTask {
     @Override
     public void run() {
         Executed = true;
-        // Prepare work directory
+         // EPlus config
+        TRNSYSConfig config = JEPlusConfig.getDefaultInstance().getTRNSYSConfigs().get("all");
+       // Prepare work directory
         boolean ok = TRNSYSWinTools.prepareWorkDir(getWorkingDir());
         // Write DCK file
-        ok = ok && this.preprocessInputFile(JEPlusConfig.getDefaultInstance());
+        ok = ok && this.preprocessInputFile();
         // Ready to run TRNSYS
         if (ok) {
-            int code = TRNSYSWinTools.runTRNSYS(JEPlusConfig.getDefaultInstance(), getWorkingDir(), TRNSYSConfig.getTRNSYSDefDCK());
+            int code = TRNSYSWinTools.runTRNSYS(config, getWorkingDir(), TRNSYSConfig.getTRNSYSDefDCK());
             ok = (code >= 0) && TRNSYSWinTools.isAnyFileAvailable(getOutputPrinter(), getWorkingDir());
         }      
         // Remove temperory files/dir if required

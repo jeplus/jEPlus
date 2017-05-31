@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.4
  * @since 1.4
  */
-public class INSELConfig extends TRNSYSConfig {
+public class INSELConfig extends ConfigFileNames {
 
     /** Logger */
     private final static org.slf4j.Logger logger = LoggerFactory.getLogger(INSELConfig.class);
@@ -78,13 +78,12 @@ public class INSELConfig extends TRNSYSConfig {
         ScreenFile = "console.log";
     }
 
-    @Override
     public boolean loadFromFile(String fn) {
         Properties prop = new Properties();
         try {
             prop.load(new FileReader(fn));
-            InselBinDir = prop.getProperty("InselBinDir", getDefTRNSYSBinDir());
-            InselEXEC = prop.getProperty("InselEXE", InselBinDir + getDefTRNSYSEXEC());
+            InselBinDir = prop.getProperty("InselBinDir", getDefInselBinDir());
+            InselEXEC = prop.getProperty("InselEXE", InselBinDir + getDefInselEXEC());
             ScreenFile = prop.getProperty("ScreenFile", "console.log");
         } catch (FileNotFoundException fnfe) {
             logger.error("Specified configue file " + fn + " is not found.");
@@ -108,6 +107,8 @@ public class INSELConfig extends TRNSYSConfig {
      */
     public void setInselBinDir(String dir) {
         InselBinDir = dir;
+        InselEXEC = new File (InselBinDir + INSELConfig.getDefInselEXEC()).getAbsolutePath();
+        fireConfigChangedEvent ();
     }
 
     /**
@@ -139,6 +140,7 @@ public class INSELConfig extends TRNSYSConfig {
      */
     public void setInselEXEC(String name) {
         InselEXEC = name;
+        fireConfigChangedEvent ();
     }
 
     /**
@@ -193,7 +195,7 @@ public class INSELConfig extends TRNSYSConfig {
                         case INSEL:
                             return extension.equals(getInselExt());
                         default:
-                            return TRNSYSConfig.getFileFilter(type).accept(f);
+                            return ConfigFileNames.getFileFilter(type).accept(f);
                     }
                 }
                 return false;
@@ -208,7 +210,7 @@ public class INSELConfig extends TRNSYSConfig {
                     case INSEL:
                         return "Insel text model file (*.insel)";
                     default:
-                        return TRNSYSConfig.getFileFilter(type).getDescription();
+                        return ConfigFileNames.getFileFilter(type).getDescription();
                 }
 
             }

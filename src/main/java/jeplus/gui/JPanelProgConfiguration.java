@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import jeplus.ConfigFileNames;
 import jeplus.EPlusConfig;
 import jeplus.EPlusWinTools;
 import jeplus.JEPlusConfig;
@@ -42,7 +43,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     }
 
     public String getConfigFile() {
-        return Config.getCurrentConfigFile();
+        return JEPlusConfig.DefaultConfigFile;
     }
 
     /** 
@@ -50,10 +51,15 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
      * @param config
      */
     public final void setConfig(JEPlusConfig config) {
-        Config = config;
+        if (Config != config) {
+            if (Config != null) {
+                Config.removeListener(this);
+            }
+            Config = config;
+            Config.addListener(this);
+        }
         initSettings();
         checkSettings();
-        Config.addListener(this);
     }
 
     public Window getHostWindow() {
@@ -762,7 +768,6 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     }//GEN-LAST:event_cmdSelectPython2ExeActionPerformed
 
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
-        Config.saveToFile(getConfigFile());
         if (HostWindow != null) {
             HostWindow.dispose();
         }
@@ -855,8 +860,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void configChanged(JEPlusConfig config) {
-        initSettings();
-        checkSettings();
+    public void configChanged(ConfigFileNames config) {
+        setConfig((JEPlusConfig)config);
     }
 }

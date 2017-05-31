@@ -21,11 +21,9 @@ package jeplus.gui; //
 import java.awt.Color;
 import java.awt.Window;
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import javax.swing.JFileChooser;
-import jeplus.JEPlusConfig;
-import jeplus.event.IF_ConfigChangedEventHandler;
+import jeplus.ConfigFileNames;
+import jeplus.EPlusConfig;
 
 /**
  * JPanel_EPlusSettings.java - This is the view of EPlusConfig record
@@ -33,14 +31,17 @@ import jeplus.event.IF_ConfigChangedEventHandler;
  * @version 0.6
  * @since 0.5b
  */
-public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements TitledJPanel, IF_ConfigChangedEventHandler {
+public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements TitledJPanel {
 
     protected String title = "E+ Executables";
     protected final JFileChooser fc = new JFileChooser("./");
-    protected JEPlusConfig Config = null;
-    public void setConfig(JEPlusConfig config) {
-        Config = config;
+    protected EPlusConfig Config = null;
+    public final void setConfig(EPlusConfig config) {
+        if (Config != config) {
+            Config = config;
+        }
         initSettings();
+        checkSettings();
     }
     protected Window HostWindow = null;
 
@@ -49,11 +50,9 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
      * @param hostwindow 
      * @param config 
      */
-    public JPanel_EPlusSettingsDetailed(Window hostwindow, JEPlusConfig config) {
+    public JPanel_EPlusSettingsDetailed(Window hostwindow, EPlusConfig config) {
         initComponents();
-        Config = config;
-        initSettings();
-        checkSettings();
+        setConfig(config);
         HostWindow = hostwindow;
     }
 
@@ -377,7 +376,7 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
 }//GEN-LAST:event_cmdSelectEPMacroActionPerformed
 
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
-        Config.saveToFile("jEPlus configuration generated at " + SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date()));
+//        Config.saveToFile("jEPlus configuration generated at " + SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date()));
         HostWindow.dispose();
     }//GEN-LAST:event_cmdSaveActionPerformed
 
@@ -403,11 +402,5 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
     private javax.swing.JTextField txtReadVarEXE;
     private javax.swing.JTextField txtScreenLog;
     // End of variables declaration//GEN-END:variables
-
-    @Override
-    public void configChanged(JEPlusConfig config) {
-        initSettings();
-        checkSettings();
-    }
 
 }

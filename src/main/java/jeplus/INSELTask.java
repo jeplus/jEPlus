@@ -75,8 +75,7 @@ public class INSELTask extends EPlusTask {
      * Preprocess the input file
      * @return Operation successful or not
      */
-    @Override
-    public boolean preprocessInputFile (JEPlusConfig config) {
+    public boolean preprocessInputFile () {
         boolean ok;
         String[] SearchStrings = SearchStringList.toArray(new String[0]);
         String[] Newvals = AltValueList.toArray(new String[0]);
@@ -95,10 +94,14 @@ public class INSELTask extends EPlusTask {
         // Prepare work directory
         boolean ok = INSELWinTools.prepareWorkDir(getWorkingDir());
         // Write DCK file
-        ok = ok && this.preprocessInputFile(JEPlusConfig.getDefaultInstance());
+        ok = ok && this.preprocessInputFile();
         // Ready to run TRNSYS
         if (ok) {
-            int code = INSELWinTools.runINSEL(JEPlusConfig.getDefaultInstance(), getWorkingDir(), INSELConfig.getInselDefModel());
+            int code = INSELWinTools.runINSEL(
+                    JEPlusConfig.getDefaultInstance().getINSELConfigs().get("all"), 
+                    getWorkingDir(), 
+                    INSELConfig.getInselDefModel()
+            );
             ok = (code >= 0) && INSELWinTools.isAnyFileAvailable(getOutputPrinter(), getWorkingDir());
         }      
         // Remove temperory files/dir if required
