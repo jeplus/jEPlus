@@ -30,8 +30,18 @@ import java.io.Serializable;
 //		}
 //	],
 public class RVX_RVIitem implements Serializable {
+    
+    public static enum Frequencies {
+        Annual,
+        RunPeriod,
+        Monthly,
+        Daily,
+        Hourly,
+        Timestep,
+        Detailed
+    };
     private String FileName = "my.rvi";
-    private String Frequency = "Annual";
+    private String Frequency = "RunPeriod";
     private String TableName = "SimResults";
     private boolean UsedInCalc = true;
 
@@ -67,4 +77,8 @@ public class RVX_RVIitem implements Serializable {
         this.UsedInCalc = UsedInCalc;
     }
     
+    @Override
+    public String toString () {
+        return TableName + ":" + FileName + "(" + Frequency + ")" + (UsedInCalc ? "" : "*");
+    }
 }

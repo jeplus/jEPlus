@@ -73,4 +73,8 @@ public class RVX_SQLitem implements Serializable {
         this.UsedInCalc = UsedInCalc;
     }
     
+    @Override
+    public String toString () {
+        return TableName + ":" + ColumnHeaders + (UsedInCalc ? "" : "*");
+    }
 }

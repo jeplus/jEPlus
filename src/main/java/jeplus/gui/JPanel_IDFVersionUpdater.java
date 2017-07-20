@@ -488,7 +488,7 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel implements IF_C
 //            }
 //        }
         RVX rvx = Project.getRvx();
-        if (rvx != null && rvx.getRVIs() != null && rvx.getRVIs().length > 0) {
+        if (rvx != null && rvx.getRVIs() != null && ! rvx.getRVIs().isEmpty()) {
             for (RVX_RVIitem item : rvx.getRVIs()) {
                 list.add(RelativeDirUtil.checkAbsolutePath(item.getFileName(), Project.resolveRVIDir()));
             }

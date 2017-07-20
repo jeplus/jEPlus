@@ -86,4 +86,8 @@ public class RVX_UserSuppliedItem implements Serializable {
         this.MissingValue = MissingValue;
     }
     
+    @Override
+    public String toString () {
+        return TableName + ":" + FileName;
+    }
 }

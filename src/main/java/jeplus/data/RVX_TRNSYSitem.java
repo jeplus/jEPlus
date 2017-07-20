@@ -29,8 +29,14 @@ import java.io.Serializable;
 //		}
 //	],
 public class RVX_TRNSYSitem implements Serializable {
+    public enum ColumnAggregationOption {
+        LastRow/*,
+        Sum,
+        Average,
+        None*/
+    }
     private String PlotterName = "plotter1";
-    private String Aggregation = "None"; // Or 'LastRow', 'Sum', 'Average' ... to be implemented
+    private String Aggregation = "LastRow"; // Or 'LastRow', 'Sum', 'Average' ... to be implemented
     private String TableName = "SimResults_plotter1";
     private boolean UsedInCalc = true;
 
@@ -66,4 +72,8 @@ public class RVX_TRNSYSitem implements Serializable {
         this.UsedInCalc = UsedInCalc;
     }
     
+    @Override
+    public String toString () {
+        return TableName + ":" + PlotterName + (UsedInCalc ? "" : "*");
+    }
 }

@@ -30,11 +30,17 @@ import java.io.Serializable;
 //		}
 //	],
 public class RVX_ScriptItem implements Serializable {
-    private String FileName = "readRunTimes_jy.py";
-    private String PythonVersion = "jython";
+    
+    public enum Language {
+        python2,
+        python3
+    };
+    
+    private String FileName = "script.py";
+    private String PythonVersion = "python3";
     private boolean OnEachJob = false;
     private String Arguments = "";
-    private String TableName = "CpuTime";
+    private String TableName = "script_table";
 
     public String getFileName() {
         return FileName;
@@ -76,4 +82,8 @@ public class RVX_ScriptItem implements Serializable {
         this.TableName = TableName;
     }
     
+    @Override
+    public String toString () {
+        return TableName + ":" + FileName + "(" + PythonVersion + ")" + (OnEachJob ? "+" : "");
+    }
 }

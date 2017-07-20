@@ -237,7 +237,7 @@ public class TrnsysAgentLocal extends EPlusAgent {
         RVX rvx = this.getJobOwner().getProject().getRvx();
         // Clear collectors list first
         ResultCollectors.clear();
-        if (rvx == null || rvx.getTRNs() == null || rvx.getTRNs().length == 0) {
+        if (rvx == null || rvx.getTRNs() == null || rvx.getTRNs().isEmpty()) {
             // Report and index collector
             ResultCollector rc = new ResultCollector ("TRNSYS report collector");
             rc.setRepReader(new TRNSYSOutputReader (null));

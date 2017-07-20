@@ -20,6 +20,8 @@ package jeplus.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -449,7 +451,7 @@ public class ParameterItem implements Serializable, Cloneable {
                 return;
 
             } catch (MalformedValuesException mve) {
-                // does nothing
+                // logger.error(mve.getMessage());
             } catch (Exception ex) {
                 // logger.error("Something's wrong with parameter " + this.getID(), ex);
             }
@@ -469,35 +471,42 @@ public class ParameterItem implements Serializable, Cloneable {
     private String [] parseRange (String rstr) throws Exception {
         String [] s = rstr.split("\\s*:\\s*");
         if (s.length != 3) throw new MalformedValuesException("Range format: [LB:Int:UB]");
-        if (Type == INTEGER) {
-            int lb = Integer.parseInt(s[0]);
-            int intv = Integer.parseInt(s[1]);
-            if (intv <= 0) throw new MalformedValuesException("Range format: [LB:Int:UB]; incremental value must be greater than 0.");
-            int ub = Integer.parseInt(s[2]);
+        if (Type == INTEGER || Type == DOUBLE) {
+//            int lb = Integer.parseInt(s[0]);
+//            int intv = Integer.parseInt(s[1]);
+//            if (intv <= 0) throw new MalformedValuesException("Range format: [LB:Int:UB]; incremental value must be greater than 0.");
+//            int ub = Integer.parseInt(s[2]);
+//            ArrayList<String> list = new ArrayList();
+//            while (lb <= ub) {
+//                list.add(Integer.toString(lb));
+//                lb += intv;
+//            }
+//            return list.toArray(new String[0]);
+//        }else if (Type == DOUBLE) {
+//            double lb = Double.parseDouble(s[0]);
+//            double intv = Double.parseDouble(s[1]);
+//            if (intv <= 0) throw new MalformedValuesException("Range format: [LB:Int:UB]; incremental value must be greater than 0.");
+//            double ub = Double.parseDouble(s[2]);
+            BigDecimal lb = new BigDecimal(s[0]);
+            BigDecimal intv = new BigDecimal(s[1]);
+            BigDecimal ub = new BigDecimal(s[2]);
+            int dir = ub.compareTo(lb);
+            if ( dir != intv.compareTo(new BigDecimal("0.0"))) throw new MalformedValuesException("Range [" + rstr + "] must have format [LB:Int:UB], where if LB > UB, incremental value must be smaller than 0.0");
+            if (intv.compareTo(new BigDecimal("0.0")) == 0) throw new MalformedValuesException("Range [" + rstr + "]: the incremental value cannot be 0");
             ArrayList<String> list = new ArrayList();
-            while (lb <= ub) {
-                list.add(Integer.toString(lb));
-                lb += intv;
-            }
-            return list.toArray(new String[0]);
-        }else if (Type == DOUBLE) {
-            double lb = Double.parseDouble(s[0]);
-            double intv = Double.parseDouble(s[1]);
-            if (intv <= 0) throw new MalformedValuesException("Range format: [LB:Int:UB]; incremental value must be greater than 0.");
-            double ub = Double.parseDouble(s[2]);
-            ArrayList<String> list = new ArrayList();
-            while (lb <= ub) {
-                // list.add(Double.toString(lb));
-                String val = new Formatter().format("%g", lb).toString();
-                if (val.contains(".")) {    // only when a decimal point is present
-                    // split at 'e'
-                    String [] parts = val.split("e");
-                    val = parts[0];
-                    while (val.length() > 3 && val.endsWith("0")) val = val.substring(0, val.length()-1);
-                    if (parts.length > 1 && parts[1] != null) val = val.concat("e").concat(parts[1]);
-                }
-                list.add(val);
-                lb += intv;
+            while (ub.compareTo(lb) == dir || ub.compareTo(lb) == 0) {
+                String valstr = (Type == DOUBLE) ? lb.toString() : lb.setScale(0, RoundingMode.HALF_UP).toString();
+                list.add(valstr);
+//                String val = new Formatter().format("%g", lb).toString();
+//                if (val.contains(".")) {    // only when a decimal point is present
+//                    // split at 'e'
+//                    String [] parts = val.split("e");
+//                    val = parts[0];
+//                    while (val.length() > 3 && val.endsWith("0")) val = val.substring(0, val.length()-1);
+//                    if (parts.length > 1 && parts[1] != null) val = val.concat("e").concat(parts[1]);
+//                }
+//                list.add(val);
+                lb = lb.add(intv);
             }
             return list.toArray(new String[0]);
         }

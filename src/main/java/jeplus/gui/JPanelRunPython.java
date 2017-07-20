@@ -372,7 +372,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         txaCmdLn.setEditable(false);
         txaCmdLn.setColumns(20);
         txaCmdLn.setLineWrap(true);
-        txaCmdLn.setRows(5);
+        txaCmdLn.setRows(3);
         jScrollPane1.setViewportView(txaCmdLn);
 
         chkPassProjectBase.setSelected(true);
@@ -472,7 +472,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                     .addComponent(txtProjectBase))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+                    .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkPassWorkDir, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtWorkDir))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -500,7 +500,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                 .addGap(18, 18, 18)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1)
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(1, 1, 1)
@@ -519,7 +519,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmdOpenConsole)
                     .addComponent(cmdRunScript))
-                .addGap(9, 9, 9))
+                .addContainerGap())
         );
 
         bindingGroup.bind();

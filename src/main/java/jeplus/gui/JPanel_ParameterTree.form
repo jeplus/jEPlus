@@ -49,7 +49,7 @@
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jPanel1" max="32767" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Component id="jPanel4" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -97,10 +97,10 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="cboParamType" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="jScrollPane2" alignment="0" pref="338" max="32767" attributes="0"/>
-                      <Component id="txtAltValues" alignment="1" pref="338" max="32767" attributes="2"/>
+                      <Component id="jScrollPane2" alignment="0" pref="355" max="32767" attributes="0"/>
+                      <Component id="txtAltValues" alignment="1" pref="355" max="32767" attributes="2"/>
                       <Group type="102" alignment="1" attributes="0">
-                          <Component id="txtSearchString" pref="152" max="32767" attributes="2"/>
+                          <Component id="txtSearchString" pref="167" max="32767" attributes="2"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jLabel23" min="-2" pref="94" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -111,7 +111,7 @@
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="txtDescript" alignment="0" pref="338" max="32767" attributes="0"/>
+                      <Component id="txtDescript" alignment="0" pref="355" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -149,7 +149,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jLabel26" min="-2" max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" min="-2" pref="58" max="-2" attributes="0"/>
+                      <Component id="jScrollPane2" pref="45" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -157,7 +157,7 @@
                       <Component id="cboFixValue" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace pref="19" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -290,8 +290,8 @@
           <SubComponents>
             <Component class="javax.swing.JTextPane" name="txpPreview">
               <Properties>
-                <Property name="contentType" type="java.lang.String" value="text/html" noResource="true"/>
                 <Property name="editable" type="boolean" value="false"/>
+                <Property name="contentType" type="java.lang.String" value="text/html" noResource="true"/>
                 <Property name="toolTipText" type="java.lang.String" value="Preview of the list of alternative values. Please note if sampling (@sample) is used, the preview list is NOT that to be used in simulations."/>
               </Properties>
             </Component>

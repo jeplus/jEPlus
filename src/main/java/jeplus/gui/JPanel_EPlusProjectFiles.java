@@ -135,20 +135,20 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        chkReadVar = new javax.swing.JCheckBox();
+        txtRviDir = new javax.swing.JTextField();
+        cboRviFile = new javax.swing.JComboBox();
+        cmdSelectRVIFile = new javax.swing.JButton();
+        cmdEditRVI = new javax.swing.JButton();
         txtIdfDir = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
-        cboRviFile = new javax.swing.JComboBox();
         jLabel16 = new javax.swing.JLabel();
         txtWthrDir = new javax.swing.JTextField();
-        chkReadVar = new javax.swing.JCheckBox();
         jLabel8 = new javax.swing.JLabel();
-        txtRviDir = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
-        cmdEditRVI = new javax.swing.JButton();
         txtGroupNotes = new javax.swing.JTextField();
         cmdEditWeather = new javax.swing.JButton();
         cboTemplateFile = new javax.swing.JComboBox();
-        cmdSelectRVIFile = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         txtGroupID = new javax.swing.JTextField();
         cmdSelectWeatherFile = new javax.swing.JButton();
@@ -156,21 +156,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         cmdSelectTemplateFile = new javax.swing.JButton();
         cboWeatherFile = new javax.swing.JComboBox();
         cmdEditTemplate = new javax.swing.JButton();
-
-        txtIdfDir.setText("./");
-        txtIdfDir.setToolTipText("Location of the IDF/IMF files. To use a relative path, edit this field manually.");
-
-        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel10.setText("Notes:");
-
-        cboRviFile.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select file ..." }));
-        cboRviFile.setToolTipText("You can only specify one RVI or MVI file, here");
-
-        jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel16.setText("IDF/IMF template(s):");
-
-        txtWthrDir.setText("./");
-        txtWthrDir.setToolTipText("Location of the weather files. To use a relative path, edit this field manually.");
 
         chkReadVar.setSelected(true);
         chkReadVar.setText("Use Extended RVI");
@@ -183,14 +168,19 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
             }
         });
 
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel8.setText("EP_");
-
         txtRviDir.setText("./");
         txtRviDir.setToolTipText("Location of the RVI file. To use a relative path, edit this field manually.");
 
-        jLabel17.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel17.setText("Weather file(s):");
+        cboRviFile.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select file ..." }));
+        cboRviFile.setToolTipText("You can only specify one RVI or MVI file, here");
+
+        cmdSelectRVIFile.setText("...");
+        cmdSelectRVIFile.setToolTipText("Select rvi file (.rvi/.mvi). Single selection only.");
+        cmdSelectRVIFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdSelectRVIFileActionPerformed(evt);
+            }
+        });
 
         cmdEditRVI.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_edit.png"))); // NOI18N
         cmdEditRVI.setToolTipText("Edit the contents of my.rvi");
@@ -199,6 +189,24 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
                 cmdEditRVIActionPerformed(evt);
             }
         });
+
+        txtIdfDir.setText("./");
+        txtIdfDir.setToolTipText("Location of the IDF/IMF files. To use a relative path, edit this field manually.");
+
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jLabel10.setText("Notes:");
+
+        jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel16.setText("IDF/IMF template(s):");
+
+        txtWthrDir.setText("./");
+        txtWthrDir.setToolTipText("Location of the weather files. To use a relative path, edit this field manually.");
+
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jLabel8.setText("EP_");
+
+        jLabel17.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel17.setText("Weather file(s):");
 
         txtGroupNotes.setToolTipText("Notes about this project");
 
@@ -212,14 +220,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
 
         cboTemplateFile.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select files ..." }));
         cboTemplateFile.setToolTipText("Pull down to see all your selected files");
-
-        cmdSelectRVIFile.setText("...");
-        cmdSelectRVIFile.setToolTipText("Select rvi file (.rvi/.mvi). Single selection only.");
-        cmdSelectRVIFile.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectRVIFileActionPerformed(evt);
-            }
-        });
 
         jLabel6.setText("Folder:");
 
@@ -271,20 +271,16 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
                         .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkReadVar, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(6, 6, 6)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtRviDir, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtIdfDir, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 62, Short.MAX_VALUE)
                             .addComponent(txtWthrDir))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(cboRviFile, 0, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(cboWeatherFile, 0, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(cboTemplateFile, 0, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -297,11 +293,7 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(cmdSelectTemplateFile, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cmdEditTemplate, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(cmdSelectRVIFile, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cmdEditRVI, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(cmdEditTemplate, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addComponent(txtGroupNotes))
                 .addContainerGap())
         );
@@ -337,15 +329,7 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
                         .addComponent(jLabel16)
                         .addComponent(cmdSelectTemplateFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(cmdEditTemplate))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(cmdSelectRVIFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(cboRviFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtRviDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(chkReadVar))
-                    .addComponent(cmdEditRVI))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 

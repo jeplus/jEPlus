@@ -50,6 +50,7 @@ import jeplus.data.ParameterItem;
 import jeplus.data.RVX;
 import jeplus.data.RandomSource;
 import jeplus.gui.*;
+import jeplus.gui.editor.JPanel_RVXTree;
 import jeplus.postproc.ResultCollector;
 import jeplus.util.RelativeDirUtil;
 import org.apache.commons.io.FileUtils;
@@ -89,6 +90,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
     protected EPlusTextPanelOld OutputPanel = null;
     protected EPlusTextPanelOld ResultFilePanel = null;
     protected JPanel_ParameterTree jplParameterTree = null;
+    protected JPanel_RVXTree jplRvxTree = null;
     // Project file panel for EnerygPlus
     protected JPanel_EPlusProjectFiles EPlusProjectFilesPanel = new JPanel_EPlusProjectFiles();
     // Project file panel for Trnsys
@@ -131,7 +133,9 @@ public class JEPlusFrameMain extends JEPlusFrame {
 
         // tabTexts.setTabComponentAt(0, new ButtonTabComponent (tabTexts));
         jplParameterTree = new JPanel_ParameterTree (Project);
-        jplTree.add(this.jplParameterTree, BorderLayout.CENTER);
+        jplParamTreeHolder.add(this.jplParameterTree, BorderLayout.CENTER);
+        jplRvxTree = new JPanel_RVXTree (this, Project.getBaseDir(), Project.getRvx());
+        jplRvxTreeHolder.add(this.jplRvxTree, BorderLayout.CENTER);
         initProjectSection();
         initBatchOptions();
 
@@ -389,6 +393,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
 //            this.Project.ExecSettings.setParentDir("TRNoutput/");
         }
         jplParameterTree.setParameterTree(Project);
+        jplRvxTree.setContents(this, Project.getBaseDir(), Project.getRvx());
     }
 
     /**
@@ -752,9 +757,11 @@ public class JEPlusFrameMain extends JEPlusFrame {
         tpnMain = new javax.swing.JTabbedPane();
         pnlProject = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
-        jplTree = new javax.swing.JPanel();
         jplProjectFilesPanelHolder = new javax.swing.JPanel();
         jPanel_EPlusProjectFiles2 = new jeplus.gui.JPanel_EPlusProjectFiles();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jplParamTreeHolder = new javax.swing.JPanel();
+        jplRvxTreeHolder = new javax.swing.JPanel();
         cboProjectType = new javax.swing.JComboBox();
         jLabel2 = new javax.swing.JLabel();
         cmdValidate = new javax.swing.JButton();
@@ -880,7 +887,6 @@ public class JEPlusFrameMain extends JEPlusFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1000, 740));
-        setPreferredSize(new java.awt.Dimension(1200, 760));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -903,28 +909,31 @@ public class JEPlusFrameMain extends JEPlusFrame {
 
         pnlProject.setPreferredSize(new java.awt.Dimension(450, 688));
 
-        jplTree.setBorder(javax.swing.BorderFactory.createTitledBorder("Parameter Tree"));
-        jplTree.setLayout(new java.awt.BorderLayout());
-
         javax.swing.GroupLayout jplProjectFilesPanelHolderLayout = new javax.swing.GroupLayout(jplProjectFilesPanelHolder);
         jplProjectFilesPanelHolder.setLayout(jplProjectFilesPanelHolderLayout);
         jplProjectFilesPanelHolderLayout.setHorizontalGroup(
             jplProjectFilesPanelHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel_EPlusProjectFiles2, javax.swing.GroupLayout.DEFAULT_SIZE, 485, Short.MAX_VALUE)
+            .addComponent(jPanel_EPlusProjectFiles2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jplProjectFilesPanelHolderLayout.setVerticalGroup(
             jplProjectFilesPanelHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel_EPlusProjectFiles2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
+        jplParamTreeHolder.setLayout(new java.awt.BorderLayout());
+        jTabbedPane1.addTab("Parameter Tree", jplParamTreeHolder);
+
+        jplRvxTreeHolder.setLayout(new java.awt.BorderLayout());
+        jTabbedPane1.addTab("Result Collection", jplRvxTreeHolder);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jplProjectFilesPanelHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jplTree, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -932,7 +941,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addComponent(jplProjectFilesPanelHolder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jplTree, javax.swing.GroupLayout.DEFAULT_SIZE, 482, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addContainerGap())
         );
 
@@ -963,7 +972,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(cboProjectType, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 92, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(cmdValidate)
                 .addContainerGap())
         );
@@ -1102,7 +1111,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdoTestChains, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE)
+                    .addComponent(rdoTestChains, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(rdoTestRandomN)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1110,7 +1119,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cboSampleOpt, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cboSampleOpt, 0, 1, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1155,7 +1164,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmdStart)
                     .addComponent(chkOverride))
-                .addContainerGap(115, Short.MAX_VALUE))
+                .addContainerGap(78, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -1221,7 +1230,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
             pnlUtilitiesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlUtilitiesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)
+                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 652, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1640,14 +1649,14 @@ public class JEPlusFrameMain extends JEPlusFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 989, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1176, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 708, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -2745,12 +2754,14 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JTabbedPane jTabbedPane1;
     private jeplus.gui.JPanel_EPlusSettings jplEPlusSettings;
     private jeplus.gui.JPanel_LocalControllerOptions jplLocalControllerSettings;
     private javax.swing.JPanel jplOptions;
+    private javax.swing.JPanel jplParamTreeHolder;
     private javax.swing.JPanel jplProjectFilesPanelHolder;
+    private javax.swing.JPanel jplRvxTreeHolder;
     private javax.swing.JPanel jplSettings;
-    private javax.swing.JPanel jplTree;
     private javax.swing.JPanel pnlExecution;
     private javax.swing.JPanel pnlProject;
     private javax.swing.JPanel pnlUtilities;

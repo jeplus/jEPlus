@@ -33,7 +33,7 @@ import java.io.Serializable;
 //		}
 //	],
 public class RVX_CSVitem implements Serializable {
-    private String SourceCsv = ""; 
+    private String SourceCsv = "eplustbl.csv"; 
     private String FromReport = ""; 
     private String FromTable = ""; 
     private String FromColumn = ""; 
@@ -106,4 +106,8 @@ public class RVX_CSVitem implements Serializable {
         this.UsedInCalc = UsedInCalc;
     }
     
+    @Override
+    public String toString () {
+        return TableName + ":" + ColumnHeaders + "(" + SourceCsv + ")" + (UsedInCalc ? "" : "*");
+    }
 }

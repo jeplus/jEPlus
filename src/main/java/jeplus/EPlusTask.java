@@ -31,6 +31,7 @@ import javax.script.ScriptException;
 import jeplus.util.PythonTools;
 import jeplus.util.RelativeDirUtil;
 import org.apache.commons.io.FileUtils;
+import org.jsoup.helper.StringUtil;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -186,11 +187,11 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                     for (int k=0; k<SearchStringList.size()-sstrs.length; k++) {
                         String var = "p" + k;
                         map.put(SearchStringList.get(k), var);
-                        String statement = var + " = " + AltValueList.get(k);
+                        String statement = var + " = " + (StringUtil.isNumeric(AltValueList.get(k)) ? AltValueList.get(k) : ("\"" + AltValueList.get(k) + "\""));
                         try {
                             engine.eval(statement);
                         }catch (ScriptException spe) {
-                            logger.error("Error evaluating expression " + statement + ".");
+                            logger.warn("Error evaluating expression " + statement + ".");
                         }
                     }
                     for (String tag: map.keySet()) {
@@ -199,7 +200,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                     try {
                         vstrs[j] = engine.eval(formula).toString();
                     }catch (ScriptException spe) {
-                        logger.error("Error evaluating expression " + formula + ".");
+                        logger.warn("Error evaluating expression " + formula + ".");
                     }
                 // If starts with "call(", create a script record and add "script" to vstrs
                 } else if (formula.startsWith("call(")) {

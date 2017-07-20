@@ -24,6 +24,6 @@ package jeplus.gui;
  * @version 0.6
  * @since 0.6
  */
-interface TitledJPanel {
+public interface TitledJPanel {
     public abstract String getTitle();
 }
