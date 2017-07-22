@@ -22,15 +22,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import jeplus.EPlusBatch;
-import jeplus.EPlusWinTools;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusProject;
-import jeplus.Main;
 import jeplus.agent.EPlusAgentLocal;
-import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -44,9 +39,6 @@ public class ApiTester {
 
     public static void main (String [] args) throws IOException {
         
-        // configure logger
-        PropertyConfigurator.configure("log4j.cfg");
-
         // load jEPlus configuration file
         JEPlusConfig.setDefaultInstance(new JEPlusConfig("jeplus.cfg"));
 

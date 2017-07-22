@@ -34,7 +34,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -522,8 +521,6 @@ public class RadianceWinTools {
     }
     
     public static void main (String [] args) {
-        
-        PropertyConfigurator.configure("D:\\4\\jEPlus_v1.6.0\\log4j.cfg");
         
         JEPlusConfig Config = new JEPlusConfig ();
         Config.setRadianceBinDir("C:\\Program Files (x86)\\Radiance\\bin");

@@ -17,7 +17,6 @@
 
 import java.io.File;
 import jeplus.JEPlusProject;
-import org.apache.log4j.PropertyConfigurator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -44,7 +43,7 @@ public class JEPlusProject_Test {
     
     @Before
     public void setUp() {
-        PropertyConfigurator.configure("D:\\4\\jEPlus_v1.5.2\\log4j.cfg");
+
     }
     
     @After

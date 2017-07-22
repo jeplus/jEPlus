@@ -31,7 +31,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,12 +87,6 @@ public class LineEnds {
                 // automatically generate the help statement
                 formatter.printHelp( "java -cp jEPlusNet.jar jeplusplus.util.LineEnds [OPTIONS]", options );    
                 System.exit(-1);
-            }
-            // Set log4j configuration
-            if (commandline.hasOption("log")) {
-                PropertyConfigurator.configure(commandline.getOptionValue("log"));
-            }else {
-                PropertyConfigurator.configure("log4j.cfg");
             }
         }
         catch( ParseException exp ) {

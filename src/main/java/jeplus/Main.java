@@ -28,12 +28,11 @@ import jeplus.agent.EPlusAgentLocal;
 import jeplus.data.RandomSource;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -96,7 +95,7 @@ public class Main {
         // System.setProperty("file.separator", "/");  // seemed to have no effect
 
         // create the parser
-        CommandLineParser parser = new GnuParser();
+        CommandLineParser parser = new DefaultParser();
         Options options = new Main().getCommandLineOptions(null);
         CommandLine commandline = null;
         HelpFormatter formatter = new HelpFormatter();
@@ -108,12 +107,6 @@ public class Main {
                 // automatically generate the help statement
                 formatter.printHelp( "java -Xmx1000m -jar jEPlus.jar [OPTIONS]", options );    
                 System.exit(-1);
-            }
-            // Set log4j configuration
-            if (commandline.hasOption("log")) {
-                PropertyConfigurator.configure(commandline.getOptionValue("log"));
-            }else {
-                PropertyConfigurator.configure("log4j.cfg");
             }
         }
         catch( ParseException exp ) {
@@ -290,7 +283,7 @@ public class Main {
 
         Option log = Option.builder("log").argName( "log config file" )
                                         .hasArg()
-                                        .desc(  "Specify the configuration file for logs. Default=./log4j.cfg" )
+                                        .desc(  "This option has been disused!" )
                                         .build();
 
         Option job = Option.builder("job").argName( "project file" )
