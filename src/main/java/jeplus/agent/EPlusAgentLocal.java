@@ -128,8 +128,8 @@ public class EPlusAgentLocal extends EPlusAgent {
                 try { Thread.sleep(Settings.getDelay()); } catch (Exception ex) {}
             }
             // Check if any of the processors have finished
-            for (int i=0; i<Processors.size(); i++) {
-                Thread proc = Processors.get(i);
+            for (int i=0; i<RunningJobs.size(); i++) {
+                Thread proc = RunningJobs.get(i);
                 if (! proc.isAlive()) {
                     Processors.remove(proc);
                     RunningJobs.remove((EPlusTask)proc);
@@ -152,8 +152,8 @@ public class EPlusAgentLocal extends EPlusAgent {
                     // Wait for the last few jobs to finish
                     while (Processors.size() > 0) {
                         // Check if any of the processors have finished
-                        for (int i=0; i<Processors.size(); i++) {
-                            Thread proc = Processors.get(i);
+                        for (int i=0; i<RunningJobs.size(); i++) {
+                            Thread proc = RunningJobs.get(i);
                             if (! proc.isAlive()) {
                                 Processors.remove(proc);
                                 RunningJobs.remove((EPlusTask)proc);
@@ -175,8 +175,8 @@ public class EPlusAgentLocal extends EPlusAgent {
             // Wait for the last few jobs to finish
             while (Processors.size() > 0) {
                 // Check if any of the processors have finished
-                for (int i=0; i<Processors.size(); i++) {
-                    Thread proc = Processors.get(i);
+                for (int i=0; i<RunningJobs.size(); i++) {
+                    Thread proc = RunningJobs.get(i);
                     if (! proc.isAlive()) {
                         Processors.remove(proc);
                         RunningJobs.remove((EPlusTask)proc);

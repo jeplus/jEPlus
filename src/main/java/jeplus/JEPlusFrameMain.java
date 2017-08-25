@@ -1689,7 +1689,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
             boolean OkToStart = true;
             // Reload RVX
             try {
-                Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile()));
+                Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile(), Project.getBaseDir()));
             }catch (IOException ioe) {
                 logger.error("Error reloading RVX from " + Project.resolveRVIDir() + Project.getRVIFile(), ioe);
                 Project.setRvx(new RVX());
@@ -1983,6 +1983,9 @@ private void jMenuItemSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN
         File file = new File (CurrentProjectFile);
         // convert to relative paths?
         // Project.convertToRelativeDir(file.getParentFile());
+        // Remove RVI file reference, as RVX/editor is built in now
+        Project.setRVIFile(null);
+        // Save as .jep
         Project.saveAsXML(file);
     }else {
         jMenuItemSaveAsActionPerformed(null);

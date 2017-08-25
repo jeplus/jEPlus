@@ -94,8 +94,8 @@ public abstract class EPlusAgent implements Runnable {
     protected List<EPlusTask> FinishedJobs = new ArrayList<>();
 
     /** List of currently employed processors */
-//    protected static List<Thread> Processors = Collections.synchronizedList(new ArrayList()); // This didn't work 
-    protected List<Thread> Processors = null;
+    protected static List<Thread> Processors = Collections.synchronizedList(new ArrayList()); // This didn't work 
+//    protected List<Thread> Processors = null;
 
     // States and signals
 

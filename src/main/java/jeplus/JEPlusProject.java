@@ -326,10 +326,12 @@ public class JEPlusProject implements Serializable {
             proj.getParameters().add((ParameterItem)item);
         }
         // Load Rvx if a RVX file is available
-        try {
-            proj.Rvx = RVX.getRVX(proj.resolveRVIDir() + proj.getRVIFile());
-        }catch (IOException ioe) {
-            logger.error("Cannot read the project's RVX file", ioe);
+        if (proj.getRVIFile() != null) {
+            try {
+                proj.Rvx = RVX.getRVX(proj.resolveRVIDir() + proj.getRVIFile(), proj.getBaseDir());
+            }catch (IOException ioe) {
+                logger.error("Cannot read the project's RVX file", ioe);
+            }
         }
 
         // done            
@@ -388,7 +390,7 @@ public class JEPlusProject implements Serializable {
         // If external RVX file is specified, use its contents for Rvx object
         if (project.RvxFile != null) {
             try {
-                project.Rvx = RVX.getRVX(RelativeDirUtil.checkAbsolutePath(project.RvxFile, dir));
+                project.Rvx = RVX.getRVX(RelativeDirUtil.checkAbsolutePath(project.RvxFile, dir), project.getBaseDir());
             }catch (IOException ioe) {
                 logger.error("Cannot read the given RVX file", ioe);
             }
@@ -616,7 +618,7 @@ public class JEPlusProject implements Serializable {
         // If external RVX file is specified, use its contents for Rvx object
         if (RvxFile != null) {
             try {
-                this.Rvx = RVX.getRVX(RelativeDirUtil.checkAbsolutePath(RvxFile, this.getBaseDir()));
+                this.Rvx = RVX.getRVX(RelativeDirUtil.checkAbsolutePath(RvxFile, BaseDir), BaseDir);
             }catch (IOException ioe) {
                 logger.error("Cannot read the given RVX file", ioe);
             }

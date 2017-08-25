@@ -315,7 +315,7 @@ public class EPlusBatch extends Thread {
             // Check RVX
             if (Project.getRVIFile() != null) {
                 try {
-                    Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile()));
+                    Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile(), Project.getBaseDir()));
                 } catch (IOException ex) {
                     logger.error("Error loading rvi/rvx file.", ex);
                     Info.addValidationError("Cannot read rvi/rvx file " + Project.resolveRVIDir() + Project.getRVIFile());

@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import jeplus.EPlusConfig;
+import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -128,7 +129,7 @@ public class RVX implements Serializable {
      * @return RVX object
      * @throws IOException 
      */
-    public static RVX getRVX (String rvxfile) throws IOException {
+    public static RVX getRVX (String rvxfile, String basedir) throws IOException {
         if (rvxfile.toLowerCase().endsWith(EPlusConfig.getJEPlusRvxExt())) {    //RVX
             ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
             return mapper.readValue(new File (rvxfile), RVX.class);
@@ -171,7 +172,7 @@ public class RVX implements Serializable {
 
             // RVI section points to this RVI file
             RVX_RVIitem rvi = new RVX_RVIitem();
-            rvi.setFileName(rvxfile);
+            rvi.setFileName(RelativeDirUtil.getRelativePath(new File(basedir), new File(rvxfile).getParentFile()) + new File(rvxfile).getName());
             rvi.setTableName("SimResults");
             rvx.getRVIs().add(rvi);
 
