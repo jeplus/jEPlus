@@ -21,6 +21,7 @@ package jeplus.agent;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.swing.JPanel;
@@ -93,6 +94,7 @@ public abstract class EPlusAgent implements Runnable {
     protected List<EPlusTask> FinishedJobs = new ArrayList<>();
 
     /** List of currently employed processors */
+//    protected static List<Thread> Processors = Collections.synchronizedList(new ArrayList()); // This didn't work 
     protected List<Thread> Processors = null;
 
     // States and signals
@@ -360,6 +362,18 @@ public abstract class EPlusAgent implements Runnable {
         buf.append(", Fin=").append(this.getFinishedJobs().size());
         buf.append("]");
         //buf.append(" Elapsed time = ").append(DateUtility.showElapsedTime(StartTime.getTime(), true));
+        return buf.toString();
+    }
+
+    /**
+     * Report the status of the Agent in a shorter form
+     * @return A string describing the status of the agent
+     */
+    public String getShortStatus() {
+        StringBuilder buf = new StringBuilder ();
+        buf.append("Q=").append(this.getJobQueue().size());
+        buf.append(", R=").append(this.getProcessors().size()); // or RunningJobs?
+        buf.append(", F=").append(this.getFinishedJobs().size());
         return buf.toString();
     }
 

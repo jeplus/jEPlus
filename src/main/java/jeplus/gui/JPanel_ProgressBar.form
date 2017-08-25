@@ -21,10 +21,10 @@
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="lblInfo" max="32767" attributes="0"/>
                   <Component id="lblTime" alignment="0" max="32767" attributes="0"/>
-                  <Component id="barProgress" alignment="0" pref="389" max="32767" attributes="0"/>
+                  <Component id="barProgress" alignment="0" pref="195" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="sldThreads" min="-2" pref="68" max="-2" attributes="0"/>
+              <Component id="sldThreads" min="-2" pref="108" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -75,7 +75,7 @@
         <Property name="snapToTicks" type="boolean" value="true"/>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Threads"/>
+            <TitledBorder justification="2" title="Threads"/>
           </Border>
         </Property>
       </Properties>
