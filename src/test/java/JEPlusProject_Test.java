@@ -53,9 +53,9 @@ public class JEPlusProject_Test {
     // TODO add test methods here.
     // The methods must be annotated with annotation @Test. For example:
     //
-     @Test
-     public void loadProjectFromXML() {
-         JEPlusProject project = JEPlusProject.loadAsXML(new File("D:\\4\\jEPlus_v1.5.2\\example_2-rvx_E+v8.1\\project.jep"));
-         assertEquals (project.getIDFTemplate(), "5ZoneCostEst.idf");
-     }
+//     @Test
+//     public void loadProjectFromXML() {
+//         JEPlusProject project = JEPlusProject.loadAsXML(new File("D:\\4\\jEPlus_v1.5.2\\example_2-rvx_E+v8.1\\project.jep"));
+//         assertEquals (project.getIDFTemplate(), "5ZoneCostEst.idf");
+//     }
 }
