@@ -762,7 +762,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         cboExecutionType = new javax.swing.JComboBox();
         jLabel27 = new javax.swing.JLabel();
         jplSettings = new javax.swing.JPanel();
-        jplEPlusSettings = new org.netbeans.modules.form.InvalidComponent();
+        jplEPlusSettings = new jeplus.gui.JPanel_EPlusSettings();
         jplOptions = new javax.swing.JPanel();
         jplLocalControllerSettings = new jeplus.gui.JPanel_LocalControllerOptions();
         jPanel3 = new javax.swing.JPanel();
@@ -2745,7 +2745,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JSplitPane jSplitPane1;
-    private org.netbeans.modules.form.InvalidComponent jplEPlusSettings;
+    private jeplus.gui.JPanel_EPlusSettings jplEPlusSettings;
     private jeplus.gui.JPanel_LocalControllerOptions jplLocalControllerSettings;
     private javax.swing.JPanel jplOptions;
     private javax.swing.JPanel jplProjectFilesPanelHolder;
