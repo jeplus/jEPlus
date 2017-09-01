@@ -94,7 +94,7 @@ public class JPanel_RunReadVars extends javax.swing.JPanel implements IF_ConfigC
     }
     
     public final void initContents () {
-        this.cboEPlusVersion.setModel(new DefaultComboBoxModel (new Vector(Config.getEPlusConfigs().keySet())));
+        this.cboEPlusVersion.setModel(new DefaultComboBoxModel (Config.getEPlusConfigs().values().toArray(new EPlusConfig [0])));
         // PostResultDir = MainFrame.getProject().getExecSettings().getParentDir();
         PostResultDir = MainFrame.getProject().resolveWorkDir();
         this.txtResultDir.setText(PostResultDir);
@@ -103,7 +103,7 @@ public class JPanel_RunReadVars extends javax.swing.JPanel implements IF_ConfigC
     }
     
     private String getSelectedReadVars() {
-        return Config.getEPlusConfigs().get(SelectedVersion).getResolvedReadVars();
+        return ((EPlusConfig)this.cboEPlusVersion.getSelectedItem()).getResolvedReadVars();
     }
 
     /**

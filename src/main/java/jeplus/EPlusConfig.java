@@ -23,8 +23,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import javax.swing.filechooser.FileFilter;
+import jeplus.data.VersionInfo;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
 
@@ -59,8 +62,8 @@ public class EPlusConfig extends ConfigFileNames {
     public static final int JEPLUS_INTERM = 17;
 
     /** Bin Directory */
-    private static final String EPlusBinDir_WIN = "C:/EnergyPlusV8-1-0/";
-    private static final String EPlusBinDir_LIN = "/usr/local/EnergyPlus-8-1-0/";
+    private static final String EPlusBinDir_WIN = "C:/EnergyPlusV8-7-0/";
+    private static final String EPlusBinDir_LIN = "/usr/local/EnergyPlus-8-7-0/";
 
     /** Interface for EnergyPlus executable */
     private static final String EPlusEPMacro_WIN = "EPMacro.exe"; // Eplus windows EPMacro
@@ -120,6 +123,10 @@ public class EPlusConfig extends ConfigFileNames {
     protected String EPlusReadVarsEXE = null;
     protected String EPlusExpandObjectsEXE = null;
     protected int    NThreads = 0;
+    protected VersionInfo Version = null;
+    
+    /** This config is valid or not */
+    protected boolean Valid = false;
 
     public EPlusConfig () {
         EPlusBinDir = getDefEPlusBinDir();
@@ -128,6 +135,8 @@ public class EPlusConfig extends ConfigFileNames {
         EPlusReadVarsEXE = EPlusBinDir + getDefEPlusReadVars();
         EPlusExpandObjectsEXE = EPlusBinDir + getDefEPlusExpandObjects();
         ScreenFile = "console.log"; // no screen log file if set to null
+        Version = new VersionInfo ("8.7");
+        Valid = false;
     }
     
     public boolean loadFromFile (String fn) {
@@ -150,7 +159,47 @@ public class EPlusConfig extends ConfigFileNames {
         return true;
     }
 
-    /** Get Default Bin Directory */
+    public List<String> validate () {
+        String bindir = getResolvedEPlusBinDir();
+        String expandobjects = getResolvedExpandObjects();
+        String epmacro = getResolvedEPMacro();
+        String exe = getResolvedEPlusEXEC();
+        String idd = getEPDefIDD();
+        String readvars = getResolvedReadVars();
+
+        List<String> invalid = new ArrayList<> ();
+        boolean ok = new File(bindir + idd).exists();
+        if (! ok) {
+            invalid.add(this.getEPlusBinDir());
+        }
+        Valid = ok;
+        ok = new File(exe).exists();
+        if (! ok) {
+            invalid.add(getEPlusEXEC());
+        }
+        Valid &= ok;
+        ok = new File(epmacro).exists();
+        if (! ok) {
+            invalid.add(this.getEPlusEPMacro());
+        }
+        Valid &= ok;
+        ok = new File(readvars).exists();
+        if (! ok) { 
+            invalid.add(this.getEPlusReadVars());
+        }
+        Valid &= ok;
+        ok = new File(expandobjects).exists();
+        if (! ok) { 
+            invalid.add(this.getEPlusExpandObjects());
+        }
+        Valid &= ok;
+        return invalid;
+    }
+    
+    /** 
+     * Get Default Bin Directory
+     * @return Default E+ binary directory depending on Winows or Linux distributions
+     */
     public static String getDefEPlusBinDir() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPlusBinDir_WIN;
@@ -172,13 +221,18 @@ public class EPlusConfig extends ConfigFileNames {
         return dir;
     }
 
-    /** Set Bin Directory */
+    /** 
+     * Set Bin Directory
+     * @param dir 
+     */
     public void setEPlusBinDir(String dir) {
         EPlusBinDir = dir;
         EPlusEPMacroEXE = EPlusBinDir + EPlusConfig.getDefEPlusEPMacro();
         EPlusExpandObjectsEXE = EPlusBinDir + EPlusConfig.getDefEPlusExpandObjects();
         EPlusEXE = EPlusBinDir + EPlusConfig.getDefEPlusEXEC();
         EPlusReadVarsEXE = EPlusBinDir + EPlusConfig.getDefEPlusReadVars();
+        this.validate();
+        this.getEPlusVersion();
         fireConfigChangedEvent ();
     }
 
@@ -290,6 +344,22 @@ public class EPlusConfig extends ConfigFileNames {
         fireConfigChangedEvent ();
     }
 
+    public VersionInfo getVersion() {
+        return Version;
+    }
+
+    public void setVersion(VersionInfo Version) {
+        this.Version = Version;
+    }
+
+    public boolean isValid() {
+        return Valid;
+    }
+
+    public void setValid(boolean Valid) {
+        this.Valid = Valid;
+    }
+    
     /** */
     public static String getEPDefINI() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
@@ -353,7 +423,9 @@ public class EPlusConfig extends ConfigFileNames {
         }
     }
 
-    /** */
+    /**
+     * @return  
+     */
     public static String getEPDefSTAT() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPDefSTAT;
@@ -362,7 +434,9 @@ public class EPlusConfig extends ConfigFileNames {
         }
     }
 
-    /** */
+    /**
+     * @return  
+     */
     public static String getEPDefOutESO() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPDefOutESO;
@@ -371,7 +445,9 @@ public class EPlusConfig extends ConfigFileNames {
         }
     }
 
-    /** */
+    /**
+     * @return  
+     */
     public static String getEPDefOutCSV() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPDefOutCSV;
@@ -380,7 +456,9 @@ public class EPlusConfig extends ConfigFileNames {
         }
     }
 
-    /** */
+    /**
+     * @return
+     */
     public static String getEPDefOutEND() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPDefOutEND;
@@ -747,6 +825,7 @@ public class EPlusConfig extends ConfigFileNames {
      * Get the version of E+ from the Energy+.IDD file
      * @return the version string
      */
+    @JsonIgnore
     public String getEPlusVersion () {
         if (new File(getEPlusBinDir() + getEPDefIDD()).exists()) {
             try (BufferedReader fi = new BufferedReader (new FileReader (getEPlusBinDir() + getEPDefIDD()))) {
@@ -754,7 +833,9 @@ public class EPlusConfig extends ConfigFileNames {
                 while (line != null) {
                     if (line.trim().startsWith("!IDD_Version ")) {
                         fi.close();
-                        return line.trim().substring(13);
+                        String verstr = line.trim().substring(13);
+                        Version = new VersionInfo (verstr);
+                        return Version.toString();
                     }
                     line = fi.readLine();
                 }
@@ -762,6 +843,15 @@ public class EPlusConfig extends ConfigFileNames {
                 logger.error("Error parsing IDD file for E+ version info.", ex);
             }
         }
-        return "Unavailable";
+        return "NA";
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public String toString () {
+        return Version == null ? "NA" : Version.toString();
     }
 }

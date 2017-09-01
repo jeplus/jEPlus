@@ -135,7 +135,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
         initProjectSection();
         initBatchOptions();
 
-        EPlusExecAgents.add(new EPlusAgentLocal (Project.getExecSettings()));
+        EPlusExecAgents.add(new EPlusAgentLocal (JEPlusConfig.getDefaultInstance(), Project.getExecSettings()));
         TrnsysExecAgents.add(new TrnsysAgentLocal (Project.getExecSettings()));
         InselExecAgents.add(new InselAgentLocal (Project.getExecSettings()));
         String [] options = {ExecAgents.get(0).getAgentID()};
@@ -2651,8 +2651,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         JDialog ConfigDialog = new JDialog (this, "Configuration file: ", true);
         if (jplProgConfPanel == null) {
             jplProgConfPanel = new JPanelProgConfiguration(ConfigDialog, JEPlusConfig.getDefaultInstance());
+        }else {
+            jplProgConfPanel.setHostWindow(ConfigDialog);
         }
-        jplProgConfPanel.setHostWindow(ConfigDialog);
         ConfigDialog.getContentPane().add(jplProgConfPanel);
         ConfigDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         ConfigDialog.setTitle(ConfigDialog.getTitle() + jplProgConfPanel.getConfigFile());
@@ -2888,7 +2889,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                     // Clear console log file content
                     JEPlusConfig.getDefaultInstance().purgeScreenLogFile();
                     // Set recent projects in menu
-                    ArrayList<String> recent = JEPlusConfig.getDefaultInstance().getRecentProjects();
+                    List<String> recent = JEPlusConfig.getDefaultInstance().getRecentProjects();
                     if (recent != null) {
                         int idx = 0;
                         for (int i=0; i<recent.size(); i++) {

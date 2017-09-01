@@ -66,7 +66,7 @@ public class EsoResultCollector extends ResultCollector {
                     ResultFiles.add(fn);
                     ResWriter = new DefaultCSVWriter(null, fn);
                     ResReader = new EPlusRVIReader(
-                            JEPlusConfig.getDefaultInstance().getEPlusConfigs().get(JobOwner.getProject().getEPlusModelVersion()),
+                            JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(JobOwner.getProject().getEPlusModelVersion()),
                             RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getResolvedEnv().getRVIDir()), 
                             item.getFrequency(), 
                             fn, 

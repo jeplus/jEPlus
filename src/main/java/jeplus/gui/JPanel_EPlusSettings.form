@@ -29,14 +29,16 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <Component id="cboEPlusVersions" min="-2" pref="149" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cmdDelete" min="-2" pref="27" max="-2" attributes="0"/>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
-                              <Component id="txtBinDir" pref="220" max="32767" attributes="0"/>
+                              <Component id="txtBinDir" pref="216" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="cmdSelectEPlusDir" min="-2" pref="25" max="-2" attributes="1"/>
+                              <Component id="cmdSelectEPlusDir" min="-2" pref="27" max="-2" attributes="1"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="cmdEnergyPlusDetails" min="-2" pref="25" max="-2" attributes="0"/>
+                              <Component id="cmdEnergyPlusDetails" min="-2" pref="27" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -50,19 +52,20 @@
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="cboEPlusVersions" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtBinDir" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="cmdSelectEPlusDir" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="cmdEnergyPlusDetails" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="cmdDelete" alignment="1" min="-2" pref="27" max="-2" attributes="0"/>
+                  <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
+                  <Component id="cboEPlusVersions" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="lblInformation" pref="49" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtBinDir" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
+                  <Component id="cmdEnergyPlusDetails" alignment="3" min="-2" pref="27" max="-2" attributes="0"/>
+                  <Component id="cmdSelectEPlusDir" alignment="0" min="-2" pref="27" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
+              <Component id="lblInformation" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -124,7 +127,18 @@
         </Property>
       </Properties>
       <Events>
+        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="cboEPlusVersionsItemStateChanged"/>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cboEPlusVersionsActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="cmdDelete">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/jeplus/images/cross.png"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdDeleteActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

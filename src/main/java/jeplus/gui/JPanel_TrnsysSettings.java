@@ -232,7 +232,7 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
             File file = fc.getSelectedFile();
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
-            Config.setTRNYSBinDir(bindir);
+            Config.setTRNSYSBinDir(bindir);
 //            Config.setTRNSYSEXEC(new File (bindir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath());
 //            initSettings();
 //            checkSettings();

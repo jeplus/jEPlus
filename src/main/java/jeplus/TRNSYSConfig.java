@@ -185,7 +185,7 @@ public class TRNSYSConfig extends ConfigFileNames {
     /**
      * Set Bin Directory
      */
-    public void setTRNYSBinDir(String dir) {
+    public void setTRNSYSBinDir(String dir) {
         TRNSYSBinDir = dir;
         TRNSYSEXE = new File (TRNSYSBinDir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath();
         fireConfigChangedEvent ();

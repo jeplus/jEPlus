@@ -5,10 +5,12 @@
  */
 package jeplus.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Window;
 import java.io.File;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import jeplus.ConfigFileNames;
@@ -16,6 +18,7 @@ import jeplus.EPlusConfig;
 import jeplus.EPlusWinTools;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusFrameMain;
+import jeplus.TRNSYSConfig;
 import jeplus.event.IF_ConfigChangedEventHandler;
 import jeplus.util.PythonTools;
 
@@ -28,6 +31,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     protected String title = "External Executables Configuration";
     protected final JFileChooser fc = new JFileChooser("./");
     protected JEPlusConfig Config = JEPlusConfig.getDefaultInstance();
+    protected JPanel_EPlusSettings EpPanel = new JPanel_EPlusSettings ();
 
     protected Window HostWindow = null;
     
@@ -39,6 +43,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     public JPanelProgConfiguration(Window host, JEPlusConfig config) {
         initComponents();
         HostWindow = host;
+        jplEpPanelHolder.add(EpPanel, BorderLayout.CENTER);
         setConfig (config);
     }
 
@@ -75,10 +80,21 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
      * initialise display from data records
      */
     public final void initSettings () {
-        // Config = JEPlusConfig.getNewInstance(ConfigFile);
-        txtEPlusBinDir.setText(Config.getEPlusBinDir());
-        txtTrnsysBinDir.setText(Config.getTRNSYSBinDir());
-        txtTrnsysEXE.setText(Config.getTRNSYSEXEC());
+//        if (! Config.getEPlusConfigs().isEmpty()) {
+//            cboEPlusVersion.setModel(new DefaultComboBoxModel (Config.getEPlusConfigs().values().toArray(new EPlusConfig [0])));
+//            cboEPlusVersion.setSelectedIndex(0);
+//            txtEPlusBinDir.setText(((EPlusConfig)cboEPlusVersion.getSelectedItem()).getEPlusBinDir());
+//        }else {
+//            txtEPlusBinDir.setText("Select an EnergyPlus installation ...");
+//        }
+        EpPanel.setConfig(Config);
+        if (! Config.getTRNSYSConfigs().isEmpty()) {
+            cboTrnVersion.setModel(new DefaultComboBoxModel (Config.getTRNSYSConfigs().keySet().toArray(new String [0])));
+            txtTrnsysBinDir.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSBinDir());
+            txtTrnsysEXE.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSEXEC());
+        }else {
+            txtTrnsysBinDir.setText("Select a TRNSYS installation ...");
+        }
         this.txtPython2Exe.setText(Config.getPython2EXE() == null ? "Select Python 2 exe..." : Config.getPython2EXE());
         this.txtPython3Exe.setText(Config.getPython3EXE() == null ? "Select Python 3 exe..." : Config.getPython3EXE());
         this.txtVerConvDir.setText(Config.getEPlusVerConvDir() == null ? "Select Version Converter dir ..." : Config.getEPlusVerConvDir());
@@ -94,46 +110,23 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         StringBuilder buf = new StringBuilder ("<html>");
         
         // EnergyPlus binary
-        File dir = new File (txtEPlusBinDir.getText());
         buf.append("<p><em>EnergyPlus:</em></p>");
-        if (! (dir.exists() && dir.isDirectory())) {
-            txtEPlusBinDir.setForeground(Color.red);
-            buf.append("<p>EnergyPlus binary folder ").append(dir.getAbsolutePath()).append(" does not exist!</p>");
-        }else {
-            txtEPlusBinDir.setForeground(Color.black);
-            buf.append("<p>");
-            File f = new File(Config.getEPlusBinDir() + EPlusConfig.getEPDefIDD());
-            if (! f.exists()) {
-                buf.append(f.getAbsolutePath());
-                errors = true;
+        for (EPlusConfig cfg : Config.getEPlusConfigs().values()) {
+            buf.append("<p>V").append(cfg.toString());
+            List<String> unfound = cfg.validate();
+            if (cfg.isValid()) {
+                buf.append(" is available</p>");
             }else {
-                buf.append("Found EnergyPlus IDD version ").append(Config.getEPlusVersion()).append("</p><p>");
+                buf.append(" contains errors: </p>");
+                for (String item : unfound) {
+                    buf.append("<p> - ").append(item).append(" is not found </p>");
+                }
             }
-            f = new File(Config.getEPlusEXEC());
-            if (! f.exists()) {
-                buf.append(!errors ? "" : ", ").append(f.getAbsolutePath());
-                errors = true;
-            }
-            f = new File(Config.getEPlusEPMacro());
-            if (! f.exists()) {
-                buf.append(!errors ? "" : ", ").append(f.getAbsolutePath());
-                errors = true;
-            }
-            f = new File(Config.getEPlusExpandObjects());
-            if (! f.exists()) {
-                buf.append(!errors ? "" : ", ").append(f.getAbsolutePath());
-                errors = true;
-            }
-            f = new File(Config.getEPlusReadVars());
-            if (! f.exists()) {
-                buf.append(!errors ? "" : ", ").append(f.getAbsolutePath());
-                errors = true;
-            }
-            buf.append(!errors ? "" : " are missing!").append("</p>");
         }
+        buf.append("<p></p>");
         
         // TRNSYS binary
-        dir = new File (txtTrnsysBinDir.getText());
+        File dir = new File (txtTrnsysBinDir.getText());
         buf.append("<p><em>TRNSYS:</em></p>");
         if (! (dir.exists() && dir.isDirectory())) {
             txtTrnsysBinDir.setForeground(Color.red);
@@ -254,6 +247,14 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         buf.append("<p></p></html>");
         lblInformation.setText(buf.toString());
     }
+    
+    private EPlusConfig getSelectedEPlusConfig () {
+        return (EPlusConfig)cboEPlusVersion.getSelectedItem();
+    }
+
+    private TRNSYSConfig getSelectedTrnsysConfig () {
+        return Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString());
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -264,13 +265,14 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
         cmdSelectEPlusDir = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         cmdEnergyPlusDetails = new javax.swing.JButton();
         txtEPlusBinDir = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         cboEPlusVersion = new javax.swing.JComboBox();
+        cmdEnergyPlusDetails1 = new javax.swing.JButton();
+        jplEpPanelHolder = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         txtTrnsysBinDir = new javax.swing.JTextField();
         cmdSelectTrnsysDir = new javax.swing.JButton();
@@ -303,8 +305,6 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         txtVerConvDir = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("EnergyPlus"));
-
         cmdSelectEPlusDir.setText("...");
         cmdSelectEPlusDir.setToolTipText("Select the folder where EnergyPlus.exe and Energy+.idd are located");
         cmdSelectEPlusDir.addActionListener(new java.awt.event.ActionListener() {
@@ -331,45 +331,22 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         jLabel10.setText("Select version:");
 
         cboEPlusVersion.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "7.2", "8.1", "8.2" }));
+        cboEPlusVersion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboEPlusVersionActionPerformed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtEPlusBinDir, javax.swing.GroupLayout.DEFAULT_SIZE, 286, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cmdSelectEPlusDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdEnergyPlusDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(cboEPlusVersion, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cboEPlusVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel10))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmdEnergyPlusDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(cmdSelectEPlusDir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtEPlusBinDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel6)))
-                .addContainerGap())
-        );
+        cmdEnergyPlusDetails1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/cross.png"))); // NOI18N
+        cmdEnergyPlusDetails1.setToolTipText("Check and specify individual E+ tools");
+        cmdEnergyPlusDetails1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdEnergyPlusDetails1ActionPerformed(evt);
+            }
+        });
+
+        jplEpPanelHolder.setBorder(javax.swing.BorderFactory.createTitledBorder("EnergyPlus"));
+        jplEpPanelHolder.setLayout(new java.awt.BorderLayout());
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("TRNSYS"));
 
@@ -400,6 +377,11 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         txtTrnsysEXE.setToolTipText("The command may vary within different projects of TRNSYS. Edit this field if necessary. If the executable is located in a different location, please specify the relative diretory to the TRNSYS binary directory above.");
 
         cboTrnVersion.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16", "17", "18" }));
+        cboTrnVersion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboTrnVersionActionPerformed(evt);
+            }
+        });
 
         jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel9.setText("Select version:");
@@ -434,7 +416,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cboTrnVersion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cboTrnVersion, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -653,13 +635,13 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jplEpPanelHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
                     .addComponent(jScrollPane1))
                 .addContainerGap())
         );
@@ -673,7 +655,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                         .addGap(18, 18, 18)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jplEpPanelHolder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -682,7 +664,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                         .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 6, Short.MAX_VALUE)))
+                        .addGap(0, 94, Short.MAX_VALUE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -691,41 +673,38 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         // Select a directory to open
         fc.resetChoosableFileFilters();
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        fc.setCurrentDirectory(new File(Config.getEPlusBinDir()));
+        fc.setCurrentDirectory(new File(getSelectedEPlusConfig().getEPlusBinDir()));
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
-            Config.setEPlusBinDir(bindir);
+            getSelectedEPlusConfig().setEPlusBinDir(bindir);
 //            Config.setEPlusEPMacro(bindir + EPlusConfig.getDefEPlusEPMacro());
 //            Config.setEPlusExpandObjects(bindir + EPlusConfig.getDefEPlusExpandObjects());
 //            Config.setEPlusEXEC(bindir + EPlusConfig.getDefEPlusEXEC());
 //            Config.setEPlusReadVars(bindir + EPlusConfig.getDefEPlusReadVars());
 //            initSettings();
 //            checkSettings();
-            Config.saveToFile(Config.getCurrentConfigFile());
+            Config.saveAsJSON(new File(JEPlusConfig.DefaultConfigFile));
         }
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
     }//GEN-LAST:event_cmdSelectEPlusDirActionPerformed
 
     private void cmdEnergyPlusDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnergyPlusDetailsActionPerformed
         JDialog dialog = new JDialog (JEPlusFrameMain.getCurrentMainGUI(), "Set EnergyPlus binaries", true);
-        final JPanel_EPlusSettingsDetailed detPanel = new JPanel_EPlusSettingsDetailed (dialog, Config);
-        Config.addListener(detPanel);
+        final EPlusConfig config = getSelectedEPlusConfig();
+        final JPanel_EPlusSettingsDetailed detPanel = new JPanel_EPlusSettingsDetailed (dialog, config);
+        config.addListener(detPanel);
         dialog.getContentPane().add(detPanel);
         // Add dialog closing listener
         dialog.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent evt) {
-//                initSettings();
-//                checkSettings();
-                Config.removeListener(detPanel);
+                config.removeListener(detPanel);
             }
             @Override
             public void windowClosed(java.awt.event.WindowEvent evt) {
-//                initSettings();
-//                checkSettings();
-                Config.removeListener(detPanel);
+                config.removeListener(detPanel);
             }
         });
         dialog.setSize(500, 260);
@@ -742,7 +721,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
             File file = fc.getSelectedFile();
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
-            Config.setTRNYSBinDir(bindir);
+            getSelectedTrnsysConfig().setTRNSYSBinDir(bindir);
 //            Config.setTRNSYSEXEC(new File (bindir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath());
 //            initSettings();
 //            checkSettings();
@@ -753,13 +732,13 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     private void cmdSelectTRNexeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectTRNexeActionPerformed
         // Select a file to open
         fc.setMultiSelectionEnabled(false);
-        fc.setCurrentDirectory(new File(Config.getTRNSYSBinDir()));
+        fc.setCurrentDirectory(new File(getSelectedTrnsysConfig().getTRNSYSBinDir()));
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             String name = file.getPath();
             txtTrnsysEXE.setText(name);
             txtTrnsysEXE.setForeground(Color.black);
-            Config.setTRNSYSEXEC(name);
+            getSelectedTrnsysConfig().setTRNSYSEXEC(name);
         }
         fc.resetChoosableFileFilters();
         checkSettings ();
@@ -800,6 +779,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     }//GEN-LAST:event_cmdSelectPython2ExeActionPerformed
 
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
+        Config.saveAsJSON(new File(JEPlusConfig.DefaultConfigFile));
         if (HostWindow != null) {
             HostWindow.dispose();
         }
@@ -853,11 +833,25 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
 
     }//GEN-LAST:event_cmdSelectVerConvDirActionPerformed
 
+    private void cboEPlusVersionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboEPlusVersionActionPerformed
+        this.txtEPlusBinDir.setText(((EPlusConfig)cboEPlusVersion.getSelectedItem()).getEPlusBinDir());
+    }//GEN-LAST:event_cboEPlusVersionActionPerformed
+
+    private void cboTrnVersionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboTrnVersionActionPerformed
+        txtTrnsysBinDir.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSBinDir());
+        txtTrnsysEXE.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSEXEC());
+    }//GEN-LAST:event_cboTrnVersionActionPerformed
+
+    private void cmdEnergyPlusDetails1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnergyPlusDetails1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmdEnergyPlusDetails1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboEPlusVersion;
     private javax.swing.JComboBox cboTrnVersion;
     private javax.swing.JButton cmdEnergyPlusDetails;
+    private javax.swing.JButton cmdEnergyPlusDetails1;
     private javax.swing.JButton cmdSave;
     private javax.swing.JButton cmdSelectClient;
     private javax.swing.JButton cmdSelectEPlusDir;
@@ -877,13 +871,13 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel jplEpPanelHolder;
     private javax.swing.JLabel lblInformation;
     private javax.swing.JTextField txtEPlusBinDir;
     private javax.swing.JTextField txtJEPlusEADir;
@@ -897,6 +891,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
 
     @Override
     public void configChanged(ConfigFileNames config) {
-        setConfig((JEPlusConfig)config);
+        initSettings();
+        checkSettings();
     }
 }

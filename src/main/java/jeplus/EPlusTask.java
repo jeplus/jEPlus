@@ -520,23 +520,26 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
     public void run() {
         Executed = true;
         // EPlus config
-        EPlusConfig config = JEPlusConfig.getDefaultInstance().getEPlusConfigs().get(WorkEnv.getEPlusVersion());
-        // Prepare work directory
-        boolean ok = EPlusWinTools.prepareWorkDir(config, getWorkingDir());
-        // Copy weather and rvi files
-        ok = ok && EPlusWinTools.copyWorkFiles(getWorkingDir(), WorkEnv.WeatherDir + WorkEnv.WeatherFile, WorkEnv.isRVX() ? null : WorkEnv.RVIDir + WorkEnv.RVIFile);
-        // Write IDF file
-        ok = ok && this.preprocessInputFile(config);
-        // Run Python script 
-        ok = ok && this.runPythonScriptOnIDF (config);
-        // Ready to run EPlus
-        if (ok) {
-            int code = EPlusWinTools.runEPlus(config, getWorkingDir(), false);
-            ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
-        }
-        // Remove temperory files/dir if required
-        if (ok) {
-            ok = EPlusWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles);
+        EPlusConfig config = JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(WorkEnv.getEPlusVersion());
+        boolean ok = false;
+        if (config != null) {
+            // Prepare work directory
+            ok = EPlusWinTools.prepareWorkDir(config, getWorkingDir());
+            // Copy weather and rvi files
+            ok = ok && EPlusWinTools.copyWorkFiles(getWorkingDir(), WorkEnv.WeatherDir + WorkEnv.WeatherFile, WorkEnv.isRVX() ? null : WorkEnv.RVIDir + WorkEnv.RVIFile);
+            // Write IDF file
+            ok = ok && this.preprocessInputFile(config);
+            // Run Python script 
+            ok = ok && this.runPythonScriptOnIDF (config);
+            // Ready to run EPlus
+            if (ok) {
+                int code = EPlusWinTools.runEPlus(config, getWorkingDir(), false);
+                ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
+            }
+            // Remove temperory files/dir if required
+            if (ok) {
+                ok = EPlusWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles);
+            }
         }
         ResultAvailable = ok;
     }

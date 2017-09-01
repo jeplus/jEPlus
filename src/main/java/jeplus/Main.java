@@ -135,13 +135,13 @@ public class Main {
     public void mainFunction (CommandLine commandline) {
         // jE+ Configuration file
         String cfgfile = JEPlusConfig.DefaultConfigFile;
-        if (commandline.hasOption("cfg")) {
-            cfgfile = commandline.getOptionValue("cfg");
-        }
         // load E+ configuration
         boolean showSplash = false;
-        if (! new File (cfgfile).exists()) { showSplash = true; }
-        JEPlusConfig.setDefaultInstance(JEPlusConfig.getNewInstance(cfgfile));
+        if (! new File (cfgfile).exists()) { 
+            showSplash = true; 
+        }else {
+            JEPlusConfig.setDefaultInstance(JEPlusConfig.getNewInstance(cfgfile));
+        }
         // Set local threads
         int nthread = Runtime.getRuntime().availableProcessors();
         if (commandline.hasOption("local")) {
@@ -183,7 +183,7 @@ public class Main {
                 project.getExecSettings().setNumThreads(nthread);
                 if (DefaultAgent == null) { // Default agent may have been set by external code
                     // set execution agent
-                    DefaultAgent = new EPlusAgentLocal (project.getExecSettings());
+                    DefaultAgent = new EPlusAgentLocal (JEPlusConfig.getDefaultInstance(), project.getExecSettings());
                 }
                 batch.setAgent(DefaultAgent);
 
@@ -283,11 +283,6 @@ public class Main {
     protected Options getCommandLineOptions (Options opts) {
         Option help = new Option( "help", "Show this message" );
         
-        Option cfg = Option.builder("cfg").argName( "config file" )
-                                        .hasArg()
-                                        .desc(  "Load jEPlus configuration file. Default=./jeplus.cfg" )
-                                        .build();
-
         Option log = Option.builder("log").argName( "log config file" )
                                         .hasArg()
                                         .desc(  "Specify the configuration file for logs. Default=./log4j.cfg" )
@@ -344,7 +339,6 @@ public class Main {
         Options options = (opts == null) ? new Options() : opts;
 
         options.addOption( help );
-        options.addOption( cfg );
         options.addOption(log);
         options.addOption( job );
         options.addOption( run_all );

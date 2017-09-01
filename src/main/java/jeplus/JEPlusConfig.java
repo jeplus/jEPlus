@@ -18,6 +18,7 @@
  ***************************************************************************/
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
@@ -25,7 +26,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
+import jeplus.data.VersionInfo;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -44,7 +47,7 @@ public class JEPlusConfig extends ConfigFileNames {
     public static JEPlusConfig getNewInstance (String fn) {
         JEPlusConfig cfg = null;
         try {
-            loadFromJSON(new File (fn));
+            cfg = loadFromJSON(new File (fn));
         }catch (IOException ioe) {
             logger.error("Error loading tools config from " + fn, ioe);
             cfg = new JEPlusConfig();
@@ -56,16 +59,26 @@ public class JEPlusConfig extends ConfigFileNames {
     public static String DefaultConfigFile = "tools.json";
 
     /** EPlus configurations */
-    protected TreeMap<String, EPlusConfig> EPlusConfigs = new TreeMap<>();
+    protected List<EPlusConfig> EPlusList = new ArrayList<>();
     /** TRNSYS configurations */
-    protected TreeMap<String, TRNSYSConfig> TRNSYSConfigs = new TreeMap<>();
+    protected List<TRNSYSConfig> TRNSYSList = new ArrayList<>();
     /** INSEL configurations */
-    protected TreeMap<String, INSELConfig> INSELConfigs = new TreeMap<>();
+    protected List<INSELConfig> INSELList = new ArrayList<>();
     /** Radiance configurations */
-    protected TreeMap<String, RadianceConfig> RadianceConfigs = new TreeMap<>();
+    protected List<RadianceConfig> RadianceList = new ArrayList<>();
+    /** EPlus configurations */
+    protected transient TreeMap<VersionInfo, EPlusConfig> EPlusConfigs = new TreeMap<>();
+    /** TRNSYS configurations */
+    protected transient TreeMap<String, TRNSYSConfig> TRNSYSConfigs = new TreeMap<>();
+    /** INSEL configurations */
+    protected transient TreeMap<String, INSELConfig> INSELConfigs = new TreeMap<>();
+    /** Radiance configurations */
+    protected transient TreeMap<String, RadianceConfig> RadianceConfigs = new TreeMap<>();
+    /** Current selected EPlus Config */
+    protected transient EPlusConfig CurrentEPlus = null;
 
     /** Recent projects */
-    protected ArrayList<String> RecentProjects = new ArrayList<>();
+    protected List<String> RecentProjects = new ArrayList<>();
     
     protected String EPlusVerConvDir = null;
     public String getEPlusVerConvDir() { return EPlusVerConvDir; }
@@ -103,47 +116,112 @@ public class JEPlusConfig extends ConfigFileNames {
      */
     public JEPlusConfig () {
         super ();
+        EPlusConfig epcfg = new EPlusConfig();
+        EPlusList.add(epcfg);
+        EPlusConfigs.put(epcfg.getVersion(), epcfg);
+        
+        TRNSYSConfig trcfg = new TRNSYSConfig();
+        TRNSYSList.add(trcfg);
+        TRNSYSConfigs.put("TRNSYS", trcfg);
+        
+        INSELConfig incfg = new INSELConfig();
+        INSELList.add(incfg);
+        INSELConfigs.put("INSEL", incfg);
+        
+        RadianceConfig raycfg = new RadianceConfig();
+        RadianceList.add(raycfg);
+        RadianceConfigs.put("Radiance", raycfg);
     }
 
     // ========= Getters and Setters =========
 
-    public TreeMap<String, EPlusConfig> getEPlusConfigs() {    
+    public List<EPlusConfig> getEPlusList() {    
+        return EPlusList;
+    }
+
+    public void setEPlusList(List<EPlusConfig> EPlusList) {
+        this.EPlusList = EPlusList;
+    }
+
+    public List<TRNSYSConfig> getTRNSYSList() {
+        return TRNSYSList;
+    }
+
+    public void setTRNSYSList(List<TRNSYSConfig> TRNSYSList) {
+        this.TRNSYSList = TRNSYSList;
+    }
+
+    public List<INSELConfig> getINSELList() {
+        return INSELList;
+    }
+
+    public void setINSELList(List<INSELConfig> INSELList) {
+        this.INSELList = INSELList;
+    }
+
+    public List<RadianceConfig> getRadianceList() {
+        return RadianceList;
+    }
+
+    public void setRadianceList(List<RadianceConfig> RadianceList) {
+        this.RadianceList = RadianceList;
+    }
+
+    @JsonIgnore
+    public TreeMap<VersionInfo, EPlusConfig> getEPlusConfigs() {    
         return EPlusConfigs;
     }
 
-    public void setEPlusConfigs(TreeMap<String, EPlusConfig> EPlusConfigs) {
+    @JsonIgnore
+    public void setEPlusConfigs(TreeMap<VersionInfo, EPlusConfig> EPlusConfigs) {
         this.EPlusConfigs = EPlusConfigs;
     }
 
+    @JsonIgnore
     public TreeMap<String, TRNSYSConfig> getTRNSYSConfigs() {
         return TRNSYSConfigs;
     }
 
+    @JsonIgnore
     public void setTRNSYSConfigs(TreeMap<String, TRNSYSConfig> TRNSYSConfigs) {
         this.TRNSYSConfigs = TRNSYSConfigs;
     }
 
+    @JsonIgnore
     public TreeMap<String, INSELConfig> getINSELConfigs() {
         return INSELConfigs;
     }
 
+    @JsonIgnore
     public void setINSELConfigs(TreeMap<String, INSELConfig> INSELConfigs) {
         this.INSELConfigs = INSELConfigs;
     }
 
+    @JsonIgnore
     public TreeMap<String, RadianceConfig> getRadianceConfigs() {
         return RadianceConfigs;
     }
 
+    @JsonIgnore
     public void setRadianceConfigs(TreeMap<String, RadianceConfig> RadianceConfigs) {
         this.RadianceConfigs = RadianceConfigs;
     }
 
-    public ArrayList<String> getRecentProjects() {
+    @JsonIgnore
+    public EPlusConfig getCurrentEPlus() {
+        return CurrentEPlus;
+    }
+
+    @JsonIgnore
+    public void setCurrentEPlus(EPlusConfig CurrentEPlus) {
+        this.CurrentEPlus = CurrentEPlus;
+    }
+
+    public List<String> getRecentProjects() {
         return RecentProjects;
     }
 
-    public void setRecentProjects(ArrayList<String> RecentProjects) {    
+    public void setRecentProjects(List<String> RecentProjects) {    
         this.RecentProjects = RecentProjects;
     }
 
@@ -160,6 +238,16 @@ public class JEPlusConfig extends ConfigFileNames {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(format);
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        // Update config lists
+        EPlusList.clear();
+        EPlusList.addAll(EPlusConfigs.values());
+        TRNSYSList.clear();
+        TRNSYSList.addAll(TRNSYSConfigs.values());
+        INSELList.clear();
+        INSELList.addAll(INSELConfigs.values());
+        RadianceList.clear();
+        RadianceList.addAll(RadianceConfigs.values());
+        // Write to file
         try (FileOutputStream fw = new FileOutputStream(file); ) {
             mapper.writeValue(fw, this);
             logger.info("Configuration saved to " + file.getAbsolutePath());
@@ -180,6 +268,23 @@ public class JEPlusConfig extends ConfigFileNames {
         // Read JSON
         ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
         JEPlusConfig config = mapper.readValue(file, JEPlusConfig.class);
+        // Construct maps
+        config.EPlusConfigs.clear();
+        for (EPlusConfig cfg: config.EPlusList) {
+            config.EPlusConfigs.put(cfg.getVersion(), cfg);
+        }
+        config.TRNSYSConfigs.clear();
+        for (TRNSYSConfig cfg: config.TRNSYSList) {
+            config.TRNSYSConfigs.put("TRNSYS", cfg);
+        }
+        config.INSELConfigs.clear();
+        for (INSELConfig cfg: config.INSELList) {
+            config.INSELConfigs.put("INSEL", cfg);
+        }
+        config.RadianceConfigs.clear();
+        for (RadianceConfig cfg: config.RadianceList) {
+            config.RadianceConfigs.put("Radiance", cfg);
+        }
         // Return
         return config;
     }
@@ -194,5 +299,9 @@ public class JEPlusConfig extends ConfigFileNames {
                 scrfile.delete();
             }
         }
+    }
+    
+    public EPlusConfig findMatchingEPlusConfig (String idf_ver) {
+        return this.EPlusConfigs.get(new VersionInfo (idf_ver));
     }
 }
