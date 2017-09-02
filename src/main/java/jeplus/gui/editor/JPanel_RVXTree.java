@@ -288,7 +288,8 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         });
 
         cmdImport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/folder_open.png"))); // NOI18N
-        cmdImport.setToolTipText("Delete the whole branch");
+        cmdImport.setToolTipText("Import from an external RVX file");
+        cmdImport.setEnabled(false);
         cmdImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdImportActionPerformed(evt);
@@ -304,7 +305,8 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         });
 
         cmdNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_lightning.png"))); // NOI18N
-        cmdNew.setToolTipText("Delete the whole branch");
+        cmdNew.setToolTipText("Reset the RVX tree");
+        cmdNew.setEnabled(false);
         cmdNew.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdNewActionPerformed(evt);
@@ -312,7 +314,7 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         });
 
         cmdUndo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/edit-undo.png"))); // NOI18N
-        cmdUndo.setToolTipText("Delete the whole branch");
+        cmdUndo.setToolTipText("Undo last change");
         cmdUndo.setEnabled(false);
         cmdUndo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -338,19 +340,21 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(cmdNew)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmdImport)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmdUndo)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(1, 1, 1)
-                .addComponent(cmdAdd)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmdRemove)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(cmdNew)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmdImport)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmdUndo)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(1, 1, 1)
+                        .addComponent(cmdAdd)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmdRemove))
+                    .addComponent(jScroll, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, Short.MAX_VALUE))
-            .addComponent(jScroll, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);

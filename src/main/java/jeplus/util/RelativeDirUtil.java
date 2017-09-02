@@ -241,6 +241,8 @@ public class RelativeDirUtil {
      * test the function
      */
     public static void main(String args[]) {
+        
+        System.out.println(getRelativePath("D:\\4\\jEPlus_v2.0.0_beta\\example_1-params_E+v8.3\\my.rvi", "D:\\4\\jEPlus_v2.0.0_beta\\example_2-params_E+v8.3\\my.rvi", "/"));
         if (args.length != 2) {
             System.out.println("RelativePath <home> <file>");
             return;

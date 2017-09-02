@@ -172,7 +172,7 @@ public class RVX implements Serializable {
 
             // RVI section points to this RVI file
             RVX_RVIitem rvi = new RVX_RVIitem();
-            rvi.setFileName(RelativeDirUtil.getRelativePath(new File(basedir), new File(rvxfile).getParentFile()) + new File(rvxfile).getName());
+            rvi.setFileName(RelativeDirUtil.getRelativePath(new File(rvxfile).getParent(), basedir, "/") + new File(rvxfile).getName());
             rvi.setTableName("SimResults");
             rvx.getRVIs().add(rvi);
 
