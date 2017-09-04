@@ -236,6 +236,10 @@ public class EPlusBatch extends Thread {
         this.SimulationRunning = SimulationRunning;
         if (this.getGUI() != null) getGUI().setSimulationRunning(SimulationRunning);
     }
+    
+    public int getRemainingJobs () {
+        return SimulationRunning ? Agent.getJobQueue().size() : -1;
+    }
 
     /**
      * Decode IDF files string and store them, with directory, in an array
