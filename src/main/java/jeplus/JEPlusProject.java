@@ -28,7 +28,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 import javax.swing.tree.DefaultMutableTreeNode;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
@@ -80,7 +79,7 @@ public class JEPlusProject implements Serializable {
     protected static String UserBaseDir = System.getProperty("user.dir") + File.separator;
     
     /** Flag marking whether this project has been changed since last save/load */
-    transient private boolean ContentChanged = false;
+    transient private boolean ContentChanged = true;
     
     /** Base directory of the project, i.e. the location where the project file is saved */
     protected String BaseDir = null;
@@ -138,9 +137,6 @@ public class JEPlusProject implements Serializable {
 
     /** RVX object for result collection */
     protected RVX Rvx = null;
-    
-    /** External file defining the RVX object, in JSON format */
-    protected String RvxFile = null;
     
     /**
      * Class containing post-process function options
@@ -274,7 +270,6 @@ public class JEPlusProject implements Serializable {
             // Clear external parameters and rvx file reference fields before saving the project
             // These files are for importing only
             this.ParamFile = null;
-            this.RvxFile = null;
             encoder.writeObject(this);
             encoder.close();
             // get new location of project file
@@ -298,6 +293,7 @@ public class JEPlusProject implements Serializable {
         JEPlusProject proj;
         try (XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(fn)))) {
             proj = ((JEPlusProject)decoder.readObject());
+            proj.ContentChanged = false;
         }catch (Exception ex) {
             logger.error("Error loading project from file " + fn, ex);
             return null;
@@ -309,6 +305,10 @@ public class JEPlusProject implements Serializable {
         if (proj.ParamFile != null) {
             // Load parameters from text file
             proj.importParameterTableFile(new File (RelativeDirUtil.checkAbsolutePath(proj.ParamFile, dir)));
+            // Reset ParamFile so it is read-once
+            proj.ParamFile = null;
+            // If parameters are imported, project state is unsaved
+            proj.ContentChanged = true;
         }else {
             // Reassign reference to project in all parameters
             if (proj.getParamTree() != null) {
@@ -326,9 +326,13 @@ public class JEPlusProject implements Serializable {
             proj.getParameters().add((ParameterItem)item);
         }
         // Load Rvx if a RVX file is available
-        if (proj.getRVIFile() != null) {
+        if (proj.RVIFile != null) {
             try {
                 proj.Rvx = RVX.getRVX(proj.resolveRVIDir() + proj.getRVIFile(), proj.getBaseDir());
+                // Remove RVI file reference. With the RVX/editor being built-in now, external RVI/RVX file is only for importing (one time read)
+                proj.RVIFile = null;
+                // If external RVI/RVX is imported, project state is unsaved
+                proj.ContentChanged = true;
             }catch (IOException ioe) {
                 logger.error("Cannot read the project's RVX file", ioe);
             }
@@ -356,6 +360,7 @@ public class JEPlusProject implements Serializable {
             logger.error("Error saving project to JSON.", ex);
             success = false;
         }
+        // Project changed state unaffected by the exporting to JSON
         return success;
     }
 
@@ -378,6 +383,8 @@ public class JEPlusProject implements Serializable {
         if (project.ParamFile != null) {
             // Load parameters from text file, to replace the existing Parameters list and tree
             project.importParameterTableFile(new File (RelativeDirUtil.checkAbsolutePath(project.ParamFile, dir)));
+            // Reset ParamFile so it is read-once
+            project.ParamFile = null;
         }else {
             // Reassign reference to project in all parameters, and build param tree
             if (project.getParameters() != null) {
@@ -388,14 +395,17 @@ public class JEPlusProject implements Serializable {
             }
         }
         // If external RVX file is specified, use its contents for Rvx object
-        if (project.RvxFile != null) {
+        if (project.RVIFile != null) {
             try {
-                project.Rvx = RVX.getRVX(RelativeDirUtil.checkAbsolutePath(project.RvxFile, dir), project.getBaseDir());
+                project.Rvx = RVX.getRVX(project.resolveRVIDir() + project.getRVIFile(), project.getBaseDir());
+                // Remove RVI file reference. With the RVX/editor being built-in now, external RVI/RVX file is only for importing (one time read)
+                project.RVIFile = null;
             }catch (IOException ioe) {
-                logger.error("Cannot read the given RVX file", ioe);
+                logger.error("Cannot read the project's RVX file", ioe);
             }
         }
-        project.ContentChanged = false;
+        // Default project format remains .jep, so newly imported project is unsaved.
+        project.ContentChanged = true;
         // Return
         return project;
     }
@@ -426,7 +436,11 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setProjectType(int ProjectType) {
+        if (this.ProjectType != ProjectType) {
+            ContentChanged = true;
+        }
         this.ProjectType = ProjectType;
+        
     }
 
     public String getProjectID() {
@@ -434,6 +448,9 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setProjectID(String ProjectID) {
+        if (! Objects.equals(this.ProjectID, ProjectID)) {
+            ContentChanged = true;
+        }
         this.ProjectID = ProjectID;
     }
 
@@ -442,6 +459,9 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setProjectNotes(String ProjectNotes) {
+        if (! Objects.equals(this.ProjectNotes, ProjectNotes)) {
+            ContentChanged = true;
+        }
         this.ProjectNotes = ProjectNotes;
     }
 
@@ -450,6 +470,7 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setExecSettings(ExecutionOptions ExecSettings) {
+        ContentChanged = true;
         this.ExecSettings = ExecSettings;
     }
 
@@ -458,6 +479,9 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setIDFDir(String IDFDir) {
+        if (! Objects.equals(this.IDFDir, IDFDir)) {
+            ContentChanged = true;
+        }
         this.IDFDir = IDFDir;
     }
 
@@ -466,6 +490,9 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setIDFTemplate(String IDFTemplate) {
+        if (! Objects.equals(this.IDFTemplate, IDFTemplate)) {
+            ContentChanged = true;
+        }
         this.IDFTemplate = IDFTemplate;
     }
 
@@ -494,26 +521,29 @@ public class JEPlusProject implements Serializable {
 
     @JsonIgnore
     public void setParamTree(DefaultMutableTreeNode ParamTree) {
+        ContentChanged = true;
         this.ParamTree = ParamTree;
     }
 
-    @JsonIgnore
     public String getRVIDir() {
         return RVIDir;
     }
 
-    @JsonIgnore
     public void setRVIDir(String RVIDir) {
+        if (! Objects.equals(this.RVIDir, RVIDir)) {
+            ContentChanged = true;
+        }
         this.RVIDir = RVIDir;
     }
 
-    @JsonIgnore
     public String getRVIFile() {
         return RVIFile;
     }
 
-    @JsonIgnore
     public void setRVIFile(String RVIFile) {
+        if (! Objects.equals(this.RVIFile, RVIFile)) {
+            ContentChanged = true;
+        }
         this.RVIFile = RVIFile;
     }
 
@@ -524,6 +554,9 @@ public class JEPlusProject implements Serializable {
 
     @JsonIgnore
     public void setUseReadVars(boolean UseReadVars) {
+        if (this.UseReadVars != UseReadVars) {
+            ContentChanged = true;
+        }
         this.UseReadVars = UseReadVars;
     }
 
@@ -534,6 +567,7 @@ public class JEPlusProject implements Serializable {
 
     @JsonIgnore
     public void setDCKDir(String DCKDir) {
+        ContentChanged = true;
         this.DCKDir = DCKDir;
     }
 
@@ -544,6 +578,7 @@ public class JEPlusProject implements Serializable {
 
     @JsonIgnore
     public void setDCKTemplate(String DCKTemplate) {
+        ContentChanged = true;
         this.DCKTemplate = DCKTemplate;
     }
 
@@ -554,6 +589,7 @@ public class JEPlusProject implements Serializable {
 
     @JsonIgnore
     public void setINSELDir(String INSELDir) {
+        ContentChanged = true;
         this.INSELDir = INSELDir;
     }
 
@@ -564,6 +600,7 @@ public class JEPlusProject implements Serializable {
 
     @JsonIgnore
     public void setINSELTemplate(String INSELTemplate) {
+        ContentChanged = true;
         this.INSELTemplate = INSELTemplate;
     }
 
@@ -574,6 +611,7 @@ public class JEPlusProject implements Serializable {
 
     @JsonIgnore
     public void setOutputFileNames(String OutputFileNames) {
+        ContentChanged = true;
         this.OutputFileNames = OutputFileNames;
     }
 
@@ -582,6 +620,9 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setWeatherDir(String WeatherDir) {
+        if (! Objects.equals(this.ProjectNotes, ProjectNotes)) {
+            ContentChanged = true;
+        }
         this.WeatherDir = WeatherDir;
     }
 
@@ -590,6 +631,9 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setWeatherFile(String WeatherFile) {
+        if (! Objects.equals(this.WeatherFile, WeatherFile)) {
+            ContentChanged = true;
+        }
         this.WeatherFile = WeatherFile;
     }
 
@@ -598,6 +642,7 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setParamFile(String ParamFile) {
+        ContentChanged = true;
         this.ParamFile = ParamFile;
     }
 
@@ -606,25 +651,10 @@ public class JEPlusProject implements Serializable {
     }
 
     public void setRvx(RVX Rvx) {
+        ContentChanged = true;
         this.Rvx = Rvx;
     }
 
-    public String getRvxFile() {
-        return RvxFile;
-    }
-
-    public void setRvxFile(String RvxFile) {
-        this.RvxFile = RvxFile;
-        // If external RVX file is specified, use its contents for Rvx object
-        if (RvxFile != null) {
-            try {
-                this.Rvx = RVX.getRVX(RelativeDirUtil.checkAbsolutePath(RvxFile, BaseDir), BaseDir);
-            }catch (IOException ioe) {
-                logger.error("Cannot read the given RVX file", ioe);
-            }
-        }
-    }
-    
     
 
     // ====================== End Getters and Setters ======================
@@ -776,6 +806,8 @@ public class JEPlusProject implements Serializable {
         ExecSettings.setDeleteSelectedFiles(env.SelectedFiles != null);
         ExecSettings.setSelectedFiles(env.SelectedFiles);
         ExecSettings.setRerunAll(env.ForceRerun);
+        // Mark content changed
+        ContentChanged = true;
     }
 
     /**
@@ -870,6 +902,8 @@ public class JEPlusProject implements Serializable {
                 WeatherDir = RelativeDirUtil.getRelativePath(Base, wthr);
                 RVIDir = RelativeDirUtil.getRelativePath(Base, rvi);
                 ExecSettings.setParentDir(RelativeDirUtil.getRelativePath(Base, out));
+                // Mark content changed
+                ContentChanged = true;
                 return true;
             }
         }
@@ -887,6 +921,8 @@ public class JEPlusProject implements Serializable {
         ExecSettings.setParentDir(new File (base, ExecSettings.getWorkDir()).getAbsolutePath());
         //ExecSettings.setPBSscriptFile(new File (base, ExecSettings.getPBSscriptFile()).getAbsolutePath());
         //ExecSettings.setServerConfigFile(new File (base, ExecSettings.getServerConfigFile()).getAbsolutePath());
+        // Mark content changed
+        ContentChanged = true;
     }
 
     /**
@@ -971,6 +1007,8 @@ public class JEPlusProject implements Serializable {
                 }
             }
             addParameterListAsBranch (null, Parameters);
+            // Mark content changed
+            ContentChanged = true;
             return true;
         }
         return false;
@@ -1311,4 +1349,103 @@ public class JEPlusProject implements Serializable {
         }
         return list.toArray(new String [0]);
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 17 * hash + this.ProjectType;
+        hash = 17 * hash + Objects.hashCode(this.ProjectID);
+        hash = 17 * hash + Objects.hashCode(this.ProjectNotes);
+        hash = 17 * hash + Objects.hashCode(this.IDFDir);
+        hash = 17 * hash + Objects.hashCode(this.IDFTemplate);
+        hash = 17 * hash + Objects.hashCode(this.WeatherDir);
+        hash = 17 * hash + Objects.hashCode(this.WeatherFile);
+        hash = 17 * hash + (this.UseReadVars ? 1 : 0);
+        hash = 17 * hash + Objects.hashCode(this.RVIDir);
+        hash = 17 * hash + Objects.hashCode(this.RVIFile);
+        hash = 17 * hash + Objects.hashCode(this.DCKDir);
+        hash = 17 * hash + Objects.hashCode(this.DCKTemplate);
+        hash = 17 * hash + Objects.hashCode(this.OutputFileNames);
+        hash = 17 * hash + Objects.hashCode(this.INSELDir);
+        hash = 17 * hash + Objects.hashCode(this.INSELTemplate);
+        hash = 17 * hash + Objects.hashCode(this.ExecSettings);
+        hash = 17 * hash + Objects.hashCode(this.Parameters);
+        hash = 17 * hash + Objects.hashCode(this.ParamFile);
+        hash = 17 * hash + Objects.hashCode(this.Rvx);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final JEPlusProject other = (JEPlusProject) obj;
+        if (this.ProjectType != other.ProjectType) {
+            return false;
+        }
+        if (this.UseReadVars != other.UseReadVars) {
+            return false;
+        }
+        if (!Objects.equals(this.ProjectID, other.ProjectID)) {
+            return false;
+        }
+        if (!Objects.equals(this.ProjectNotes, other.ProjectNotes)) {
+            return false;
+        }
+        if (!Objects.equals(this.IDFDir, other.IDFDir)) {
+            return false;
+        }
+        if (!Objects.equals(this.IDFTemplate, other.IDFTemplate)) {
+            return false;
+        }
+        if (!Objects.equals(this.WeatherDir, other.WeatherDir)) {
+            return false;
+        }
+        if (!Objects.equals(this.WeatherFile, other.WeatherFile)) {
+            return false;
+        }
+        if (!Objects.equals(this.RVIDir, other.RVIDir)) {
+            return false;
+        }
+        if (!Objects.equals(this.RVIFile, other.RVIFile)) {
+            return false;
+        }
+        if (!Objects.equals(this.DCKDir, other.DCKDir)) {
+            return false;
+        }
+        if (!Objects.equals(this.DCKTemplate, other.DCKTemplate)) {
+            return false;
+        }
+        if (!Objects.equals(this.OutputFileNames, other.OutputFileNames)) {
+            return false;
+        }
+        if (!Objects.equals(this.INSELDir, other.INSELDir)) {
+            return false;
+        }
+        if (!Objects.equals(this.INSELTemplate, other.INSELTemplate)) {
+            return false;
+        }
+        if (!Objects.equals(this.ParamFile, other.ParamFile)) {
+            return false;
+        }
+        if (!Objects.equals(this.ExecSettings, other.ExecSettings)) {
+            return false;
+        }
+        if (!Objects.equals(this.Parameters, other.Parameters)) {
+            return false;
+        }
+        if (!Objects.equals(this.Rvx, other.Rvx)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

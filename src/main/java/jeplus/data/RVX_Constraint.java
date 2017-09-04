@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 //	"constraints" : [
 
@@ -155,6 +156,67 @@ public class RVX_Constraint implements Serializable {
             buf.append(Min).append(", ").append(Max).append("] ");
         }
         return buf.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 31 * hash + Objects.hashCode(this.Identifier);
+        hash = 31 * hash + Objects.hashCode(this.Formula);
+        hash = 31 * hash + Objects.hashCode(this.Caption);
+        hash = 31 * hash + (this.Scaling ? 1 : 0);
+        hash = 31 * hash + (int) (Double.doubleToLongBits(this.LB) ^ (Double.doubleToLongBits(this.LB) >>> 32));
+        hash = 31 * hash + (int) (Double.doubleToLongBits(this.UB) ^ (Double.doubleToLongBits(this.UB) >>> 32));
+        hash = 31 * hash + (int) (Double.doubleToLongBits(this.Min) ^ (Double.doubleToLongBits(this.Min) >>> 32));
+        hash = 31 * hash + (int) (Double.doubleToLongBits(this.Max) ^ (Double.doubleToLongBits(this.Max) >>> 32));
+        hash = 31 * hash + (int) (Double.doubleToLongBits(this.Weight) ^ (Double.doubleToLongBits(this.Weight) >>> 32));
+        hash = 31 * hash + (this.Enabled ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX_Constraint other = (RVX_Constraint) obj;
+        if (this.Scaling != other.Scaling) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.LB) != Double.doubleToLongBits(other.LB)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.UB) != Double.doubleToLongBits(other.UB)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.Min) != Double.doubleToLongBits(other.Min)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.Max) != Double.doubleToLongBits(other.Max)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.Weight) != Double.doubleToLongBits(other.Weight)) {
+            return false;
+        }
+        if (this.Enabled != other.Enabled) {
+            return false;
+        }
+        if (!Objects.equals(this.Identifier, other.Identifier)) {
+            return false;
+        }
+        if (!Objects.equals(this.Formula, other.Formula)) {
+            return false;
+        }
+        if (!Objects.equals(this.Caption, other.Caption)) {
+            return false;
+        }
+        return true;
     }
     
 }

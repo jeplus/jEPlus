@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 //	"userVars" : [
 
@@ -72,6 +73,43 @@ public class RVX_UserVar implements Serializable {
         StringBuilder buf = new StringBuilder(Caption);
         buf.append(": ").append(Identifier).append(" = ").append(Formula);
         return buf.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 97 * hash + Objects.hashCode(this.Identifier);
+        hash = 97 * hash + Objects.hashCode(this.Formula);
+        hash = 97 * hash + Objects.hashCode(this.Caption);
+        hash = 97 * hash + (this.Report ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX_UserVar other = (RVX_UserVar) obj;
+        if (this.Report != other.Report) {
+            return false;
+        }
+        if (!Objects.equals(this.Identifier, other.Identifier)) {
+            return false;
+        }
+        if (!Objects.equals(this.Formula, other.Formula)) {
+            return false;
+        }
+        if (!Objects.equals(this.Caption, other.Caption)) {
+            return false;
+        }
+        return true;
     }
     
 }

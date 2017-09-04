@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 //	"csvs" : [
 //		{
@@ -110,4 +111,59 @@ public class RVX_CSVitem implements Serializable {
     public String toString () {
         return TableName + ":" + ColumnHeaders + "(" + SourceCsv + ")" + (UsedInCalc ? "" : "*");
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 61 * hash + Objects.hashCode(this.SourceCsv);
+        hash = 61 * hash + Objects.hashCode(this.FromReport);
+        hash = 61 * hash + Objects.hashCode(this.FromTable);
+        hash = 61 * hash + Objects.hashCode(this.FromColumn);
+        hash = 61 * hash + Objects.hashCode(this.FromRow);
+        hash = 61 * hash + Objects.hashCode(this.TableName);
+        hash = 61 * hash + Objects.hashCode(this.ColumnHeaders);
+        hash = 61 * hash + (this.UsedInCalc ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX_CSVitem other = (RVX_CSVitem) obj;
+        if (this.UsedInCalc != other.UsedInCalc) {
+            return false;
+        }
+        if (!Objects.equals(this.SourceCsv, other.SourceCsv)) {
+            return false;
+        }
+        if (!Objects.equals(this.FromReport, other.FromReport)) {
+            return false;
+        }
+        if (!Objects.equals(this.FromTable, other.FromTable)) {
+            return false;
+        }
+        if (!Objects.equals(this.FromColumn, other.FromColumn)) {
+            return false;
+        }
+        if (!Objects.equals(this.FromRow, other.FromRow)) {
+            return false;
+        }
+        if (!Objects.equals(this.TableName, other.TableName)) {
+            return false;
+        }
+        if (!Objects.equals(this.ColumnHeaders, other.ColumnHeaders)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 //	"rvis" : [
 
@@ -80,5 +81,42 @@ public class RVX_RVIitem implements Serializable {
     @Override
     public String toString () {
         return TableName + ":" + FileName + "(" + Frequency + ")" + (UsedInCalc ? "" : "*");
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 53 * hash + Objects.hashCode(this.FileName);
+        hash = 53 * hash + Objects.hashCode(this.Frequency);
+        hash = 53 * hash + Objects.hashCode(this.TableName);
+        hash = 53 * hash + (this.UsedInCalc ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX_RVIitem other = (RVX_RVIitem) obj;
+        if (this.UsedInCalc != other.UsedInCalc) {
+            return false;
+        }
+        if (!Objects.equals(this.FileName, other.FileName)) {
+            return false;
+        }
+        if (!Objects.equals(this.Frequency, other.Frequency)) {
+            return false;
+        }
+        if (!Objects.equals(this.TableName, other.TableName)) {
+            return false;
+        }
+        return true;
     }
 }

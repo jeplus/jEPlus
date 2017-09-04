@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 //	"sqls" : [
 
@@ -76,5 +77,42 @@ public class RVX_SQLitem implements Serializable {
     @Override
     public String toString () {
         return TableName + ":" + ColumnHeaders + (UsedInCalc ? "" : "*");
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 79 * hash + Objects.hashCode(this.TableName);
+        hash = 79 * hash + Objects.hashCode(this.ColumnHeaders);
+        hash = 79 * hash + Objects.hashCode(this.SQLcommand);
+        hash = 79 * hash + (this.UsedInCalc ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX_SQLitem other = (RVX_SQLitem) obj;
+        if (this.UsedInCalc != other.UsedInCalc) {
+            return false;
+        }
+        if (!Objects.equals(this.TableName, other.TableName)) {
+            return false;
+        }
+        if (!Objects.equals(this.ColumnHeaders, other.ColumnHeaders)) {
+            return false;
+        }
+        if (!Objects.equals(this.SQLcommand, other.SQLcommand)) {
+            return false;
+        }
+        return true;
     }
 }

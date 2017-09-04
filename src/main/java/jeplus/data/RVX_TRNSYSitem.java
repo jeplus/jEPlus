@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 //	"trnsys" : [
 //		{
@@ -75,5 +76,42 @@ public class RVX_TRNSYSitem implements Serializable {
     @Override
     public String toString () {
         return TableName + ":" + PlotterName + (UsedInCalc ? "" : "*");
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 19 * hash + Objects.hashCode(this.PlotterName);
+        hash = 19 * hash + Objects.hashCode(this.Aggregation);
+        hash = 19 * hash + Objects.hashCode(this.TableName);
+        hash = 19 * hash + (this.UsedInCalc ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX_TRNSYSitem other = (RVX_TRNSYSitem) obj;
+        if (this.UsedInCalc != other.UsedInCalc) {
+            return false;
+        }
+        if (!Objects.equals(this.PlotterName, other.PlotterName)) {
+            return false;
+        }
+        if (!Objects.equals(this.Aggregation, other.Aggregation)) {
+            return false;
+        }
+        if (!Objects.equals(this.TableName, other.TableName)) {
+            return false;
+        }
+        return true;
     }
 }

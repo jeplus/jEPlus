@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -64,7 +65,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @since 1.0
  */
-public class JEPlusFrameMain extends JEPlusFrame {
+public class JEPlusFrameMain extends JFrame {
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusFrameMain.class);
@@ -86,6 +87,8 @@ public class JEPlusFrameMain extends JEPlusFrame {
     protected JFileChooser fc = new JFileChooser("./");
     protected File DefaultDir = new File ("./");
     protected String CurrentProjectFile = null;
+    protected JEPlusProject Project = new JEPlusProject ();
+    protected JEPlusProject SavedProject = null;
 
     protected EPlusTextPanelOld OutputPanel = null;
     protected EPlusTextPanelOld ResultFilePanel = null;
@@ -317,14 +320,22 @@ public class JEPlusFrameMain extends JEPlusFrame {
     }
 
     /**
+     * Retrieve the current project object
+     * @return 
+     */
+    public JEPlusProject getProject() {
+        return Project;
+    }
+
+    /**
      * Set the current Project object
      * @param Project Project object
      * @param batch Simulation manager object
      */
-    @Override
     public void setProject(JEPlusProject Project, EPlusBatch batch) {
         if (Project != null) {
             this.Project = Project;
+            this.SavedProject = null;
             this.initProjectSection();
             this.cboExecutionTypeActionPerformed(null);
         }
@@ -382,15 +393,15 @@ public class JEPlusFrameMain extends JEPlusFrame {
         if (Project.getProjectType() == JEPlusProject.EPLUS) {
             EPlusProjectFilesPanel = new JPanel_EPlusProjectFiles(this, Project);
             this.jplProjectFilesPanelHolder.add(EPlusProjectFilesPanel, BorderLayout.CENTER);
-//            this.Project.ExecSettings.setParentDir("output/");
+//            this.Project.getExecSettings().setParentDir("output/");
         }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
             TrnsysProjectFilesPanel = new JPanel_TrnsysProjectFiles(this, Project);
             this.jplProjectFilesPanelHolder.add(TrnsysProjectFilesPanel, BorderLayout.CENTER);
-//            this.Project.ExecSettings.setParentDir("TRNoutput/");
+//            this.Project.getExecSettings().setParentDir("TRNoutput/");
         }else if (Project.getProjectType() == JEPlusProject.INSEL) {
             InselProjectFilesPanel = new JPanel_InselProjectFiles(this, Project);
             this.jplProjectFilesPanelHolder.add(InselProjectFilesPanel, BorderLayout.CENTER);
-//            this.Project.ExecSettings.setParentDir("TRNoutput/");
+//            this.Project.getExecSettings().setParentDir("TRNoutput/");
         }
         jplParameterTree.setParameterTree(Project);
         jplRvxTree.setContents(this, Project.getBaseDir(), Project.getRvx());
@@ -400,12 +411,12 @@ public class JEPlusFrameMain extends JEPlusFrame {
      * Fill in the batch execution options section in the Exec tab
      */
     private void initBatchOptions() {
-        this.txtJobListFile.setText(Project.ExecSettings.getJobListFile());
-        this.txtTestRandomN.setText(Integer.toString(Project.ExecSettings.getNumberOfJobs()));
-        this.txtRandomSeed.setText(Long.toString(Project.ExecSettings.getRandomSeed()));
-        this.chkLHS.setSelected(Project.ExecSettings.isUseLHS());
-        this.cboSampleOpt.setSelectedItem(Project.ExecSettings.getSampleOpt());
-        switch (Project.ExecSettings.getSubSet()) {
+        this.txtJobListFile.setText(Project.getExecSettings().getJobListFile());
+        this.txtTestRandomN.setText(Integer.toString(Project.getExecSettings().getNumberOfJobs()));
+        this.txtRandomSeed.setText(Long.toString(Project.getExecSettings().getRandomSeed()));
+        this.chkLHS.setSelected(Project.getExecSettings().isUseLHS());
+        this.cboSampleOpt.setSelectedItem(Project.getExecSettings().getSampleOpt());
+        switch (Project.getExecSettings().getSubSet()) {
             case ExecutionOptions.CHAINS: 
                 this.rdoTestChains.setSelected(true);
                 this.rdoTestChainsActionPerformed(null);
@@ -433,19 +444,19 @@ public class JEPlusFrameMain extends JEPlusFrame {
             public void insertUpdate(DocumentEvent e) {
                 Document src = e.getDocument();
                 if(src == DocJobListFile) {
-                    Project.ExecSettings.setJobListFile(txtJobListFile.getText());
-                    if (! new File (Project.ExecSettings.getJobListFile()).exists()) {
+                    Project.getExecSettings().setJobListFile(txtJobListFile.getText());
+                    if (! new File (Project.getExecSettings().getJobListFile()).exists()) {
                         txtJobListFile.setForeground(Color.red);
                     }else {
                         txtJobListFile.setForeground(Color.black);
                     }
                 }else if (src == DocTestRandomN) {
                     try {
-                        Project.ExecSettings.setNumberOfJobs(Integer.parseInt(txtTestRandomN.getText()));
+                        Project.getExecSettings().setNumberOfJobs(Integer.parseInt(txtTestRandomN.getText()));
                         txtTestRandomN.setForeground(Color.black);
                     }catch (NumberFormatException nfx) {
                         txtTestRandomN.setForeground(Color.red);
-                        Project.ExecSettings.setNumberOfJobs(1); // one job by default
+                        Project.getExecSettings().setNumberOfJobs(1); // one job by default
                     }
                 }else if (src == DocRandomSeed) {
                     long seed;
@@ -457,7 +468,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
                         seed = new Date().getTime();
                         txtRandomSeed.setForeground(Color.red);
                     }
-                    Project.ExecSettings.setRandomSeed(seed);
+                    Project.getExecSettings().setRandomSeed(seed);
                 }
             }
             @Override
@@ -1754,10 +1765,10 @@ public class JEPlusFrameMain extends JEPlusFrame {
                 if (BatchManager.getAgent().isValidationRequired()) {
                     // do something?
                 }
-                if (Project.ExecSettings.getSubSet() == ExecutionOptions.ALL) {
+                if (Project.getExecSettings().getSubSet() == ExecutionOptions.ALL) {
                     startBatchRunAll ();
                 }else {
-                    switch (Project.ExecSettings.getSubSet()) {
+                    switch (Project.getExecSettings().getSubSet()) {
                         case ExecutionOptions.CHAINS: 
                             startBatchRunTest ();
                             break;
@@ -1772,14 +1783,14 @@ public class JEPlusFrameMain extends JEPlusFrame {
                                 seed = new Date().getTime();
                                 txtRandomSeed.setForeground(Color.red);
                             }
-                            Project.ExecSettings.setRandomSeed(seed);
+                            Project.getExecSettings().setRandomSeed(seed);
 
-                            startBatchRunSample (Project.ExecSettings.getNumberOfJobs(), 
-                                    Project.ExecSettings.getSampleOpt(),
-                                    RandomSource.getRandomGenerator(Project.ExecSettings.getRandomSeed()));
+                            startBatchRunSample (Project.getExecSettings().getNumberOfJobs(), 
+                                    Project.getExecSettings().getSampleOpt(),
+                                    RandomSource.getRandomGenerator(Project.getExecSettings().getRandomSeed()));
                             break;
                         case ExecutionOptions.FILE:
-                            startBatchRunFile (Project.ExecSettings.getJobListFile());
+                            startBatchRunFile (Project.getExecSettings().getJobListFile());
                     }
                 }
             }
@@ -1829,6 +1840,15 @@ private void cboExecutionTypeActionPerformed(java.awt.event.ActionEvent evt) {//
 }//GEN-LAST:event_cboExecutionTypeActionPerformed
 
 private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
+    // Assign the first branch to the Parameters list
+    DefaultMutableTreeNode thisleaf = Project.getParamTree().getFirstLeaf();
+    Object [] path = thisleaf.getUserObjectPath();
+    Project.getParameters().clear();
+    for (Object item : path) {
+        Project.getParameters().add((ParameterItem)item);
+    }
+    // Detect project changes
+    if (Project.isContentChanged() || ! Objects.equals(Project, SavedProject)) {
         // Save the project file before exit?
         String cfn = this.CurrentProjectFile;
         int n = JOptionPane.showConfirmDialog(
@@ -1841,24 +1861,25 @@ private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN
         }else if (n == JOptionPane.YES_OPTION) {
             this.jMenuItemSaveActionPerformed(null);
         }
-        // Check opened files
-        for (int i=TpnEditors.getTabCount()-1; i>=0; i--) {
-            try {
-                ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
-            }catch (ClassCastException | NullPointerException cce) {
+    }
+    // Check opened files
+    for (int i=TpnEditors.getTabCount()-1; i>=0; i--) {
+        try {
+            ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+        }catch (ClassCastException | NullPointerException cce) {
 
-            }
         }
+    }
 
-        // Save EnergyPlus settings
-        String currentdate = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date());
-        JEPlusConfig.getDefaultInstance().saveToFile("jEPlus configuration generated at " + currentdate);
-        // Exit
-        if (this.getFrameCloseOperation() == JEPlusFrameMain.EXIT_ON_CLOSE) {
-            System.exit(-1);
-        }else {
-            this.dispose();
-        }
+    // Save EnergyPlus settings
+    String currentdate = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date());
+    JEPlusConfig.getDefaultInstance().saveToFile("jEPlus configuration generated at " + currentdate);
+    // Exit
+    if (this.getFrameCloseOperation() == JEPlusFrameMain.EXIT_ON_CLOSE) {
+        System.exit(-1);
+    }else {
+        this.dispose();
+    }
 }//GEN-LAST:event_jMenuItemExitActionPerformed
 
 private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
@@ -1984,10 +2005,18 @@ private void jMenuItemSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN
         File file = new File (CurrentProjectFile);
         // convert to relative paths?
         // Project.convertToRelativeDir(file.getParentFile());
-        // Remove RVI file reference, as RVX/editor is built in now
-        Project.setRVIFile(null);
         // Save as .jep
-        Project.saveAsXML(file);
+        if (! Project.saveAsXML(file)) {
+            // warning message
+            JOptionPane.showMessageDialog(
+                this,
+                "Failed to save the JEPlus project for some reasons! Please check the logs for more information.",
+                "Error",
+                JOptionPane.CLOSED_OPTION);
+        }else {
+            // Update the original copy of project
+            SavedProject = JEPlusProject.loadAsXML(file);
+        }
     }else {
         jMenuItemSaveAsActionPerformed(null);
     }
@@ -2026,16 +2055,19 @@ private void jMenuItemSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//G
             // warning message
             JOptionPane.showMessageDialog(
                 this,
-                "The JEPlus Project cannot be saved for some reasons. :-(",
+                "The JEPlus Project cannot be saved for some reasons. Check logs for more information.",
                 "Error",
                 JOptionPane.CLOSED_OPTION);
+        }else {
+            // Update the original copy of project
+            SavedProject = JEPlusProject.loadAsXML(file);
+            // Update default dir and current project file reference
+            DefaultDir = new File (Project.getBaseDir());
+            this.setCurrentProjectFile(file.getPath());
+            // update screen
+            this.initProjectSection();
+            this.cboExecutionTypeActionPerformed(null);
         }
-        // Update default dir and current project file reference
-        DefaultDir = new File (Project.getBaseDir());
-        this.setCurrentProjectFile(file.getPath());
-        // update screen
-        this.initProjectSection();
-        this.cboExecutionTypeActionPerformed(null);
     } else {
 
     }
@@ -2793,7 +2825,10 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                 "Error",
                 JOptionPane.CLOSED_OPTION);
         }else {
-            Project = proj;
+            // Use it as the saved project (for detecting changes)
+            SavedProject = proj;
+            // Open it again as the working project
+            Project = JEPlusProject.loadAsXML(file);
             // GUI update
             // this.initProjectSection();
             // Update project type (E+ or TRNSYS) and gui

@@ -960,4 +960,58 @@ public class ParameterItem implements Serializable, Cloneable {
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 41 * hash + Objects.hashCode(this.ID);
+        hash = 41 * hash + Objects.hashCode(this.Name);
+        hash = 41 * hash + this.ParamType;
+        hash = 41 * hash + this.Type;
+        hash = 41 * hash + Objects.hashCode(this.Description);
+        hash = 41 * hash + Objects.hashCode(this.SearchString);
+        hash = 41 * hash + Objects.hashCode(this.ValuesString);
+        hash = 41 * hash + this.SelectedAltValue;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ParameterItem other = (ParameterItem) obj;
+        if (this.ParamType != other.ParamType) {
+            return false;
+        }
+        if (this.Type != other.Type) {
+            return false;
+        }
+        if (this.SelectedAltValue != other.SelectedAltValue) {
+            return false;
+        }
+        if (!Objects.equals(this.ID, other.ID)) {
+            return false;
+        }
+        if (!Objects.equals(this.Name, other.Name)) {
+            return false;
+        }
+        if (!Objects.equals(this.Description, other.Description)) {
+            return false;
+        }
+        if (!Objects.equals(this.SearchString, other.SearchString)) {
+            return false;
+        }
+        if (!Objects.equals(this.ValuesString, other.ValuesString)) {
+            return false;
+        }
+        return true;
+    }
+
+    
 }

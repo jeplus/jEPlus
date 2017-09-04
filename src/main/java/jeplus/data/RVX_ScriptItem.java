@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 //	"scripts" : [
 //		{
@@ -85,5 +86,46 @@ public class RVX_ScriptItem implements Serializable {
     @Override
     public String toString () {
         return TableName + ":" + FileName + "(" + PythonVersion + ")" + (OnEachJob ? "+" : "");
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 43 * hash + Objects.hashCode(this.FileName);
+        hash = 43 * hash + Objects.hashCode(this.PythonVersion);
+        hash = 43 * hash + (this.OnEachJob ? 1 : 0);
+        hash = 43 * hash + Objects.hashCode(this.Arguments);
+        hash = 43 * hash + Objects.hashCode(this.TableName);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX_ScriptItem other = (RVX_ScriptItem) obj;
+        if (this.OnEachJob != other.OnEachJob) {
+            return false;
+        }
+        if (!Objects.equals(this.FileName, other.FileName)) {
+            return false;
+        }
+        if (!Objects.equals(this.PythonVersion, other.PythonVersion)) {
+            return false;
+        }
+        if (!Objects.equals(this.Arguments, other.Arguments)) {
+            return false;
+        }
+        if (!Objects.equals(this.TableName, other.TableName)) {
+            return false;
+        }
+        return true;
     }
 }

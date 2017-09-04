@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 //	"xmls" : [
 //		{
@@ -65,6 +66,43 @@ public class RVX_XMLitem implements Serializable {
 
     public void setUsedInCalc(boolean UsedInCalc) {
         this.UsedInCalc = UsedInCalc;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 59 * hash + Objects.hashCode(this.TableName);
+        hash = 59 * hash + Objects.hashCode(this.ColumnHeaders);
+        hash = 59 * hash + Objects.hashCode(this.XPath);
+        hash = 59 * hash + (this.UsedInCalc ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX_XMLitem other = (RVX_XMLitem) obj;
+        if (this.UsedInCalc != other.UsedInCalc) {
+            return false;
+        }
+        if (!Objects.equals(this.TableName, other.TableName)) {
+            return false;
+        }
+        if (!Objects.equals(this.ColumnHeaders, other.ColumnHeaders)) {
+            return false;
+        }
+        if (!Objects.equals(this.XPath, other.XPath)) {
+            return false;
+        }
+        return true;
     }
     
 }

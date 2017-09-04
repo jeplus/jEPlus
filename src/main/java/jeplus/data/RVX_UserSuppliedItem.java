@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 //	"userSupplied" : [
 //		{
@@ -89,5 +90,50 @@ public class RVX_UserSuppliedItem implements Serializable {
     @Override
     public String toString () {
         return TableName + ":" + FileName;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 17 * hash + Objects.hashCode(this.FileName);
+        hash = 17 * hash + this.HeaderRow;
+        hash = 17 * hash + this.JobIdColumn;
+        hash = 17 * hash + Objects.hashCode(this.DataColumns);
+        hash = 17 * hash + (int) (Double.doubleToLongBits(this.MissingValue) ^ (Double.doubleToLongBits(this.MissingValue) >>> 32));
+        hash = 17 * hash + Objects.hashCode(this.TableName);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX_UserSuppliedItem other = (RVX_UserSuppliedItem) obj;
+        if (this.HeaderRow != other.HeaderRow) {
+            return false;
+        }
+        if (this.JobIdColumn != other.JobIdColumn) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.MissingValue) != Double.doubleToLongBits(other.MissingValue)) {
+            return false;
+        }
+        if (!Objects.equals(this.FileName, other.FileName)) {
+            return false;
+        }
+        if (!Objects.equals(this.DataColumns, other.DataColumns)) {
+            return false;
+        }
+        if (!Objects.equals(this.TableName, other.TableName)) {
+            return false;
+        }
+        return true;
     }
 }

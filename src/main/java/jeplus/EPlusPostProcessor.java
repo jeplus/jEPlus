@@ -101,26 +101,26 @@ public class EPlusPostProcessor implements Runnable {
             List<EPlusTask> Jobs;
 
             if (ProjectJobsOnly) {
-                if (Batch.getProject().ExecSettings.getSubSet() == ExecutionOptions.ALL) {
+                if (Batch.getProject().getExecSettings().getSubSet() == ExecutionOptions.ALL) {
                     // Build all jobs
                     Batch.buildJobs();
                 } else {
-                    switch (Batch.getProject().ExecSettings.getSubSet()) {
+                    switch (Batch.getProject().getExecSettings().getSubSet()) {
                         case ExecutionOptions.CHAINS:
                             Batch.buildJobs(Batch.getTestJobList());
                             break;
                         case ExecutionOptions.RANDOM:
-                            RandomSource.setSeed(Batch.getProject().ExecSettings.getRandomSeed());
-                            if (Batch.getProject().ExecSettings.isUseLHS()) {
-                                Batch.buildJobs(Batch.getProject().getLHSJobList(Batch.getProject().ExecSettings.getNumberOfJobs(),
+                            RandomSource.setSeed(Batch.getProject().getExecSettings().getRandomSeed());
+                            if (Batch.getProject().getExecSettings().isUseLHS()) {
+                                Batch.buildJobs(Batch.getProject().getLHSJobList(Batch.getProject().getExecSettings().getNumberOfJobs(),
                                         RandomSource.getRandomGenerator()));
                             } else {
-                                Batch.buildJobs(Batch.getRandomJobList(Batch.getProject().ExecSettings.getNumberOfJobs(),
+                                Batch.buildJobs(Batch.getRandomJobList(Batch.getProject().getExecSettings().getNumberOfJobs(),
                                         RandomSource.getRandomGenerator()));
                             }
                             break;
                         case ExecutionOptions.FILE:
-                            Batch.prepareJobSet(EPlusBatch.JobStringType.FILE, Batch.getProject().ExecSettings.getJobListFile());
+                            Batch.prepareJobSet(EPlusBatch.JobStringType.FILE, Batch.getProject().getExecSettings().getJobListFile());
                     }
                 }
                 Jobs = Batch.getJobQueue();
@@ -160,7 +160,7 @@ public class EPlusPostProcessor implements Runnable {
             for (int i = 0; i < Jobs.size(); i++) {
 
                 EPlusTask CurJob = Jobs.get(i);
-//                if ((Batch.Project.getExecSettings().isUseLHS()) && (Batch.Project.getExecSettings().getSubSet() == ExecutionOptions.RANDOM)) {
+//                if ((Batch.Project.getgetExecSettings()().isUseLHS()) && (Batch.Project.getgetExecSettings()().getSubSet() == ExecutionOptions.RANDOM)) {
 //                    CurJob.setJobID(new Formatter().format("LHS-%06d", i).toString());                    
 //                }
                 String CurDir = RelativeDirUtil.checkAbsolutePath(ResultDir, this.Batch.getProject().getBaseDir()) + "/" + CurJob.getJobID() + "/";

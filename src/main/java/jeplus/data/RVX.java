@@ -26,6 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Objects;
 import jeplus.EPlusConfig;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
@@ -122,6 +123,70 @@ public class RVX implements Serializable {
     private String Notes = "";
     public String getNotes() { return Notes; }
     public void setNotes(String Notes) { this.Notes = Notes; }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 13 * hash + Objects.hashCode(this.RVIs);
+        hash = 13 * hash + Objects.hashCode(this.SQLs);
+        hash = 13 * hash + Objects.hashCode(this.Scripts);
+        hash = 13 * hash + Objects.hashCode(this.CSVs);
+        hash = 13 * hash + Objects.hashCode(this.UserSupplied);
+        hash = 13 * hash + Objects.hashCode(this.TRNs);
+        hash = 13 * hash + Objects.hashCode(this.UserVars);
+        hash = 13 * hash + Objects.hashCode(this.Constraints);
+        hash = 13 * hash + Objects.hashCode(this.Objectives);
+        hash = 13 * hash + Objects.hashCode(this.Notes);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final RVX other = (RVX) obj;
+        if (!Objects.equals(this.Notes, other.Notes)) {
+            return false;
+        }
+        if (!Objects.equals(this.RVIs, other.RVIs)) {
+            return false;
+        }
+        if (!Objects.equals(this.SQLs, other.SQLs)) {
+            return false;
+        }
+        if (!Objects.equals(this.Scripts, other.Scripts)) {
+            return false;
+        }
+        if (!Objects.equals(this.CSVs, other.CSVs)) {
+            return false;
+        }
+        if (!Objects.equals(this.UserSupplied, other.UserSupplied)) {
+            return false;
+        }
+        if (!Objects.equals(this.TRNs, other.TRNs)) {
+            return false;
+        }
+        if (!Objects.equals(this.UserVars, other.UserVars)) {
+            return false;
+        }
+        if (!Objects.equals(this.Constraints, other.Constraints)) {
+            return false;
+        }
+        if (!Objects.equals(this.Objectives, other.Objectives)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+    
     
     /**
      * Read RVX from a json file or a traditional RVI file with extensions
