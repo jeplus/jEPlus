@@ -26,7 +26,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import jeplus.EPlusConfig;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
@@ -185,7 +190,57 @@ public class RVX implements Serializable {
         return true;
     }
     
+    public boolean hasUserVars () {
+        return this.UserVars.size() > 0;
+    }
     
+    public void autoGenerateUserVars () {
+        // Get existing user vars in a map
+        Map<String, RVX_UserVar> UVarsMap = new HashMap<> ();
+        for (RVX_UserVar var : UserVars) {
+            UVarsMap.put(var.getIdentifier(), var);
+        }
+        // Go throgh the formulae of objectives and constraints to find refs to c?? variables
+        HashSet<String> cx = new HashSet<>();
+        for (RVX_Objective obj: Objectives) {
+            // Match all c?? patterns
+            Matcher m = Pattern.compile("c[0-9]+").matcher(obj.getFormula());
+            while (m.find()) {
+              cx.add(m.group());
+            }
+        }
+        for (RVX_Constraint cons: Constraints) {
+            // Match all c?? patterns
+            Matcher m = Pattern.compile("c[0-9]+").matcher(cons.getFormula());
+            while (m.find()) {
+              cx.add(m.group());
+            }
+        }
+        // Add User variables for the found c??
+        Map<String, String> NewVarsMap = new HashMap<> ();
+        for (String c: cx) {
+            RVX_UserVar v = new RVX_UserVar();
+            String id = c.replace("c", "v");
+            if (UVarsMap.containsKey(id)) {
+                id = id + "_";
+            }
+            v.setIdentifier(id);
+            v.setFormula(c);
+            v.setCaption("Output " + c);
+            v.setReport(false);
+            NewVarsMap.put(c, id);
+            UserVars.add(v);
+        }
+        // Replace references to c?? with new user vars
+        for (String c: NewVarsMap.keySet()) {
+            for (RVX_Objective obj: Objectives) {
+                obj.setFormula(obj.getFormula().replaceAll(c, NewVarsMap.get(c)));
+            }
+            for (RVX_Constraint cons: Constraints) {
+                cons.setFormula(cons.getFormula().replaceAll(c, NewVarsMap.get(c)));
+            }
+        }
+    }
     
     
     /**
