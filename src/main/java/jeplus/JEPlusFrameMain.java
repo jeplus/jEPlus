@@ -664,7 +664,7 @@ public class JEPlusFrameMain extends JFrame {
         }
         if (opt == EPlusBatch.SampleType.SHUFFLE) {
             // Check batch size 
-            if (BatchManager.getBatchInfo().getTotalNumberOfJobs() > 1000000) {
+            if (BatchManager.getBatchInfo().getTotalNumberOfJobs() > 10000000) { // larger than 10M cases
                 // Project is too large
                 StringBuilder buf = new StringBuilder ("<html><p>The estimated solution space size (");
                 buf.append(LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs()));
