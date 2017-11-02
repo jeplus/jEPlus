@@ -74,7 +74,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
     
     protected NumberFormat LargeIntFormatter = new DecimalFormat("###,###,###,###,###,###");
 
-    public final static String version = "1.7.0_beta";
+    public final static String version = "1.7.1_beta";
     public final static String version_ps = "_1_7";
     public final static String osName = System.getProperty( "os.name" );
     protected static String VersionInfo = "jEPlus (version " + version + ") for " + osName;
@@ -1102,7 +1102,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdoTestChains, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE)
+                    .addComponent(rdoTestChains, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(rdoTestRandomN)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1110,7 +1110,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cboSampleOpt, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cboSampleOpt, 0, 1, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1155,7 +1155,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmdStart)
                     .addComponent(chkOverride))
-                .addContainerGap(115, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -1679,12 +1679,16 @@ public class JEPlusFrameMain extends JEPlusFrame {
 
             boolean OkToStart = true;
             // Reload RVX
-            try {
-                Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile()));
-            }catch (IOException ioe) {
-                logger.error("Error reloading RVX from " + Project.resolveRVIDir() + Project.getRVIFile(), ioe);
+            if (Project.getRVIFile() != null) {
+                try {
+                    Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile()));
+                }catch (IOException ioe) {
+                    logger.error("Error reloading RVX from " + Project.resolveRVIDir() + Project.getRVIFile(), ioe);
+                    Project.setRvx(new RVX());
+                }
+            }else {
                 Project.setRvx(new RVX());
-            }
+            }   
             
             // Validate jobs if the execution agent requires it
             if (ExecAgents.get(this.cboExecutionType.getSelectedIndex()).isValidationRequired()) {

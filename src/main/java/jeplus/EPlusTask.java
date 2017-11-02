@@ -253,7 +253,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
      * @return A directory name comprises of the parent dir and the job id
      */
     public String getWorkingDir() {
-        return WorkEnv.ParentDir + TaskID + "/";
+        return WorkEnv.ParentDir + TaskID + File.separator;
     }
 
     /**
@@ -496,6 +496,17 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                 }
             }
             String args = buf.toString();
+            // Simulator's path
+            String sim_path = "";
+            switch (this.getWorkEnv().ProjectType) {
+                case JEPlusProject.TRNSYS:
+                    sim_path = config.getResolvedTRNSYSBinDir();
+                    break;
+                case JEPlusProject.EPLUS:
+                default:
+                    sim_path = config.getResolvedEPlusBinDir();
+            }
+            
             // Call Python
             try (PrintStream outs = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + config.getScreenFile(), true));) {
                 PythonTools.runPython(
@@ -504,7 +515,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                         script.getPyVersion(), 
                         WorkEnv.getProjectBaseDir(), 
                         job_dir, 
-                        config.getResolvedEPlusBinDir(),
+                        sim_path,
                         args,
                         outs);
             }catch (IOException ioe) {

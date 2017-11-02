@@ -97,6 +97,8 @@ public class TRNSYSTask extends EPlusTask {
         boolean ok = TRNSYSWinTools.prepareWorkDir(getWorkingDir());
         // Write DCK file
         ok = ok && this.preprocessInputFile(JEPlusConfig.getDefaultInstance());
+        // Run Python script 
+        ok = ok && this.runPythonScriptOnIDF (JEPlusConfig.getDefaultInstance());
         // Ready to run TRNSYS
         if (ok) {
             int code = TRNSYSWinTools.runTRNSYS(JEPlusConfig.getDefaultInstance(), getWorkingDir(), TRNSYSConfig.getTRNSYSDefDCK());

@@ -326,12 +326,13 @@ public class JEPlusProject implements Serializable {
             proj.getParameters().add((ParameterItem)item);
         }
         // Load Rvx if a RVX file is available
-        try {
-            proj.Rvx = RVX.getRVX(proj.resolveRVIDir() + proj.getRVIFile());
-        }catch (IOException ioe) {
-            logger.error("Cannot read the project's RVX file", ioe);
+        if (proj.getRVIFile() != null) {
+            try {
+                proj.Rvx = RVX.getRVX(proj.resolveRVIDir() + proj.getRVIFile());
+            }catch (IOException ioe) {
+                logger.error("Cannot read the project's RVX file", ioe);
+            }
         }
-
         // done            
         return proj;
     }
