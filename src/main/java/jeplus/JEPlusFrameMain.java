@@ -74,7 +74,7 @@ public class JEPlusFrameMain extends JEPlusFrame {
     
     protected NumberFormat LargeIntFormatter = new DecimalFormat("###,###,###,###,###,###");
 
-    public final static String version = "1.7.1_beta";
+    public final static String version = "1.7.2_beta";
     public final static String version_ps = "_1_7";
     public final static String osName = System.getProperty( "os.name" );
     protected static String VersionInfo = "jEPlus (version " + version + ") for " + osName;

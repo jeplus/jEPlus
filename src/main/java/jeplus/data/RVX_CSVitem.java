@@ -35,6 +35,7 @@ import java.io.Serializable;
 public class RVX_CSVitem implements Serializable {
     private String SourceCsv = ""; 
     private String FromReport = ""; 
+    private String FromFor = null;
     private String FromTable = ""; 
     private String FromColumn = ""; 
     private String FromRow = ""; 
@@ -56,6 +57,14 @@ public class RVX_CSVitem implements Serializable {
 
     public void setFromReport(String FromReport) {
         this.FromReport = FromReport;
+    }
+
+    public String getFromFor() {
+        return FromFor;
+    }
+
+    public void setFromFor(String FromFor) {
+        this.FromFor = FromFor;
     }
 
     public String getFromTable() {
