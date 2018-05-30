@@ -61,7 +61,7 @@ public class ConfigFileNames implements Serializable {
 
     /** Configuration changed event listener */
     protected ArrayList<IF_ConfigChangedEventHandler> Listeners = new ArrayList<> ();
-    public void addListener (IF_ConfigChangedEventHandler listener) { Listeners.add(listener); }
+    public void addListener (IF_ConfigChangedEventHandler listener) { if (! Listeners.contains(listener)) Listeners.add(listener); }
     public void removeListener (IF_ConfigChangedEventHandler listener) { Listeners.remove(listener); }
     public void removeAllListeners () { Listeners.clear(); }
     public void fireConfigChangedEvent () {

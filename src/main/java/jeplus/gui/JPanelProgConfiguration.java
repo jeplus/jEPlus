@@ -61,8 +61,8 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 Config.removeListener(this);
             }
             Config = config;
-            Config.addListener(this);
         }
+        Config.addListener(this);
         initSettings();
         checkSettings();
     }
