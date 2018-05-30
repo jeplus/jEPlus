@@ -29,7 +29,6 @@ import jeplus.EPlusBatch;
 import jeplus.EPlusConfig;
 import jeplus.EPlusTask;
 import jeplus.EPlusWinTools;
-import jeplus.JEPlusConfig;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -41,6 +40,7 @@ public class EPlusRVIReader implements IFResultReader {
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusRVIReader.class);
     
+    protected EPlusConfig Config = null;
     protected String RVIFile = EPlusConfig.getEPDefRvi();
     protected String Frequency = "Annual";
     protected String CSVFile = EPlusConfig.getEPDefOutCSV();
@@ -48,12 +48,14 @@ public class EPlusRVIReader implements IFResultReader {
     
     /**
      * Default constructor, does nothing
+     * @param config
      * @param rvi
      * @param freq
      * @param csv
      * @param use
      */
-    public EPlusRVIReader (String rvi, String freq, String csv, boolean use) {
+    public EPlusRVIReader (EPlusConfig config, String rvi, String freq, String csv, boolean use) {
+        Config = config;
         RVIFile = rvi;
         Frequency = freq;
         CSVFile = csv;
@@ -88,7 +90,7 @@ public class EPlusRVIReader implements IFResultReader {
         // Get path to job folder
         String job_dir = dir + (dir.endsWith(File.separator)?"":"/") + job_id + "/";
         // Run ReadVars
-        EPlusWinTools.runReadVars(JEPlusConfig.getDefaultInstance(), job_dir, RVIFile, Frequency, CSVFile);
+        EPlusWinTools.runReadVars(Config, job_dir, RVIFile, Frequency, CSVFile);
         if (UseInCalc) {
             // Read job result file
             File csv = new File(job_dir + CSVFile);

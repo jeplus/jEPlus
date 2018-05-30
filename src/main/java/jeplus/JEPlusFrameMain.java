@@ -142,7 +142,7 @@ public class JEPlusFrameMain extends JFrame {
         initProjectSection();
         initBatchOptions();
 
-        EPlusExecAgents.add(new EPlusAgentLocal (Project.getExecSettings()));
+        EPlusExecAgents.add(new EPlusAgentLocal (JEPlusConfig.getDefaultInstance(), Project.getExecSettings()));
         TrnsysExecAgents.add(new TrnsysAgentLocal (Project.getExecSettings()));
         InselExecAgents.add(new InselAgentLocal (Project.getExecSettings()));
         String [] options = {ExecAgents.get(0).getAgentID()};
@@ -161,7 +161,7 @@ public class JEPlusFrameMain extends JFrame {
         jplProgConfPanel = new JPanelProgConfiguration (null, JEPlusConfig.getDefaultInstance());
         jplIDFConvPanel = new JPanel_IDFVersionUpdater (this, JEPlusConfig.getDefaultInstance(), this.getProject());
         jplPythonPanel = new JPanelRunPython (this, JEPlusConfig.getDefaultInstance(), getProject() == null ? "./" : getProject().resolveWorkDir());
-        jplReadVarsPanel = new JPanel_RunReadVars(this);
+        jplReadVarsPanel = new JPanel_RunReadVars(this, JEPlusConfig.getDefaultInstance());
 //        TpnUtilities.add("Configure Programs", jplProgConfPanel);
         TpnUtilities.add("Run Python", jplPythonPanel);
         TpnUtilities.add("IDF Converter", jplIDFConvPanel);
@@ -294,8 +294,8 @@ public class JEPlusFrameMain extends JFrame {
 
     public void setCurrentProjectFile(String CurrentProjectFile) {
         this.CurrentProjectFile = CurrentProjectFile;
-        if (! JEPlusConfig.getRecentProjects().contains(CurrentProjectFile))
-            JEPlusConfig.getRecentProjects().add(0, CurrentProjectFile);
+        if (! JEPlusConfig.getDefaultInstance().getRecentProjects().contains(CurrentProjectFile))
+            JEPlusConfig.getDefaultInstance().getRecentProjects().add(0, CurrentProjectFile);
         this.setTitle(getVersionInfo() + " - " + CurrentProjectFile);
     }
 
@@ -1871,15 +1871,15 @@ private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN
         }
     }
 
-    // Save EnergyPlus settings
-    String currentdate = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date());
-    JEPlusConfig.getDefaultInstance().saveToFile("jEPlus configuration generated at " + currentdate);
-    // Exit
-    if (this.getFrameCloseOperation() == JEPlusFrameMain.EXIT_ON_CLOSE) {
-        System.exit(-1);
-    }else {
-        this.dispose();
-    }
+        // Save EnergyPlus settings
+        String currentdate = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date());
+        JEPlusConfig.getDefaultInstance().saveAsJSON(new File(JEPlusConfig.DefaultConfigFile));
+        // Exit
+        if (this.getFrameCloseOperation() == JEPlusFrameMain.EXIT_ON_CLOSE) {
+            System.exit(-1);
+        }else {
+            this.dispose();
+        }
 }//GEN-LAST:event_jMenuItemExitActionPerformed
 
 private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
@@ -2696,8 +2696,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         JDialog ConfigDialog = new JDialog (this, "Configuration file: ", true);
         if (jplProgConfPanel == null) {
             jplProgConfPanel = new JPanelProgConfiguration(ConfigDialog, JEPlusConfig.getDefaultInstance());
+        }else {
+            jplProgConfPanel.setHostWindow(ConfigDialog);
         }
-        jplProgConfPanel.setHostWindow(ConfigDialog);
         ConfigDialog.getContentPane().add(jplProgConfPanel);
         ConfigDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         ConfigDialog.setTitle(ConfigDialog.getTitle() + jplProgConfPanel.getConfigFile());
@@ -2938,7 +2939,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                     // Clear console log file content
                     JEPlusConfig.getDefaultInstance().purgeScreenLogFile();
                     // Set recent projects in menu
-                    ArrayList<String> recent = JEPlusConfig.getRecentProjects();
+                    List<String> recent = JEPlusConfig.getDefaultInstance().getRecentProjects();
                     if (recent != null) {
                         int idx = 0;
                         for (int i=0; i<recent.size(); i++) {

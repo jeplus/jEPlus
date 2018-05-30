@@ -22,58 +22,63 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Properties;
-import static jeplus.EPlusConfig.getDefEPlusBinDir;
-import jeplus.event.IF_ConfigChangedEventHandler;
+import java.util.List;
+import java.util.TreeMap;
+import jeplus.data.VersionInfo;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author yzhang
  */
-public class JEPlusConfig extends RadianceConfig {
+public class JEPlusConfig extends ConfigFileNames {
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusConfig.class);
-    
-    protected ArrayList<IF_ConfigChangedEventHandler> Listeners = new ArrayList<> ();
-    public void addListener (IF_ConfigChangedEventHandler listener) { Listeners.add(listener); }
-    public void removeListener (IF_ConfigChangedEventHandler listener) { Listeners.remove(listener); }
-    public void removeAllListeners () { Listeners.clear(); }
-    public void fireConfigChangedEvent () {
-        for (IF_ConfigChangedEventHandler item : Listeners) {
-            if (item != null) { item.configChanged(Config); }
-        }
-    }
-
-    protected final static int NRecentProjs = 5;
-    protected static ArrayList<String> RecentProjects = new ArrayList<>();
-
-    public static ArrayList<String> getRecentProjects() {
-        return RecentProjects;
-    }
     
     /** Static instance of configuration */
     public static JEPlusConfig Config = new JEPlusConfig ();
     public static JEPlusConfig getDefaultInstance () {return Config;}
     public static void setDefaultInstance (JEPlusConfig config) {Config = config;}
-    
     public static JEPlusConfig getNewInstance (String fn) {
-        return new JEPlusConfig(fn);
+        JEPlusConfig cfg = null;
+        try {
+            cfg = loadFromJSON(new File (fn));
+        }catch (IOException ioe) {
+            logger.error("Error loading tools config from " + fn, ioe);
+            cfg = new JEPlusConfig();
+        }
+        return cfg;
     }
 
-    
     /** Reference to configure file */
-    protected String CurrentConfigFile = "jeplus.cfg";
-    @JsonIgnore
-    public String getCurrentConfigFile () { return CurrentConfigFile; }
+    public static String DefaultConfigFile = "tools.json";
+
+    /** EPlus configurations */
+    protected List<EPlusConfig> EPlusList = new ArrayList<>();
+    /** TRNSYS configurations */
+    protected List<TRNSYSConfig> TRNSYSList = new ArrayList<>();
+    /** INSEL configurations */
+    protected List<INSELConfig> INSELList = new ArrayList<>();
+    /** Radiance configurations */
+    protected List<RadianceConfig> RadianceList = new ArrayList<>();
+    /** EPlus configurations */
+    protected transient TreeMap<VersionInfo, EPlusConfig> EPlusConfigs = new TreeMap<>();
+    /** TRNSYS configurations */
+    protected transient TreeMap<String, TRNSYSConfig> TRNSYSConfigs = new TreeMap<>();
+    /** INSEL configurations */
+    protected transient TreeMap<String, INSELConfig> INSELConfigs = new TreeMap<>();
+    /** Radiance configurations */
+    protected transient TreeMap<String, RadianceConfig> RadianceConfigs = new TreeMap<>();
+    /** Current selected EPlus Config */
+    protected transient EPlusConfig CurrentEPlus = null;
+
+    /** Recent projects */
+    protected List<String> RecentProjects = new ArrayList<>();
     
     protected String EPlusVerConvDir = null;
     public String getEPlusVerConvDir() { return EPlusVerConvDir; }
@@ -87,6 +92,8 @@ public class JEPlusConfig extends RadianceConfig {
     public String getPython3EXE() { return Python3EXE; }
     public void setPython3EXE(String Python3EXE) { this.Python3EXE = Python3EXE; fireConfigChangedEvent ();}
 
+    
+    
     protected String PythonArgv = null;
     public String getPythonArgv() { return PythonArgv; }
     public void setPythonArgv(String PythonArgv) { this.PythonArgv = PythonArgv; }
@@ -109,239 +116,116 @@ public class JEPlusConfig extends RadianceConfig {
      */
     public JEPlusConfig () {
         super ();
+        EPlusConfig epcfg = new EPlusConfig();
+        EPlusList.add(epcfg);
+        EPlusConfigs.put(epcfg.getVersion(), epcfg);
+        
+        TRNSYSConfig trcfg = new TRNSYSConfig();
+        TRNSYSList.add(trcfg);
+        TRNSYSConfigs.put("TRNSYS", trcfg);
+        
+        INSELConfig incfg = new INSELConfig();
+        INSELList.add(incfg);
+        INSELConfigs.put("INSEL", incfg);
+        
+        RadianceConfig raycfg = new RadianceConfig();
+        RadianceList.add(raycfg);
+        RadianceConfigs.put("Radiance", raycfg);
     }
 
-    /**
-     * Construct from file
-     * @param fn Configure file name
-     */
-    public JEPlusConfig (String fn) {
-        super ();
-        loadFromFile (fn);
-    }
-
-    
     // ========= Getters and Setters =========
-    
-    /** Set Bin Directory
-     * @param dir */
-    @Override
-    public void setEPlusBinDir(String dir) {
-        EPlusBinDir = dir;
-        EPlusEPMacroEXE = EPlusBinDir + EPlusConfig.getDefEPlusEPMacro();
-        EPlusExpandObjectsEXE = EPlusBinDir + EPlusConfig.getDefEPlusExpandObjects();
-        EPlusEXE = EPlusBinDir + EPlusConfig.getDefEPlusEXEC();
-        EPlusReadVarsEXE = EPlusBinDir + EPlusConfig.getDefEPlusReadVars();
-        fireConfigChangedEvent ();
+
+    public List<EPlusConfig> getEPlusList() {    
+        return EPlusList;
     }
 
-    /** 
-     * Set EnergyPlus executable
-     * @param name 
-     */
-    @Override
-    public void setEPlusEXEC(String name) {
-        EPlusEXE = name;
-        fireConfigChangedEvent ();
+    public void setEPlusList(List<EPlusConfig> EPlusList) {
+        this.EPlusList = EPlusList;
     }
 
-    /** 
-     * Set EnergyPlus ReadVarsESO executable
-     * @param name 
-     */
-    @Override
-    public void setEPlusReadVars(String name) {
-        EPlusReadVarsEXE = name;
-        fireConfigChangedEvent ();
+    public List<TRNSYSConfig> getTRNSYSList() {
+        return TRNSYSList;
     }
 
-    /** 
-     * Set EnergyPlus EPMacro executable
-     * @param name 
-     */
-    @Override
-    public void setEPlusEPMacro(String name) {
-        EPlusEPMacroEXE = name;
-        fireConfigChangedEvent ();
+    public void setTRNSYSList(List<TRNSYSConfig> TRNSYSList) {
+        this.TRNSYSList = TRNSYSList;
     }
 
-    /** 
-     * Set EnergyPlus ExpandObjects executable
-     * @param name 
-     */
-    @Override
-    public void setEPlusExpandObjects(String name) {
-        EPlusExpandObjectsEXE = name;
-        fireConfigChangedEvent ();
+    public List<INSELConfig> getINSELList() {
+        return INSELList;
     }
 
-    /** 
-     * set Screen capture file name
-     * @param ScreenFile 
-     */
-    @Override
-    public void setScreenFile(String ScreenFile) {
-        this.ScreenFile = ScreenFile;
-        fireConfigChangedEvent ();
+    public void setINSELList(List<INSELConfig> INSELList) {
+        this.INSELList = INSELList;
     }
 
-    /**
-     * Set Bin Directory
-     * @param dir
-     */
-    @Override
-    public void setTRNYSBinDir(String dir) {
-        TRNSYSBinDir = dir;
-        TRNSYSEXE = new File (TRNSYSBinDir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath();
-        fireConfigChangedEvent ();
+    public List<RadianceConfig> getRadianceList() {
+        return RadianceList;
     }
 
-    /**
-     * Set TRNSYS executable
-     * @param name
-     */
-    @Override
-    public void setTRNSYSEXEC(String name) {
-        TRNSYSEXE = name;
-        fireConfigChangedEvent ();
+    public void setRadianceList(List<RadianceConfig> RadianceList) {
+        this.RadianceList = RadianceList;
     }
 
-    /**
-     * Set Bin Directory
-     * @param dir
-     */
-    @Override
-    public void setInselBinDir(String dir) {
-        InselBinDir = dir;
-        InselEXEC = new File (InselBinDir + INSELConfig.getDefInselEXEC()).getAbsolutePath();
-        fireConfigChangedEvent ();
+    @JsonIgnore
+    public TreeMap<VersionInfo, EPlusConfig> getEPlusConfigs() {    
+        return EPlusConfigs;
     }
 
-    /**
-     * Set TRNSYS executable
-     * @param name
-     */
-    @Override
-    public void setInselEXEC(String name) {
-        InselEXEC = name;
-        fireConfigChangedEvent ();
+    @JsonIgnore
+    public void setEPlusConfigs(TreeMap<VersionInfo, EPlusConfig> EPlusConfigs) {
+        this.EPlusConfigs = EPlusConfigs;
     }
 
-    
-    // ========= End =========
-    /**
-     * Load configuration from text file (java property format)
-     * @param fn Configure file name
-     * @return Load successful or not
-     */
-    @Override
-    public final boolean loadFromFile (String fn) {
-        Properties prop = new Properties ();
-        try {
-            prop.load(new FileReader (fn));
-            this.CurrentConfigFile = fn;
-        }catch (FileNotFoundException fnfe) {
-            logger.error("Specified configue file " + fn + " is not found.");
-            return false;
-        }catch (Exception ex) {
-            logger.error("Error loading configure file " + fn, ex);
-            return false;
-        }
-        EPlusBinDir = prop.getProperty("EPlusBinDir", getDefEPlusBinDir());
-        EPlusEPMacroEXE = prop.getProperty("EPlusEPMacroEXE", EPlusBinDir + getDefEPlusEPMacro());
-        EPlusExpandObjectsEXE = prop.getProperty("EPlusExpandObjectsEXE", EPlusBinDir + getDefEPlusExpandObjects());
-        EPlusEXE = prop.getProperty("EPlusEXE", EPlusBinDir + getDefEPlusEXEC());
-        EPlusReadVarsEXE = prop.getProperty("EPlusReadVarsEXE", EPlusBinDir + getDefEPlusReadVars());
-        EPlusVerConvDir = prop.getProperty("EPlusVerConvDir", null);
-        Python2EXE = prop.getProperty("Python2EXE", null);
-        Python3EXE = prop.getProperty("Python3EXE", null);
-        PythonArgv = prop.getProperty("PythonArgv", null);
-        PythonScript = prop.getProperty("PythonScript", null);
-        JESSClientDir = prop.getProperty("JESSClientDir", null);
-        JEPlusEADir = prop.getProperty("JEPlusEADir", null);
-        TRNSYSBinDir = prop.getProperty("TRNSYSBinDir", getDefTRNSYSBinDir());
-        TRNSYSEXE = prop.getProperty("TRNSYSEXE", TRNSYSBinDir + getDefTRNSYSEXEC());
-        InselBinDir = prop.getProperty("InselBinDir", getDefInselBinDir());
-        InselEXEC = prop.getProperty("InselEXE", InselBinDir + getDefInselEXEC());
-        RadianceBinDir = prop.getProperty("RadianceBinDir", null);
-        RadianceLibDir = prop.getProperty("RadianceLibDir", null);
-        DaySimBinDir = prop.getProperty("DaySimBinDir", null);
-        DaySimLibDir = prop.getProperty("DaySimLibDir", null);
-        //NThreads = Integer.parseInt(prop.getProperty("NThreads", "0"));
-        ScreenFile = prop.getProperty("ScreenFile", "console.log");
-        if (ScreenFile.trim().length() == 0) {
-            ScreenFile = null;
-        }
-        for (int i=0; i<NRecentProjs; i++) {
-            RecentProjects.add(prop.getProperty("RecentProject" + i, null));
-        }
-        fireConfigChangedEvent ();
-        return true;
+    @JsonIgnore
+    public TreeMap<String, TRNSYSConfig> getTRNSYSConfigs() {
+        return TRNSYSConfigs;
     }
 
-    /**
-     * Save configuration to file in java property format
-     * @param comment Comment line to be added to the file
-     * @return Save successful or not
-     */
-    public boolean saveToFile (String comment) {
-        Properties prop = new Properties ();
-        try {
-            prop.setProperty("EPlusBinDir", EPlusBinDir);
-            prop.setProperty("EPlusEPMacroEXE", EPlusEPMacroEXE);
-            prop.setProperty("EPlusExpandObjectsEXE", EPlusExpandObjectsEXE);
-            prop.setProperty("EPlusEXE", EPlusEXE);
-            prop.setProperty("EPlusReadVarsEXE", EPlusReadVarsEXE);
-            prop.setProperty("TRNSYSBinDir", TRNSYSBinDir);
-            prop.setProperty("TRNSYSEXE", TRNSYSEXE);
-            prop.setProperty("InselBinDir", InselBinDir);
-            prop.setProperty("InselEXE", InselEXEC);
-            if (ScreenFile != null) {
-                prop.setProperty("ScreenFile", ScreenFile);
-            }
-            if (EPlusVerConvDir != null) {
-                prop.setProperty("EPlusVerConvDir", EPlusVerConvDir);
-            }
-            if (Python2EXE != null) {
-                prop.setProperty("Python2EXE", Python2EXE);
-            }
-            if (Python3EXE != null) {
-                prop.setProperty("Python3EXE", Python3EXE);
-            }
-            if (PythonArgv != null) {
-                prop.setProperty("PythonArgv", PythonArgv);
-            }
-            if (PythonScript != null) {
-                prop.setProperty("PythonScript", PythonScript);
-            }
-            if (JESSClientDir != null) {
-                prop.setProperty("JESSClientDir", JESSClientDir);
-            }
-            if (JEPlusEADir != null) {
-                prop.setProperty("JEPlusEADir", JEPlusEADir);
-            }
-            if (RadianceBinDir != null) {
-                prop.setProperty("RadianceBinDir", RadianceBinDir);
-            }
-            if (RadianceLibDir != null) {
-                prop.setProperty("RadianceLibDir", RadianceLibDir);
-            }
-            if (DaySimBinDir != null) {
-                prop.setProperty("DaySimBinDir", DaySimBinDir);
-            }
-            if (DaySimLibDir != null) {
-                prop.setProperty("DaySimLibDir", DaySimLibDir);
-            }
-            for (int i=0; i<Math.min(NRecentProjs, RecentProjects.size()); i++) {
-                if (RecentProjects.get(i) != null) prop.setProperty("RecentProject" + i, RecentProjects.get(i));
-            }
-            prop.store(new FileWriter (this.CurrentConfigFile), comment);
-        }catch (Exception ex) {
-            logger.error("Error saving configuration to " + CurrentConfigFile, ex);
-            return false;
-        }
-        return true;
+    @JsonIgnore
+    public void setTRNSYSConfigs(TreeMap<String, TRNSYSConfig> TRNSYSConfigs) {
+        this.TRNSYSConfigs = TRNSYSConfigs;
     }
+
+    @JsonIgnore
+    public TreeMap<String, INSELConfig> getINSELConfigs() {
+        return INSELConfigs;
+    }
+
+    @JsonIgnore
+    public void setINSELConfigs(TreeMap<String, INSELConfig> INSELConfigs) {
+        this.INSELConfigs = INSELConfigs;
+    }
+
+    @JsonIgnore
+    public TreeMap<String, RadianceConfig> getRadianceConfigs() {
+        return RadianceConfigs;
+    }
+
+    @JsonIgnore
+    public void setRadianceConfigs(TreeMap<String, RadianceConfig> RadianceConfigs) {
+        this.RadianceConfigs = RadianceConfigs;
+    }
+
+    @JsonIgnore
+    public EPlusConfig getCurrentEPlus() {
+        return CurrentEPlus;
+    }
+
+    @JsonIgnore
+    public void setCurrentEPlus(EPlusConfig CurrentEPlus) {
+        this.CurrentEPlus = CurrentEPlus;
+    }
+
+    public List<String> getRecentProjects() {
+        return RecentProjects;
+    }
+
+    public void setRecentProjects(List<String> RecentProjects) {    
+        this.RecentProjects = RecentProjects;
+    }
+
+    // ========= End getters and setters =========
 
     /**
      * Save this configuration to a JSON file
@@ -354,6 +238,16 @@ public class JEPlusConfig extends RadianceConfig {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(format);
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        // Update config lists
+        EPlusList.clear();
+        EPlusList.addAll(EPlusConfigs.values());
+        TRNSYSList.clear();
+        TRNSYSList.addAll(TRNSYSConfigs.values());
+        INSELList.clear();
+        INSELList.addAll(INSELConfigs.values());
+        RadianceList.clear();
+        RadianceList.addAll(RadianceConfigs.values());
+        // Write to file
         try (FileOutputStream fw = new FileOutputStream(file); ) {
             mapper.writeValue(fw, this);
             logger.info("Configuration saved to " + file.getAbsolutePath());
@@ -374,8 +268,23 @@ public class JEPlusConfig extends RadianceConfig {
         // Read JSON
         ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
         JEPlusConfig config = mapper.readValue(file, JEPlusConfig.class);
-        // Set current file
-        config.CurrentConfigFile = file.getAbsolutePath();
+        // Construct maps
+        config.EPlusConfigs.clear();
+        for (EPlusConfig cfg: config.EPlusList) {
+            config.EPlusConfigs.put(cfg.getVersion(), cfg);
+        }
+        config.TRNSYSConfigs.clear();
+        for (TRNSYSConfig cfg: config.TRNSYSList) {
+            config.TRNSYSConfigs.put("TRNSYS", cfg);
+        }
+        config.INSELConfigs.clear();
+        for (INSELConfig cfg: config.INSELList) {
+            config.INSELConfigs.put("INSEL", cfg);
+        }
+        config.RadianceConfigs.clear();
+        for (RadianceConfig cfg: config.RadianceList) {
+            config.RadianceConfigs.put("Radiance", cfg);
+        }
         // Return
         return config;
     }
@@ -390,5 +299,9 @@ public class JEPlusConfig extends RadianceConfig {
                 scrfile.delete();
             }
         }
+    }
+    
+    public EPlusConfig findMatchingEPlusConfig (String idf_ver) {
+        return this.EPlusConfigs.get(new VersionInfo (idf_ver));
     }
 }

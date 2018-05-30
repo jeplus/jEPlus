@@ -107,6 +107,9 @@ public class JPanel_ScriptItmeEditor extends javax.swing.JPanel {
     protected final void setScriptItem (RVX_ScriptItem script) {
         Script = script;
         txtScriptFile.setText(Script.getFileName());
+        if (Script.getPythonVersion().equalsIgnoreCase("jython")) {
+            Script.setPythonVersion("python2");
+        }
         cboLanguage.setSelectedItem(RVX_ScriptItem.Language.valueOf(Script.getPythonVersion()));
         txtArgs.setText(Script.getArguments());
         txtResultTable.setText(Script.getTableName());

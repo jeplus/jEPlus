@@ -39,9 +39,6 @@ public class ApiTester {
 
     public static void main (String [] args) throws IOException {
         
-        // load jEPlus configuration file
-        JEPlusConfig.setDefaultInstance(new JEPlusConfig("jeplus.cfg"));
-
         // load project file
         JEPlusProject Project = JEPlusProject.loadAsXML(new File("example_3-RVX_v1.6_E+v8.3/project.jep")); // Or your own project file
 
@@ -49,7 +46,7 @@ public class ApiTester {
         EPlusBatch SimManager = new EPlusBatch (null, Project);
 
         // Set simulation agent
-        SimManager.setAgent(new EPlusAgentLocal ( Project.getExecSettings()));
+        SimManager.setAgent(new EPlusAgentLocal ( JEPlusConfig.getDefaultInstance(), Project.getExecSettings()));
 
         // Validate project
         SimManager.validateProject();

@@ -21,10 +21,9 @@ package jeplus.gui; //
 import java.awt.Color;
 import java.awt.Window;
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import javax.swing.JFileChooser;
-import jeplus.JEPlusConfig;
+import jeplus.ConfigFileNames;
+import jeplus.EPlusConfig;
 import jeplus.event.IF_ConfigChangedEventHandler;
 
 /**
@@ -37,10 +36,13 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
 
     protected String title = "E+ Executables";
     protected final JFileChooser fc = new JFileChooser("./");
-    protected JEPlusConfig Config = null;
-    public void setConfig(JEPlusConfig config) {
-        Config = config;
+    protected EPlusConfig Config = null;
+    public final void setConfig(EPlusConfig config) {
+        if (Config != config) {
+            Config = config;
+        }
         initSettings();
+        checkSettings();
     }
     protected Window HostWindow = null;
 
@@ -49,11 +51,9 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
      * @param hostwindow 
      * @param config 
      */
-    public JPanel_EPlusSettingsDetailed(Window hostwindow, JEPlusConfig config) {
+    public JPanel_EPlusSettingsDetailed(Window hostwindow, EPlusConfig config) {
         initComponents();
-        Config = config;
-        initSettings();
-        checkSettings();
+        setConfig(config);
         HostWindow = hostwindow;
     }
 
@@ -138,6 +138,7 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
         jLabel5 = new javax.swing.JLabel();
         cmdSelectEPMacro = new javax.swing.JButton();
         txtEPMacroEXE = new javax.swing.JTextField();
+        jPanel1 = new javax.swing.JPanel();
         cmdSave = new javax.swing.JButton();
 
         jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -192,7 +193,7 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel13.setText("Energy+ EP-Macro");
 
-        jLabel15.setText("command:");
+        jLabel15.setText("Exceutables:");
 
         txtReadVarEXE.setEditable(false);
         txtReadVarEXE.setText("ReadVarsESO.exe");
@@ -216,21 +217,23 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
         txtEPMacroEXE.setText("EPMacro.exe");
         txtEPMacroEXE.setToolTipText("The command may vary with different versions of EnergyPlus. Edit this field if necessary. If the executable is located in a different location, please specify the relative diretory to the Energy+ binary directory above. Case-sensitive in Linux.");
 
-        cmdSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/save1.png"))); // NOI18N
-        cmdSave.setText("Save to jeplus.cfg");
+        cmdSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/check.png"))); // NOI18N
+        cmdSave.setText("Done");
         cmdSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdSaveActionPerformed(evt);
             }
         });
+        jPanel1.add(cmdSave);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -252,10 +255,7 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
                             .addComponent(cmdSelectEPMacro, 0, 1, Short.MAX_VALUE)
                             .addComponent(cmdSelectEPlusDir, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
                             .addComponent(cmdSelectReadVars, javax.swing.GroupLayout.Alignment.LEADING, 0, 1, Short.MAX_VALUE)
-                            .addComponent(cmdSelectExpandObjects, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(cmdSave)))
+                            .addComponent(cmdSelectExpandObjects, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -266,7 +266,7 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
                     .addComponent(jLabel6)
                     .addComponent(txtBinDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmdSelectEPlusDir))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel15)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -288,8 +288,8 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
                     .addComponent(cmdSelectReadVars)
                     .addComponent(txtReadVarEXE, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4))
-                .addGap(18, 18, 18)
-                .addComponent(cmdSave)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -377,7 +377,7 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
 }//GEN-LAST:event_cmdSelectEPMacroActionPerformed
 
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
-        Config.saveToFile("jEPlus configuration generated at " + SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date()));
+//        Config.saveToFile("jEPlus configuration generated at " + SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date()));
         HostWindow.dispose();
     }//GEN-LAST:event_cmdSaveActionPerformed
 
@@ -396,6 +396,7 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtBinDir;
     private javax.swing.JTextField txtEPMacroEXE;
     private javax.swing.JTextField txtEPlusEXE;
@@ -405,9 +406,8 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void configChanged(JEPlusConfig config) {
-        initSettings();
-        checkSettings();
+    public void configChanged(ConfigFileNames config) {
+        setConfig((EPlusConfig)config);
     }
 
 }

@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
+import jeplus.ConfigFileNames;
 import jeplus.EPlusConfig;
 import jeplus.EPlusTask;
 import jeplus.JEPlusConfig;
@@ -765,7 +766,10 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void configChanged(JEPlusConfig config) {
+    public void configChanged(ConfigFileNames config) {
+        if (Config != config) {
+            Config = (JEPlusConfig)config;
+        }
         updateDisplay();
     }
 }

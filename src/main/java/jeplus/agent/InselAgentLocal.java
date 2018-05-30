@@ -42,6 +42,8 @@ import jeplus.postproc.*;
  */
 public class InselAgentLocal extends EPlusAgent {
 
+    protected INSELConfig Config = null;
+
     /**
      * Construct with Exec settings
      * @param settings Reference to an existing Exec settings instance
@@ -50,7 +52,8 @@ public class InselAgentLocal extends EPlusAgent {
         super("Local batch simulation controller", settings);
         this.QueueCapacity = 10000;
         this.attachDefaultCollector();
-        SettingsPanel = new jeplus.gui.JPanel_InselSettings (JEPlusConfig.getDefaultInstance());
+        Config = JEPlusConfig.getDefaultInstance().getINSELConfigs().get("INSEL");
+        SettingsPanel = new jeplus.gui.JPanel_InselSettings (Config);
     }
 
     /**
@@ -262,8 +265,8 @@ public class InselAgentLocal extends EPlusAgent {
      */
     @Override
     public boolean checkAgentSettings() {
-        String bindir = JEPlusConfig.getDefaultInstance().getResolvedInselBinDir();
-        String exe = JEPlusConfig.getDefaultInstance().getResolvedInselEXEC();
+        String bindir = Config.getResolvedInselBinDir();
+        String exe = Config.getResolvedInselEXEC();
 
         boolean success = new File(exe).exists();
         if (! success) {

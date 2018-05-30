@@ -64,7 +64,7 @@ public class RVX_ScriptItem implements Serializable {
     }
 
     public void setPythonVersion(String PythonVersion) {
-        this.PythonVersion = PythonVersion;
+        this.PythonVersion = PythonVersion.equalsIgnoreCase("jython") ? "python2" : PythonVersion;
     }
 
     public String getArguments() {

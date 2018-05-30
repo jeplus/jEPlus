@@ -18,7 +18,6 @@
  ***************************************************************************/
 package jeplus.agent;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.JFrame;
@@ -26,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import jeplus.*;
 import jeplus.data.ExecutionOptions;
+import jeplus.data.VersionInfo;
 import jeplus.gui.JFrameAgentLocalMonitor;
 import jeplus.gui.JPanel_LocalControllerOptions;
 
@@ -40,15 +40,19 @@ import jeplus.gui.JPanel_LocalControllerOptions;
  */
 public class EPlusAgentLocal extends EPlusAgent {
     
+    JEPlusConfig Config = null;
+    
     /**
      * Construct with Exec settings
+     * @param config JEPlus config instance containing multiple EPlusConfig objects
      * @param settings Reference to an existing Exec settings instance
      */
-    public EPlusAgentLocal (ExecutionOptions settings) {
+    public EPlusAgentLocal (JEPlusConfig config, ExecutionOptions settings) {
         super("Local batch simulation controller", settings);
+        this.Config = config;
         this.QueueCapacity = 10000;
         this.attachDefaultCollector();
-        SettingsPanel = new jeplus.gui.JPanel_EPlusSettings (JEPlusConfig.getDefaultInstance());
+        SettingsPanel = new jeplus.gui.JPanel_EPlusSettings (Config);
     }
     
     /**
@@ -228,76 +232,24 @@ public class EPlusAgentLocal extends EPlusAgent {
      */
     @Override
     public boolean checkAgentSettings() {
-        String bindir = JEPlusConfig.getDefaultInstance().getResolvedEPlusBinDir();
-        String expandobjects = JEPlusConfig.getDefaultInstance().getResolvedExpandObjects();
-        String epmacro = JEPlusConfig.getDefaultInstance().getResolvedEPMacro();
-        String exe = JEPlusConfig.getDefaultInstance().getResolvedEPlusEXEC();
-        String idd = EPlusConfig.getEPDefIDD();
-        String readvars = JEPlusConfig.getDefaultInstance().getResolvedReadVars();
-
-        boolean success = true;
-        boolean ok = new File(exe).exists();
-        if (! ok) {
+        boolean success = false;
+        VersionInfo IdfVer = new VersionInfo (this.getJobOwner().getProject().getEPlusModelVersion());
+        success = Config.getEPlusConfigs().containsKey(IdfVer);
+//        for (VersionInfo ver : Config.getEPlusConfigs().keySet()) {
+//            // Check if E+ version is for the current project
+//            VersionInfo EpVer = new VersionInfo (ver);
+//            if (IdfVer.equals(EpVer)) { 
+//                success = true;
+//            }
+//        }
+        if (! success) {
             try {
-                this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Error: " + exe + " is not accessible.");
-            }catch (Exception ex) {
-                System.err.println("[" + this.AgentID + "]: Settings error: " + exe + " is not accessible.");
-            }
-        }
-        success &= ok;
-        ok = new File(epmacro).exists();
-        if (! ok) { 
-            try {
-                this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Error: " + epmacro + " is not accessible.");
-            }catch (Exception ex) {
-                System.err.println("[" + this.AgentID + "]: Settings error: " + epmacro + " is not accessible.");
-            }
-        }
-        success &= ok;
-        ok = new File(bindir + idd).exists();
-        if (! ok) { 
-            try {
-                this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Error: " + bindir + idd + " is not accessible.");
-            }catch (Exception ex) {
-                System.err.println("[" + this.AgentID + "]: Settings error: " + bindir + idd + " is not accessible.");
-            }
-        }
-        success &= ok;
-        ok = new File(readvars).exists();
-        if (! ok) { 
-            try {
-                this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Error: " + readvars + " is not accessible.");
-            }catch (Exception ex) {
-                System.err.println("[" + this.AgentID + "]: Settings error: " + readvars + " is not accessible.");
-            }
-        }
-        success &= ok;
-        ok = new File(expandobjects).exists();
-        if (! ok) { 
-            try {
-                this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Error: " + expandobjects + " is not accessible.");
-            }catch (Exception ex) {
-                System.err.println("[" + this.AgentID + "]: Settings error: " + expandobjects + " is not accessible.");
-            }
-        }
-        success &= ok;
-        // Check if E+ version is for the current project
-        String EpVer = JEPlusConfig.getDefaultInstance().getEPlusVersion();
-        String IdfVer = this.getJobOwner().getProject().getEPlusModelVersion();
-        ok = IdfVer != null && EpVer.startsWith(IdfVer);
-        if (! ok) { 
-            try {
-                this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Warning: E+ version (" + 
-                        EpVer + ") is different than the project's (" +
-                        IdfVer + ").");
+                this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find an E+ installation to handle model version " + IdfVer + " of the project!");
+                this.JobOwner.getBatchInfo().setValidationSuccessful(false);
             }catch (Exception ex) {
                 System.err.println("[" + this.AgentID + "]: Version checking error. ");
             }
         }
-        success &= ok;
-        try {
-            this.JobOwner.getBatchInfo().setValidationSuccessful(success);
-        }catch (Exception ex) {}
         return success;
     }
 }

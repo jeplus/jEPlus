@@ -39,7 +39,7 @@ public class Tester {
         new Thread (new Runnable () {
             @Override
             public void run () {
-                EPlusWinTools.runEPlus(config, workdir, false, wrapper);
+                EPlusWinTools.runEPlus(config.findMatchingEPlusConfig("7.2"), workdir, false, wrapper);
             }
         }).start();
         System.out.println("E+ started...");

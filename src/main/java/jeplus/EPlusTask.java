@@ -22,7 +22,6 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -387,7 +386,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
      * @param config
      * @return Operation successful or not
      */
-    public boolean preprocessInputFile (JEPlusConfig config) {
+    public boolean preprocessInputFile (EPlusConfig config) {
         boolean ok = true;
         String[] SearchStrings = SearchStringList.toArray(new String[0]);
         String[] Newvals = AltValueList.toArray(new String[0]);
@@ -471,7 +470,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         return ok;
     }
 
-    public boolean runPythonScriptOnIDF (JEPlusConfig config) {
+    public boolean runPythonScriptOnIDF (EPlusConfig config) {
         boolean ok = true;
         // Get path to job folder
         String job_dir = getWorkingDir();
@@ -521,22 +520,27 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
     @Override
     public void run() {
         Executed = true;
-        // Prepare work directory
-        boolean ok = EPlusWinTools.prepareWorkDir(JEPlusConfig.getDefaultInstance(), getWorkingDir());
-        // Copy weather and rvi files
-        ok = ok && EPlusWinTools.copyWorkFiles(getWorkingDir(), WorkEnv.WeatherDir + WorkEnv.WeatherFile, WorkEnv.isRVX() ? null : WorkEnv.RVIDir + WorkEnv.RVIFile);
-        // Write IDF file
-        ok = ok && this.preprocessInputFile(JEPlusConfig.getDefaultInstance());
-        // Run Python script 
-        ok = ok && this.runPythonScriptOnIDF (JEPlusConfig.getDefaultInstance());
-        // Ready to run EPlus
-        if (ok) {
-            int code = EPlusWinTools.runEPlus(JEPlusConfig.getDefaultInstance(), getWorkingDir(), false);
-            ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
-        }
-        // Remove temperory files/dir if required
-        if (ok) {
-            ok = ok && EPlusWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles);
+        // EPlus config
+        EPlusConfig config = JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(WorkEnv.getEPlusVersion());
+        boolean ok = false;
+        if (config != null) {
+            // Prepare work directory
+            ok = EPlusWinTools.prepareWorkDir(config, getWorkingDir());
+            // Copy weather and rvi files
+            ok = ok && EPlusWinTools.copyWorkFiles(getWorkingDir(), WorkEnv.WeatherDir + WorkEnv.WeatherFile, WorkEnv.isRVX() ? null : WorkEnv.RVIDir + WorkEnv.RVIFile);
+            // Write IDF file
+            ok = ok && this.preprocessInputFile(config);
+            // Run Python script 
+            ok = ok && this.runPythonScriptOnIDF (config);
+            // Ready to run EPlus
+            if (ok) {
+                int code = EPlusWinTools.runEPlus(config, getWorkingDir(), false);
+                ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
+            }
+            // Remove temperory files/dir if required
+            if (ok) {
+                ok = EPlusWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles);
+            }
         }
         ResultAvailable = ok;
     }

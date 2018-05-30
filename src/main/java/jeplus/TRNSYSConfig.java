@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.3
  * @since 0.1
  */
-public class TRNSYSConfig extends EPlusConfig {
+public class TRNSYSConfig extends ConfigFileNames {
 
     /** Logger */
     private final static org.slf4j.Logger logger = LoggerFactory.getLogger(TRNSYSConfig.class);
@@ -50,27 +50,6 @@ public class TRNSYSConfig extends EPlusConfig {
      * TRNSYS executable file
      */
     private static final String TRNSYSEXEC_WIN = "Exe/TRNexe.exe"; // TRNSYS windows exec
-    /**
-     * Dynamic library located in Exe
-     */
-    private static final String TRNSYSTRNDLL = "TRNDLL.dll";
-    private static final String TRNSYSTRNDLLLIB = "TRNDLL.lib";
-    /**
-     * Files located in Exe
-     */
-    private static final String TRdforrtDLL = "dforrt.dll";
-    private static final String TRdforrtdDLL = "dforrtd.dll";
-    private static final String TRlibifcoremdDLL = "libifcoremd.dll";
-    private static final String TRlibifcoremddDLL = "libifcoremdd.dll";
-    private static final String TRlibifcorertDLL = "libifcorert.dll";
-    private static final String TRlibifcorertdDLL = "libifcorertd.dll";
-    private static final String TRlibifportmdDLL = "libifportmd.dll";
-    private static final String TRlibmmdDLL = "libmmd.dll";
-    private static final String TRlibmmddDLL = "libmmdd.dll";
-    private static final String TRmsvcr71DLL = "msvcr71.dll";
-    private static final String TRmsvcr71dDLL = "msvcr71d.dll";
-    private static final String TRmsvcrtDLL = "msvcrt.dll";
-    private static final String TRmsvcrtdDLL = "msvcrtd.dll";
     
     // File types - contants start from 30
     public static final int DCK = 30;
@@ -122,7 +101,6 @@ public class TRNSYSConfig extends EPlusConfig {
         ScreenFile = "jeplus.log";
     }
 
-    @Override
     public boolean loadFromFile(String fn) {
         Properties prop = new Properties();
         try {
@@ -207,8 +185,10 @@ public class TRNSYSConfig extends EPlusConfig {
     /**
      * Set Bin Directory
      */
-    public void setTRNYSBinDir(String dir) {
+    public void setTRNSYSBinDir(String dir) {
         TRNSYSBinDir = dir;
+        TRNSYSEXE = new File (TRNSYSBinDir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath();
+        fireConfigChangedEvent ();
     }
 
     /**
@@ -240,6 +220,7 @@ public class TRNSYSConfig extends EPlusConfig {
      */
     public void setTRNSYSEXEC(String name) {
         TRNSYSEXE = name;
+        fireConfigChangedEvent ();
     }
 
     /**
@@ -339,7 +320,7 @@ public class TRNSYSConfig extends EPlusConfig {
                         case TRLST:
                             return (extension.equals(".lst"));
                         default:
-                            return EPlusConfig.getFileFilter(type).accept(f);
+                            return ConfigFileNames.getFileFilter(type).accept(f);
                     }
                 }
                 return false;
@@ -374,7 +355,7 @@ public class TRNSYSConfig extends EPlusConfig {
                     case TRLST:
                         return "Extended TRNSYS output file to check problems in the running (.LST)";
                     default:
-                        return EPlusConfig.getFileFilter(type).getDescription();
+                        return ConfigFileNames.getFileFilter(type).getDescription();
                 }
 
             }

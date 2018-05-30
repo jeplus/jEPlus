@@ -23,9 +23,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import javax.swing.filechooser.FileFilter;
+import jeplus.data.VersionInfo;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
 
@@ -38,22 +40,16 @@ import org.slf4j.LoggerFactory;
  * @version 0.5c
  * @since 0.1
  */
-public class EPlusConfig implements Serializable {
+public class EPlusConfig extends ConfigFileNames {
 
     /** Logger */
     private final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusConfig.class);
 
-    /** This is the working directory of the program */
-    protected static String UserBaseDir = System.getProperty("user.dir") + File.separator;
-    
-    //public static final String FileSeparator = System.getProperty("file.separator");
-    
     // File type constants
     public static final int IDF = 0;
     public static final int EPW = 1;
     public static final int STAT = 2;
     public static final int MTR = 3;
-    public static final int CSV = 4;
     public static final int ESO = 5;
     public static final int IDD = 6;
     public static final int INI = 7;
@@ -62,25 +58,12 @@ public class EPlusConfig implements Serializable {
     public static final int EPINPUT = 10;
     public static final int EPOUTPUT = 11;
     public static final int EPEXE = 12;
-    public static final int ALL = 13;
-    public static final int EPUSEROBJ = 14;
-    public static final int EPUSERTXT = 15;
     public static final int IMF = 16;
     public static final int JEPLUS_INTERM = 17;
-    public static final int LIST = 18;
-    public static final int PBS = 19;
-    public static final int CFG = 20;
-    public static final int JEP = 21;
-    public static final int ZIP = 22;
-    public static final int JSON = 23;
-    public static final int PYTHON = 24;
-    public static final int XML = 25;
-    public static final int RVX = 26;
-
 
     /** Bin Directory */
-    private static final String EPlusBinDir_WIN = "C:/EnergyPlusV8-1-0/";
-    private static final String EPlusBinDir_LIN = "/usr/local/EnergyPlus-8-1-0/";
+    private static final String EPlusBinDir_WIN = "C:/EnergyPlusV8-7-0/";
+    private static final String EPlusBinDir_LIN = "/usr/local/EnergyPlus-8-7-0/";
 
     /** Interface for EnergyPlus executable */
     private static final String EPlusEPMacro_WIN = "EPMacro.exe"; // Eplus windows EPMacro
@@ -139,8 +122,11 @@ public class EPlusConfig implements Serializable {
     protected String EPlusEXE = null;
     protected String EPlusReadVarsEXE = null;
     protected String EPlusExpandObjectsEXE = null;
-    protected String ScreenFile = "console.log";
     protected int    NThreads = 0;
+    protected VersionInfo Version = null;
+    
+    /** This config is valid or not */
+    protected boolean Valid = false;
 
     public EPlusConfig () {
         EPlusBinDir = getDefEPlusBinDir();
@@ -149,6 +135,8 @@ public class EPlusConfig implements Serializable {
         EPlusReadVarsEXE = EPlusBinDir + getDefEPlusReadVars();
         EPlusExpandObjectsEXE = EPlusBinDir + getDefEPlusExpandObjects();
         ScreenFile = "console.log"; // no screen log file if set to null
+        Version = new VersionInfo ("8.7");
+        Valid = false;
     }
     
     public boolean loadFromFile (String fn) {
@@ -171,7 +159,47 @@ public class EPlusConfig implements Serializable {
         return true;
     }
 
-    /** Get Default Bin Directory */
+    public List<String> validate () {
+        String bindir = getResolvedEPlusBinDir();
+        String expandobjects = getResolvedExpandObjects();
+        String epmacro = getResolvedEPMacro();
+        String exe = getResolvedEPlusEXEC();
+        String idd = getEPDefIDD();
+        String readvars = getResolvedReadVars();
+
+        List<String> invalid = new ArrayList<> ();
+        boolean ok = new File(bindir + idd).exists();
+        if (! ok) {
+            invalid.add(this.getEPlusBinDir());
+        }
+        Valid = ok;
+        ok = new File(exe).exists();
+        if (! ok) {
+            invalid.add(getEPlusEXEC());
+        }
+        Valid &= ok;
+        ok = new File(epmacro).exists();
+        if (! ok) {
+            invalid.add(this.getEPlusEPMacro());
+        }
+        Valid &= ok;
+        ok = new File(readvars).exists();
+        if (! ok) { 
+            invalid.add(this.getEPlusReadVars());
+        }
+        Valid &= ok;
+        ok = new File(expandobjects).exists();
+        if (! ok) { 
+            invalid.add(this.getEPlusExpandObjects());
+        }
+        Valid &= ok;
+        return invalid;
+    }
+    
+    /** 
+     * Get Default Bin Directory
+     * @return Default E+ binary directory depending on Winows or Linux distributions
+     */
     public static String getDefEPlusBinDir() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPlusBinDir_WIN;
@@ -193,9 +221,19 @@ public class EPlusConfig implements Serializable {
         return dir;
     }
 
-    /** Set Bin Directory */
+    /** 
+     * Set Bin Directory
+     * @param dir 
+     */
     public void setEPlusBinDir(String dir) {
         EPlusBinDir = dir;
+        EPlusEPMacroEXE = EPlusBinDir + EPlusConfig.getDefEPlusEPMacro();
+        EPlusExpandObjectsEXE = EPlusBinDir + EPlusConfig.getDefEPlusExpandObjects();
+        EPlusEXE = EPlusBinDir + EPlusConfig.getDefEPlusEXEC();
+        EPlusReadVarsEXE = EPlusBinDir + EPlusConfig.getDefEPlusReadVars();
+        this.validate();
+        this.getEPlusVersion();
+        fireConfigChangedEvent ();
     }
 
     /** Get Default EnergyPlus executable */
@@ -222,6 +260,7 @@ public class EPlusConfig implements Serializable {
     /** Set EnergyPlus executable */
     public void setEPlusEXEC(String name) {
         EPlusEXE = name;
+        fireConfigChangedEvent ();
     }
 
     /** Get Default EnergyPlus ReadVarsESO executable */
@@ -248,6 +287,7 @@ public class EPlusConfig implements Serializable {
     /** Set EnergyPlus ReadVarsESO executable */
     public void setEPlusReadVars(String name) {
         EPlusReadVarsEXE = name;
+        fireConfigChangedEvent ();
     }
 
     /** Get Default EnergyPlus EPMacro executable */
@@ -274,6 +314,7 @@ public class EPlusConfig implements Serializable {
     /** Set EnergyPlus EPMacro executable */
     public void setEPlusEPMacro(String name) {
         EPlusEPMacroEXE = name;
+        fireConfigChangedEvent ();
     }
 
     /** Get Default EnergyPlus ExpandObjects executable */
@@ -300,18 +341,25 @@ public class EPlusConfig implements Serializable {
     /** Set EnergyPlus ExpandObjects executable */
     public void setEPlusExpandObjects(String name) {
         EPlusExpandObjectsEXE = name;
+        fireConfigChangedEvent ();
     }
 
-    /** get Screen capture file name */
-    public String getScreenFile () {
-        return ScreenFile;
+    public VersionInfo getVersion() {
+        return Version;
     }
 
-    /** set Screen capture file name */
-    public void setScreenFile(String ScreenFile) {
-        this.ScreenFile = ScreenFile;
+    public void setVersion(VersionInfo Version) {
+        this.Version = Version;
     }
 
+    public boolean isValid() {
+        return Valid;
+    }
+
+    public void setValid(boolean Valid) {
+        this.Valid = Valid;
+    }
+    
     /** */
     public static String getEPDefINI() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
@@ -375,7 +423,9 @@ public class EPlusConfig implements Serializable {
         }
     }
 
-    /** */
+    /**
+     * @return  
+     */
     public static String getEPDefSTAT() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPDefSTAT;
@@ -384,7 +434,9 @@ public class EPlusConfig implements Serializable {
         }
     }
 
-    /** */
+    /**
+     * @return  
+     */
     public static String getEPDefOutESO() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPDefOutESO;
@@ -393,7 +445,9 @@ public class EPlusConfig implements Serializable {
         }
     }
 
-    /** */
+    /**
+     * @return  
+     */
     public static String getEPDefOutCSV() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPDefOutCSV;
@@ -402,7 +456,9 @@ public class EPlusConfig implements Serializable {
         }
     }
 
-    /** */
+    /**
+     * @return
+     */
     public static String getEPDefOutEND() {
         if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
             return EPDefOutEND;
@@ -682,18 +738,12 @@ public class EPlusConfig implements Serializable {
                             return (extension.equals(getEPlusWeatherStatExt()));
                         case MTR:
                             return (extension.equals(getEPlusMtrExt()));
-                        case CSV:
-                            return (extension.equals(getEPlusCsvExt()));
                         case ESO:
                             return (extension.equals(getEPlusEsoExt()));
                         case RVI:
                             return (extension.equals(getEPlusRviExt()) || extension.equals(getEPlusMviExt()));
                         case MVI:
                             return (extension.equals(getEPlusMviExt()));
-                        case EPUSEROBJ:
-                            return (extension.equals(getEPlusUserObjExt()));
-                        case EPUSERTXT:
-                            return (extension.equals(getEPlusUserTxtExt()));
                         case EPOUTPUT: // EnergyPlus output files. Used for deleting E+ files
                             return ((filename.startsWith("eplusout.") &&
                                     (! filename.endsWith(".err")) &&
@@ -722,26 +772,8 @@ public class EPlusConfig implements Serializable {
                             return (filename.equals(getEPDefINI()));
                         case EPEXE:
                             return (filename.equals(getDefEPlusEXEC()));
-                        case PBS:
-                            return (extension.equals(".pbs"));
-                        case CFG:
-                            return (extension.equals(".cfg"));
-                        case JEP:
-                            return (extension.equals(".jep"));
-                        case ZIP:
-                            return (extension.equals(".zip"));
-                        case JSON:
-                            return (extension.equals(".json"));
-                        case PYTHON:
-                            return (extension.equals(".py"));
-                        case XML:
-                            return (extension.equals(".xml"));
-                        case RVX:
-                            return (extension.equals(".rvx"));
-                        case ALL:
-
                         default:
-                            return true;
+                            return ConfigFileNames.getFileFilter(type).accept(f);
                     }
                 }
                 return false;
@@ -765,18 +797,12 @@ public class EPlusConfig implements Serializable {
                         return "E+ weather stat file (.STAT)";
                     case MTR:
                         return "E+ output meter file (.MTR)";
-                    case CSV:
-                        return "CSV files as result or parameter tables (.CSV)";
                     case ESO:
                         return "E+ output eso file (.ESO)";
                     case RVI:
                         return "E+ readVarsESO rvi file (.RVI) or mvi file (.MVI)";
                     case MVI:
                         return "E+ readVarsESO mvi file (.MVI)";
-                    case EPUSEROBJ:
-                        return "Java Object file (.OBJ)";
-                    case EPUSERTXT:
-                        return "jE+ user project export file (.TXT)";
                     case EPOUTPUT: // EnergyPlus output files. Used for deleting E+ files
                         return "E+ output files";
                     case JEPLUS_INTERM: // JEPlus intermediate files. Used for deleting
@@ -787,28 +813,9 @@ public class EPlusConfig implements Serializable {
                         return "E+ INI file";
                     case EPEXE:
                         return "E+ main executable";
-                    case ALL:
-                        return "All files";
-                    case PBS:
-                        return "PBS script for individual E+ jobs (.pbs)";
-                    case CFG:
-                        return "JobServer configuration file (.cfg)";
-                    case JEP:
-                        return "JEPlus Project file (.jep)";
-                    case ZIP:
-                        return "Zipped jEPlus Project input files (.zip)";
-                    case JSON:
-                        return "JSON format data file (.json)";
-                    case PYTHON:
-                        return "Python script file (.py)";
-                    case XML:
-                        return "XML document (.xml)";
-                    case RVX:
-                        return "JSON RVX (.rvx)";
                     default:
-                        return "Filter not implemented";
+                        return ConfigFileNames.getFileFilter(type).getDescription();
                 }
-
             }
         };
         return ff;
@@ -818,6 +825,7 @@ public class EPlusConfig implements Serializable {
      * Get the version of E+ from the Energy+.IDD file
      * @return the version string
      */
+    @JsonIgnore
     public String getEPlusVersion () {
         if (new File(getEPlusBinDir() + getEPDefIDD()).exists()) {
             try (BufferedReader fi = new BufferedReader (new FileReader (getEPlusBinDir() + getEPDefIDD()))) {
@@ -825,7 +833,9 @@ public class EPlusConfig implements Serializable {
                 while (line != null) {
                     if (line.trim().startsWith("!IDD_Version ")) {
                         fi.close();
-                        return line.trim().substring(13);
+                        String verstr = line.trim().substring(13);
+                        Version = new VersionInfo (verstr);
+                        return Version.toString();
                     }
                     line = fi.readLine();
                 }
@@ -833,6 +843,15 @@ public class EPlusConfig implements Serializable {
                 logger.error("Error parsing IDD file for E+ version info.", ex);
             }
         }
-        return "Unavailable";
+        return "NA";
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public String toString () {
+        return Version == null ? "NA" : Version.toString();
     }
 }
