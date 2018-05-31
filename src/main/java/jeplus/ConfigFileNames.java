@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import javax.swing.filechooser.FileFilter;
-import static jeplus.JEPlusConfig.Config;
 import jeplus.event.IF_ConfigChangedEventHandler;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +54,7 @@ public class ConfigFileNames implements Serializable {
     public static final int XML = 25;
     public static final int RVX = 26;
     public static final int CSV = 27;
-    public static final int EPUSEROBJ = 14;
+    public static final int OBJ = 14;
     public static final int EPUSERTXT = 15;
     public static final int ALL = 28;
 
@@ -155,7 +154,7 @@ public class ConfigFileNames implements Serializable {
                             return (extension.equalsIgnoreCase(".rvx"));
                         case CSV:
                             return (extension.equalsIgnoreCase(".csv"));
-                        case EPUSEROBJ:
+                        case OBJ:
                             return (extension.equalsIgnoreCase(".obj"));
                         case EPUSERTXT:
                             return (extension.equalsIgnoreCase(".txt"));
@@ -179,11 +178,11 @@ public class ConfigFileNames implements Serializable {
                     case CFG:
                         return "JobServer configuration file (.cfg)";
                     case JEP:
-                        return "JEPlus Project file (.jep)";
+                        return "JEPlus v1.x Project file (.jep)";
                     case ZIP:
                         return "Zipped jEPlus Project input files (.zip)";
                     case JSON:
-                        return "JSON format data file (.json)";
+                        return "JEPlus JSON project file (.json)";
                     case PYTHON:
                         return "Python script file (.py)";
                     case XML:
@@ -192,8 +191,8 @@ public class ConfigFileNames implements Serializable {
                         return "JSON RVX (.rvx)";
                     case CSV:
                         return "CSV files as result or parameter tables (.csv)";
-                    case EPUSEROBJ:
-                        return "Java Object file (.obj)";
+                    case OBJ:
+                        return "JEPlus v0.5 Project object file (.obj)";
                     case EPUSERTXT:
                         return "jE+ user project export file (.txt)";
                     case ALL:

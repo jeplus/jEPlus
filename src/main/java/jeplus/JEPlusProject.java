@@ -58,11 +58,6 @@ public class JEPlusProject implements Serializable {
     protected static final ScriptEngine Script_Engine = new ScriptEngineManager().getEngineByName("javascript");
     static {
         // Set up script engine
-//        try {
-//            Script_Engine.eval("import math");
-//        }catch (ScriptException sce) {
-//            logger.error("Script engine error when importing math module.", sce);
-//        }
     }
     
     public static ScriptEngine getScript_Engine() {
@@ -138,29 +133,6 @@ public class JEPlusProject implements Serializable {
     /** RVX object for result collection */
     protected RVX Rvx = null;
     
-    /**
-     * Class containing post-process function options
-     */
-    public class PostProcOptions {
-        protected String ExtraRVIFile = "./my.rvi";
-        protected String ExtraRVIFrequency = "RunPeriod";
-        protected String SelectedTRNOutput = "TRNSYSout.csv";
-        protected boolean DeleteOutput = false;
-        
-        protected String PostProcFunctor = "DefaultPostProcFunc";
-        protected String ReferenceCase = null;
-        protected String ReferenceTable = "reference.csv";
-        
-        protected String ExportDir = "./";
-        protected boolean ExportJobTables = false;
-        protected String JobTablePrefix = "my";
-        protected boolean ExportOneTable = true;
-        protected String OneTableName = "processed_result";
-        protected boolean ExportStatsTables = true;
-        protected String StatsTablePrefix = "my";
-        
-        public PostProcOptions () {}
-    }
 
     /**
      * Default constructor
@@ -187,6 +159,7 @@ public class JEPlusProject implements Serializable {
         Parameters.add(root);
         ParamTree = new DefaultMutableTreeNode (root);
         BaseDir = new File ("./").getAbsolutePath() + File.separator;
+        Rvx = new RVX();
     }
 
     /**
