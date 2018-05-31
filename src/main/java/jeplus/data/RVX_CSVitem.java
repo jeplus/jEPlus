@@ -25,6 +25,7 @@ import java.util.Objects;
 //		{
 //                      "sourceCsv"  : "eplustbl.csv",
 //                      "fromReport"  : "Annual Building Utility Performance Summary",
+//                      "fromFor"  : "",
 //                      "fromTable"  : "Heating Coils",
 //                      "fromColumn" : "Nominal Total Capacity [W]",
 //                      "fromRow"    : "TEST AIR-TO-AIR HEAT PUMP HP HEATING COIL",
@@ -36,6 +37,7 @@ import java.util.Objects;
 public class RVX_CSVitem implements Serializable {
     private String SourceCsv = "eplustbl.csv"; 
     private String FromReport = ""; 
+    private String FromFor = null;
     private String FromTable = ""; 
     private String FromColumn = ""; 
     private String FromRow = ""; 
@@ -57,6 +59,14 @@ public class RVX_CSVitem implements Serializable {
 
     public void setFromReport(String FromReport) {
         this.FromReport = FromReport;
+    }
+
+    public String getFromFor() {
+        return FromFor;
+    }
+
+    public void setFromFor(String FromFor) {
+        this.FromFor = FromFor;
     }
 
     public String getFromTable() {

@@ -845,7 +845,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jplModelTest" min="-2" max="-2" attributes="0"/>
+                          <Component id="jplModelTest" min="-2" pref="102" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="jplRVX" pref="545" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -948,8 +948,8 @@
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-                  <JTabbedPaneConstraints tabName="Run">
-                    <Property name="tabTitle" type="java.lang.String" value="Run"/>
+                  <JTabbedPaneConstraints tabName="Execution">
+                    <Property name="tabTitle" type="java.lang.String" value="Execution"/>
                   </JTabbedPaneConstraints>
                 </Constraint>
               </Constraints>

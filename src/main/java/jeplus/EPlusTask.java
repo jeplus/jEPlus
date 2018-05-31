@@ -253,7 +253,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
      * @return A directory name comprises of the parent dir and the job id
      */
     public String getWorkingDir() {
-        return WorkEnv.ParentDir + TaskID + "/";
+        return WorkEnv.ParentDir + TaskID + File.separator;
     }
 
     /**
@@ -470,7 +470,13 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         return ok;
     }
 
-    public boolean runPythonScriptOnIDF (EPlusConfig config) {
+    /**
+     * Function to set up running Python script on the model files
+     * @param sim_path Path of the simulation tools (E+ or TRNSYS) binary
+     * @param console_log Console log file path
+     * @return Python run successful or not
+     */
+    public boolean runPythonScriptOnModel (String sim_path, String console_log) {
         boolean ok = true;
         // Get path to job folder
         String job_dir = getWorkingDir();
@@ -496,15 +502,16 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                 }
             }
             String args = buf.toString();
+            
             // Call Python
-            try (PrintStream outs = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + config.getScreenFile(), true));) {
+            try (PrintStream outs = (console_log == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + console_log, true));) {
                 PythonTools.runPython(
                         default_config, 
                         RelativeDirUtil.checkAbsolutePath(script.getScriptFile(), WorkEnv.getProjectBaseDir()), 
                         script.getPyVersion(), 
                         WorkEnv.getProjectBaseDir(), 
                         job_dir, 
-                        config.getResolvedEPlusBinDir(),
+                        sim_path,
                         args,
                         outs);
             }catch (IOException ioe) {
@@ -531,7 +538,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
             // Write IDF file
             ok = ok && this.preprocessInputFile(config);
             // Run Python script 
-            ok = ok && this.runPythonScriptOnIDF (config);
+            ok = ok && this.runPythonScriptOnModel (config.getEPlusBinDir(), config.getScreenFile());
             // Ready to run EPlus
             if (ok) {
                 int code = EPlusWinTools.runEPlus(config, getWorkingDir(), false);

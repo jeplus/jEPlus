@@ -1124,7 +1124,7 @@ public class JEPlusFrameMain extends JFrame {
             pnlRvxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlRvxLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 545, Short.MAX_VALUE)
                 .addContainerGap())
@@ -1357,7 +1357,7 @@ public class JEPlusFrameMain extends JFrame {
                 .addContainerGap())
         );
 
-        tpnMain.addTab("Run", pnlExecution);
+        tpnMain.addTab("Execution", pnlExecution);
 
         javax.swing.GroupLayout pnlUtilitiesLayout = new javax.swing.GroupLayout(pnlUtilities);
         pnlUtilities.setLayout(pnlUtilitiesLayout);

@@ -310,7 +310,6 @@ public class JEPlusProject implements Serializable {
                 logger.error("Cannot read the project's RVX file", ioe);
             }
         }
-
         // done            
         return proj;
     }

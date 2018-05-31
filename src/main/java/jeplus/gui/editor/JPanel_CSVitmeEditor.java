@@ -66,6 +66,7 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
         DL = new DocumentListener () {
             Document DocCsvFile = txtCsvFile.getDocument();
             Document DocReport = txtReport.getDocument();
+            Document DocFor = txtFor.getDocument();
             Document DocTable = txtTable.getDocument();
             Document DocColumn = txtColumn.getDocument();
             Document DocRow = txtRow.getDocument();
@@ -79,6 +80,8 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
                     Csv.setSourceCsv(txtCsvFile.getText());
                 }else if (src == DocReport) {
                     Csv.setFromReport(txtReport.getText());
+                }else if (src == DocFor) {
+                    Csv.setFromFor(txtFor.getText());
                 }else if (src == DocTable) {
                     Csv.setFromTable(txtTable.getText());
                 }else if (src == DocColumn) {
@@ -103,6 +106,7 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
         };
         txtCsvFile.getDocument().addDocumentListener(DL);
         txtReport.getDocument().addDocumentListener(DL);
+        txtFor.getDocument().addDocumentListener(DL);
         txtTable.getDocument().addDocumentListener(DL);
         txtColumn.getDocument().addDocumentListener(DL);
         txtRow.getDocument().addDocumentListener(DL);
@@ -149,6 +153,8 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
         txtColumn = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         txtRow = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        txtFor = new javax.swing.JTextField();
 
         jLabel2.setText("Result Table:");
 
@@ -166,7 +172,7 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
 
         jLabel4.setText("EPlus CSV report: ");
 
-        jLabel5.setText("Headers: ");
+        jLabel5.setText("Custom Headers: ");
 
         jLabel6.setText(".csv");
 
@@ -178,7 +184,7 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
 
         txtCsvFile.setText("jTextField1");
 
-        jLabel7.setText("From Report: ");
+        jLabel7.setText("From 'Report': ");
 
         txtReport.setText("jTextField1");
 
@@ -193,6 +199,10 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
         jLabel10.setText("From Row: ");
 
         txtRow.setText("jTextField1");
+
+        jLabel11.setText("From 'For': ");
+
+        txtFor.setText("jTextField1");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -211,7 +221,8 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
                             .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtReport)
@@ -227,8 +238,8 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
                                         .addComponent(jLabel6))
                                     .addComponent(chkAggregate)
                                     .addComponent(txtCsvFile, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addGap(0, 0, 0)))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(txtFor))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -245,6 +256,10 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
                     .addComponent(jLabel7)
                     .addComponent(txtReport, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(txtFor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -269,8 +284,10 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(chkAggregate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(41, Short.MAX_VALUE))
+                .addContainerGap())
         );
+
+        jLabel5.getAccessibleContext().setAccessibleName("Custom Headers: ");
     }// </editor-fold>//GEN-END:initComponents
 
     private void chkAggregateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAggregateActionPerformed
@@ -283,6 +300,7 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
     private javax.swing.JCheckBox chkAggregate;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -293,6 +311,7 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JTextField txtColumn;
     private javax.swing.JTextField txtCsvFile;
+    private javax.swing.JTextField txtFor;
     private javax.swing.JTextField txtHeaders;
     private javax.swing.JTextField txtReport;
     private javax.swing.JTextField txtResultTable;
