@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.8.0_121" class="java.beans.XMLDecoder">
+ <object class="jeplus.JEPlusProject" id="JEPlusProject0">
+  <void property="DCKDir">
+   <string>../../../../Windows/System32/</string>
+  </void>
+  <void property="IDFTemplate">
+   <string>test.idf</string>
+  </void>
+  <void property="RVIFile">
+   <string>test.rvx</string>
+  </void>
+  <void property="baseDir">
+   <string>D:\4\jEPlus_v1.7.2\example_8-PyWWR_E+v8.5\</string>
+  </void>
+  <void property="execSettings">
+   <void property="numberOfJobs">
+    <int>2</int>
+   </void>
+   <void property="parentDir">
+    <string>../output_ex4/</string>
+   </void>
+   <void property="randomSeed">
+    <long>15</long>
+   </void>
+   <void property="subSet">
+    <int>2</int>
+   </void>
+  </void>
+  <void id="DefaultMutableTreeNode0" property="paramTree">
+   <void id="ParameterItem0" property="userObject">
+    <void class="jeplus.data.ParameterItem" method="getField">
+     <string>Name</string>
+     <void method="set">
+      <object idref="ParameterItem0"/>
+      <string>wwr</string>
+     </void>
+    </void>
+    <void class="jeplus.data.ParameterItem" method="getField">
+     <string>Description</string>
+     <void method="set">
+      <object idref="ParameterItem0"/>
+      <string>window to wall ratio</string>
+     </void>
+    </void>
+    <void class="jeplus.data.ParameterItem" method="getField">
+     <string>SearchString</string>
+     <void method="set">
+      <object idref="ParameterItem0"/>
+      <string>@@wwr@@</string>
+     </void>
+    </void>
+    <void property="valuesString">
+     <string>[ 10:10:90 ]</string>
+    </void>
+   </void>
+   <void method="add">
+    <object class="javax.swing.tree.DefaultMutableTreeNode">
+     <void property="userObject">
+      <object class="jeplus.data.ParameterItem" id="ParameterItem1">
+       <void class="jeplus.data.ParameterItem" method="getField">
+        <string>ID</string>
+        <void method="set">
+         <object idref="ParameterItem1"/>
+         <string>P2</string>
+        </void>
+       </void>
+       <void class="jeplus.data.ParameterItem" method="getField">
+        <string>Name</string>
+        <void method="set">
+         <object idref="ParameterItem1"/>
+         <string>python</string>
+        </void>
+       </void>
+       <void class="jeplus.data.ParameterItem" method="getField">
+        <string>Description</string>
+        <void method="set">
+         <object idref="ParameterItem1"/>
+         <string>python function</string>
+        </void>
+       </void>
+       <void class="jeplus.data.ParameterItem" method="getField">
+        <string>SearchString</string>
+        <void method="set">
+         <object idref="ParameterItem1"/>
+         <string>@@tag2@@</string>
+        </void>
+       </void>
+       <void property="project">
+        <object idref="JEPlusProject0"/>
+       </void>
+       <void property="valuesString">
+        <string>@python3(apply_wwr.py,P1)</string>
+       </void>
+      </object>
+     </void>
+    </object>
+   </void>
+  </void>
+  <void property="parameters">
+   <void method="add">
+    <object idref="ParameterItem1"/>
+   </void>
+  </void>
+  <void property="projectNotes">
+   <string>jEPlus Example for E+ v8.8: Change window size with EPPY (requires Python3)</string>
+  </void>
+  <void property="rvx">
+   <object class="jeplus.data.RVX">
+    <void property="CSVs">
+     <array class="jeplus.data.RVX_CSVitem" length="0"/>
+    </void>
+    <void property="RVIs">
+     <array class="jeplus.data.RVX_RVIitem" length="1">
+      <void index="0">
+       <object class="jeplus.data.RVX_RVIitem">
+        <void property="fileName">
+         <string>temp.rvi</string>
+        </void>
+        <void property="tableName">
+         <string>temperature</string>
+        </void>
+       </object>
+      </void>
+     </array>
+    </void>
+    <void property="SQLs">
+     <array class="jeplus.data.RVX_SQLitem" length="0"/>
+    </void>
+    <void property="notes">
+     <string>Some notes about this RVX</string>
+    </void>
+    <void property="scripts">
+     <array class="jeplus.data.RVX_ScriptItem" length="0"/>
+    </void>
+   </object>
+  </void>
+  <void property="weatherFile">
+   <string>GBR_London.Gatwick.037760_IWEC.epw</string>
+  </void>
+ </object>
+</java>

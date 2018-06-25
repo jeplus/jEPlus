@@ -1,0 +1,68 @@
+__[[docs:manual_1_7#table_of_contents|Table of Contents]]__
+
+====== Chapter 1 Introduction ======
+
+Version 1.7, © 2015 [[:start|jeplus.org]]
+
+\\
+
+
+----
+
+Parametric analysis is often needed for exploring design options, especially when a global optimization method is not available, or the optimization result is in doubt. Parametric analysis can also be applied to all design variables simultaneously, which forms an exhaustive search that, on a fine mesh, guarantees the discovery of the global optimum solution. To perform complex parametric analysis on multiple design parameters, a tool is needed to create and manage simulation jobs, and to collect results afterwards. jEPlus has been developed for this purpose.
+
+[{{ :jeplus_v1.5_diagrams.png?nolink&850 |Figure 1.1: The concept}}]
+
+\\
+
+===== 1.1 The workflow =====
+
+//So, how does it work?// In a nutshell, you select a building model (an IDF or a set of IMF files) and put search strings in the places of the parameters; specify all alternative values for the parameters in jEPlus; jEPlus will then pick a set of values and put them in the right places in the building model and call EnergyPlus. In this way, you can quickly set up large amount of simulation runs to explore the design options.
+
+The following diagrams show a more detailed workflow.
+
+[{{ :docs:v_1_6:jeplus_v1.6_workflow-1.png?nolink |Figure 1.2: Creating jobs from parameters}}]
+
+[{{ :docs:v_1_7:jeplus_v1.7_workflow-2.png?nolink |Figure 1.3: Pre-processing steps}}]
+
+[{{ :docs:v_1_6:jeplus_v1.6_workflow-3.png?nolink |Figure 1.4: Running simulations and collecting results}}]
+
+\\
+
+===== 1.2 Key concepts =====
+
+**jEPlus Project** - a jEPlus project contains all nessesary information that defines the parametric study. These information include: a list of model templates, a list of weather files, one RVI or MVI file, the parameters tree, and simulation settings such as the working directory, number of processors to deploy, and options to keep or remove temporary files and EnergyPlus outputs.
+
+**Model template** – an IDF (.idf) file or a set of IMF (.imf) files that contains search strings (see next). A template should be based on a working EnergyPlus building model.
+
+**Search string** – a specially formulated text string that are not normally occurring in EnergyPlus files. Search strings are used by jEPlus to identify locations in the model to insert values for parameters.
+
+**Parameter** – an element or aspect of the model that can have more than one options. A parameter can be a single design variable (e.g. a temperature set point), a component (e.g. the construction of an external wall), a sub-system (e.g. an HVAC system), and even the whole model (the model template can be regarded as a parameter). The weather file to be used in simulation can be a parameter, too.
+
+**An EnergyPlus job (a job)** – a set of input files defining a model for EnergyPlus to simulate. These files typically include either an IDF, an IMF, or a set of IMF/IDF files, a weather file, and a RVI or MVI file. 'A job' can refer to a model to be simulated, or the process of a simulation.
+
+**Job ID** - Each EnergyPlus job is named systematically, following a simple rule: G_[group/project id]-T_[template id]-W_[weather id]-[parameter 1's id]_[alt value id]-[parameter 2's id]_[alt value id]-...A job's id is a unique identification of the job within a project. It is also used for naming output directories of jobs.
+
+**A batch of jobs (a batch)** – a collection of jobs of a parametric study. jEPlus creates batch jobs according to the batch configuration defined by the user and systematically names each job before carrying out simulations with EnergyPlus. Several methods are provided for creating a batch that is a subset of all jobs defined by the project.
+
+**Simulation options** - these include the choice of simulation controller to use (only local batch controller is provided in this version), the number of processors (cores) to deploy, the working directory of the project, and options to keep/remove temporary files after the simulation.
+
+**Working directory** - this is the directory in which jobs are prepared and results/output files are stored. In fact, the Working directory is the parent directory of the individual working directory of each job, named with the job id. After simulation, results will be collected from individual job directories and saved to a few result files in the Working Directory.
+
+**Simulation process** – first jEPlus opens the model template and replace the search strings with corresponding values; if the template is an IMF file, jEPlus will create an 'in.imf' file. jEPlus calls EP-Macro to generate a 'out.idf' file; jEPlus then search through the new IDF file once more for search strings and produce the 'in.idf' file. EnergyPlus executables (including ExpandObjects.exe) are then called to run the simulation. Once finished, jEPlus calls ReadVarsESO to extract monitored variables from the simulation result, and combines the extracted eplusout.csv file for each job into a single result file 'SimResults.csv' in the working directory.
+
+**Output files** – include intermediate, results and index files generated by either jEPlus or EnergyPlus during or at the end of the process. More details of these files can be found in [[docs:manual_1_6_rvx|Chapter 5]].
+
+**jEPlus Input files** – jEPlus allows you to use a text file as input at various places, such as specifying weather files, model templates, parameter values, parameter definitions, and selected jobs of a project. These input files are normally comma-delimitted text files, although each can have different format requirement. Please reffer to the corresponding sections on how to use these files.
+
+===== 1.3 Installation =====
+
+Following the steps below to install (well, download and unpack, really) jEPlus:
+
+  - You will need a computer that supports Java (Java Platform Standard Edition **7** and above, available from [[http://www.oracle.com/technetwork/java/javase/downloads/index.html|Java SE Download]]) and EnergyPlus (version 2.2.0 and above, available from [[http://apps1.eere.energy.gov/buildings/energyplus/|EnergyPlus]]). In order to use jEPlus, the resolution of your computer screen must be 1024x768 or higher
+  - The jEPlus distribution package, available from [[http://sourceforge.net/projects/jeplus/|SourceForge]]
+  - Unpack the jEPlus package into a folder. (Since jEPlus does not require installation, you can put it on a memory stick and run it on any computer that has Java.)
+  - Start jEPlus by either double-clicking on the jEPlus.jar file, using the supplied run.bat and run.sh files, or using the following command in a terminal window: <code>java -jar jeplus.jar</code> or if you have a large project (e.g. containing more than a few thousand jobs), use <code>java -Xmx1000m -jar jeplus.jar</code>
+  - Your EnergyPlus models or test it with the example files provided. 
+
+\\

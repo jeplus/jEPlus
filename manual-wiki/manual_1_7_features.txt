@@ -1,0 +1,28 @@
+__[[docs:manual_1_7#table_of_contents|Table of Contents]]__
+
+
+====== Main features of jEPlus ======
+
+The main features of jEPlus version 1.7 include:
+
+  * GUI designed for setting up and managing parametric simulations with [[https://energyplus.net/|EnergyPlus]], as well as collecting and post-processing results into CSV tables
+  * It also supports [[http://www.trnsys.com/|TRNSYS]] and [[http://www.insel.eu//|INSEL]] parametrics (since version 1.3/version 1.5)
+  * Command-line interface for using jEPlus with other programs (since version 1.4)
+  * Parametric projects can be saved in XML format or in JSON format (since version 1.6) which is easily editable and portable across platforms.
+  * Parameters may be organized in a tree structure that reflects dependencies between the parameters
+  * Flexible syntax for specifying alternative values, including importing from files and random sampling from specified probabilistic density functions, including Gaussian, Uniform, Triangular, Exponential, Log-normal (since **version 1.7**) and Discrete distributions
+  * Support combinatorial parameters, i.e. parameters containing two or more search strings and the corresponding value sets (since version 1.4)
+  * Support formula in parameter definition, which allows values to be calculated from other parameters (improved in version 1.6)
+  * Parameter definitions can be imported from and export to a CSV-styled text file, making the task of editing large number of parameters easier (improved in version 1.4)
+  * Random sampling of jobs using Random shuffling, Latin Hypercube Sampling ([[http://en.wikipedia.org/wiki/Latin_hypercube|LHS]], since version 1.3), and Sobol Sequence Sampling ([[https://en.wikipedia.org/wiki/Sobol_sequence|Sobol]] since **version 1.7**)
+  * Supports Windows/Mac/Linux versions of EnergyPlus; supports EP-Macro and HVACTemplate objects
+  * Supports multi-processor/multi-core systems; easy to choose the number of processors to deploy
+  * Resource and progress monitor for controlling number of computer cores to deploy on-the-fly. It helps users keep an eye on memory and disk space when running a large project. The monitor also allows you to pause and resume a project. (since version 1.3)
+  * In-built text editor supports basic syntax highlighting for IDF/IMF files, quick location of parameters, and incremental search functions with regular expression support (improved in version 1.5)
+  * Extracts simulation results from both ESO (using ReadVarsESO) and tabular (using SQLite, since version 1.4, or CSV, since version 1.6) outputs
+  * Parametric results are collected in CSV tables (improved in version 1.5)
+  * Python scripts can be used for both pre-processing (manipulating model based on parameter values of each case, since **version 1.7**) and post-processing (reading, extracting results and calculating user-defined variables during result collection, improved in version 1.6)
+  * Utility tab for collecting and compiling results table without rerunning the simulations. Simple statistics (mean, variance, min and max) can be performed during result collection. (since version 1.1)
+  * Utility for running Python script in the project folder for further analysis (improved in **version 1.6**)
+  * Utility for easily updating projects to later E+ versions using IDF version converter (since version 1.5, Windows only)
+  * Post-processing function to support linking E+ parametric output with TRNSYS parametrics (since version 1.3)

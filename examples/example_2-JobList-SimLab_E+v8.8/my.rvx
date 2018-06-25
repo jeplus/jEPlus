@@ -1,0 +1,25 @@
+{
+
+	"notes" : "Some notes about this RVX",
+
+	"rvis" : [ 
+		{ 
+			"fileName" : "HVACTemplate-5ZoneFanCoil.mvi",
+			"tableName" : "consumption",
+			"frequency" : "Annual",
+			"usedInCalc" : true
+		}
+	],
+	
+	"sqls" : [
+	],
+	
+	"csvs" : [
+	],
+
+	"scripts" : [
+	],
+	
+	"userVars" : [
+	]
+}

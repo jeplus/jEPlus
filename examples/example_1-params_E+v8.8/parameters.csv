@@ -1,0 +1,10 @@
+# Parameter list for project: 0 (exported at 01/09/15 14:46)
+# Note: this list contains only the first branch of the parameter tree.
+# Parameter definitions in a csv file. Column headings are as below
+# ID, Name, Parameter Type, Description, Search String, Value Type, Value String, Selected Value Index
+#           {0}                                         {0, 1, 2}                 {0, .... depending on number of values}
+# 
+P1,Orientation,0,"Orientation of the building",@@orientation@@,0,[0 :45 :359 ] & {101} ^ {45, 135},0
+P2,Outside Air Rate,0,"Outside Air Rate [m3/s/person]",@@Outside_Air@@,1,@sample(n, 0.008, 0.003, 5),0
+P3,Occupancy density,0,"occupancy density [people / m^2]",@@Occ@@,1,@file(P3_sample_EXP.txt),0
+P4,Equipment power,0,"Equipment power as a function of occupancy density",@@Eq@@,1,@calc(-400*P3*P3+220*P3+2),0

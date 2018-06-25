@@ -1,0 +1,31 @@
+{
+
+	"notes" : "Some notes about this RVX",
+
+	"rvis" : [ 
+		{ 
+			"fileName" : "temp.rvi",
+			"tableName" : "temperature",
+			"frequency" : "Annual",
+			"usedInCalc" : true
+		}
+	],
+	
+	"sqls" : [
+	],
+	
+	"csvs" : [
+	],
+
+	"scripts" : [
+	],
+	
+	"userVars" : [
+	],
+	
+	"constraints" : [
+	],
+
+	"objectives" : [
+	]
+}

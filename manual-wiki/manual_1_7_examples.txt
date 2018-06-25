@@ -1,0 +1,258 @@
+__[[docs:manual_1_7#table_of_contents|Table of Contents]]__
+
+====== Chapter 10 Examples ======
+
+Version 1.7, © 2015 [[:start|jeplus.org]]
+
+
+
+\\
+
+----
+
+===== 10.1 Example Projects =====
+
+Four example project folders are included in the jEPlus' distribution package. 
+
+==== example_1-params_E+v8.3 ====
+
+This example demonstrates the user of different parameter definition syntax, including the ''@sample'', ''@file'', and ''@calc''.
+
+[{{ :docs:v_1_6:ex1_params.png?nolink |Ex.1 - Parameter definitions}}]
+
+==== example_2-SimLab_E+v8.3 ====
+
+This is the same project as in the Example 1. A few additional files are included for a demonstration of how to do Sensitivity Analysis with [[https://ec.europa.eu/jrc/en/samo/simlab|SimLab]]. 
+
+The steps are as below:
+  - Define the model parameters as the UA/SA factors in SimLab 2.2
+  - Generate a sample of the factors using SimLab, for example as in ''simlab_sobol.sam''
+  - Open ''simlab_sobol.sam'' in Excel, keep only the sample body, insert three columns for Job_IDs, weather file index (''0''), and model file index (''0''), and then save the table in CSV format. The result is ''joblist.csv''.
+  - Run jEPlus with the job list file ''joblist.csv''
+  - After simulation, open ''AllCombinedResults.csv'', **sort the table according to the Job_IDs**, remove the unnecessary columns and the header row, insert the header rows as required by SimLab, and then save the file as tab-separated text.
+  - This result table can be used in SimLab for UA and SA analysis.
+
+==== example_3-RVX_v1.6_E+v8.3 ====
+
+Demonstrates the latest RVX syntax and various ways of collecting results. The ''my.rvx'' file is explained in [[docs:manual_1_6_rvx|Chapter 5 Result Extraction]] in full details. 
+
+[{{ :docs:v_1_6:ex3_rvx.png?nolink |Ex.3 - RVX}}]
+
+==== example_4-JSON_E+v8.3 ====
+
+Demonstrates the JSON version of the project in Example 3, and the command-line to execute the JSON project. You may note in the folder, ''project.json'' has replaced ''project.jep'', and ''my.rvx'' is no longer required. To run the project, use the command-line as given in ''commandline.bat'':
+
+  java -jar ../jEPlus.jar -job project.json -sample 5 -cfg ../jeplus.cfg -log ../log4j.cfg -local 2 -output results
+
+===== 10.2 Work with EP-Macro =====
+
+[[https://energyplus.net/sites/default/files/docs/site_v8.3.0/AuxiliaryPrograms/AuxiliaryPrograms/#input-macros|EP-Macro]] is a powerful tool provided in the EnergyPlus package. It allows more flexibility in designing parameters with jEPlus:
+
+Table 1: features of EP-Macro and potential applications
+
+^  ^  EP-Macro features  ^   Application of jEPlus with EP-Macro  ^
+^  1  | Incorporating external files containing pieces of IDF into the main EnergyPlus input stream   | Defining a block of code in the building model as one parameter  |
+^  2  | Selectively accepting or skipping portions of the input  | Another way for defining a block of code as a parameter  |
+^  3  | Defining a block of input with parameters and later referencing this block   | Using one search string to change multiple values at different locations   |
+^  4  | Performing arithmetic and logical operations on the input   | Calculating a variable value from an input value, therefore one parameter can be used in stead of two        |
+
+To use EP-Macro with jEPlus, however, the specific instructions bellow needs your attention:
+
+  * EP-Macro will be triggered if the model template file has an ''.imf'' extension
+  * If the model has inclusion files (i.e. ''##include '' is used), rules regarding the location where you can insert search strings differ for the main IMF file and for the inclusion files
+  * In the main IMF file, search strings are allowed anywhere, either in the model code, or in macro instructions
+  * In the inclusion files, search strings are only allowed in model code. Search strings in macro instructions in an inclusion file cannot be processed by jEPlus; therefore errors will be reported by EP-Macro
+  * If ''##include'' and/or ''##fileprefix'' are used, absolute path to the folder location is recommended, for example: ''##fileprefix C:\EnergyPlusV6-0-0\ExampleFiles\'' If relative path is used, please bear in mind that it is relative to the location of the main IDF/IMF model.
+
+A tutorial is available here:
+
+<html><iframe width="560" height="315" src="http://www.youtube.com/embed/NopNWtgKvDs" frameborder="0" allowfullscreen></iframe></html>
+
+
+\\
+===== 10.3 Change Window Size =====
+
+How to use jEPlus to change window size is a question came up rather frequently. Manipulating geometry is not what jEPlus is best at, especially compared to the tools with 3D modelling capability, such as DesignBuilder. However, for a simple problem e.g. to test a small number of window geometries, or the sizes of one window, there are at least four ways to achieve the effect:
+
+  - Incorporate pre-defined FenestrationSurface objects into the main model using EP-Macro's #include function
+  - Use the combinatorial parameter syntax to specify pre-defined sets of coordinates
+  - Use the @calc syntax to calculate coordinates from height and width parameters
+  - And use EP-Macro's macro functions to perform coordinates calculations within the IDF model
+
+In this example we focus on the third and the fourth methods.
+
+==== Problem definition ====
+
+{{ :docs:window_example.png?nolink |Vertices of fenestration surface}}
+
+The location and the dimensions of a rectangular window in a wall can be defined by four parameters. These can be the coordinates of the opposite corners of the windows, or its width and height plus the offsets to a reference point. In the examples below, both methods of using the @calc syntax in parameter definition, and using EP-Macro, are demonstrated.
+==== Use @calc syntax ====
+
+The @calc syntax allows you to define dependent parameters whose values are to be calculated from other parameters. This example shows defining the window geometry using the offset of its lower left corner and its width/height. The actual coordinates of the corners are calculated in a different set of parameters, whose search tags are placed in the IDF model template. 
+
+First, let's see the parameter definitions. The text file (in CSV format) below can be imported into a jEPlus project to create the parameter tree (**Requires jEPlus v1.6.0 or later**).
+
+<sxh shell; first-line: 1; highlight: [7,13]; title: Parameter definition file>
+#
+# Parameter definitions in a csv file. Column headings are as below
+# ID, Name, Parameter Type, Description, Search String, Value Type, Value String, Selected Value Index
+#           {0}                                         {0, 1, 2}                 {0, .... depending on number of values}
+# Please note , " or ' must not be used in data fields, e.g. "{1, 2, 3}" will cause errors; use { 1 2 3 } instead.
+
+# Independent parameters
+DX, OffsetX, 0, Window offset X to the lower left corner of the wall, @@dx@@, 1, [0.1:0.1:9.0], 0
+DZ, OffsetZ, 0, Window offset Z to the lower left corner of the wall, @@dz@@, 1, [0.6:0.1:2.8], 0
+W,  Width,   0, Width of window,                                      @@w@@,  1, [0.5:0.1:9.8], 0
+H,  Height,  0, Height of window,                                     @@h@@,  1, [0.5:0.1:2.4], 0
+
+# Dependent parameters. Note that the wall's coordinates are (0, 0) - (10, 3.5)
+X0, CoordX0, 0, Coordinate X of the lower left corner of the window,  @@x0@@, 1, @calc(0.0+DX), 0
+Z0, CoordZ0, 0, Coordinate Z of the lower left corner of the window,  @@z0@@, 1, @calc(0.0+DZ), 0
+X2, CoordX2, 0, Coordinate X of the upper right corner of the window, @@x2@@, 1, @calc(min(X0+W,10-0.1)), 0
+Z2, CoordZ2, 0, Coordinate Z of the upper right corner of the window, @@z2@@, 1, @calc(min(Z0+H,3.5-0.1)), 0
+
+#
+</sxh>
+
+And then, in the IDF model, the search tags are applied as below:
+
+<sxh shell; first-line: 1224; highlight: [1227,1241,1242,1243,1244]; title: IDF model>
+...
+!-   ===========  ALL OBJECTS IN CLASS: FENESTRATIONSURFACE:DETAILED ===========
+
+!- Intermediate parameter values: dx = @@dx@@, dz = @@dz@@, w = @@w@@, h = @@h@@
+
+! Window, 16.354m2
+FenestrationSurface:Detailed,
+    Block1:Zone1_Wall_5_0_0_0_0_0_Win,  !- Name
+    Window,                  !- Surface Type
+    1001,                    !- Construction Name
+    Block1:Zone1_Wall_5_0_0, !- Building Surface Name
+    ,                        !- Outside Boundary Condition Object
+    0.5,                     !- View Factor to Ground
+    ,                        !- Shading Control Name
+    ,                        !- Frame and Divider Name
+    1,                       !- Multiplier
+    4,                       !- Number of Vertices
+    @@x0@@, -10, @@z0@@,     !- X,Y,Z  1 {m}
+    @@x2@@, -10, @@z0@@,     !- X,Y,Z  2 {m}
+    @@x2@@, -10, @@z2@@,     !- X,Y,Z  3 {m}
+    @@x0@@, -10, @@z2@@;     !- X,Y,Z  4 {m}
+
+
+!-   ===========  ALL OBJECTS IN CLASS: PEOPLE ===========
+...
+</sxh>
+
+The working jEPlus project can be downloaded here: {{:examples:projects:windowsizeexample1-atcalc.zip|WindowSizeExample1-atCalc.zip}}
+
+
+==== Use macro functions ====
+
+The same effect can be achieved by using the EP-Macro functions in the IMF model. The example below let user define four parameters: left, bottom, top, and right, corresponding to x0, z0, z2 and x2 respectively, as in the above diagram. Further macro functions are used for checking coordinates collisions, so that a window of size 0.1m x 0.1m minimum is produced. User must take care of the value ranges for the left, bottom, top and right parameters. 
+
+<sxh shell; first-line: 1224; title: Excerpt of the IMF model>
+...
+
+!-   ===========  ALL OBJECTS IN CLASS: FENESTRATIONSURFACE:DETAILED ===========
+##set1 Left @@L@@
+##set1 Bottom @@B@@
+##set1 Top @@T@@
+##set1 Right @@R@@
+
+##if #[Top[] LE Bottom[]]
+##set1 NewTop #eval[Bottom[] + 0.10]
+##else 
+##set1 NewTop Top[]
+##endif
+
+##if #[Right[] LE Left[]]
+##set1 NewRight #eval[Left[] + 0.10]
+##else 
+##set1 NewRight Right[]
+##endif
+
+
+! Window, 16.354m2
+FenestrationSurface:Detailed,
+    Block1:Zone1_Wall_5_0_0_0_0_0_Win,  !- Name
+    Window,                  !- Surface Type
+    1001,                    !- Construction Name
+    Block1:Zone1_Wall_5_0_0, !- Building Surface Name
+    ,                        !- Outside Boundary Condition Object
+    0.5,                     !- View Factor to Ground
+    ,                        !- Shading Control Name
+    ,                       !- Frame and Divider Name
+    1,                       !- Multiplier
+    4,                       !- Number of Vertices
+    Left[], -10, Bottom[],    !- X,Y,Z  1 {m}
+    NewRight[], -10, Bottom[],     !- X,Y,Z  2 {m}
+    NewRight[], -10, NewTop[],     !- X,Y,Z  3 {m}
+    Left[], -10, NewTop[];    !- X,Y,Z  4 {m}
+
+
+!-   ===========  ALL OBJECTS IN CLASS: PEOPLE ===========
+...
+
+</sxh>
+
+The working jEPlus project of this example can be downloaded here: {{:examples:projects:windowsizeexample2-epmacro.zip|WindowSizeExample2-EPMacro.zip}}
+
+
+\\
+===== 10.4 Change Window-to-wall Ratio =====
+
+Changing window-to-wall ratio (WWR) can be considered as a special case for manipulating window geometries. This example presents the simplest case, in which the window is located in the centre of the wall, and its width and height are proportional to the overall size of the wall according the WWR. The diagram below illustrate the calculations. The example project requires **jEPlus v1.5.2 or later**.
+
+{{ :docs:wwr_example.png?nolink |Calculate vertices from WWR}}
+
+<sxh shell; first-line: 1; highlight: [7,10]; title: Parameter definition file>
+#
+# Parameter definitions in a csv file. Column headings are as below
+# ID, Name, Parameter Type, Description, Search String, Value Type, Value String, Selected Value Index
+#           {0}                                         {0, 1, 2}                 {0, .... depending on number of values}
+# Please note , " or ' must not be used in data fields, e.g. "{1, 2, 3}" will cause errors; use { 1 2 3 } instead.
+
+# Independent parameters
+WWR, WWR, 0, Window-to-wall ratio, @@wwr@@, 1, [0.1:0.1:0.9], 0
+
+# Dependent parameters. Note that the wall's coordinates are (0, 0) - (10, 3.5)
+X0, CoordX0, 0, Coordinate X of the lower left corner of the window,  @@x0@@, 1, @calc(5.0-math.sqrt(WWR)*5.0), 0
+Z0, CoordZ0, 0, Coordinate Z of the lower left corner of the window,  @@z0@@, 1, @calc(1.75-math.sqrt(WWR)*1.75), 0
+X2, CoordX2, 0, Coordinate X of the upper right corner of the window, @@x2@@, 1, @calc(5.0+math.sqrt(WWR)*5.0), 0
+Z2, CoordZ2, 0, Coordinate Z of the upper right corner of the window, @@z2@@, 1, @calc(1.75+math.sqrt(WWR)*1.75), 0
+
+#
+</sxh>
+
+And then, in the IDF model, the search tags are applied as below:
+
+<sxh shell; first-line: 1224; highlight: [1227,1241,1242,1243,1244]; title: IDF model>
+...
+!-   ===========  ALL OBJECTS IN CLASS: FENESTRATIONSURFACE:DETAILED ===========
+
+!- Intermediate parameter values: wwr = @@wwr@@
+
+! Window, 16.354m2
+FenestrationSurface:Detailed,
+    Block1:Zone1_Wall_5_0_0_0_0_0_Win,  !- Name
+    Window,                  !- Surface Type
+    1001,                    !- Construction Name
+    Block1:Zone1_Wall_5_0_0, !- Building Surface Name
+    ,                        !- Outside Boundary Condition Object
+    0.5,                     !- View Factor to Ground
+    ,                        !- Shading Control Name
+    ,                        !- Frame and Divider Name
+    1,                       !- Multiplier
+    4,                       !- Number of Vertices
+    @@x0@@, -10, @@z0@@,     !- X,Y,Z  1 {m}
+    @@x2@@, -10, @@z0@@,     !- X,Y,Z  2 {m}
+    @@x2@@, -10, @@z2@@,     !- X,Y,Z  3 {m}
+    @@x0@@, -10, @@z2@@;     !- X,Y,Z  4 {m}
+
+
+!-   ===========  ALL OBJECTS IN CLASS: PEOPLE ===========
+...
+</sxh>
+
+The working jEPlus project can be downloaded here: {{:examples:projects:wwr_example-atcalc.zip|WWR_Example-atCalc.zip}}

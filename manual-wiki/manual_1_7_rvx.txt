@@ -1,0 +1,635 @@
+__[[docs:manual_1_7#table_of_contents|Table of Contents]]__
+
+====== Chapter 5 Result Extraction ======
+
+Version 1.7, © 2015 [[:start|jeplus.org]]
+
+
+\\
+
+----
+
+
+===== 5.1 The RVX file format =====
+
+Although it has been possible to extract SQLite output by extending the standard RVI file since version 1.4, the additional sections in the RVI files may be erased by EnergyPlus' version updater program. Since jEPlus version 1.5, a new file format is introduced to provide a more robust and flexible solution. 
+
+Below is an example RVX (stands for RVI-extended) file. It is in fact a data structure represented in [[http://json.org/|JSON format]]. It is not difficult to understand what the result extraction items do from the contents of this file. We will nevertheless explain the details in the following sections.
+
+<sxh javascript; first-line: 1; highlight: [5,26,39,60,77,88,109,134]; title: my.rvx in example_3-RVX_v1.6_E+v8.3/>
+{
+
+	"notes" : "Some notes about this RVX",
+
+	"rvis" : [ 
+		{ 
+			"fileName" : "AnnualCarbon.rvi",
+			"tableName" : "Carbon",
+			"frequency" : "Annual",
+			"usedInCalc" : true
+		},
+		{ 
+			"fileName" : "AnnualDiscomfort.rvi",
+			"tableName" : "Discomfort",
+			"frequency" : "Annual",
+			"usedInCalc" : true
+		},
+		{ 
+			"fileName" : "HourlyMeters.rvi",
+			"tableName" : "HourlyMeters",
+			"frequency" : "Hourly",
+			"usedInCalc" : false
+		}
+	],
+	
+	"sqls" : [
+		{ 
+			"tableName" : "ChillerCap",
+			"columnHeaders" : "Chiller Nominal Capacity [W]",
+			"sqlcommand" : "select Value from ComponentSizes WHERE (CompType='Chiller:Electric' AND CompName='CHILLER PLANT CHILLER' AND Description='Design Size Nominal Capacity')"
+		},
+		{ 
+			"tableName" : "ConsCost",
+			"columnHeaders" : "Construction Cost [$/m2]",
+			"sqlcommand" : "select Value from TabularDataWithStrings WHERE (ReportName='Construction Cost Estimate Summary' AND ReportForString='Entire Facility' AND TableName='Construction Cost Estimate Summary' AND RowName='Cost Per Conditioned Building Area (~~$~~/m2)' AND ColumnName='Reference Bldg.' AND Units='')"
+		}
+	],
+	
+	"csvs" : [
+		{
+			"sourceCsv"  : "eplustbl.csv",
+			"fromTable"  : "End Uses By Subcategory",
+			"fromColumn" : "Water [m3]",
+			"fromRow"    : "Heat Rejection",
+			"tableName"  : "WaterUse",
+			"columnHeaders" : "Water use for Heat Rejection [m3]",
+			"usedInCalc" : true
+		},
+		{
+			"sourceCsv"  : "eplustbl.csv",
+			"fromTable"  : "Heating Coils",
+			"fromColumn" : "Nominal Total Capacity [W]",
+			"fromRow"    : "TEST AIR-TO-AIR HEAT PUMP HP HEATING COIL",
+			"tableName"  : "CoilCapacity",
+			"columnHeaders" : "Nominal Total Capacity - HP Heating Coil [W]",
+			"usedInCalc" : true
+		}
+	],
+
+	"scripts" : [
+		{
+			"fileName" : "calcMaxOfColumn_jy.py",
+			"pythonVersion" : "jython",
+			"onEachJob" : true,
+			"arguments" : "HourlyMeters",
+			"tableName" : "ElecPeakLoad"
+		},
+		{
+			"fileName" : "readRunTimes_jy.py",
+			"pythonVersion" : "jython",
+			"onEachJob" : false,
+			"arguments" : "",
+			"tableName" : "CpuTime"
+		}
+	],
+	
+	"userSupplied" : [
+		{
+			"fileName" : "feasible.csv",
+			"headerRow" : 0,
+			"jobIdColumn" : 0,
+			"dataColumns" : "1",
+			"missingValue" : 0,
+			"tableName" : "Filter"
+		}
+	],
+	
+	"userVars" : [
+		{
+			"identifier" : "v0",
+			"formula" : "c0",
+			"caption" : "CO2 Emmission [kg]",
+			"report" : false
+		},
+		{
+			"identifier" : "v1",
+			"formula" : "max(c1, c2, c3, c4, c5)",
+			"caption" : "Max discomfort [Hr]",
+			"report" : true
+		},
+		{
+			"identifier" : "v2",
+			"formula" : "math.hypot(c12, c13)",
+			"caption" : "Arbitary Var []",
+			"report" : true
+		}
+	],
+	
+	"constraints" : [
+		{
+			"identifier" : "s1",
+			"formula" : "c11/1000",
+			"caption" : "Chiller Capacity [kW]",
+			"scaling" : true,
+			"lb" : 0,
+			"ub" : 200,
+			"min" : 0,
+			"max" : 300,
+			"weight" : 1.0
+		},
+		{
+			"identifier" : "s2",
+			"formula" : "c16/1000/3600",
+			"caption" : "Peak HVAC Load [kWh]",
+			"scaling" : true,
+			"lb" : 0,
+			"ub" : 5.55,
+			"min" : 0,
+			"max" : 10,
+			"weight" : 1.0
+		}
+	],
+
+	"objectives" : [
+		{
+			"identifier" : "t1",
+			"formula" : "v0/1000",
+			"caption" : "CO2 [ton]",
+			"scaling" : false,
+			"min" : 0,
+			"max" : 100000,
+			"weight" : 1.0
+		},
+		{
+			"identifier" : "t2",
+			"formula" : "v1",
+			"caption" : "Discomfort [Hr]",
+			"scaling" : false,
+			"min" : 0,
+			"max" : 1000,
+			"weight" : 1.0
+		}
+	]
+}
+</sxh>
+
+
+===== 5.2 Structure of RVX =====
+
+As you can see from the example above, a RVX contains 7 components, which are //notes//, //rvis//, //sqls//, //scripts//, //userVars//, //constraints//, and //objectives//. The //notes// holds only one text string that serves as comments of the RVX file, as no other comment line is allowed in JSON format. The //rvis//, //sqls// and //scripts// components define result extractors, which we will explain in sections 5.3 - 5.5. The //userVars//, //constraints// and //objectives// components are user-defined report variables, useful for doing calculations from the simulation results.
+
+The [[http://json.org/|JSON data format]] is fairly straightforward. A component (or object) is wrapped in a pair of ''{ }''. A list of components is wrapped in ''[ ]''. Members of a list or a component are separated with '',''. Except for //notes//, all other components of the RVX are in fact lists. JSON is designed for programmatic data exchange rather than user input; therefore the syntax rules are very strict and may cause trouble to new users. Here are a few things you need to take care when editing this file:
+
+  * The reference of each member, i.e. the text on the left side of a '' : '', must not be changed
+  * '' "  " '', '' [  ] '', '' {  } '' pairs must be matched
+  * No excess or missing '' , ''
+
+<WRAP round info>
+It may be easier to use a dedicated **[[http://www.jsoneditoronline.org/|JSON editor]]** to check over your RVX file.
+</WRAP>
+===== 5.3 Use ReadVarsEso and the RVI/MVI files =====
+
+ReadVarsESO is a very useful tool in EnergyPlus and has been used in jEPlus since its first release. ReadVarsESO extract data of user selected variables from the standard EnergyPlus output files (''eplusout.eso'' and ''eplusout.mtr'') and reformat it as a CSV file. More details of how ReadVarsESO works can be found in EnergyPlus' documentation. To use ReadVarsESO, you need to specify a RVI or MVI file, which contains the name of the EnergyPlus output file (either ''eplusout.eso'' or ''eplusout.mtr''), the name of the output CSV file (must be ''eplusout.csv''), a list of output variables to extract, and a ''0'' in the last row to mark the end of the file. List below shows an example of RVI. 
+
+<sxh shell; first-line: 1; highlight: [3]; title: 5ZoneCostEst.rvi>
+eplusout.mtr
+eplusout.csv
+Electricity:Facility
+0
+</sxh>
+
+The available output variable names of your model are reported in ''eplusout.rdd'' and ''eplusout.mdd'' (or ''your_model_name.mdd/rdd'', if you simulated the model with EP-Launch) files. Below is (part of) an example ''eplusout.mdd'' file, in which you can see where the variable names are specified. Please note the variables must be specified for output at the desired frequency in the IDF model, too.
+
+<sxh shell; first-line: 1; highlight: [3]; title: eplusout.mdd>
+Program Version,EnergyPlus-32 7.0.0.036, 06/06/2013 20:46,IDD_Version 7.0.0.036
+Var Type (reported time step),Var Report Type,Variable Name [Units]
+Zone,Meter,Electricity:Facility [J]
+Zone,Meter,Electricity:Building [J]
+Zone,Meter,Electricity:Zone:SPACE1-1 [J]
+Zone,Meter,InteriorLights:Electricity [J]
+Zone,Meter,InteriorLights:Electricity:Zone:SPACE1-1 [J]
+Zone,Meter,GeneralLights:InteriorLights:Electricity [J]
+
+...
+</sxh>
+
+Prior to version 1.5, jEPlus can only use one RVI file to extract results. This has changed with the introduction of the RVX file. In a RVX, you can specify as many RVI files to use as you like in the //rvis// component. Below is an example showing the syntax. In addition to the RVI file name, you should specify a table name. Each RVI extracts results to a ''eplusout.csv'' file, which will then be renamed to ''[tableName].csv'' by jEPlus to avoid conflicts between different RVIs.
+
+jEPlus **version 1.6** has introduced two new fields in the //rvi// objects. The ''"frequency"'' field specifies the report frequency of the output variables to be extracted. The ''"usedInCalc"'' field indicates whether the extracted table should be included in the combined table after collection. In the example below, the hourly results will be further processed using a Python script (see section 5.6), therefore they are intermediate data and should not be included in the final combined table.
+
+<sxh javascript; first-line: 1; highlight: [3]; title: my.rvx in example_3-RVX_v1.6_E+v8.3/>
+	...,
+
+	"rvis" : [ 
+		{ 
+			"fileName" : "AnnualCarbon.rvi",
+			"tableName" : "Carbon",
+			"frequency" : "Annual",
+			"usedInCalc" : true
+		},
+		{ 
+			"fileName" : "AnnualDiscomfort.rvi",
+			"tableName" : "Discomfort",
+			"frequency" : "Annual",
+			"usedInCalc" : true
+		},
+		{ 
+			"fileName" : "HourlyMeters.rvi",
+			"tableName" : "HourlyMeters",
+			"frequency" : "Hourly",
+			"usedInCalc" : false
+		}
+	],
+	
+	...
+</sxh>
+
+===== 5.4 Extract SQLite output =====
+
+{{url>http://www.youtube.com/embed/9Cf0yHYxd-M 240px,165px noscroll noborder right|Use SQLite output}}
+
+Certain simulation results from EnergyPlus simulation is only available from the tabular outputs in eplusout.sql. Since version 1.4, jEPlus can extract such results by using [[http://www.w3schools.com/sql/|SQL]] and the built-in SQLite driver. For a tutorial on how to prepare SQLite instructions, please check out the video guide. 
+
+
+Below is an example of a RVI file extension used in version 1.4. The standard RVI instructions ends at the line containing only ''0''. Three additional blocks are appended. The first block starts with ''!-sqlite'' and ends with ''!-end sqlite'', containing instructions on data extraction from the SQLite tables. This syntax is still accepted in version 1.5. However, if the RVI file is passed through the EnergyPlus version updater, the additional blocks will be lost. A better solution is the new RVX file.
+
+<sxh shell; first-line: 1; highlight: [6,7,8,9,10]; title: extended my.rvi>
+eplusout.mtr
+eplusout.csv
+Electricity:Facility 
+0
+
+!-sqlite
+! Output file name; Column headers; SQL command
+ChillerCap; Chiller Nominal Capacity [W]; select Value from ComponentSizes WHERE (CompType='Chiller:Electric' AND CompName='CHILLER PLANT CHILLER' AND Description='Nominal Capacity')
+ConsCost; Construction Cost [$/m2]; select Value from TabularDataWithStrings WHERE (ReportName='Construction Cost Estimate Summary' AND ReportForString='Entire Facility' AND TableName='Construction Cost Estimate Summary' AND RowName='Cost Per Conditioned Building Area (~~$~~/m2)' AND ColumnName='Current Bldg. Model' AND Units='' AND RowId=10)
+!-end sqlite
+
+!
+</sxh>
+
+The list below is the //sqls// component of the RVX example. Each sql item has a ''tableName'', a set of ''columnHeaders'', and a ''sqlcommand''. jEPlus will execute the ''sqlcommand'' on each job's eplusout.sql output file, and store result(s) in the [''tableName''].csv, with the given ''columnHeaders''. You can have as many sql items in this section as you like.
+
+<sxh javascript; first-line: 1; highlight: [3]; title: my.rvx in example_3-RVX_v1.6_E+v8.3/>
+	...
+
+	"sqls" : [
+		{ 
+			"tableName" : "ChillerCap",
+			"columnHeaders" : "Chiller Nominal Capacity [W]",
+			"sqlcommand" : "select Value from ComponentSizes WHERE (CompType='Chiller:Electric' AND CompName='CHILLER PLANT CHILLER' AND Description='Design Size Nominal Capacity')"
+		},
+		{ 
+			"tableName" : "ConsCost",
+			"columnHeaders" : "Construction Cost [$/m2]",
+			"sqlcommand" : "select Value from TabularDataWithStrings WHERE (ReportName='Construction Cost Estimate Summary' AND ReportForString='Entire Facility' AND TableName='Construction Cost Estimate Summary' AND RowName='Cost Per Conditioned Building Area (~~$~~/m2)' AND ColumnName='Reference Bldg.' AND Units='')"
+		}
+	],
+
+	...
+</sxh>
+
+Two things require further attention when you are using //sqls// in the RVX. First is that the SQL command may need to be revised if you change E+ versions. Second, double quote (''"'') characters should be avoided if possible. If they must be used, escape the character with a backslash as ''\"''.
+
+===== 5.5 Read from E+ CSV tabular report =====
+
+Although using the SQLite output you can extract almost anything that E+ produces, this method requires knowledge of SQL language and additional tools. Also the SQL commands tend to be long and subject to changes when migrating between E+ versions. The CSV method is introduced in version 1.6 as a convenient alternative to access tabular reports from EnergyPlus.
+
+To enable CSV tabular report output from E+, add the highlighted object below in the model:
+
+<sxh shell; first-line: 1; highlight: [6,7]; title: Enable CSV tabular output in E+ model (example_3-RVX_v1.6_E+v8.3/5ZoneCostEst.idf)>
+  ...
+  
+  Output:SQLite,
+    SimpleAndTabular;        !- Option Type
+
+  OutputControl:Table:Style,
+    CommaAndHTML;            !- Column Separator
+
+  Output:Table:SummaryReports,
+    AllSummary;              !- Report 1 Name
+
+  ...
+</sxh>
+
+The resultant CSV tabular output (eplustbl.csv) is shown in the screenshot below. To locate a cell in the tables, you need to specify the report name, the table name, the column heading, and the row heading, as highlighted in the spreadsheet. 
+
+[{{ :docs:v_1_6:jeplus_v1.6_eplustbl_csv.png?nolink&800 |Locating cell in eplustbl.csv}}]
+
+The CSVs objects in the RVX are fairly easy to understand. The specified the cell in ''eplustbl.csv'' will be collected and written to ''[tableName].csv'', under the given new column header.
+
+<sxh javascript; first-line: 1; highlight: [3]; title: my.rvx in example_3-RVX_v1.6_E+v8.3/>
+	...
+
+	"csvs" : [
+		{
+			"sourceCsv"  : "eplustbl.csv",
+			"fromReport" : "Annual Building Utility Performance Summary",
+			"fromTable"  : "End Uses By Subcategory",
+			"fromColumn" : "Water [m3]",
+			"fromRow"    : "Heat Rejection",
+			"tableName"  : "WaterUse",
+			"columnHeaders" : "Water use for Heat Rejection [m3]",
+			"usedInCalc" : true
+		},
+		{
+			"sourceCsv"  : "eplustbl.csv",
+			"fromReport" : "",
+			"fromTable"  : "Heating Coils",
+			"fromColumn" : "Nominal Total Capacity [W]",
+			"fromRow"    : "TEST AIR-TO-AIR HEAT PUMP HP HEATING COIL",
+			"tableName"  : "CoilCapacity",
+			"columnHeaders" : "Nominal Total Capacity - HP Heating Coil [W]",
+			"usedInCalc" : true
+		}
+	],
+
+	...
+</sxh>
+
+
+===== 5.6 Use Python Scripts =====
+
+Probably the most significant feature introduced in version 1.5 is the ability to run [[https://www.python.org/|Python]] scripts in the data collection process. This gives user virtually infinite possibilities for post-processing simulation results. Here is the //scripts// components in the RVX for specifying Python scripts for extracting data.
+
+<sxh javascript; first-line: 1; highlight: [3]; title: my.rvx in example_3-RVX_v1.6_E+v8.3/>
+	...
+
+	"scripts" : [
+		{
+			"fileName" : "calcMaxOfColumn_jy.py",
+			"pythonVersion" : "jython",
+			"onEachJob" : true,
+			"arguments" : "HourlyMeters",
+			"tableName" : "ElecPeakLoad"
+		},
+		{
+			"fileName" : "readRunTimes_jy.py",
+			"pythonVersion" : "jython",
+			"onEachJob" : false,
+			"arguments" : "",
+			"tableName" : "CpuTime"
+		}
+	],
+
+	...
+</sxh>
+
+==== Description of the fields ====
+
+The fields in each script item require a bit of explaination:
+
+  * ''fileName'' -- The file name of the Python script. If full path is not provided, it is relative to the location of this RVX file.
+  * ''pythonVersion'' -- Unfortunately the Python language differs between version 2 and 3. There are also restrictions depending on the interpreter used. In this field you can select ''jython'', ''python2'' or ''python3''. 
+  * ''onEachJob'' -- ''true'' or ''false''. If true, the script will be executed in each job folder, otherwise in the project's output folder where the individual job folders are located. If not ''onEachJob'', a list of jobs in the project will be passed to the script as the second argument.
+  * ''arguments'' -- You can provide additional arguments to be passed to the script. All additional arguments should be specified in one text string, separated by '',''. 
+  * ''tableName'' -- The file name for the output table. Value of this field will be passed to the Python script as the third argument. The script is then responsible for producing a csv table similar to the RVI result.
+
+==== Arguments passed to the script ====
+
+The number of arguments jEPlus passes to the script varies depending on the ''onEachJob'' option. If the **''onEachJob''** field is set to **''false''**, jEPlus will pass five arguments in total to the script. The arguments can be read within the script using ''sys.argv[]''. Note that ''sys.argv[0]'' always returns the name of the script.
+
+  - sys.argv[1]  --  the full paths of the location of the project itself
+  - sys.argv[2]  --  the full path of the output folder of the project where the individual job folders are located
+  - sys.argv[3]  --  the list of the job IDs of the simulations that have been executed
+  - sys.argv[4]  --  the expected output table name, as defined by ''tableName''. In the script, ''.csv'' should be appended to the table name before written to the file
+  - sys.argv[5]  --  Other arguments as specified in the ''scripts'' object in the RVX file
+
+Otherwise, if the **''onEachJob''** option is **''true''**, the arguments passed are as below:
+
+  - sys.argv[1]  --  the full paths of the location of the project itself
+  - sys.argv[2]  --  the full path of the output folder of the simulation case
+  - sys.argv[3]  --  the expected output table name, as defined by ''tableName''. In the script, ''.csv'' should be appended to the table name before written to the file
+  - sys.argv[4]  --  Other arguments as specified in the ''scripts'' object in the RVX file
+
+
+
+==== Output table format ====
+
+The Python scripts are responsible to produce suitable output tables that jEPlus can read and include into its result collection process. Depending on where the script is run, the output table formats are different. 
+
+If a script is run in the individual jobs folders, the output table should mimic the format of a typical ''eplusout.csv'' file generated by ReadVarsESO. Basically, the first column is date and time; the rest are data. Here is an example:
+
+<sxh>
+Date/Time,InteriorLights:Electricity [J](Hourly),InteriorEquipment:Electricity [J](Hourly),Heating:DistrictHeating [J](Hourly)
+ 01/01  01:00:00,0.0,2276640.,13278931.1044949
+ 01/01  02:00:00,0.0,2276640.,32229908.1477126
+ 01/01  03:00:00,0.0,2276640.,17895859.9832406
+ 01/01  04:00:00,0.0,2276640.,38784519.4821989
+...
+</sxh>
+
+A script running in the project's output folder should produce a table similar to SimResults.csv. The table should have three columns before the start of data. These three columns are the serial IDs, the job IDs, and a reserved column that can be anything or left empty. Below is an example. Please note the header row must start with ''#''
+
+<sxh>
+#, Job_ID, Date/Time, Electricity:Facility [J](RunPeriod)
+0, LHS-000000, simdays=62, 233879205202.003 
+1, LHS-000001, simdays=62, 236359323510.063 
+2, LHS-000002, simdays=62, 248514348464.105 
+3, LHS-000003, simdays=62, 232542002313.733 
+4, LHS-000004, simdays=62, 248299129214.135 
+5, LHS-000005, simdays=62, 250977825693.01 
+6, LHS-000006, simdays=62, 239737768305.779 
+...
+</sxh>
+
+==== Notes on Jython ====
+
+[[http://www.jython.org/|Jython]] is Python language implemented in Java and runs on a Java virtual machine. Its development lags behind the C Pyhton, and supports Python 2.7 at present. Jython is included in jEPlus for people who do not need to full power of Python nor have C Python installed on their computers. Despite its limitations (see below), Jython provides a convenient way of having simple scripts in a jEPlus project. 
+
+  * Language level support: Python 2.7
+  * Only the core libraries, no extensions or plugins available
+  * Script will be executed in the jEPlus folder, instead of the project output folder or the individual job folder
+
+==== An example ====
+
+The following script is included in the ''example_3-RVX_v1.6_E+v8.3/'' folder. It reads the RunTimes.csv table and calculates the CPU time in seconds, before writing the results to an output table. This script is just for demonstration purpose and has probably little practical use. However, you can see how scripts work with jEPlus.
+
+<sxh python; first-line: 1; highlight: []; title: readRunTimes_jy.py in example_3-RVX_v1.6_E+v8.3/>
+# Example python script: This script reads from RunTimes.csv, calculates CPU time used in seconds,
+# and then write to different table specified by the user.
+# Arguments:
+#   sys.argv[1]  -  project's base folder where the project files are located
+#   sys.argv[2]  -  output folder of the project where the RunTimes.csv is located
+#   sys.argv[3]  -  the list of jobs have been executed in the project
+#   sys.argv[4]  -  user-defined output table name + .csv
+#   sys.argv[5..] - Other arguments specified in the RVX file
+
+import sys
+import _csv
+import math
+
+ifile  = open(sys.argv[2] + "RunTimes.csv", "rt")
+reader = _csv.reader(ifile)
+ofile = open(sys.argv[2] + sys.argv[4], "wb")
+writer = _csv.writer(ofile)
+
+rownum = 0
+timelist = []
+for row in reader:
+    # Save header row.
+    if rownum == 0:
+        header = row[0:3]
+        header.append("CpuTime")
+        writer.writerow(header)
+    else:
+        time = [float(t) for t in row[5:]]
+        seconds = time[0]*3600+time[1]*60+time[2]
+        timelist.append(seconds)
+        temprow = row[0:3]
+        temprow.append(seconds)
+        writer.writerow(temprow)
+    rownum += 1
+ifile.close()
+ofile.close()
+
+n = len(timelist)
+mean = sum(timelist) / n
+sd = math.sqrt(sum((x-mean)**2 for x in timelist) / n)
+
+# Console output will be recorded in PyConsole.log
+print '%(n)d jobs done, mean simulation time = %(mean).2fs, stdev = %(sd).2fs' % {'n':n, 'mean':mean, 'sd':sd}
+
+</sxh>
+
+The console errors and outputs (including the ''print...'' output) are logged in ''PyConsole.log'' file in the project's output folder. If a script is run in the individual job folders, the console logs are stored in the ''console.log'' files in each job folder.
+
+===== 5.7 Additional Data in User Supplied Spreadsheet =====
+
+There are situations where you may need extra data to be included in the results, e.g. to be considered in the optimisation process, that are not otherwise possible to generate by the simulation model. You may also want to tag certain combinations of model parameter values using another report variable. These can be achieved by using the ''userSupplied'' object to load the extra data from an external spreadsheet (in CSV format).
+
+<sxh javascript; first-line: 1; highlight: [3]; title: my.rvx in example_3-RVX_v1.6_E+v8.3/>
+	...
+
+	"userSupplied" : [
+		{
+			"fileName" : "feasible.csv",
+			"headerRow" : 0,
+			"jobIdColumn" : 0,
+			"dataColumns" : "1",
+			"missingValue" : 0,
+			"tableName" : "Filter"
+		}
+	],
+
+	...
+</sxh>
+
+This object specifies that the extra data are read from the file named ''feasible.csv''. The file is expected to be located in the same folder as the project (.jep) file, as no paths information is given. The file, which must be in CSV format, contains the first row for the column headers, and the first column for the patterns for matching Job ID strings. The data column is in the second column. Please note that the quote marks around the value for ''dataColumns'' are necessary, as a string field is expected. If you have more than one data columns, list them with a space separated string, such as ''"1 3 4"''. If jEPlus cannot find any entry in the spreadsheet corresponding to a job, it will use the ''missingValue'', which defaults to ''0''. The extra data will be collected to a table named ''Filter.csv'' in this case.
+
+Here is an example of the user supplied spreadsheet:
+
+<sxh text; first-line: 1; highlight: []; title: feasible.csv>
+    Job_ID,Disallowed
+    G-0_1_0_2_1_1,1
+    G-0_1_0_1_2_0,1
+    G-.+_1_.+_.+_.+_.+,1
+    G-.+_2_.+_.+_.+_.+,1
+    G-.+_3_.+_.+_.+_.+,1
+
+    ...
+</sxh>
+
+The Job_ID column list the patterns using regular expression (Regex). There are rich resources available online for this powerful mechanism. You can develop and test your Regex here: [[https://regex101.com/]], for example. For each simulation case, jEPlus tries to match its job ID in the list, and returns the first match it has found. So in this case, the order of the list may be significant.
+
+===== 5.8 User-defined Report Variables =====
+
+Finally, the RVX file allows user to define a number of derivative variables from the collected simulation results, and define scaled (or normalized) metrics that can be used as constraints and objectives in optimization processes. jEPlus will compute all these variables and metrics after collecting simulation results, and put the values in the ''AllDerivedResults.csv'' file. 
+
+==== User Variables ====
+
+User Variables (the ''userVars'' objects) may be used as intermediate variables in downstream calculations, or as report variables to be included in the ''AllDerivedResults.csv'' file. There are four fields to specify a user variable. These are:
+
+  * ''identifier'' - The identifier (variable name) of each variable must be unique
+  * ''formula'' - The expression for calculating the value of this variable. All collected simulation output values (''c0'', ''c1''...) and variables defined before the current one can be used in the expression. Please note that the model parameters (e.g P1, P2...) are NOT available for calculations.
+  * ''caption'' - More description of the variable. This will be used as the column header for this variable in the report table.
+  * ''report'' - You can choose to include a variable in the output table or not. 
+
+<sxh javascript; first-line: 1; highlight: [3]; title: my.rvx in example_3-RVX_v1.6_E+v8.3/>
+	...,
+	
+	"userVars" : [
+		{
+			"identifier" : "v0",
+			"formula" : "c0",
+			"caption" : "Variable 0 []",
+			"report" : false
+		},
+		{
+			"identifier" : "v1",
+			"formula" : "c1",
+			"caption" : "Variable 1 []",
+			"report" : true
+		},
+		{
+			"identifier" : "v2",
+			"formula" : "c2",
+			"caption" : "Variable 2 []",
+			"report" : false
+		}
+	],
+
+        ...	
+</sxh>
+
+==== Constraints ====
+
+Constraints are user-defined report variables with a particular scaling method. They are used for specifying a special type of metrics for optimization projects. Constraints are always reported in the ''AllDerivedResults.csv'' table. There are six additional fields for defining the scaling function. Their use is best illustrated using the diagram below.
+
+[{{ :docs:v_1_5:jeplus_v1.5_constraint.png?nolink |Figure 5.1 Constraint scaling}}]
+
+An example constraint definition is given below.
+
+<sxh javascript; first-line: 1; highlight: [3]; title: my.rvx in example_3-RVX_v1.6_E+v8.3/>
+	...,
+	
+	"constraints" : [
+		{
+			"identifier" : "s1",
+			"formula" : "v1/1000",
+			"caption" : "Chiller Capacity [kW]",
+			"scaling" : true,
+			"lb" : 0,
+			"ub" : 200,
+			"min" : 0,
+			"max" : 300,
+			"weight" : 1.0
+		}
+	],
+
+        ...
+</sxh>
+
+
+==== Objectives ====
+
+Similar to constraints, Objectives are user-defined metrics for optimization purposes. The scaling function for objectives is different than that of the constraints. The shape of output is illustrated below.
+
+[{{ :docs:v_1_5:jeplus_v1.5_objective.png?nolink |Figure 5.2 Objective scaling}}]
+
+<sxh javascript; first-line: 1; highlight: [3]; title: my.rvx in example_3-RVX_v1.6_E+v8.3/>
+	...,
+	
+	"objectives" : [
+		{
+			"identifier" : "t1",
+			"formula" : "v0/1000/3600",
+			"caption" : "Electricity [kWh]",
+			"scaling" : true,
+			"min" : 0,
+			"max" : 100000,
+			"weight" : 1.0
+		},
+		{
+			"identifier" : "t2",
+			"formula" : "v2",
+			"caption" : "Construction Cost [$/m2]",
+			"scaling" : false,
+			"min" : 0,
+			"max" : 1000,
+			"weight" : 1.0
+		}
+	]
+
+</sxh>
+

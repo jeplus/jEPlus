@@ -1,0 +1,88 @@
+__[[docs:manual_1_7#table_of_contents|Table of Contents]]__
+
+====== Chapter 4 The Parameters ======
+
+Version 1.7, © 2015 [[:start|jeplus.org]]
+
+
+\\
+
+----
+
+
+===== 4.1 Parameter definition =====
+
+A parameter to be incorporated in the parametric analysis is specified with three essential elements, a unique ID, a Search string, and a list of Alternative values. The ID is short string used for identifying the parameter. It is also used to form part of the job title as well as the work directory name in which the job is to be executed. The formulation of the job titles will be further explained in the “Result collection” section.
+
+The Search string is a character sequence to be planted in the IDF files to identify the location of a value to be later inserted. This string must not naturally occur in an IDF file; therefore it is recommended to include special characters (e.g. ‘@’) that are not used in the standard EnergyPlus syntax. Note that jEPlus only search and replace one occurrence of a search string in each job. A user must ensure that there is only one instance of a search string, as well as all search strings in the IDF will be replaced within the job. A validation facility has been provided in the jEPlus GUI.
+
+The “Alternative values” is a list of strings to be used one at a time in the parametric jobs. jEPlus supports three types of alternative values: Discrete, Integer and Double. The syntax for specifying the list of values is explained next. Figure 3 shows an example of parameter definition. There are two extra fields, i.e. “Name” and “Description”, which are recorded in the output files for reference, but not used in the simulation.
+
+===== 4.2 Syntax for alternative values =====
+
+For the “Discrete” type of parameters, the values can be specified with a comma ('','') delimited list enclosed in a pair of curly brackets (''{}''), e.g. ''{Detailed, Simple, CeilingDiffuser}''. For the “Integer” and “Double” parameters, square brackets (''[]'') and union/exclusion operations (''&'' ''^'') are accepted in addition to the curly brackets (''{}''). The square brackets are used to define a number series with a uniform interval. For example, the list ''{1,3,5,7,9}'' can be specified using ''[1:2:9]''. Colons ('':'') are used to separate the Start Value, the Interval, and the End Value. Please note the last value in the resultant list is unnecessarily the End Value.
+
+The union operator (''&'') combines the elements in two lists. For example, ''[1:2:5]&{2,4,6}'' is equivalent to ''{1,3,5,2,4,6}'' (Note that the list is not sorted). The exclusion operator (''^'') removes elements in the right-hand list from the left-hand list, e.g. ''[-2:1:6]^{2,4,6}'' gives ''{-2,-1,0,1,3,5}''. The operators are processed in the left-to-right order. In the current version, grouping with parentheses is not supported. The following example shows the use of all supported operations: ''{1}&[0:5:30]^{0}'', which gives ''{1,5,10,15,20,25,30}'' as the result.
+
+===== 4.3 @sample syntax =====
+
+Since version 1.0, it is possible to specify alternative values as random samples rather than a predefined sequence. Sampling can be performed on ‘Integer’ or ‘Double’ parameters with three distribution profiles, a uniform distribution, a Gaussian (normal) distribution, or a triangular distribution. The syntax for the sampling methods is illustrated with the following examples:
+
+''@sample(gaussian,0,2,20)'' or ''@sample(n,0,2,20)'' gives 20 samples with Gaussian distribution (mean = 0, standard deviation = 2)
+
+''@sample(uniform,0,2,20)'' or ''@sample(u,0,2,20)'' gives 20 samples with uniform distribution (lower bound = 0, upper bound = 2)
+
+''@sample(triangular,-1.0,0.2,1.0,20)'' or ''@sample(tr,-1.0,0.2,1.0,20)'' gives 20 samples with triangular distribution (lower bound = -1.0, mode = 0.2, upper bound = 1.0)
+
+''@sample(discrete, single-glazed, 0.3, double-glazed, 0.5, triple-glazed, 0.2, 20)'' or ''@sample(d, single-glazed, 0.3, double-glazed, 0.5, triple-glazed, 0.2, 20)'' gives 20 sample points with single-, double- and triple-glazed options account for 30%, 50% and 20% of the cases, respectively.
+
+Please note that sampling is performed right before the start of simulation. As a result, the values you see in the Preview box may NOT be what you get in the actual simulations.
+
+===== 4.4 @file syntax =====
+
+If you want to use an external random sample generator, you can the list of generated values in a text file, and load them into the parameter, using the following syntax:
+
+''@file(P3_sample_EXP.txt)'' of which ''P3_sample_EXP.txt'' is provided in the ''example_1-params_E+v8.3/'' folder in the jEPlus package. Please note that, if a relative directory name is used (as in this case), it is relative to the location where the jEPlus project file (''project.jep'') is stored. If you don't see the content of the file in the preview box, it means that jEPlus was not able to access the file. Try check the paths again or use the absolute paths instead.
+
+Unlike ''@sample()'', ''@file()'' syntax works with any types of parameters.
+
+===== 4.5 @calc syntax =====
+
+The ''@calc'' syntax was introduced since version 1.5. The idea is to perform calculations based on the values of other parameters. It provides a convenient alternative to EnergyPlus' macro functions. Here is an example of the syntax:
+
+  @calc(15+P2/4)
+  
+Assuming this is the alternative value definition for parameter P3, and P2 is another parameter in the project, the values P3 will take during simulation will be 15 plus a quarter of P2's value. If P2 is {4, 8, 12}, then P3 will be {16, 17, 18}, correspondingly. Please note that P2 must have been defined in the parameter tree before (above) P3.
+
+**jEPlus v1.6** uses [[http://www.jython.org/|Jython]] script engine for calculations. All of the Python 2.7 arithmetic operators are available to use. The bitwise operators (''^'' ''|'' and ''&'') should not be used as they conflict with jEPlus syntax. 
+
+Most of the [[https://docs.python.org/2/library/math.html|Python 2.7 math functions]] are available, too. For example, ''@calc(math.hypot(P2, P3))'' will return the Euclidean norm of P2 and P3.
+===== 4.6 Combinatorial parameters =====
+
+Combinatorial parameter is a new feature introduced in version 1.4, to significantly simplify the way how joint parameters can be defined. A combinatorial parameter contains two or more search tags that can be placed in different locations in the IDF template. The alternative values to be used in place of the search tags during simulation are defined in groups, and each group is considered together as one design option. The purpose of using combinatorial parameters is to make synchronous multiple changes in the model, which is quite often needed in practice. 
+
+For example, if you want to change the size and location of a window, there are 4 values (x0, z0, w, h) have to be modified together. One combinatorial parameter is able to modify the 4 values simultaneously. The syntax for the search tag is now ''@@x0@@|@@y0@@|@@w@@|@@h@@''. And the alternative values are ''{1|1|2|2, 1.1|1|1.9|2, 1|0.8|2|1.8 ...}''. In the IDF model, you can insert ''@@x0@@'', ''@@y0@@'', ''@@w@@'' and ''@@h@@'' at the right locations. jE+ will then parse the definition and assign correct values to the corresponding fields. 
+
+===== 4.7 Fixing on a parameter value =====
+
+Another feature of jEPlus, provided since version 1.0, is that you can choose to run only part of project, rather than all jobs in one go. One way to do this is by using the ‘Fix on the i-th value’ option of each parameter. Once selected, only jobs containing the particular parameter value will be included in the job batch. The Job IDs and indexes of the whole project are preserved in this way, allowing you to split a large project into smaller batches, and to merge the results later.
+
+===== 4.8 Import parameter table =====
+
+You can import the whole the parameter tree from a list of parameter definitions in a CSV-styled text file. An example parameter definition list file, as shown below, is provided in the ''example_1-params_E+v8.3/'' folder. The import function creates only a single-branch tree. You can then edit it manually to achieve the right 'shape'.
+
+<code shell>
+# Parameter list for project: 0 (exported at 01/09/15 14:46)
+# Note: this list contains only the first branch of the parameter tree.
+# Parameter definitions in a csv file. Column headings are as below
+# ID, Name, Parameter Type, Description, Search String, Value Type, Value String, Selected Value Index
+#           {0}                                         {0, 1, 2}                 {0, .... depending on number of values}
+# 
+P1,Orientation,0,"Orientation of the building",@@orientation@@,0,[0 :45 :359 ] & {101} ^ {45, 135},0
+P2,Outside Air Rate,0,"Outside Air Rate [m3/s/person]",@@Outside_Air@@,1,@sample(n, 0.008, 0.003, 5),0
+P3,Occupancy density,0,"occupancy density [people / m^2]",@@Occ@@,1,@file(P3_sample_EXP.txt),0
+P4,Equipment power,0,"Equipment power as a function of occupancy density",@@Eq@@,1,@calc(-400*P3*P3+220*P3+2),0
+</code>
+
+\\
+

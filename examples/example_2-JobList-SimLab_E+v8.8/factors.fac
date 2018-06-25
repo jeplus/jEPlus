@@ -1,0 +1,42 @@
+Default Truncations:
+0.001	0.999
+
+4 Distributions:
+Uniform
+P1
+
+1	1
+0.0	360.0	1.0	
+
+Normal
+P2
+
+1	0.008	0.003	0.001	0.999
+
+Triangular
+P3
+
+1	0	0.04	0.1
+
+Uniform
+P4
+
+1	1	
+0.0	30.0	1.0	
+
+Correlation information
+0 -1 0 
+0 -1 0 
+0 -1 0 
+0 -1 0 
+Correlation Matrix:
+1	0	0	0
+0	1	0	0
+0	0	1	0
+0	0	0	1	
+Stein information:
+
+0
+0
+0
+2

@@ -1,0 +1,145 @@
+{
+
+	"notes" : "Some notes about this RVX",
+
+	"rvis" : [ 
+		{ 
+			"fileName" : "AnnualCarbon.rvi",
+			"tableName" : "Carbon",
+			"frequency" : "Annual",
+			"usedInCalc" : true
+		},
+		{ 
+			"fileName" : "AnnualDiscomfort.rvi",
+			"tableName" : "Discomfort",
+			"frequency" : "Annual",
+			"usedInCalc" : true
+		},
+		{ 
+			"fileName" : "HourlyMeters.rvi",
+			"tableName" : "HourlyMeters",
+			"frequency" : "Hourly",
+			"usedInCalc" : false
+		}
+	],
+	
+	"sqls" : [
+		{ 
+			"tableName" : "ChillerCap",
+			"columnHeaders" : "Chiller Nominal Capacity [W]",
+			"sqlcommand" : "select Value from ComponentSizes WHERE (CompType='Chiller:Electric' AND CompName='CHILLER PLANT CHILLER' AND Description='Design Size Nominal Capacity')"
+		},
+		{ 
+			"tableName" : "ConsCost",
+			"columnHeaders" : "Construction Cost [$/m2]",
+			"sqlcommand" : "select Value from TabularDataWithStrings WHERE (ReportName='Construction Cost Estimate Summary' AND ReportForString='Entire Facility' AND TableName='Construction Cost Estimate Summary' AND RowName='Cost Per Conditioned Building Area (~~$~~/m2)' AND ColumnName='Reference Bldg.' AND Units='')"
+		}
+	],
+	
+	"csvs" : [
+		{
+			"sourceCsv"  : "eplustbl.csv",
+			"fromReport" : "Annual Building Utility Performance Summary",
+			"fromTable"  : "End Uses",
+			"fromColumn" : "Water [m3]",
+			"fromRow"    : "Heat Rejection",
+			"tableName"  : "WaterUse",
+			"columnHeaders" : "Water use for Heat Rejection [m3]",
+			"usedInCalc" : true
+		},
+		{
+			"sourceCsv"  : "eplustbl.csv",
+			"fromReport" : "Equipment Summary",
+			"fromTable"  : "Heating Coils",
+			"fromColumn" : "Nominal Total Capacity [W]",
+			"fromRow"    : "VAV SYS 1 HEATING COIL",
+			"tableName"  : "CoilCapacity",
+			"columnHeaders" : "Nominal Total Capacity - VAV Heating Coil [W]",
+			"usedInCalc" : true
+		}
+	],
+
+	"scripts" : [
+		{
+			"fileName" : "calcMaxOfColumn_jy.py",
+			"pythonVersion" : "python2",
+			"onEachJob" : true,
+			"arguments" : "HourlyMeters",
+			"tableName" : "ElecPeakLoad"
+		},
+		{
+			"fileName" : "readRunTimes_jy.py",
+			"pythonVersion" : "python2",
+			"onEachJob" : false,
+			"arguments" : "",
+			"tableName" : "CpuTime"
+		}
+	],
+	
+	"userVars" : [
+		{
+			"identifier" : "v0",
+			"formula" : "c0",
+			"caption" : "CO2 Emmission [kg]",
+			"report" : false
+		},
+		{
+			"identifier" : "v1",
+			"formula" : "Math.max(c1, c2, c3, c4, c5)",
+			"caption" : "Max discomfort [Hr]",
+			"report" : true
+		},
+		{
+			"identifier" : "v2",
+			"formula" : "Math.hypot(c12, c13)",
+			"caption" : "Arbitary Var []",
+			"report" : true
+		}
+	],
+	
+	"constraints" : [
+		{
+			"identifier" : "s1",
+			"formula" : "c11/1000",
+			"caption" : "Chiller Capacity [kW]",
+			"scaling" : true,
+			"lb" : 0,
+			"ub" : 200,
+			"min" : 0,
+			"max" : 300,
+			"weight" : 1.0
+		},
+		{
+			"identifier" : "s2",
+			"formula" : "c16/1000/3600",
+			"caption" : "Peak HVAC Load [kWh]",
+			"scaling" : true,
+			"lb" : 0,
+			"ub" : 5.55,
+			"min" : 0,
+			"max" : 10,
+			"weight" : 1.0
+		}
+	],
+
+	"objectives" : [
+		{
+			"identifier" : "t1",
+			"formula" : "v0/1000",
+			"caption" : "CO2 [ton]",
+			"scaling" : false,
+			"min" : 0,
+			"max" : 100000,
+			"weight" : 1.0
+		},
+		{
+			"identifier" : "t2",
+			"formula" : "v1",
+			"caption" : "Discomfort [Hr]",
+			"scaling" : false,
+			"min" : 0,
+			"max" : 1000,
+			"weight" : 1.0
+		}
+	]
+}

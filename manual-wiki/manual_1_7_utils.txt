@@ -1,0 +1,57 @@
+__[[docs:manual_1_7#table_of_contents|Table of Contents]]__
+
+====== Chapter 7 Utilities ======
+
+Version 1.7, © 2015 [[:start|jeplus.org]]
+
+
+\\
+
+----
+
+===== 7.1 Python Runner =====
+
+jEPlus simplifies the organization of parametric projects. However, its post-processing functions are much limited. Python scripts can be used at the result collection stage to make up for this limitation. After the simulation results being collected into various tables, it is fairly easy to use Python to perform further calculations. The only problem is how to pass information from the jEPlus project to the Python script. 
+
+The main purpose of the Python executor utility is for testing scripts before including them in the jEPlus project. On this tab, you can select the arguments to be passed to the script to mimic the scenarios defined in the RVX (see [[docs:manual_1_6_rvx|Chapter 5]]). When called from the RVX result collection process, four or five arguments are passed to the script, depending on the ''onEachJob'' option. If the ''onEachJob'' option is set to true, the list of arguments is as below: (Note that ''sys.argv[0]'' returns the name of the script.)
+
+  - sys.argv[1]  --  the full paths of the location of the project itself
+  - sys.argv[2]  --  the full path of the output folder of the simulation case
+  - sys.argv[3]  --  the expected output table name, as defined by ''tableName''. In the script, ''.csv'' should be appended to the table name before written to the file
+  - sys.argv[4]  --  Other arguments as specified in the ''scripts'' object in the RVX file
+
+Otherwise, if the ''onEachJob'' option is false, the arguments passed are as below:
+
+  - sys.argv[1]  --  the full paths of the location of the project itself
+  - sys.argv[2]  --  the full path of the output folder of the project where the individual job folders are located
+  - sys.argv[3]  --  the list of the job IDs of the simulations that have been executed
+  - sys.argv[4]  --  the expected output table name, as defined by ''tableName''. In the script, ''.csv'' should be appended to the table name before written to the file
+  - sys.argv[5]  --  Other arguments as specified in the ''scripts'' object in the RVX file
+
+On the Python executor tab, you can enable/disable arguments and select the corresponding paths to reproduce the scenarios for data collection using RVX.
+
+\\
+
+[{{ :docs:v_1_6:jeplus_v1.6_python.png?direct&800 |Figure 7.1: The Python script runner}}]
+
+\\
+===== 7.2 E+ Version Converter =====
+
+{{url>http://www.youtube.com/embed/RUDpmdkYI_g 280px,210px noscroll noborder right|IDF version converter tool}}
+
+The EnergyPlus version converter utility is provided to help upgrade E+ files in jEPlus projects to the latest E+ versions. The util is an interface to the E+ version updater programs. The main benefit it offers, compared to the E+'s own version converter GUI, is the ability to discover model files by either reading the jEPlus project, or sweeping the folder. A tutorial demonstrating its use is available here.
+
+This utility requires the E+ multiple version updater package, which is available to download from the [[http://energyplus.helpserve.com/Knowledgebase/List/Index/46/converting-older-version-files|EnergyPlus Help Desk]].
+
+\\ 
+
+[{{ :docs:v_1_6:jeplus_v1.6_converter.png?direct&800 |Figure 7.2: The E+ Version Updater shell}}]
+
+\\
+
+===== 7.3 ReadVars Runner =====
+
+If you have kept the EnergyPlus output files after the simulations, you can extra a different set of data tables with the ‘Post process’ tab, without re-runing the simulations. Here, you can specify an alternative RVI/MVI file, and run ReadVarsESO. There are options to store data tables separately for each job, compile a combined table like jEPlus does by default, and perform simple statistics on the results.
+
+[{{ :docs:v_1_5:jeplus_v1.5_readvars.png?direct&800 |Figure 7.3: The ReadVars runner}}]
+

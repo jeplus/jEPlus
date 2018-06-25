@@ -1,0 +1,69 @@
+====== jEPlus User's Manual ======
+
+Version 1.7, © 2015 [[:start|jeplus.org]]
+
+**[This manual is under revision]**
+
+For instructions on how to use Python in pre-processing, see [[misc:python_preproc|Python script for model pre-processing]]
+
+----
+
+<WRAP round info>
+
+===== Disclaimer =====
+
+//jEPlus v1.7 (the software) is provided by Dr Yi Zhang free of charge for commercial or non-commercial use. It is provided on the basis of “as is”. Any express or implied warranties, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose are disclaimed. In no event shall Dr Yi Zhang or his employer be liable for any direct, indirect, incidental, special, exemplary, or consequential damages, (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this software.//
+
+//The software is released under GPLv3 (see [[http://www.gnu.org/licenses/gpl.html|link]]). The use of the software is done at your own discretion and risk and with agreement of the foregoing disclaimer.//
+
+
+</WRAP>
+===== New Features =====
+
+<wrap indent>The new [[docs:manual_1_7_features|features]] of jEPlus introduced in Version 1.7 include:</wrap>
+
+  * Python for pre-processing with @python() syntax
+  * Sobol sampling function in addition to Latin Hypercube Sampling and Random shuffling methods
+  * Added exponential and log-normal distributions to the @sample() syntax
+  * New dialog for configuring external programs
+  
+
+===== Table of Contents =====
+
+<WRAP indent>
+
+**[[docs:manual_1_7_intro|Chapter 1 Introduction]]** -- This chapter describes how jEPlus works with diagrams, and explains some of the key concepts and terminologies used in this users guide. Also covered are the things you need to know about installing the software.
+
+**[[docs:manual_1_7_gui|Chapter 2 The GUI]]** -- Illustrated description of the graphical user interface, including the menu structure, the project tab, the execution tab, the utilities tab, and the output/editor pane. User controls are annotated on the screenshots.
+
+**[[docs:manual_1_7_project|Chapter 3 jEPlus Project]]** -- This chapter explains the contents of a jEPlus project, such as the model template files, weather files, the RVI/MVI files (the default method for E+ result collection), and the parameter tree. Also shown are GUI for TRNSYS and INSEL projects.
+
+**[[docs:manual_1_7_params|Chapter 4 Parameter Definition]]** -- This chapter is all about the jEPlus parameter definitions, and the various syntax you can use to specify the parameter values to be used in a parametric project. 
+
+**[[docs:manual_1_7_rvx|Chapter 5 Result Extraction]]** -- jEPlus v1.7 provides more flexible and customisable ways of extracting results from simulations using the new RVX file. This chapter explains the syntax of the RVX file, and the use of ReadVarsEso, SQLite, CSV and Python scripts in result collection. 
+
+**[[docs:manual_1_7_exec|Chapter 6 Running Simulations]]** -- The simulation execution options jEPlus provides are described in this chapter. You can test and run a jEPlus project in various ways, such as using random sampling. The control of computing resource is explained here, too.
+
+**[[docs:manual_1_7_utils|Chapter 7 Utilities]]** -- jEPlus includes a few useful tools to help you prepare your project and extract/post-process results. These utilities include an EnergyPlus version updater shell, a Python script tester/executor, and an E+ ReadVars executor.
+
+**[[docs:manual_1_7_script|Chapter 8 Using Python in jEPlus]]** -- You can use Python in more ways in jEPlus v1.7 than before. This chapter summarizes how to use Python scripts in pre-processing and post-processing stages, and tips on how to test your scripts in jEPlus. 
+
+**[[docs:manual_1_7_advanced|Chapter 9 Interface with jEPlus]]** -- For advanced users, the command-line interface and the programming interface of jEPlus are explained in this chapter. Also covered are the use of the job list files, the parameter file and skeleton project.
+
+**[[docs:manual_1_7_examples|Chapter 10 Examples]]** -- A few examples are described in this chapter, including the use of EP-Macro, and the different ways to parameterize window size.
+
+</WRAP>
+
+
+===== Contact =====
+
+I hope you enjoy using jEPlus. Should you have any inquiries or comments, or like to report issues and request new features, please visit the **[[http://www.jeplus.org/mybb|jeplus forum]]**, or **[[about:team|contact us]]** at: [[jeplus.services@gmail.com]]
+
+===== References =====
+
+Please use the references below for citing jEPlus' works. More publications related to jEPlus can be found **[[research:publications|here]]**.
+
+Zhang, Y., Korolija, I (2010) “Performing complex parametric simulations with jEPlus”, SET2010 - 9th International Conference on Sustainable Energy Technologies, 24-27 August 2010, Shanghai, China {{:docs:set2010-shanghai-se-102.pdf|pdf}}
+
+Zhang, Y. (2009) “‘Parallel’ EnergyPlus and the development of a parametric analysis tool”, IBPSA BS2009, 27–30 July 2009, Glasgow, UK [[http://www.ibpsa.org/proceedings/BS2009/BS09_1382_1388.pdf|pdf]]
+

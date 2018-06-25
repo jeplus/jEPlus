@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.8.0_121" class="java.beans.XMLDecoder">
+ <object class="jeplus.JEPlusProject" id="JEPlusProject0">
+  <void property="IDFTemplate">
+   <string>5ZoneCostEst.idf</string>
+  </void>
+  <void property="RVIFile">
+   <string>my.rvx</string>
+  </void>
+  <void property="baseDir">
+   <string>D:\4\jEPlus_v1.7.2\example_3-RVX_v1.6_E+v8.3\</string>
+  </void>
+  <void property="execSettings">
+   <void property="numberOfJobs">
+    <int>4</int>
+   </void>
+   <void property="parentDir">
+    <string>../output_ex3/</string>
+   </void>
+   <void property="subSet">
+    <int>2</int>
+   </void>
+   <void property="useLHS">
+    <boolean>true</boolean>
+   </void>
+  </void>
+  <void id="DefaultMutableTreeNode0" property="paramTree">
+   <void id="ParameterItem0" property="userObject">
+    <void class="jeplus.data.ParameterItem" method="getField">
+     <string>Description</string>
+     <void method="set">
+      <object idref="ParameterItem0"/>
+      <string>Orientation</string>
+     </void>
+    </void>
+    <void class="jeplus.data.ParameterItem" method="getField">
+     <string>SearchString</string>
+     <void method="set">
+      <object idref="ParameterItem0"/>
+      <string>@@orientation@@</string>
+     </void>
+    </void>
+    <void property="valuesString">
+     <string>[0:5:359]</string>
+    </void>
+   </void>
+   <void method="add">
+    <object class="javax.swing.tree.DefaultMutableTreeNode">
+     <void property="userObject">
+      <object class="jeplus.data.ParameterItem" id="ParameterItem1">
+       <void class="jeplus.data.ParameterItem" method="getField">
+        <string>ID</string>
+        <void method="set">
+         <object idref="ParameterItem1"/>
+         <string>P2</string>
+        </void>
+       </void>
+       <void class="jeplus.data.ParameterItem" method="getField">
+        <string>Name</string>
+        <void method="set">
+         <object idref="ParameterItem1"/>
+         <string>Cost 1</string>
+        </void>
+       </void>
+       <void class="jeplus.data.ParameterItem" method="getField">
+        <string>Description</string>
+        <void method="set">
+         <object idref="ParameterItem1"/>
+         <string>cost item 1</string>
+        </void>
+       </void>
+       <void class="jeplus.data.ParameterItem" method="getField">
+        <string>SearchString</string>
+        <void method="set">
+         <object idref="ParameterItem1"/>
+         <string>@@cost1@@</string>
+        </void>
+       </void>
+       <void property="project">
+        <object idref="JEPlusProject0"/>
+       </void>
+       <void property="valuesString">
+        <string>[ 1000: 500:10000 ]</string>
+       </void>
+      </object>
+     </void>
+     <void method="add">
+      <object class="javax.swing.tree.DefaultMutableTreeNode">
+       <void property="userObject">
+        <object class="jeplus.data.ParameterItem" id="ParameterItem2">
+         <void class="jeplus.data.ParameterItem" method="getField">
+          <string>ID</string>
+          <void method="set">
+           <object idref="ParameterItem2"/>
+           <string>P3</string>
+          </void>
+         </void>
+         <void class="jeplus.data.ParameterItem" method="getField">
+          <string>Name</string>
+          <void method="set">
+           <object idref="ParameterItem2"/>
+           <string>cost 2</string>
+          </void>
+         </void>
+         <void class="jeplus.data.ParameterItem" method="getField">
+          <string>Description</string>
+          <void method="set">
+           <object idref="ParameterItem2"/>
+           <string>Cost item 2</string>
+          </void>
+         </void>
+         <void class="jeplus.data.ParameterItem" method="getField">
+          <string>SearchString</string>
+          <void method="set">
+           <object idref="ParameterItem2"/>
+           <string>@@cost2@@</string>
+          </void>
+         </void>
+         <void property="project">
+          <object idref="JEPlusProject0"/>
+         </void>
+         <void property="valuesString">
+          <string>[100 : 50: 1000]</string>
+         </void>
+        </object>
+       </void>
+       <void method="add">
+        <object class="javax.swing.tree.DefaultMutableTreeNode">
+         <void property="userObject">
+          <object class="jeplus.data.ParameterItem" id="ParameterItem3">
+           <void class="jeplus.data.ParameterItem" method="getField">
+            <string>ID</string>
+            <void method="set">
+             <object idref="ParameterItem3"/>
+             <string>P4</string>
+            </void>
+           </void>
+           <void class="jeplus.data.ParameterItem" method="getField">
+            <string>Name</string>
+            <void method="set">
+             <object idref="ParameterItem3"/>
+             <string>Sizing factor</string>
+            </void>
+           </void>
+           <void class="jeplus.data.ParameterItem" method="getField">
+            <string>Type</string>
+            <void method="set">
+             <object idref="ParameterItem3"/>
+             <int>1</int>
+            </void>
+           </void>
+           <void class="jeplus.data.ParameterItem" method="getField">
+            <string>Description</string>
+            <void method="set">
+             <object idref="ParameterItem3"/>
+             <string>Cooling sizing factor</string>
+            </void>
+           </void>
+           <void class="jeplus.data.ParameterItem" method="getField">
+            <string>SearchString</string>
+            <void method="set">
+             <object idref="ParameterItem3"/>
+             <string>@@sizing@@</string>
+            </void>
+           </void>
+           <void property="project">
+            <object idref="JEPlusProject0"/>
+           </void>
+           <void property="valuesString">
+            <string>[ 1.0:0.05 :1.81 ]</string>
+           </void>
+          </object>
+         </void>
+         <void method="add">
+          <object class="javax.swing.tree.DefaultMutableTreeNode">
+           <void property="userObject">
+            <object class="jeplus.data.ParameterItem" id="ParameterItem4">
+             <void class="jeplus.data.ParameterItem" method="getField">
+              <string>ID</string>
+              <void method="set">
+               <object idref="ParameterItem4"/>
+               <string>P5</string>
+              </void>
+             </void>
+             <void class="jeplus.data.ParameterItem" method="getField">
+              <string>Name</string>
+              <void method="set">
+               <object idref="ParameterItem4"/>
+               <string>Parameter 5</string>
+              </void>
+             </void>
+             <void class="jeplus.data.ParameterItem" method="getField">
+              <string>SearchString</string>
+              <void method="set">
+               <object idref="ParameterItem4"/>
+               <string>@@tag5@@</string>
+              </void>
+             </void>
+             <void property="project">
+              <object idref="JEPlusProject0"/>
+             </void>
+             <void property="valuesString">
+              <string>@python2(preproc_test_jy.py, P2, 99, P4, 222, abc)</string>
+             </void>
+            </object>
+           </void>
+          </object>
+         </void>
+        </object>
+       </void>
+      </object>
+     </void>
+    </object>
+   </void>
+  </void>
+  <void property="parameters">
+   <void method="add">
+    <object idref="ParameterItem1"/>
+   </void>
+   <void method="add">
+    <object idref="ParameterItem2"/>
+   </void>
+   <void method="add">
+    <object idref="ParameterItem3"/>
+   </void>
+   <void method="add">
+    <object idref="ParameterItem4"/>
+   </void>
+  </void>
+  <void property="projectNotes">
+   <string>jEPlus example for E+ v8.8: result collection options in RVX</string>
+  </void>
+  <void property="rvx">
+   <object class="jeplus.data.RVX">
+    <void property="CSVs">
+     <array class="jeplus.data.RVX_CSVitem" length="2">
+      <void index="0">
+       <object class="jeplus.data.RVX_CSVitem">
+        <void property="columnHeaders">
+         <string>Water use for Heat Rejection [m3]</string>
+        </void>
+        <void property="fromColumn">
+         <string>Water [m3]</string>
+        </void>
+        <void property="fromReport">
+         <string>Annual Building Utility Performance Summary</string>
+        </void>
+        <void property="fromRow">
+         <string>Heat Rejection</string>
+        </void>
+        <void property="fromTable">
+         <string>End Uses</string>
+        </void>
+        <void property="sourceCsv">
+         <string>eplustbl.csv</string>
+        </void>
+        <void property="tableName">
+         <string>WaterUse</string>
+        </void>
+       </object>
+      </void>
+      <void index="1">
+       <object class="jeplus.data.RVX_CSVitem">
+        <void property="columnHeaders">
+         <string>Nominal Total Capacity - VAV Heating Coil [W]</string>
+        </void>
+        <void property="fromColumn">
+         <string>Nominal Total Capacity [W]</string>
+        </void>
+        <void property="fromReport">
+         <string>Equipment Summary</string>
+        </void>
+        <void property="fromRow">
+         <string>VAV SYS 1 HEATING COIL</string>
+        </void>
+        <void property="fromTable">
+         <string>Heating Coils</string>
+        </void>
+        <void property="sourceCsv">
+         <string>eplustbl.csv</string>
+        </void>
+        <void property="tableName">
+         <string>CoilCapacity</string>
+        </void>
+       </object>
+      </void>
+     </array>
+    </void>
+    <void property="RVIs">
+     <array class="jeplus.data.RVX_RVIitem" length="3">
+      <void index="0">
+       <object class="jeplus.data.RVX_RVIitem">
+        <void property="fileName">
+         <string>AnnualCarbon.rvi</string>
+        </void>
+        <void property="tableName">
+         <string>Carbon</string>
+        </void>
+       </object>
+      </void>
+      <void index="1">
+       <object class="jeplus.data.RVX_RVIitem">
+        <void property="fileName">
+         <string>AnnualDiscomfort.rvi</string>
+        </void>
+        <void property="tableName">
+         <string>Discomfort</string>
+        </void>
+       </object>
+      </void>
+      <void index="2">
+       <object class="jeplus.data.RVX_RVIitem">
+        <void property="fileName">
+         <string>HourlyMeters.rvi</string>
+        </void>
+        <void property="frequency">
+         <string>Hourly</string>
+        </void>
+        <void property="tableName">
+         <string>HourlyMeters</string>
+        </void>
+        <void property="usedInCalc">
+         <boolean>false</boolean>
+        </void>
+       </object>
+      </void>
+     </array>
+    </void>
+    <void property="SQLs">
+     <array class="jeplus.data.RVX_SQLitem" length="2">
+      <void index="0">
+       <object class="jeplus.data.RVX_SQLitem">
+        <void property="SQLcommand">
+         <string>select Value from ComponentSizes WHERE (CompType=&apos;Chiller:Electric&apos; AND CompName=&apos;CHILLER PLANT CHILLER&apos; AND Description=&apos;Design Size Nominal Capacity&apos;)</string>
+        </void>
+        <void property="columnHeaders">
+         <string>Chiller Nominal Capacity [W]</string>
+        </void>
+        <void property="tableName">
+         <string>ChillerCap</string>
+        </void>
+       </object>
+      </void>
+      <void index="1">
+       <object class="jeplus.data.RVX_SQLitem">
+        <void property="SQLcommand">
+         <string>select Value from TabularDataWithStrings WHERE (ReportName=&apos;Construction Cost Estimate Summary&apos; AND ReportForString=&apos;Entire Facility&apos; AND TableName=&apos;Construction Cost Estimate Summary&apos; AND RowName=&apos;Cost Per Conditioned Building Area (~~$~~/m2)&apos; AND ColumnName=&apos;Reference Bldg.&apos; AND Units=&apos;&apos;)</string>
+        </void>
+        <void property="columnHeaders">
+         <string>Construction Cost [$/m2]</string>
+        </void>
+        <void property="tableName">
+         <string>ConsCost</string>
+        </void>
+       </object>
+      </void>
+     </array>
+    </void>
+    <void property="constraints">
+     <array class="jeplus.data.RVX_Constraint" length="2">
+      <void index="0">
+       <object class="jeplus.data.RVX_Constraint">
+        <void property="UB">
+         <double>200.0</double>
+        </void>
+        <void property="caption">
+         <string>Chiller Capacity [kW]</string>
+        </void>
+        <void property="formula">
+         <string>c11/1000</string>
+        </void>
+        <void property="max">
+         <double>300.0</double>
+        </void>
+        <void property="scaling">
+         <boolean>true</boolean>
+        </void>
+       </object>
+      </void>
+      <void index="1">
+       <object class="jeplus.data.RVX_Constraint">
+        <void property="UB">
+         <double>5.55</double>
+        </void>
+        <void property="caption">
+         <string>Peak HVAC Load [kWh]</string>
+        </void>
+        <void property="formula">
+         <string>c16/1000/3600</string>
+        </void>
+        <void property="identifier">
+         <string>s2</string>
+        </void>
+        <void property="max">
+         <double>10.0</double>
+        </void>
+        <void property="scaling">
+         <boolean>true</boolean>
+        </void>
+       </object>
+      </void>
+     </array>
+    </void>
+    <void property="notes">
+     <string>Some notes about this RVX</string>
+    </void>
+    <void property="objectives">
+     <array class="jeplus.data.RVX_Objective" length="2">
+      <void index="0">
+       <object class="jeplus.data.RVX_Objective">
+        <void property="caption">
+         <string>CO2 [ton]</string>
+        </void>
+        <void property="formula">
+         <string>v0/1000</string>
+        </void>
+        <void property="max">
+         <double>100000.0</double>
+        </void>
+       </object>
+      </void>
+      <void index="1">
+       <object class="jeplus.data.RVX_Objective">
+        <void property="caption">
+         <string>Discomfort [Hr]</string>
+        </void>
+        <void property="formula">
+         <string>v1</string>
+        </void>
+        <void property="identifier">
+         <string>t2</string>
+        </void>
+        <void property="max">
+         <double>1000.0</double>
+        </void>
+       </object>
+      </void>
+     </array>
+    </void>
+    <void property="scripts">
+     <array class="jeplus.data.RVX_ScriptItem" length="2">
+      <void index="0">
+       <object class="jeplus.data.RVX_ScriptItem">
+        <void property="arguments">
+         <string>HourlyMeters</string>
+        </void>
+        <void property="fileName">
+         <string>calcMaxOfColumn_jy.py</string>
+        </void>
+        <void property="onEachJob">
+         <boolean>true</boolean>
+        </void>
+        <void property="pythonVersion">
+         <string>python2</string>
+        </void>
+        <void property="tableName">
+         <string>ElecPeakLoad</string>
+        </void>
+       </object>
+      </void>
+      <void index="1">
+       <object class="jeplus.data.RVX_ScriptItem">
+        <void property="pythonVersion">
+         <string>python2</string>
+        </void>
+       </object>
+      </void>
+     </array>
+    </void>
+    <void property="userVars">
+     <array class="jeplus.data.RVX_UserVar" length="3">
+      <void index="0">
+       <object class="jeplus.data.RVX_UserVar">
+        <void property="caption">
+         <string>CO2 Emmission [kg]</string>
+        </void>
+        <void property="formula">
+         <string>c0</string>
+        </void>
+        <void property="identifier">
+         <string>v0</string>
+        </void>
+       </object>
+      </void>
+      <void index="1">
+       <object class="jeplus.data.RVX_UserVar">
+        <void property="caption">
+         <string>Max discomfort [Hr]</string>
+        </void>
+        <void property="formula">
+         <string>Math.max(c1, c2, c3, c4, c5)</string>
+        </void>
+        <void property="report">
+         <boolean>true</boolean>
+        </void>
+       </object>
+      </void>
+      <void index="2">
+       <object class="jeplus.data.RVX_UserVar">
+        <void property="caption">
+         <string>Arbitary Var []</string>
+        </void>
+        <void property="formula">
+         <string>Math.hypot(c12, c13)</string>
+        </void>
+        <void property="identifier">
+         <string>v2</string>
+        </void>
+        <void property="report">
+         <boolean>true</boolean>
+        </void>
+       </object>
+      </void>
+     </array>
+    </void>
+   </object>
+  </void>
+  <void property="weatherFile">
+   <string>GBR_London.Gatwick.037760_IWEC.epw</string>
+  </void>
+ </object>
+</java>

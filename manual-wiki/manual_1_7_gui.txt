@@ -1,0 +1,57 @@
+__[[docs:manual_1_7#table_of_contents|Table of Contents]]__
+
+====== Chapter 2. The GUI ======
+
+Version 1.7, © 2015 [[:start|jeplus.org]]
+
+\\
+
+----
+
+The main user interface of jEPlus is shown in Figure 2.1. Most of the controls are located on the Project/Execution/Utilities tabs on the left side of the window, as well as in the menu bar. On the right are the panels for outputs, and the file editors etc.
+
+[{{ :docs:v_1_6:jeplus_v1.6_gui.png?direct&800 |Figure 2.1: jEPlus v1.6 GUI}}]
+
+
+===== 2.1 What's on the menu =====
+
+Figure 2.2 shows what’s on the menu bar. In ‘File’ menu, there are the usual ‘New/Open/Save’ commands. The jEPlus project file is saved in XML format with extension ‘.jep’. The project is (just about) human-readable and can be edited with a text editor. If you have a project saved in ‘.obj’ format by jEPlus version 0.5, you can use the ‘Import OBJ file…’ command to open it, and then save it as a new ‘.jep’ project. An option is provided to save a project as OBJ file (Java's serialized object). However, the new OBJ format cannot be read by jEPlus v0.5.
+
+In 'Edit' menu, you can import parameter definitions from a text file, or reset the parameter tree. Please note that it is **NOT** possible to 'Undo' or 'Redo' any actions in jEPlus.
+
+In ‘Action’ menu, you can find 'validate jobs', 'run simulation' and ‘show post-process tab’ (utilities) commands. Once the simulations are done, you can also create parameter index and view project output files.
+
+In ‘Tools’ menu, a few utilities such as viewing result files, jEPlus logs and error reports, and checking current memory usage, are provided. 
+
+[{{ :docs:v_1_6:jeplus_v1.6_menus_1.png?direct&600 |Figure 2.2: jEPlus menus}}]
+
+[{{ :docs:v_1_6:jeplus_v1.6_menus_2.png?direct&600 |Figure 2.3: jEPlus menus (continued)}}]
+
+===== 2.2 The 'Project' tab =====
+
+jEPlus can help you manage complex parametric simulations. You will still need to plan a parametrics project carefully and do some preparations, e.g. testing the building model, choosing the parameters and the value range for each parameter, and, ultimately, deciding how to process the results. The 'Project' tab on the GUI is where you define your parametric project. It is the place where you prepare input files, and design the parameters.
+
+[{{ :docs:v_1_5:jeplus_v1.5_project.png?direct&800 |Figure 2.4: The Project Tab}}]
+
+
+===== 2.3 The 'Execution' tab =====
+
+The execution tab does two things, letting you choose which jobs to simulation, and how to simulated them. A good understanding of how EnergyPlus and its auxiliary tools (ExpandObjects, EP-Macro, ReadVarsESO) work will be quite useful. 
+
+[{{ :docs:v_1_6:jeplus_v1.6_execution.png?direct&800 |Figure 2.5: The Execution Tab}}]
+
+
+===== 2.4 The ‘Utilities’ tab =====
+
+Three utilities are included in the jEPlus GUI. They are a Python script tester, an IDF version converter shell, and a ReadVarsESO caller. The details of these utils are provided in [[docs:manual_1_6_utils|Chapter 7]].
+
+[{{ :docs:v_1_6:jeplus_v1.6_utils.png?direct&800 |Figure 2.6: The Utilities Tab}}]
+
+
+===== 2.5 The IDF Editor =====
+
+A simple editor (Figure 2.7) is included in jEPlus for editing the model template. The editor can be opened by pressing the [Edit] button next to the IDF/IMF template box. Within the editor, apart from the open and save buttons, two search facilities are provided for locating the existing search strings as well as arbitrary text. To close the editor tab, click on the trash can. If found in the model, version information is highlighted to remind you to double-check the version of EnergyPlus executables you are using.
+
+[{{ :docs:v_1_5:jeplus_v1.5_editor.png?direct&800 |Figure 2.7: IDF editor}}]
+
+\\

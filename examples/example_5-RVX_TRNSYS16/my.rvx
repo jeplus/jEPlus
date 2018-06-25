@@ -1,0 +1,78 @@
+{
+	"trns" : [
+		{
+			"plotterName" : "Totals",
+			"aggregation" : "LastRow",
+			"tableName" : "SimResults_Totals",
+			"usedInCalc" : true
+		}
+	],
+
+    "userVars" : [
+        {
+            "identifier" : "v1",
+            "formula" : "c1",
+            "caption" : "Q Collector [kJ]",
+            "report" : true
+        },
+        {
+            "identifier" : "v2",
+            "formula" : "c2",
+            "caption" : "Q DHW [kJ]",
+            "report" : true
+        },
+        {
+            "identifier" : "v3",
+            "formula" : "c3",
+            "caption" : "Q Auxilliary [kJ]",
+            "report" : true
+        },
+        {
+            "identifier" : "v4",
+            "formula" : "c4",
+            "caption" : "Eta Collector []",
+            "report" : true
+        },
+        {
+            "identifier" : "v5",
+            "formula" : "c5",
+            "caption" : "F solar []",
+            "report" : true
+        }
+    ],
+    
+    "constraints" : [
+        {
+            "identifier" : "s1",
+            "formula" : "v3/3600",
+            "caption" : "Q Aux [kWh]",
+            "scaling" : true,
+            "lb" : 0,
+            "ub" : 2,
+            "min" : 0,
+            "max" : 30,
+            "weight" : 1.0
+        }
+    ],
+
+    "objectives" : [
+        {
+            "identifier" : "t1",
+            "formula" : "v2/3600",
+            "caption" : "Q DHW [kWh]",
+            "scaling" : false,
+            "min" : 0,
+            "max" : 100000,
+            "weight" : 1.0
+        },
+        {
+            "identifier" : "t2",
+            "formula" : "1-v5",
+            "caption" : "F Sol Residue []",
+            "scaling" : false,
+            "min" : 0,
+            "max" : 1,
+            "weight" : 1.0
+        }
+    ]
+}
