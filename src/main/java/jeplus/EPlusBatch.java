@@ -506,36 +506,40 @@ public class EPlusBatch extends Thread {
             for (int i = 0; i < JobQueue.size(); i++) {
                 // For each job, do:
                 EPlusTask job = JobQueue.get(i);
-                if (job.getWorkEnv().getProjectType() == JEPlusProject.EPLUS) {
-                    if (i==0) {
-                        // Print table header
-                        fw.println(buf.toString());                        
-                    }
-                    buf = new StringBuffer();
-                    buf.append(i).append(",");
-                    buf.append(job.getJobID()).append(",");
-                    buf.append(job.getWorkEnv().getWeatherFile()).append(",");
-                    buf.append(job.getWorkEnv().getIDFTemplate()).append(",");
-                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.TRNSYS){
-                    if (i==0) {
-                        // Print table header
-                        buf.delete(11,24);
-                        fw.println(buf.toString());                        
-                    }
-                    buf = new StringBuffer();
-                    buf.append(i).append(",");
-                    buf.append(job.getJobID()).append(",");
-                    buf.append(job.getWorkEnv().getDCKTemplate()).append(",");
-                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.INSEL){
-                    if (i==0) {
-                        // Print table header
-                        buf.delete(11,24);
-                        fw.println(buf.toString());                        
-                    }
-                    buf = new StringBuffer();
-                    buf.append(i).append(",");
-                    buf.append(job.getJobID()).append(",");
-                    buf.append(job.getWorkEnv().getINSELTemplate()).append(",");
+                switch (job.getWorkEnv().getProjectType()) {
+                    case TRNSYS:
+                        if (i==0) {
+                            // Print table header
+                            buf.delete(11,24);
+                            fw.println(buf.toString());                        
+                        }
+                        buf = new StringBuffer();
+                        buf.append(i).append(",");
+                        buf.append(job.getJobID()).append(",");
+                        buf.append(job.getWorkEnv().getDCKTemplate()).append(",");
+                        break;
+                    case INSEL:
+                        if (i==0) {
+                            // Print table header
+                            buf.delete(11,24);
+                            fw.println(buf.toString());                        
+                        }
+                        buf = new StringBuffer();
+                        buf.append(i).append(",");
+                        buf.append(job.getJobID()).append(",");
+                        buf.append(job.getWorkEnv().getINSELTemplate()).append(",");
+                        break;
+                    case EPLUS:
+                    default:
+                        if (i==0) {
+                            // Print table header
+                            fw.println(buf.toString());                        
+                        }
+                        buf = new StringBuffer();
+                        buf.append(i).append(",");
+                        buf.append(job.getJobID()).append(",");
+                        buf.append(job.getWorkEnv().getWeatherFile()).append(",");
+                        buf.append(job.getWorkEnv().getIDFTemplate()).append(",");
                 }
                 for (int j=0; j<job.SearchStringList.size(); j++) {
                     map.put(job.SearchStringList.get(j), job.AltValueList.get(j));                        
@@ -574,7 +578,7 @@ public class EPlusBatch extends Thread {
             // Get header
             ArrayList<String> headers = new ArrayList <> ();
             headers.add("# Job_ID");
-            if (this.getResolvedEnv().getProjectType() == JEPlusProject.EPLUS) {
+            if (this.getResolvedEnv().getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
                 headers.add("WeatherFile");
             }
             headers.add("ModelFile");
@@ -598,13 +602,17 @@ public class EPlusBatch extends Thread {
             for (EPlusTask job : JobQueue) {
                 buf = new StringBuffer();
                 buf.append(job.getJobID()).append(", ");
-                if (job.getWorkEnv().getProjectType() == JEPlusProject.EPLUS) {
-                    buf.append(job.getWorkEnv().getWeatherFile()).append(", ");
-                    buf.append(job.getWorkEnv().getIDFTemplate()).append(", ");
-                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.TRNSYS){
-                    buf.append(job.getWorkEnv().getDCKTemplate()).append(", ");
-                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.INSEL){
-                    buf.append(job.getWorkEnv().getINSELTemplate()).append(", ");
+                switch (job.getWorkEnv().getProjectType()) {
+                    case TRNSYS:
+                        buf.append(job.getWorkEnv().getDCKTemplate()).append(", ");
+                        break;
+                    case INSEL:
+                        buf.append(job.getWorkEnv().getINSELTemplate()).append(", ");
+                        break;
+                    case EPLUS:
+                    default:
+                        buf.append(job.getWorkEnv().getWeatherFile()).append(", ");
+                        buf.append(job.getWorkEnv().getIDFTemplate()).append(", ");
                 }
                 
                 for (int j=0; j<job.SearchStringList.size(); j++) {
@@ -977,60 +985,60 @@ public class EPlusBatch extends Thread {
                     // Create a new instance of env by duplication
                     env = new EPlusWorkEnv(env);
                     EPlusTask Task = null;
-                    if (env.getProjectType() == JEPlusProject.EPLUS) {
-                        try {
-                            env.WeatherFile = WthrFiles.get(Integer.valueOf(jobArray[i][1]));
-                        }catch (NumberFormatException nfe) {
-                            env.WeatherFile = jobArray[i][1];
-                        }
-                        try {
-                            env.IDFTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
-                        }catch (NumberFormatException nfe) {
-                            env.IDFTemplate = jobArray[i][2];
-                        }
-                        env.EPlusVersion = IDFmodel.getEPlusVersionInIDF (env.IDFDir + env.IDFTemplate);
-                        // Collect search strings
-                        ArrayList<String> keys = new ArrayList<> ();
-                        ArrayList<String> vals = new ArrayList<> ();
-                        for (int j=0; j<searchstr.length; j++) {
-                            keys.add(searchstr[j]);
-                            vals.add(jobArray[i][j+3]);
-                        }
-                        keys.trimToSize();
-                        vals.trimToSize();
-                        Task = new EPlusTask(env, tag, keys, vals);
-                    }else if (env.getProjectType() == JEPlusProject.TRNSYS) {
-                        try {
-                            env.DCKTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
-                        }catch (NumberFormatException nfe) {
-                            env.DCKTemplate = jobArray[i][2];
-                        }
-                        // Collect search strings
-                        ArrayList<String> keys = new ArrayList<> ();
-                        ArrayList<String> vals = new ArrayList<> ();
-                        for (int j=0; j<searchstr.length; j++) {
-                            keys.add(searchstr[j]);
-                            vals.add(jobArray[i][j+3]);
-                        }
-                        keys.trimToSize();
-                        vals.trimToSize();
-                        Task = new TRNSYSTask(env, tag, keys, vals);
-                    }else if (env.getProjectType() == JEPlusProject.INSEL) {
-                        try {
-                            env.INSELTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
-                        }catch (NumberFormatException nfe) {
-                            env.INSELTemplate = jobArray[i][2];
-                        }
-                        // Collect search strings
-                        ArrayList<String> keys = new ArrayList<> ();
-                        ArrayList<String> vals = new ArrayList<> ();
-                        for (int j=0; j<searchstr.length; j++) {
-                            keys.add(searchstr[j]);
-                            vals.add(jobArray[i][j+3]);
-                        }
-                        keys.trimToSize();
-                        vals.trimToSize();
-                        Task = new INSELTask(env, tag, keys, vals);
+                    ArrayList<String> keys = new ArrayList<> ();
+                    ArrayList<String> vals = new ArrayList<> ();
+                    switch (env.getProjectType()) {
+                        case TRNSYS:
+                            try {
+                                env.DCKTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
+                            }catch (NumberFormatException nfe) {
+                                env.DCKTemplate = jobArray[i][2];
+                            }
+                            // Collect search strings
+                            for (int j=0; j<searchstr.length; j++) {
+                                keys.add(searchstr[j]);
+                                vals.add(jobArray[i][j+3]);
+                            }
+                            keys.trimToSize();
+                            vals.trimToSize();
+                            Task = new TRNSYSTask(env, tag, keys, vals);
+                            break;
+                        case INSEL:
+                            try {
+                                env.INSELTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
+                            }catch (NumberFormatException nfe) {
+                                env.INSELTemplate = jobArray[i][2];
+                            }
+                            // Collect search strings
+                            for (int j=0; j<searchstr.length; j++) {
+                                keys.add(searchstr[j]);
+                                vals.add(jobArray[i][j+3]);
+                            }
+                            keys.trimToSize();
+                            vals.trimToSize();
+                            Task = new INSELTask(env, tag, keys, vals);
+                            break;
+                        case EPLUS:
+                        default:
+                            try {
+                                env.WeatherFile = WthrFiles.get(Integer.valueOf(jobArray[i][1]));
+                            }catch (NumberFormatException nfe) {
+                                env.WeatherFile = jobArray[i][1];
+                            }
+                            try {
+                                env.IDFTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
+                            }catch (NumberFormatException nfe) {
+                                env.IDFTemplate = jobArray[i][2];
+                            }
+                            env.EPlusVersion = IDFmodel.getEPlusVersionInIDF (env.IDFDir + env.IDFTemplate);
+                            // Collect search strings
+                            for (int j=0; j<searchstr.length; j++) {
+                                keys.add(searchstr[j]);
+                                vals.add(jobArray[i][j+3]);
+                            }
+                            keys.trimToSize();
+                            vals.trimToSize();
+                            Task = new EPlusTask(env, tag, keys, vals);
                     }
                     JobQueue.add(Task);
                 }
@@ -1103,12 +1111,16 @@ public class EPlusBatch extends Thread {
                 }
                 keys.trimToSize();
                 vals.trimToSize();
-                if (env.getProjectType() == JEPlusProject.EPLUS) {
-                    Task = new EPlusTask(env, jobid, keys, vals);
-                }else if (env.getProjectType() == JEPlusProject.TRNSYS) {
-                    Task = new TRNSYSTask(env, jobid, keys, vals);
-                }else if (env.getProjectType() == JEPlusProject.INSEL) {
-                    Task = new INSELTask(env, jobid, keys, vals);
+                switch (env.getProjectType()) {
+                    case TRNSYS:
+                        Task = new TRNSYSTask(env, jobid, keys, vals);
+                        break;
+                    case INSEL:
+                        Task = new INSELTask(env, jobid, keys, vals);
+                        break;
+                    case EPLUS:
+                    default:
+                        Task = new EPlusTask(env, jobid, keys, vals);
                 }
                 JobQueue.add(Task);
             }

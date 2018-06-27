@@ -21,8 +21,6 @@ package jeplus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -31,6 +29,7 @@ import javax.script.ScriptEngineManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
+import jeplus.data.ParameterItemV2;
 import jeplus.data.RVX;
 import jeplus.data.RandomSource;
 import jeplus.data.RouletteWheel;
@@ -49,10 +48,10 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @since 1.0
  */
-public class JEPlusProject implements Serializable {
+public class JEPlusProjectV2 implements Serializable {
 
     /** Logger */
-    final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusProject.class);
+    final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusProjectV2.class);
     
     /** ScriptEngine used by all evaluators */
     protected static final ScriptEngine Script_Engine = new ScriptEngineManager().getEngineByName("javascript");
@@ -64,11 +63,9 @@ public class JEPlusProject implements Serializable {
         return Script_Engine;
     }
 
-    private static final long serialVersionUID = -3920321004466467177L;
-    public static final int EPLUS = 0;
-    public static final int TRNSYS = 1;
-    public static final int INSEL = 2;
-    public static final int EP2TRN = 99;
+    public static enum ModelType {
+        EPLUS, TRNSYS, INSEL
+    }
     
     /** This is the working directory of the program */
     protected static String UserBaseDir = System.getProperty("user.dir") + File.separator;
@@ -80,7 +77,7 @@ public class JEPlusProject implements Serializable {
     protected String BaseDir = null;
     
     /** Project Type: E+ or TRNSYS */
-    protected int ProjectType = -1; // set to illegal type
+    protected ModelType ProjectType = ModelType.EPLUS; // set to illegal type
     
     /** Project ID string */
     protected String ProjectID = null;
@@ -98,14 +95,6 @@ public class JEPlusProject implements Serializable {
     /** Weather file to be used in this job; or a (';' delimited) list of files for the batch project */
     protected String WeatherFile = null;
 
-    /** Flag for calling ReadVarsESO or not */
-    protected boolean UseReadVars = false;
-
-    /** ReadVarsESO configure file to be used to extract results */
-    protected String RVIDir = null;
-    /** ReadVarsESO configure file to be used to extract results */
-    protected String RVIFile = null;
-
     /** Local directory for DCK/TRD (for TRNSYS) template files */
     protected String DCKDir = null;
     /** Template file to be used in this job; or a (';' delimited) list of files for the batch project */
@@ -122,31 +111,28 @@ public class JEPlusProject implements Serializable {
     protected ExecutionOptions ExecSettings = null;
 
     /** List of parameters */
-    protected ArrayList<ParameterItem> Parameters = null;
+    protected ArrayList<ParameterItemV2> Parameters = null;
     
-    /** Parameter tree */
-    protected DefaultMutableTreeNode ParamTree = null;
-       
     /** Parameter definition file */
     protected String ParamFile = null;
 
     /** RVX object for result collection */
     protected RVX Rvx = null;
     
+    /** ReadVarsESO configure file to be used to extract results */
+    protected String RVIFile = null;
 
     /**
      * Default constructor
      */
-    public JEPlusProject () {
-        ProjectType = EPLUS;
+    public JEPlusProjectV2 () {
+        ProjectType = ModelType.EPLUS;
         ProjectID = "G";
         ProjectNotes = "New project";
         IDFDir = "./";
         // IDFTemplate = "select files ...";
         WeatherDir = "./";
         // WeatherFile = "select files ...";
-        UseReadVars = true;
-        RVIDir = "./";
         // RVIFile = "select a file ...";
         DCKDir = "./";
         // DCKTemplate = "select a file ...";
@@ -154,10 +140,8 @@ public class JEPlusProject implements Serializable {
         // INSELTemplate = "select a file ...";
         OutputFileNames = "trnsysout.csv";  // fixed on one file name for the time being
         ExecSettings = new ExecutionOptions ();
-        ParameterItem root = new ParameterItem(this);
         Parameters = new ArrayList<> ();
-        Parameters.add(root);
-        ParamTree = new DefaultMutableTreeNode (root);
+        Parameters.add(new ParameterItemV2());
         BaseDir = new File ("./").getAbsolutePath() + File.separator;
         Rvx = new RVX();
     }
@@ -166,7 +150,7 @@ public class JEPlusProject implements Serializable {
      * Cloning constructor. New project state is set to 'changed' after cloning
      * @param proj Project object to be cloned
      */
-    public JEPlusProject (JEPlusProject proj) {
+    public JEPlusProjectV2 (JEPlusProjectV2 proj) {
         this();
         if (proj != null) {
             ContentChanged = true;  // set content changed for the new project obj
@@ -178,9 +162,6 @@ public class JEPlusProject implements Serializable {
             IDFTemplate = proj.IDFTemplate;
             WeatherDir = proj.WeatherDir;
             WeatherFile = proj.WeatherFile;
-            UseReadVars = proj.UseReadVars;
-            RVIDir = proj.RVIDir;
-            RVIFile = proj.RVIFile;
             DCKDir = proj.DCKDir;
             DCKTemplate = proj.DCKTemplate;
             INSELDir = proj.INSELDir;
@@ -188,134 +169,25 @@ public class JEPlusProject implements Serializable {
             OutputFileNames = proj.OutputFileNames;
             ExecSettings = new ExecutionOptions (proj.ExecSettings);
             Parameters = proj.Parameters;
-            ParamTree = proj.ParamTree;
+            ParamFile = proj.ParamFile;
             Rvx = proj.Rvx;
+            RVIFile = proj.RVIFile;
         }
+    }
+
+    /**
+     * Copy from Project V1. New project state is set to 'changed' after cloning
+     * @param proj Project V1 object to be copied
+     */
+    public JEPlusProjectV2 (JEPlusProject proj) {
+        this();
+        copyFromProjectV1(proj);
     }
 
     // ================= File operations ==============================
-    /**
-     * Save the project to an object file
-     * @param fn The File object associated with the file to which the contents will be saved
-     * @param proj The project object to be serialised
-     * @return Successful or not
-     */
-    public static boolean serialize (File fn, JEPlusProject proj) {
-        boolean success = true;
-        try (ObjectOutputStream ow = new ObjectOutputStream(new FileOutputStream(fn))) {
-            ow.writeObject(proj);
-        }catch (IOException ioe) {
-            logger.error("Error writing project object to " + fn, ioe);
-            success = false;
-        }
-        return success;
-    }
 
     /**
-     * Read parameter tree from an object file
-     * @param fn The File object associated with the file
-     * @return de-serialised object
-     */
-    public static JEPlusProject deserialize (File fn) {
-        JEPlusProject proj = null;
-        try (ObjectInputStream or = new ObjectInputStream(new FileInputStream(fn))) {
-            proj = (JEPlusProject)or.readObject();
-        }catch (IOException ioe) {
-            logger.error("Error reading project object from " + fn, ioe);
-        }catch (Exception e) {
-            logger.error("Error parsing project object from " + fn, e);
-        }
-        return proj;
-    }
-
-    /**
-     * Save this project to an XML file
-     * @param fn The File object associated with the file to which the contents will be saved
-     * @return Successful or not
-     */
-    public boolean saveAsXML (File fn) {
-        boolean success = true;
-        
-        // Write project file
-        XMLEncoder encoder;
-        try {
-            encoder = new XMLEncoder(new BufferedOutputStream(new FileOutputStream(fn)));
-            // Clear external parameters and rvx file reference fields before saving the project
-            // These files are for importing only
-            this.ParamFile = null;
-            encoder.writeObject(this);
-            encoder.close();
-            // get new location of project file
-            String dir = fn.getAbsoluteFile().getParent();
-            dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
-            this.updateBaseDir(dir);
-            this.ContentChanged = false;
-        } catch (FileNotFoundException ex) {
-            logger.error("Failed to create " + fn + " for writing project.", ex);
-            success = false;
-        }
-        return success;
-    }
-
-    /**
-     * Read a project from an XML file. The members of this project are not updated.
-     * @param fn The File object associated with the file
-     * @return a new project instance from the file
-     */
-    public static JEPlusProject loadAsXML (File fn) {
-        JEPlusProject proj;
-        try (XMLDecoder decoder = new XMLDecoder(new BufferedInputStream(new FileInputStream(fn)))) {
-            proj = ((JEPlusProject)decoder.readObject());
-            proj.ContentChanged = false;
-        }catch (Exception ex) {
-            logger.error("Error loading project from file " + fn, ex);
-            return null;
-        }
-        String dir = fn.getAbsoluteFile().getParent();
-        dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
-        // proj.updateBaseDir(dir);
-        proj.setBaseDir(dir);
-        if (proj.ParamFile != null) {
-            // Load parameters from text file
-            proj.importParameterTableFile(new File (RelativeDirUtil.checkAbsolutePath(proj.ParamFile, dir)));
-            // Reset ParamFile so it is read-once
-            proj.ParamFile = null;
-            // If parameters are imported, project state is unsaved
-            proj.ContentChanged = true;
-        }else {
-            // Reassign reference to project in all parameters
-            if (proj.getParamTree() != null) {
-                Enumeration params = proj.getParamTree().breadthFirstEnumeration();
-                while (params.hasMoreElements()) {
-                     ((ParameterItem)((DefaultMutableTreeNode)params.nextElement()).getUserObject()).setProject(proj);
-                }
-            }
-        }
-        // Assign the first branch to the Parameters list
-        DefaultMutableTreeNode thisleaf = proj.getParamTree().getFirstLeaf();
-        Object [] path = thisleaf.getUserObjectPath();
-        proj.setParameters(new ArrayList<ParameterItem> ());
-        for (Object item : path) {
-            proj.getParameters().add((ParameterItem)item);
-        }
-        // Load Rvx if a RVX file is available
-        if (proj.RVIFile != null) {
-            try {
-                proj.Rvx = RVX.getRVX(proj.resolveRVIDir() + proj.getRVIFile(), proj.getBaseDir());
-                // Remove RVI file reference. With the RVX/editor being built-in now, external RVI/RVX file is only for importing (one time read)
-                proj.RVIFile = null;
-                // If external RVI/RVX is imported, project state is unsaved
-                proj.ContentChanged = true;
-            }catch (IOException ioe) {
-                logger.error("Cannot read the project's RVX file", ioe);
-            }
-        }
-        // done            
-        return proj;
-    }
-    
-    /**
-     * Save this project to an XML file
+     * Save this project to JSON Project v2.0 file
      * @param file The File object associated with the file to which the contents will be saved
      * @return Successful or not
      */
@@ -342,10 +214,10 @@ public class JEPlusProject implements Serializable {
      * @return a new project instance from the file
      * @throws java.io.IOException
      */
-    public static JEPlusProject loadFromJSON (File file) throws IOException {
+    public static JEPlusProjectV2 loadFromJSON (File file) throws IOException {
         // Read JSON
         ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
-        JEPlusProject project = mapper.readValue(file, JEPlusProject.class);
+        JEPlusProjectV2 project = mapper.readValue(file, JEPlusProjectV2.class);
         // Set base dir
         String dir = file.getAbsoluteFile().getParent();
         dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
@@ -357,19 +229,11 @@ public class JEPlusProject implements Serializable {
             project.importParameterTableFile(new File (RelativeDirUtil.checkAbsolutePath(project.ParamFile, dir)));
             // Reset ParamFile so it is read-once
             project.ParamFile = null;
-        }else {
-            // Reassign reference to project in all parameters, and build param tree
-            if (project.getParameters() != null) {
-                for (ParameterItem item: project.getParameters()) {
-                    item.setProject(project);
-                }
-                project.addParameterListAsBranch(null, project.getParameters());
-            }
         }
         // If external RVX file is specified, use its contents for Rvx object
         if (project.RVIFile != null) {
             try {
-                project.Rvx = RVX.getRVX(project.resolveRVIDir() + project.getRVIFile(), project.getBaseDir());
+                project.Rvx = RVX.getRVX(project.getRVIFile(), project.getBaseDir());
                 // Remove RVI file reference. With the RVX/editor being built-in now, external RVI/RVX file is only for importing (one time read)
                 project.RVIFile = null;
             }catch (IOException ioe) {
@@ -403,11 +267,11 @@ public class JEPlusProject implements Serializable {
         this.BaseDir = BaseDir;
     }
 
-    public int getProjectType() {
+    public ModelType getProjectType() {
         return ProjectType;
     }
 
-    public void setProjectType(int ProjectType) {
+    public void setProjectType(ModelType ProjectType) {
         if (this.ProjectType != ProjectType) {
             ContentChanged = true;
         }
@@ -478,34 +342,12 @@ public class JEPlusProject implements Serializable {
         this.ContentChanged = ContentChanged;
     }
 
-    public ArrayList<ParameterItem> getParameters() {
+    public ArrayList<ParameterItemV2> getParameters() {
         return Parameters;
     }
 
-    public void setParameters(ArrayList<ParameterItem> Parameters) {
+    public void setParameters(ArrayList<ParameterItemV2> Parameters) {
         this.Parameters = Parameters;
-    }
-
-    @JsonIgnore
-    public DefaultMutableTreeNode getParamTree() {
-        return ParamTree;
-    }
-
-    @JsonIgnore
-    public void setParamTree(DefaultMutableTreeNode ParamTree) {
-        ContentChanged = true;
-        this.ParamTree = ParamTree;
-    }
-
-    public String getRVIDir() {
-        return RVIDir;
-    }
-
-    public void setRVIDir(String RVIDir) {
-        if (! Objects.equals(this.RVIDir, RVIDir)) {
-            ContentChanged = true;
-        }
-        this.RVIDir = RVIDir;
     }
 
     public String getRVIFile() {
@@ -517,19 +359,6 @@ public class JEPlusProject implements Serializable {
             ContentChanged = true;
         }
         this.RVIFile = RVIFile;
-    }
-
-    @JsonIgnore
-    public boolean isUseReadVars() {
-        return UseReadVars;
-    }
-
-    @JsonIgnore
-    public void setUseReadVars(boolean UseReadVars) {
-        if (this.UseReadVars != UseReadVars) {
-            ContentChanged = true;
-        }
-        this.UseReadVars = UseReadVars;
     }
 
     @JsonIgnore
@@ -645,7 +474,6 @@ public class JEPlusProject implements Serializable {
         this.setWeatherDir(this.resolveWeatherDir());   // Weather file path
         this.setIDFDir(this.resolveIDFDir());        // idf file path
         this.setDCKDir(this.resolveDCKDir());        // dck file path
-        this.setRVIDir(this.resolveRVIDir());        // rvi file path
         this.getExecSettings().setParentDir(this.resolveWorkDir());        // output dir
         // Update BaseDir
         this.BaseDir = BaseDir;
@@ -653,7 +481,6 @@ public class JEPlusProject implements Serializable {
         this.setWeatherDir(RelativeDirUtil.getRelativePath(this.getWeatherDir(), this.BaseDir, "/"));   // Weather file path
         this.setIDFDir(RelativeDirUtil.getRelativePath(this.getIDFDir(), this.BaseDir, "/"));        // idf file path
         this.setDCKDir(RelativeDirUtil.getRelativePath(this.getDCKDir(), this.BaseDir, "/"));        // dck file path
-        this.setRVIDir(RelativeDirUtil.getRelativePath(this.getRVIDir(), this.BaseDir, "/"));        // rvi file path
         this.getExecSettings().setParentDir(RelativeDirUtil.getRelativePath(this.getExecSettings().getParentDir(), this.BaseDir, "/"));        // output dir
     }
 
@@ -695,17 +522,6 @@ public class JEPlusProject implements Serializable {
      */
     public String resolveIDFDir () {
         String dir = RelativeDirUtil.checkAbsolutePath(this.getIDFDir(), BaseDir);
-        dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
-        return dir;
-    }
-    
-    /** 
-     * Resolve the path to the RVI file of this project. If
-     * relative path is used, it is relative to the project folder
-     * @return Resolved absolute paths
-     */
-    public String resolveRVIDir () {
-        String dir = RelativeDirUtil.checkAbsolutePath(this.getRVIDir(), BaseDir);
         dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
         return dir;
     }
@@ -753,6 +569,40 @@ public class JEPlusProject implements Serializable {
     }
     
     /**
+     * Copy from Project V1. New project state is set to 'changed' after cloning
+     * @param proj Project V1 object to be copied
+     */
+    protected final void copyFromProjectV1 (JEPlusProject proj) {
+        if (proj != null) {
+            ContentChanged = true;  // set content changed for the new project obj
+            BaseDir = proj.BaseDir;
+            ProjectType = proj.ProjectType == 0 ? ModelType.EPLUS : (proj.ProjectType == 1 ? ModelType.TRNSYS : ModelType.INSEL);
+            ProjectID = proj.ProjectID;
+            ProjectNotes = proj.ProjectNotes;
+            IDFDir = proj.IDFDir;
+            IDFTemplate = proj.IDFTemplate;
+            WeatherDir = proj.WeatherDir;
+            WeatherFile = proj.WeatherFile;
+            RVIFile = proj.RVIFile;
+            DCKDir = proj.DCKDir;
+            DCKTemplate = proj.DCKTemplate;
+            INSELDir = proj.INSELDir;
+            INSELTemplate = proj.INSELTemplate;
+            OutputFileNames = proj.OutputFileNames;
+            ExecSettings = new ExecutionOptions (proj.ExecSettings);
+            Parameters = new ArrayList<> ();
+            DefaultMutableTreeNode thisleaf = proj.getParamTree().getFirstLeaf();
+            Object[] path = thisleaf.getUserObjectPath();
+            for (Object obj : path) {
+                Parameters.add(new ParameterItemV2((ParameterItem) obj));
+            }
+            Rvx = proj.Rvx;
+            ParamFile = null;
+            RVIFile = null;
+        }
+    }
+
+    /**
      * This function copies information from an EPlusWorkEnv object to provide
      * some backwards compatibility
      * @param env the EPlusWorkEnv object
@@ -762,10 +612,8 @@ public class JEPlusProject implements Serializable {
         IDFTemplate = env.IDFTemplate;
         WeatherDir = env.WeatherDir;
         WeatherFile = env.WeatherFile;
-        UseReadVars = env.UseReadVars;
-        RVIDir = env.RVIDir;
         RVIFile = env.RVIFile;
-        ProjectType = env.ProjectType == JEPlusProjectV2.ModelType.EPLUS ? 0 : (env.ProjectType == JEPlusProjectV2.ModelType.TRNSYS ? 1 : 2);
+        ProjectType = env.ProjectType;
         DCKDir = env.DCKDir;
         DCKTemplate = env.DCKTemplate;
         INSELDir = env.INSELDir;
@@ -792,10 +640,9 @@ public class JEPlusProject implements Serializable {
         env.IDFTemplate = IDFTemplate;
         env.WeatherDir = this.resolveWeatherDir();
         env.WeatherFile = WeatherFile;
-        env.UseReadVars = UseReadVars;
-        env.RVIDir = this.resolveRVIDir();
+        env.RVIDir = "";
         env.RVIFile = RVIFile;
-        env.ProjectType = ProjectType == 0 ? JEPlusProjectV2.ModelType.EPLUS : (ProjectType == 1 ? JEPlusProjectV2.ModelType.TRNSYS : JEPlusProjectV2.ModelType.INSEL);
+        env.ProjectType = ProjectType;
         env.DCKDir = this.resolveDCKDir();
         env.DCKTemplate = DCKTemplate;
         env.INSELDir = this.resolveINSELDir();
@@ -820,14 +667,14 @@ public class JEPlusProject implements Serializable {
         ArrayList<String> Files = new ArrayList<>();
         if (files != null) {
             String[] file = files.split("\\s*;\\s*");
-            for (int i = 0; i < file.length; i++) {
-                if (file[i].length() > 0) {
+            for (String file1 : file) {
+                if (file1.length() > 0) {
                     // If a list file, parse it
-                    if (file[i].toLowerCase().endsWith(".lst")) {
-                        Files.addAll(parseListFile(dir, file[i]));
-                    // otherwise, just add
-                    }else {
-                        Files.add(file[i]);
+                    if (file1.toLowerCase().endsWith(".lst")) {
+                        Files.addAll(parseListFile(dir, file1));
+                        // otherwise, just add
+                    } else {
+                        Files.add(file1);
                     }
                 }
             }
@@ -835,6 +682,22 @@ public class JEPlusProject implements Serializable {
         return Files;
     }
 
+    @JsonIgnore
+    protected DefaultMutableTreeNode getParamTree() {
+        DefaultMutableTreeNode ParamTree = null;
+        if (Parameters != null && Parameters.size() > 0) {
+            ParamTree = new DefaultMutableTreeNode (Parameters.get(0));
+            DefaultMutableTreeNode current = ParamTree;
+            for (int i=1; i<Parameters.size(); i++) {
+                DefaultMutableTreeNode newnode = new DefaultMutableTreeNode (Parameters.get(i));
+                current.add(newnode);
+                current = newnode;
+            }
+        }
+        return ParamTree;
+    }
+
+    
     /**
      * Get all input files in the project. This function is for E+ version conversion and possibly auto project compilation 
      * for remote execution. In a jEPlus project, the following files will be listed:
@@ -847,12 +710,16 @@ public class JEPlusProject implements Serializable {
     @JsonIgnore
     public ArrayList<String> getAllInputFiles () {
         ArrayList<String> filelist = new ArrayList<> ();
-        if (ProjectType == EPLUS) {
-            
-        }else if (ProjectType == TRNSYS) {
-            
-        }else if (ProjectType == INSEL) {
-            
+        switch (ProjectType) {
+            case TRNSYS:
+                
+                break;
+            case INSEL:
+                
+                break;
+            case EPLUS:
+            default:
+                
         }
         return filelist;
     }
@@ -867,12 +734,10 @@ public class JEPlusProject implements Serializable {
         if (Base != null && Base.exists()) {
             File idf = new File (IDFDir);
             File wthr = new File (WeatherDir);
-            File rvi = new File (RVIDir);
             File out = new File (ExecSettings.getWorkDir());
-            if (idf.exists() && wthr.exists() && rvi.exists() && out.exists()) {
+            if (idf.exists() && wthr.exists() && out.exists()) {
                 IDFDir = RelativeDirUtil.getRelativePath(Base, idf);
                 WeatherDir = RelativeDirUtil.getRelativePath(Base, wthr);
-                RVIDir = RelativeDirUtil.getRelativePath(Base, rvi);
                 ExecSettings.setParentDir(RelativeDirUtil.getRelativePath(Base, out));
                 // Mark content changed
                 ContentChanged = true;
@@ -889,7 +754,6 @@ public class JEPlusProject implements Serializable {
     protected void convertToAbsoluteDir (File base) {
         IDFDir = new File (base, IDFDir).getAbsolutePath();
         WeatherDir = new File (base, WeatherDir).getAbsolutePath();
-        RVIDir = new File (base, RVIDir).getAbsolutePath();
         ExecSettings.setParentDir(new File (base, ExecSettings.getWorkDir()).getAbsolutePath());
         //ExecSettings.setPBSscriptFile(new File (base, ExecSettings.getPBSscriptFile()).getAbsolutePath());
         //ExecSettings.setServerConfigFile(new File (base, ExecSettings.getServerConfigFile()).getAbsolutePath());
@@ -911,7 +775,7 @@ public class JEPlusProject implements Serializable {
         Enumeration nodes = ParaTree.preorderEnumeration();
         while (nodes.hasMoreElements()) {
             Object node = nodes.nextElement(); 
-            String ss = ((ParameterItem)((DefaultMutableTreeNode)node).getUserObject()).getSearchString();
+            String ss = ((ParameterItemV2)((DefaultMutableTreeNode)node).getUserObject()).getSearchString();
             if (ss != null && ss.trim().length() > 0 && !SearchStrings.contains(ss)) {
                 SearchStrings.add(ss);
             }
@@ -975,10 +839,9 @@ public class JEPlusProject implements Serializable {
             Parameters = new ArrayList<> ();
             for (String[] row : table) {
                 if (row.length >= 8) {
-                    Parameters.add(new ParameterItem (this, row));
+                    Parameters.add(new ParameterItemV2 (row));
                 }
             }
-            addParameterListAsBranch (null, Parameters);
             // Mark content changed
             ContentChanged = true;
             return true;
@@ -992,53 +855,21 @@ public class JEPlusProject implements Serializable {
      * @return import successful or not
      */
     public boolean exportParameterTableFile (File file) {
-        // Get all parameters in the first branch
-        if (ParamTree != null) {
-            try (PrintWriter fw = new PrintWriter (new FileWriter (file))) {
-                fw.println("# Parameter list for project: " + this.getProjectID() + " (exported at " + new SimpleDateFormat().format(new Date()) + ")");
-                fw.println("# Note: this list contains only the first branch of the parameter tree.");
-                fw.println("# Parameter definitions in a csv file. Column headings are as below");
-                fw.println("# ID, Name, Parameter Type, Description, Search String, Value Type, Value String, Selected Value Index");
-                fw.println("#           {0}                                         {0, 1, 2}                 {0, .... depending on number of values}");
-                fw.println("# ");
-                DefaultMutableTreeNode thisleaf = ParamTree.getFirstLeaf();
-                Object[] path = thisleaf.getUserObjectPath();
-                for (Object obj : path) {
-                    ParameterItem item = (ParameterItem) obj;
-                    fw.println(item.toCSVrow());
-                }
-                return true;
-            }catch (Exception ex) {
-                logger.error ("Error writing parameter table to file " + file.getAbsolutePath(), ex);
+        try (PrintWriter fw = new PrintWriter (new FileWriter (file))) {
+            fw.println("# Parameter list for project: " + this.getProjectID() + " (exported at " + new SimpleDateFormat().format(new Date()) + ")");
+            fw.println("# Note: this list contains only the first branch of the parameter tree.");
+            fw.println("# Parameter definitions in a csv file. Column headings are as below");
+            fw.println("# ID, Name, Parameter Type, Description, Search String, Value Type, Value String, Selected Value Index");
+            fw.println("#           {0}                                         {0, 1, 2}                 {0, .... depending on number of values}");
+            fw.println("# ");
+            for (ParameterItemV2 item : Parameters) {
+                fw.println(item.toCSVrow());
             }
+            return true;
+        }catch (Exception ex) {
+            logger.error ("Error writing parameter table to file " + file.getAbsolutePath(), ex);
         }
         return false;
-    }
-    
-    /**
-     * Add a list of parameter items as a branch at the given root node
-     * @param root Root where the new branch is attached
-     * @param list The list of parameter items
-     */
-    public void addParameterListAsBranch (DefaultMutableTreeNode root, List<ParameterItem> list) {
-        if (list != null && list.size() > 0) {
-            if (root == null) { // replace current tree
-                ParamTree = new DefaultMutableTreeNode (list.get(0));
-                DefaultMutableTreeNode current = ParamTree;
-                for (int i=1; i<list.size(); i++) {
-                    DefaultMutableTreeNode newnode = new DefaultMutableTreeNode (list.get(i));
-                    current.add(newnode);
-                    current = newnode;
-                }
-            }else {
-                DefaultMutableTreeNode current = root;
-                for (ParameterItem item : list) {
-                    DefaultMutableTreeNode newnode = new DefaultMutableTreeNode(item);
-                    current.add(newnode);
-                    current = newnode;
-                }
-            }
-        }
     }
     
     public String [][] getLHSJobList (int LHSsize, Random randomsrc) {
@@ -1048,29 +879,26 @@ public class JEPlusProject implements Serializable {
         String [][] JobList = new String [LHSsize][];
         
         // Get all parameters (inc. idf and weather) and their distributions
-        if (ParamTree != null) {
-            // Create sample for each parameter
-            String [][] SampledValues = getSampleInEqualProbSegments(LHSsize, randomsrc);
-            // debug
-            logger.debug(Arrays.deepToString(SampledValues));
-            //
-            int length = SampledValues.length;
-            // Shuffle the sample value vector of each parameter
-            for (int i=1; i<length; i++) {
-                Collections.shuffle(Arrays.asList(SampledValues[i]), randomsrc);
-            }
-            // n jobs are created by taking a value from each parameter's vector 
-            // sequentially
-            for (int i=0; i<LHSsize; i++) {
-                JobList[i] = new String [length];
-                JobList[i][0] = new Formatter().format("LHS-%06d", i).toString();  // Job id
-                for (int j=1; j<length; j++) {
-                    JobList[i][j] = SampledValues[j][i];
-                }
-            }
-            return JobList;
+        // Create sample for each parameter
+        String [][] SampledValues = getSampleInEqualProbSegments(LHSsize, randomsrc);
+        // debug
+        logger.debug(Arrays.deepToString(SampledValues));
+        //
+        int length = SampledValues.length;
+        // Shuffle the sample value vector of each parameter
+        for (int i=1; i<length; i++) {
+            Collections.shuffle(Arrays.asList(SampledValues[i]), randomsrc);
         }
-        return null;
+        // n jobs are created by taking a value from each parameter's vector 
+        // sequentially
+        for (int i=0; i<LHSsize; i++) {
+            JobList[i] = new String [length];
+            JobList[i][0] = new Formatter().format("LHS-%06d", i).toString();  // Job id
+            for (int j=1; j<length; j++) {
+                JobList[i][j] = SampledValues[j][i];
+            }
+        }
+        return JobList;
     }
     
     public String [][] getSobolJobList (int LHSsize, Random randomsrc) {
@@ -1080,30 +908,27 @@ public class JEPlusProject implements Serializable {
         String [][] JobList = new String [LHSsize][];
         
         // Get all parameters (inc. idf and weather) and their distributions
-        if (ParamTree != null) {
-            // Create sample for each parameter
-            String [][] SampledValues = getSampleInEqualProbSegments(LHSsize, randomsrc);
-            int length = SampledValues.length;
-            // Generate Sobol sequence
-            SobolSequenceGenerator SSG = new SobolSequenceGenerator(length - 1);
-            // SSG.skipTo(1000);
-            // Shuffle the sample value vector of each parameter
+        // Create sample for each parameter
+        String [][] SampledValues = getSampleInEqualProbSegments(LHSsize, randomsrc);
+        int length = SampledValues.length;
+        // Generate Sobol sequence
+        SobolSequenceGenerator SSG = new SobolSequenceGenerator(length - 1);
+        // SSG.skipTo(1000);
+        // Shuffle the sample value vector of each parameter
 //            for (int i=1; i<length; i++) {
 //                Collections.shuffle(Arrays.asList(SampledValues[i]), randomsrc);
 //            }
-            // n jobs are created by taking a value from each parameter's vector 
-            // sequentially
-            for (int i=0; i<LHSsize; i++) {
-                double [] vector = SSG.nextVector();
-                JobList[i] = new String [length];
-                JobList[i][0] = new Formatter().format("SOBOL-%06d", i).toString();  // Job id
-                for (int j=1; j<length; j++) {
-                    JobList[i][j] = SampledValues[j][Math.round((float)vector[j-1] * LHSsize)];
-                }
+        // n jobs are created by taking a value from each parameter's vector 
+        // sequentially
+        for (int i=0; i<LHSsize; i++) {
+            double [] vector = SSG.nextVector();
+            JobList[i] = new String [length];
+            JobList[i][0] = new Formatter().format("SOBOL-%06d", i).toString();  // Job id
+            for (int j=1; j<length; j++) {
+                JobList[i][j] = SampledValues[j][Math.round((float)vector[j-1] * LHSsize)];
             }
-            return JobList;
         }
-        return null;
+        return JobList;
     }
     
     /**
@@ -1113,8 +938,7 @@ public class JEPlusProject implements Serializable {
      * @return 
      */
     private String [][] getSampleInEqualProbSegments (int sampleSize, Random randomsrc) {
-        DefaultMutableTreeNode thisleaf = ParamTree.getFirstLeaf();
-        Object[] path = thisleaf.getUserObjectPath();
+        Object[] path = Parameters.toArray();
         int length = path.length + 3; // tree depth plus JobID (reserved space), IDF and Weather
         String [][] SampledValues = new String [length][];
         int n_alt;
@@ -1136,17 +960,17 @@ public class JEPlusProject implements Serializable {
 
         // Parameters
         for (int i=3; i<length; i++) {
-            ParameterItem Param = ((ParameterItem) path[i-3]);
+            ParameterItemV2 Param = ((ParameterItemV2) path[i-3]);
             if (Param.getValuesString().startsWith("@sample")) {
                 // A distribution definition
                 SampledValues [i] = this.defaultLHSdistributionSample(sampleSize, Param.getValuesString(), Param.getType(), randomsrc);
             }else {
                 // distribution undefined; normal parameter
-                n_alt = Param.getNAltValues();
+                n_alt = Param.getNAltValues(this);
                 SampledIndex = this.defaultLHSdiscreteSample(sampleSize, n_alt, randomsrc);
                 SampledValues [i] = new String [sampleSize];
                 for (int j=0; j<sampleSize; j++) {
-                    SampledValues[i][j] = Param.getAlternativeValues()[SampledIndex[j]];
+                    SampledValues[i][j] = Param.getAlternativeValues(this)[SampledIndex[j]];
                 }
             }
         }
@@ -1166,7 +990,7 @@ public class JEPlusProject implements Serializable {
         return index;
     }
     
-    private String [] defaultLHSdistributionSample(int n, String funcstr, int type, Random randomsrc) {
+    private String [] defaultLHSdistributionSample(int n, String funcstr, ParameterItemV2.VType type, Random randomsrc) {
         // Trim off brackets
         int start = funcstr.indexOf("(") + 1;
         int end = funcstr.indexOf(")");
@@ -1189,11 +1013,11 @@ public class JEPlusProject implements Serializable {
                 double lb = Double.parseDouble(params[1]);
                 double ub = Double.parseDouble(params[2]);
                 for (int i=0; i<n; i++) {
-                    if (type == ParameterItem.DOUBLE) {
+                    if (type == ParameterItemV2.VType.DOUBLE) {
                         double bin = (ub - lb) / n;
                         double v = randomsrc.nextDouble() * bin + lb + i * bin;
                         list.add(Double.toString(v));
-                    }else if (type == ParameterItem.INTEGER) {
+                    }else if (type == ParameterItemV2.VType.INTEGER) {
                         double bin = (ub + 1. - lb) / n;
                         double v = randomsrc.nextDouble() * bin + lb + i * bin;
                         list.add(Integer.toString((int)Math.floor(v)));
@@ -1213,9 +1037,9 @@ public class JEPlusProject implements Serializable {
                         double a = Dist.inverseCumulativeProbability((i == 0) ? bin/10 : i*bin);            // lb of each bin
                         double b = Dist.inverseCumulativeProbability((i == n-1) ? 1.-bin/n : (i+1)*bin);    // ub of each bin
                         double v = randomsrc.nextDouble() * (b - a) + a;
-                        if (type == ParameterItem.DOUBLE) {
+                        if (type == ParameterItemV2.VType.DOUBLE) {
                             list.add(Double.toString(v));
-                        }else if (type == ParameterItem.INTEGER) {
+                        }else if (type == ParameterItemV2.VType.INTEGER) {
                             // Warning: for integer, binomial distribution should be used.
                             // the following function is provided just for convenience
                             list.add(Long.toString(Math.round(v)));
@@ -1235,9 +1059,9 @@ public class JEPlusProject implements Serializable {
                         double a = Dist.inverseCumulativeProbability((i == 0) ? bin/10 : i*bin);            // lb of each bin
                         double b = Dist.inverseCumulativeProbability((i == n-1) ? 1.-bin/n : (i+1)*bin);    // ub of each bin
                         double v = randomsrc.nextDouble() * (b - a) + a;
-                        if (type == ParameterItem.DOUBLE) {
+                        if (type == ParameterItemV2.VType.DOUBLE) {
                             list.add(Double.toString(v));
-                        }else if (type == ParameterItem.INTEGER) {
+                        }else if (type == ParameterItemV2.VType.INTEGER) {
                             // Warning: for integer, binomial distribution should be used.
                             // the following function is provided just for convenience
                             list.add(Long.toString(Math.round(v)));
@@ -1256,9 +1080,9 @@ public class JEPlusProject implements Serializable {
                         double a = Dist.inverseCumulativeProbability((i == 0) ? bin/10 : i*bin);            // lb of each bin
                         double b = Dist.inverseCumulativeProbability((i == n-1) ? 1.-bin/n : (i+1)*bin);    // ub of each bin
                         double v = randomsrc.nextDouble() * (b - a) + a;
-                        if (type == ParameterItem.DOUBLE) {
+                        if (type == ParameterItemV2.VType.DOUBLE) {
                             list.add(Double.toString(v));
-                        }else if (type == ParameterItem.INTEGER) {
+                        }else if (type == ParameterItemV2.VType.INTEGER) {
                             // Warning: for integer, binomial distribution should be used.
                             // the following function is provided just for convenience
                             list.add(Long.toString(Math.round(v)));
@@ -1279,9 +1103,9 @@ public class JEPlusProject implements Serializable {
                         a = Dist.inverseCumulativeProbability(i * bin);         // lb of each bin
                         b = Dist.inverseCumulativeProbability((i + 1) * bin);   // ub of each bin
                         double v = randomsrc.nextDouble() * (b - a) + a;
-                        if (type == ParameterItem.DOUBLE) {
+                        if (type == ParameterItemV2.VType.DOUBLE) {
                             list.add(Double.toString(v));
-                        }else if (type == ParameterItem.INTEGER) {
+                        }else if (type == ParameterItemV2.VType.INTEGER) {
                             // Warning: for integer, user defined discrete distribution should be used.
                             // the following function is provided just for convenience
                             list.add(Long.toString(Math.round(v)));
@@ -1324,26 +1148,24 @@ public class JEPlusProject implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 17 * hash + this.ProjectType;
-        hash = 17 * hash + Objects.hashCode(this.ProjectID);
-        hash = 17 * hash + Objects.hashCode(this.ProjectNotes);
-        hash = 17 * hash + Objects.hashCode(this.IDFDir);
-        hash = 17 * hash + Objects.hashCode(this.IDFTemplate);
-        hash = 17 * hash + Objects.hashCode(this.WeatherDir);
-        hash = 17 * hash + Objects.hashCode(this.WeatherFile);
-        hash = 17 * hash + (this.UseReadVars ? 1 : 0);
-        hash = 17 * hash + Objects.hashCode(this.RVIDir);
-        hash = 17 * hash + Objects.hashCode(this.RVIFile);
-        hash = 17 * hash + Objects.hashCode(this.DCKDir);
-        hash = 17 * hash + Objects.hashCode(this.DCKTemplate);
-        hash = 17 * hash + Objects.hashCode(this.OutputFileNames);
-        hash = 17 * hash + Objects.hashCode(this.INSELDir);
-        hash = 17 * hash + Objects.hashCode(this.INSELTemplate);
-        hash = 17 * hash + Objects.hashCode(this.ExecSettings);
-        hash = 17 * hash + Objects.hashCode(this.Parameters);
-        hash = 17 * hash + Objects.hashCode(this.ParamFile);
-        hash = 17 * hash + Objects.hashCode(this.Rvx);
+        int hash = 3;
+        hash = 79 * hash + Objects.hashCode(this.ProjectType);
+        hash = 79 * hash + Objects.hashCode(this.ProjectID);
+        hash = 79 * hash + Objects.hashCode(this.ProjectNotes);
+        hash = 79 * hash + Objects.hashCode(this.IDFDir);
+        hash = 79 * hash + Objects.hashCode(this.IDFTemplate);
+        hash = 79 * hash + Objects.hashCode(this.WeatherDir);
+        hash = 79 * hash + Objects.hashCode(this.WeatherFile);
+        hash = 79 * hash + Objects.hashCode(this.DCKDir);
+        hash = 79 * hash + Objects.hashCode(this.DCKTemplate);
+        hash = 79 * hash + Objects.hashCode(this.OutputFileNames);
+        hash = 79 * hash + Objects.hashCode(this.INSELDir);
+        hash = 79 * hash + Objects.hashCode(this.INSELTemplate);
+        hash = 79 * hash + Objects.hashCode(this.ExecSettings);
+        hash = 79 * hash + Objects.hashCode(this.Parameters);
+        hash = 79 * hash + Objects.hashCode(this.ParamFile);
+        hash = 79 * hash + Objects.hashCode(this.Rvx);
+        hash = 79 * hash + Objects.hashCode(this.RVIFile);
         return hash;
     }
 
@@ -1358,13 +1180,7 @@ public class JEPlusProject implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final JEPlusProject other = (JEPlusProject) obj;
-        if (this.ProjectType != other.ProjectType) {
-            return false;
-        }
-        if (this.UseReadVars != other.UseReadVars) {
-            return false;
-        }
+        final JEPlusProjectV2 other = (JEPlusProjectV2) obj;
         if (!Objects.equals(this.ProjectID, other.ProjectID)) {
             return false;
         }
@@ -1381,12 +1197,6 @@ public class JEPlusProject implements Serializable {
             return false;
         }
         if (!Objects.equals(this.WeatherFile, other.WeatherFile)) {
-            return false;
-        }
-        if (!Objects.equals(this.RVIDir, other.RVIDir)) {
-            return false;
-        }
-        if (!Objects.equals(this.RVIFile, other.RVIFile)) {
             return false;
         }
         if (!Objects.equals(this.DCKDir, other.DCKDir)) {
@@ -1407,6 +1217,12 @@ public class JEPlusProject implements Serializable {
         if (!Objects.equals(this.ParamFile, other.ParamFile)) {
             return false;
         }
+        if (!Objects.equals(this.RVIFile, other.RVIFile)) {
+            return false;
+        }
+        if (this.ProjectType != other.ProjectType) {
+            return false;
+        }
         if (!Objects.equals(this.ExecSettings, other.ExecSettings)) {
             return false;
         }
@@ -1418,6 +1234,6 @@ public class JEPlusProject implements Serializable {
         }
         return true;
     }
-    
-    
+
+  
 }

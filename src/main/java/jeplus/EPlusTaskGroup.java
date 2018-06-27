@@ -125,13 +125,13 @@ public class EPlusTaskGroup implements EPlusJobItem {
                         String lbl = GroupLabel + "-" + item.getID();
                         EPlusTask task;
                         switch (WorkEnv.getProjectType()) {
-                            case JEPlusProject.TRNSYS: 
+                            case TRNSYS: 
                                 task = new TRNSYSTask (WorkEnv, lbl, i, keys, altvals);
                                 break;
-                            case JEPlusProject.INSEL: 
+                            case INSEL: 
                                 task = new INSELTask (WorkEnv, lbl, i, keys, altvals);
                                 break;
-                            case JEPlusProject.EPLUS: 
+                            case EPLUS: 
                             default:
                                 task = new EPlusTask (WorkEnv, lbl, i, keys, altvals);
                         }
@@ -151,13 +151,13 @@ public class EPlusTaskGroup implements EPlusJobItem {
                             String lbl = GroupLabel + "-" + item.getID();
                             EPlusTask task;
                             switch (WorkEnv.getProjectType()) {
-                                case JEPlusProject.TRNSYS: 
+                                case TRNSYS: 
                                     task = new TRNSYSTask (WorkEnv, lbl, i, keys, altvals);
                                     break;
-                                case JEPlusProject.INSEL: 
+                                case INSEL: 
                                     task = new INSELTask (WorkEnv, lbl, i, keys, altvals);
                                     break;
-                                case JEPlusProject.EPLUS: 
+                                case EPLUS: 
                                 default:
                                     task = new EPlusTask (WorkEnv, lbl, i, keys, altvals);
                             }
@@ -180,13 +180,13 @@ public class EPlusTaskGroup implements EPlusJobItem {
                             String lbl = GroupLabel + "-" + item.getID();
                             EPlusTask task;
                             switch (WorkEnv.getProjectType()) {
-                                case JEPlusProject.TRNSYS: 
+                                case TRNSYS: 
                                     task = new TRNSYSTask (WorkEnv, lbl, i, keys, altvals);
                                     break;
-                                case JEPlusProject.INSEL: 
+                                case INSEL: 
                                     task = new INSELTask (WorkEnv, lbl, i, keys, altvals);
                                     break;
-                                case JEPlusProject.EPLUS: 
+                                case EPLUS: 
                                 default:
                                     task = new EPlusTask (WorkEnv, lbl, i, keys, altvals);
                             }
@@ -212,13 +212,13 @@ public class EPlusTaskGroup implements EPlusJobItem {
                                 String lbl = GroupLabel + "-" + item.getID();
                                 EPlusTask task;
                                 switch (WorkEnv.getProjectType()) {
-                                    case JEPlusProject.TRNSYS: 
+                                    case TRNSYS: 
                                         task = new TRNSYSTask (WorkEnv, lbl, i, keys, altvals);
                                         break;
-                                    case JEPlusProject.INSEL: 
+                                    case INSEL: 
                                         task = new INSELTask (WorkEnv, lbl, i, keys, altvals);
                                         break;
-                                    case JEPlusProject.EPLUS: 
+                                    case EPLUS: 
                                     default:
                                         task = new EPlusTask (WorkEnv, lbl, i, keys, altvals);
                                 }

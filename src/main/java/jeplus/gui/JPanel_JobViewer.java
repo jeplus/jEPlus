@@ -160,33 +160,37 @@ public class JPanel_JobViewer extends javax.swing.JPanel {
             for (int i = 0; i < Jobs.length; i++) {
                 // For each job, do:
                 EPlusTask job = Manager.getJobQueue().get(i);
-                if (job.getWorkEnv().getProjectType() == JEPlusProject.EPLUS) {
-                    if (i==0) {
-                        // Print table header
-                    }
-                    buf = new StringBuffer();
-                    buf.append(i).append(", ");
-                    buf.append(job.getJobID()).append(", ");
-                    buf.append(job.getWorkEnv().getWeatherFile()).append(", ");
-                    buf.append(job.getWorkEnv().getIDFTemplate()).append(", ");
-                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.TRNSYS){
-                    if (i==0) {
-                        // Print table header
-                        buf.delete(11,24);
-                    }
-                    buf = new StringBuffer();
-                    buf.append(i).append(", ");
-                    buf.append(job.getJobID()).append(", ");
-                    buf.append(job.getWorkEnv().getDCKTemplate()).append(", ");
-                }else if (job.getWorkEnv().getProjectType() == JEPlusProject.INSEL){
-                    if (i==0) {
-                        // Print table header
-                        buf.delete(11,24);
-                    }
-                    buf = new StringBuffer();
-                    buf.append(i).append(", ");
-                    buf.append(job.getJobID()).append(", ");
-                    buf.append(job.getWorkEnv().getDCKTemplate()).append(", ");
+                switch(job.getWorkEnv().getProjectType()) {
+                    case TRNSYS:
+                        if (i==0) {
+                            // Print table header
+                            buf.delete(11,24);
+                        }
+                        buf = new StringBuffer();
+                        buf.append(i).append(", ");
+                        buf.append(job.getJobID()).append(", ");
+                        buf.append(job.getWorkEnv().getDCKTemplate()).append(", ");
+                        break;
+                    case INSEL:
+                        if (i==0) {
+                            // Print table header
+                            buf.delete(11,24);
+                        }
+                        buf = new StringBuffer();
+                        buf.append(i).append(", ");
+                        buf.append(job.getJobID()).append(", ");
+                        buf.append(job.getWorkEnv().getDCKTemplate()).append(", ");
+                        break;
+                    case EPLUS:
+                    default:
+                        if (i==0) {
+                            // Print table header
+                        }
+                        buf = new StringBuffer();
+                        buf.append(i).append(", ");
+                        buf.append(job.getJobID()).append(", ");
+                        buf.append(job.getWorkEnv().getWeatherFile()).append(", ");
+                        buf.append(job.getWorkEnv().getIDFTemplate()).append(", ");
                 }
                 for (int j=0; j<job.getSearchStringList().size(); j++) {
                     map.put(job.getSearchStringList().get(j), job.getAltValueList().get(j));

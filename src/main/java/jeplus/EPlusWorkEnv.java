@@ -51,7 +51,7 @@ public class EPlusWorkEnv implements Serializable {
     public String RVIFile = "my.rvi";
 
     /** Project Type: E+ or TRNSYS */
-    protected int ProjectType = JEPlusProject.EPLUS; // set to illegal type
+    protected JEPlusProjectV2.ModelType ProjectType = JEPlusProjectV2.ModelType.EPLUS; // set to illegal type
     /** Local directory for DCK/TRD (for TRNSYS) template files */
     protected String DCKDir = "./";
     /** Template file to be used in this job; or a (';' delimited) list of files for the batch project */
@@ -197,11 +197,11 @@ public class EPlusWorkEnv implements Serializable {
         this.RVIFile = RVIFile;
     }
 
-    public int getProjectType() {
+    public JEPlusProjectV2.ModelType getProjectType() {
         return ProjectType;
     }
 
-    public void setProjectType(int ProjectType) {
+    public void setProjectType(JEPlusProjectV2.ModelType ProjectType) {
         this.ProjectType = ProjectType;
     }
 
