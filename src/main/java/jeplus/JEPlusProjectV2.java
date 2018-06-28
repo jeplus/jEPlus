@@ -683,7 +683,7 @@ public class JEPlusProjectV2 implements Serializable {
     }
 
     @JsonIgnore
-    protected DefaultMutableTreeNode getParamTree() {
+    public DefaultMutableTreeNode getParamTree() {
         DefaultMutableTreeNode ParamTree = null;
         if (Parameters != null && Parameters.size() > 0) {
             ParamTree = new DefaultMutableTreeNode (Parameters.get(0));

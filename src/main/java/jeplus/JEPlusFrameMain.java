@@ -95,6 +95,7 @@ public class JEPlusFrameMain extends JFrame {
     protected EPlusTextPanelOld OutputPanel = null;
     protected EPlusTextPanelOld ResultFilePanel = null;
     protected JPanel_ParameterTree jplParameterTree = null;
+    protected JPanel_ParameterTable jplParameterTable = null;
     protected JPanel_RVXTree jplRvxTree = null;
     // Project file panel for EnerygPlus
     protected JPanel_EPlusProjectFiles EPlusProjectFilesPanel = new JPanel_EPlusProjectFiles();
@@ -139,8 +140,10 @@ public class JEPlusFrameMain extends JFrame {
         this.cboProjectType.setModel(new DefaultComboBoxModel<>(JEPlusProjectV2.ModelType.values()));
 
         // tabTexts.setTabComponentAt(0, new ButtonTabComponent (tabTexts));
-        jplParameterTree = new JPanel_ParameterTree (Project);
+        jplParameterTree = new JPanel_ParameterTree ();
         jplParamTreeHolder.add(this.jplParameterTree, BorderLayout.CENTER);
+        jplParameterTable = new JPanel_ParameterTable ();
+        jplParamTableHolder.add(this.jplParameterTable, BorderLayout.CENTER);
         jplRvxTree = new JPanel_RVXTree (this, Project.getBaseDir(), Project.getRvx());
         jplRVX.add(this.jplRvxTree, BorderLayout.CENTER);
         initProjectSection();
@@ -401,6 +404,7 @@ public class JEPlusFrameMain extends JFrame {
 //            this.Project.getExecSettings().setParentDir("TRNoutput/");
         }
         jplParameterTree.setParameterTree(Project);
+        jplParameterTable.setProject(Project);
         jplRvxTree.setContents(this, Project.getBaseDir(), Project.getRvx());
     }
 
@@ -745,9 +749,7 @@ public class JEPlusFrameMain extends JFrame {
         jPanel_EPlusProjectFiles2 = new jeplus.gui.JPanel_EPlusProjectFiles();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jplParamTreeHolder = new javax.swing.JPanel();
-        jplTableView = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jtbParameters = new javax.swing.JTable();
+        jplParamTableHolder = new javax.swing.JPanel();
         cboProjectType = new javax.swing.JComboBox();
         jLabel2 = new javax.swing.JLabel();
         cmdValidate = new javax.swing.JButton();
@@ -926,24 +928,8 @@ public class JEPlusFrameMain extends JFrame {
         jplParamTreeHolder.setLayout(new java.awt.BorderLayout());
         jTabbedPane1.addTab("Parameter Tree", jplParamTreeHolder);
 
-        jplTableView.setLayout(new java.awt.BorderLayout());
-
-        jtbParameters.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jScrollPane1.setViewportView(jtbParameters);
-
-        jplTableView.add(jScrollPane1, java.awt.BorderLayout.CENTER);
-
-        jTabbedPane1.addTab("Table View", jplTableView);
+        jplParamTableHolder.setLayout(new java.awt.BorderLayout());
+        jTabbedPane1.addTab("Table View", jplParamTableHolder);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -2781,7 +2767,6 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private jeplus.gui.JPanel_EPlusProjectFiles jPanel_EPlusProjectFiles2;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JSeparator jSeparator3;
@@ -2797,12 +2782,11 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private jeplus.gui.JPanel_LocalControllerOptions jplLocalControllerSettings;
     private javax.swing.JPanel jplModelTest;
     private javax.swing.JPanel jplOptions;
+    private javax.swing.JPanel jplParamTableHolder;
     private javax.swing.JPanel jplParamTreeHolder;
     private javax.swing.JPanel jplProjectFilesPanelHolder;
     private javax.swing.JPanel jplRVX;
     private javax.swing.JPanel jplSettings;
-    private javax.swing.JPanel jplTableView;
-    private javax.swing.JTable jtbParameters;
     private javax.swing.JPanel pnlExecution;
     private javax.swing.JPanel pnlProject;
     private javax.swing.JPanel pnlRvx;

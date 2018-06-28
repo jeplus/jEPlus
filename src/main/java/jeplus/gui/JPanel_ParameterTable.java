@@ -18,50 +18,54 @@
  ***************************************************************************/
 package jeplus.gui;
 
-import java.util.Enumeration;
+import java.io.File;
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.JTree;
+import javax.swing.JTable;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
 import javax.swing.text.Document;
-import javax.swing.tree.*;
+import jeplus.EPlusConfig;
 import jeplus.JEPlusProjectV2;
 import jeplus.data.ParameterItemV2;
-import jeplus.util.DNDTree;
+import jeplus.util.CsvUtil;
 
 /**
  *
  * @author yzhang
  */
-public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJPanel {
+public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJPanel, TableModelListener {
 
-    protected String Title = "Parameter Tree";
+    protected String Title = "Parameter Table";
     protected ParameterItemV2 CurrentItem = null;
-    protected DefaultMutableTreeNode ParamTreeRoot = null;
-    protected DefaultTreeModel ParamTreeModel = null;
-    protected JTree jTreeParams = null;
+    protected ParamTableModel ParamTableModel = null;
+    protected JTable jTableParams = null;
     private DocumentListener DL = null;
     private boolean DLactive = true;
-    /** Reference to project in order to pass on access to parameter items */
     protected JEPlusProjectV2 Project;
 
     
     /** Creates new form JPanel_ParameterTree */
-    public JPanel_ParameterTree() {
+    public JPanel_ParameterTable() {
         initComponents();
-        setParameterTree(null);
+        setProject(null);
     }
     
     /** 
      * Creates new form JPanel_ParameterTree
      * @param project 
      */
-    public JPanel_ParameterTree(JEPlusProjectV2 project) {
+    public JPanel_ParameterTable(JEPlusProjectV2 project) {
         initComponents();
-        setParameterTree(Project);
-        this.cboParamType.setModel(new DefaultComboBoxModel<> (ParameterItemV2.PType.values()));
-        this.cboType.setModel(new DefaultComboBoxModel<> (ParameterItemV2.VType.values()));
+        setProject(Project);
     }
 
     /**
@@ -85,46 +89,59 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
      * Set the root of the parameter tree
      * @param project the jEPlus project containing the tree
      */
-    public final void setParameterTree (JEPlusProjectV2 project) {
+    public final void setProject (JEPlusProjectV2 project) {
         Project = project;
         if (Project != null) {
-            ParamTreeRoot = Project.getParamTree();
-            initParamTree();
+            ParamTableModel = new ParamTableModel(Project.getParameters(), Project);
+            initParamTable();
         }
-    }
-
-    /**
-     * Get the parameter tree
-     * @return Root node of the current tree
-     */
-    public DefaultMutableTreeNode getParameterTree () {
-        return ParamTreeRoot;
     }
 
     /**
      * initialises the parameter tree, by setting up tree nodes and tree model
      */
-    protected void initParamTree () {
-        if (ParamTreeRoot == null) {
-            ParamTreeRoot = new DefaultMutableTreeNode(new ParameterItemV2());
-        }
-        ParamTreeModel = new DefaultTreeModel(ParamTreeRoot);
-        // Set tree
-        jTreeParams = new DNDTree(DNDTree.createTree());
-        jTreeParams.setModel(ParamTreeModel);
-        jTreeParams.setEditable(false);
-        jTreeParams.getSelectionModel().setSelectionMode
-                (TreeSelectionModel.SINGLE_TREE_SELECTION);
-        jTreeParams.setShowsRootHandles(true);
-        jTreeParams.setExpandsSelectedPaths(true);
-        jTreeParams.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-            @Override
-            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
-                jTreeParamsValueChanged(evt);
+    protected void initParamTable () {
+        cboParamType.setModel(new DefaultComboBoxModel<> (ParameterItemV2.PType.values()));
+        cboType.setModel(new DefaultComboBoxModel<> (ParameterItemV2.VType.values()));
+        // Set up table
+        jTableParams = new JTable(ParamTableModel);
+        // Column sizes
+        TableColumn column = null;
+        for (int i = 0; i < 7; i++) {
+            column = jTableParams.getColumnModel().getColumn(i);
+            if (i == 0) {
+                column.setPreferredWidth(20); //# column is small
+            } else if (i == 1) {
+                column.setPreferredWidth(70); //# column is small
+            } else if (i == 2) {
+                column.setPreferredWidth(30); //# column is small
+            } else if (i == 4) {
+                column.setPreferredWidth(60); //# column is small
+            } else if (i == 6) {
+                column.setPreferredWidth(25); //# column is small
+            } else {
+                column.setPreferredWidth(120);
             }
-        });
-        jTreeParams.setSelectionPath(new TreePath (ParamTreeRoot.getLastLeaf().getPath()));
-        this.jScroll.setViewportView(jTreeParams);
+        }
+        // Column editor
+        TableColumn PTypeColumn = jTableParams.getColumnModel().getColumn(1);
+        JComboBox comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.PType.values()));
+        PTypeColumn.setCellEditor(new DefaultCellEditor(comboBox));        
+        TableColumn VTypeColumn = jTableParams.getColumnModel().getColumn(4);
+        comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.VType.values()));
+        VTypeColumn.setCellEditor(new DefaultCellEditor(comboBox));        
+        // Selection listener
+        jTableParams.getSelectionModel().addListSelectionListener(new ListSelectionListener (){
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (!event.getValueIsAdjusting() && jTableParams.getSelectedRow() != -1) {
+                    CurrentItem = Project.getParameters().get(jTableParams.getSelectedRow());
+                    displayParamDetails();
+                }
+            }
+        });        
+        ParamTableModel.addTableModelListener(this);
+        this.jScroll.setViewportView(jTableParams);
         // Set listeners to text fields
         DL = new DocumentListener () {
             Document DocShortName = txtShortName.getDocument();
@@ -150,7 +167,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
                         txpPreview.setText(getAltValuesPreview());
                         resetAltValueNumbers();
                     }
-                    jTreeParams.update(jTreeParams.getGraphics());
+                    ParamTableModel.fireTableDataChanged();
                 }
             }
             @Override
@@ -169,31 +186,6 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
         txtSearchString.getDocument().addDocumentListener(DL);
         txtAltValues.getDocument().addDocumentListener(DL);
 
-    }
-
-    /**
-     * Handles the event that a new tree node is selected
-     * @param evt not in use
-     */
-    private void jTreeParamsValueChanged(javax.swing.event.TreeSelectionEvent evt) {
-    //Returns the last path element of the selection.
-        //This method is useful only when the selection model allows a single selection.
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-                           jTreeParams.getLastSelectedPathComponent();
-
-        if (node == null) {
-            //Nothing is selected.
-            CurrentItem = null;
-        }else {
-            // Selection available
-            Object nodeInfo = node.getUserObject();
-            if (node.isLeaf()) {
-                CurrentItem = (ParameterItemV2)nodeInfo;
-            } else {
-                CurrentItem = (ParameterItemV2)nodeInfo;
-            }
-        }
-        displayParamDetails();
     }
 
     /**
@@ -226,14 +218,6 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
      */
     protected void displayParamDetails() {
         DLactive = false;
-//        // Disable text doc listeners
-//        if (DL != null) {
-//            txtShortName.getDocument().removeDocumentListener(DL);
-//            txtName.getDocument().removeDocumentListener(DL);
-//            txtDescript.getDocument().removeDocumentListener(DL);
-//            txtSearchString.getDocument().removeDocumentListener(DL);
-//            txtAltValues.getDocument().removeDocumentListener(DL);
-//        }
         if (CurrentItem != null) {
             txtName.setEnabled(true);
             txtShortName.setEnabled(true);
@@ -275,34 +259,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
             txpPreview.setText("");
             cboFixValue.setSelectedIndex(0);
         }
-//        // Reset text doc listeners
-//        if (DL != null) {
-//            txtShortName.getDocument().addDocumentListener(DL);
-//            txtName.getDocument().addDocumentListener(DL);
-//            txtDescript.getDocument().addDocumentListener(DL);
-//            txtSearchString.getDocument().addDocumentListener(DL);
-//            txtAltValues.getDocument().addDocumentListener(DL);
-//        }
         DLactive = true;
-    }
-
-    /**
-     * Reads information from the text fields and combo-boxes to update the
-     * currently selected parameter item
-     */
-    protected void updateParamDetails() {
-        if (CurrentItem != null) {
-            CurrentItem.setName(txtName.getText().trim());
-            CurrentItem.setID(txtShortName.getText().trim());
-            CurrentItem.setDescription(txtDescript.getText().trim());
-            CurrentItem.setSearchString(txtSearchString.getText().trim());
-            txpPreview.setText(getAltValuesPreview());
-            resetAltValueNumbers ();
-            CurrentItem.setValuesString(txtAltValues.getText().trim());
-            CurrentItem.setType((ParameterItemV2.VType)cboType.getSelectedItem());
-        }
-        //??ParamTreeModel.nodeChanged(ParamTreeRoot);
-        //jTreeParams.repaint();
     }
 
     private void resetAltValueNumbers () {
@@ -320,164 +277,87 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
 
 
     /**
-     * Move the selected item up one level
-     * @return The node being moved
-     */
-    public DefaultMutableTreeNode moveUpParameterItem() {
-        DefaultMutableTreeNode node, parent;
-        TreePath path = jTreeParams.getSelectionPath();
-
-        if (path != null) {
-            int len = path.getPathCount();
-            Object [] paths = path.getPath();
-            if (len >= 3) {
-                node = (DefaultMutableTreeNode)(path.getLastPathComponent());
-                ParamTreeModel.removeNodeFromParent(node);
-                path = path.getParentPath().getParentPath();
-                parent = (DefaultMutableTreeNode)paths[len-3];
-                ParamTreeModel.insertNodeInto(node, parent, parent.getChildCount());
-                jTreeParams.scrollPathToVisible(path);
-                jTreeParams.setSelectionPath(path);
-                return node;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Remove the selected node from the tree
-     * @return the node being removed
      */
-    public DefaultMutableTreeNode removeParameterItem() {
-        DefaultMutableTreeNode node, parent;
-        TreePath path = jTreeParams.getSelectionPath();
-
-        if (path != null) {
-            node = (DefaultMutableTreeNode)(path.getLastPathComponent());
-            path = path.getParentPath();
-            if (path != null) {
-                // graft children of the node-to-remove to the parent
-                parent = (DefaultMutableTreeNode)(path.getLastPathComponent());
-                for (Enumeration e = node.children(); e.hasMoreElements(); ) {
-                    ParamTreeModel.insertNodeInto((MutableTreeNode)e.nextElement(), parent,
-                                 parent.getChildCount());
+    public void importParameterItems() {
+        // Select a file to open
+        JFileChooser fc = new JFileChooser(this.Project.getBaseDir());
+        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.CSV));
+        fc.setSelectedFile(new File(""));
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            // import table
+            String [][] table = CsvUtil.parseCSVwithComments(file);
+            int counter = 0;
+            if (table != null) {
+                for (String[] row : table) {
+                    if (row.length >= 8) {
+                        this.Project.getParameters().add(new ParameterItemV2 (row));
+                        counter ++;
+                    }
                 }
-                ParamTreeModel.removeNodeFromParent(node);
-                jTreeParams.scrollPathToVisible(path);
-                jTreeParams.setSelectionPath(path);
-                return node;
+                // Mark content changed
+                this.Project.setContentChanged(true);
             }
+            JOptionPane.showMessageDialog(
+                this,
+                "Imported " + counter + " parameters from " + file.getAbsolutePath(),
+                "Info",
+                JOptionPane.CLOSED_OPTION
+            );
+            // Set current and selected item
+            int last = this.Project.getParameters().size() - 1;
+            CurrentItem = this.Project.getParameters().get(last);
+            this.jTableParams.setRowSelectionInterval(last, last);
+            ParamTableModel.fireTableDataChanged();
         }
-        return null;
+        fc.setFileFilter(null);
     }
 
     /**
      * Delete the whole branch of the selected node from the tree
      * @return the root node of the branch being removed
      */
-    public DefaultMutableTreeNode deleteParameterBranch () {
+    public ParameterItemV2 removeParameterItem () {
         int n = JOptionPane.showConfirmDialog(
             this,
-            "Are you sure that you want to delete the whole branch?",
-            "Deleting branch",
+            "Are you sure that you want to delete the selected parameter?",
+            "Deleting parameter",
             JOptionPane.YES_NO_OPTION);
         if (n == JOptionPane.NO_OPTION) {
             return null;
         }
-
-        DefaultMutableTreeNode node;
-        TreePath path = jTreeParams.getSelectionPath();
-
-        if (path != null) {
-            node = (DefaultMutableTreeNode)(path.getLastPathComponent());
-            path = path.getParentPath();
-            if (path != null) {
-                ParamTreeModel.removeNodeFromParent(node);
-                jTreeParams.scrollPathToVisible(path);
-                jTreeParams.setSelectionPath(path);
-                return node;
-            }else { // if selection is the root
-                this.ParamTreeRoot.removeAllChildren();
-                this.ParamTreeRoot.setUserObject(new ParameterItemV2());
-                this.initParamTree();
-                return this.ParamTreeRoot;
-            }
+        
+        int idx = this.Project.getParameters().indexOf(CurrentItem);
+        ParameterItemV2 deleted = null;
+        if (idx >= 0) {
+            deleted = this.Project.getParameters().remove(idx);
+            CurrentItem = this.Project.getParameters().get(Math.max(0, idx-1));
+            ParamTableModel.fireTableDataChanged();
         }
-        return null;
+        return deleted;
     }
 
     /**
      * Make a copy of the selected item and insert it at the same level.
-     * @return The copy of the item being inserted
      */
-    public DefaultMutableTreeNode copyParameterItem() {
+    public void copyParameterItem() {
         if (CurrentItem != null) {
             ParameterItemV2 child = new ParameterItemV2 (CurrentItem);
-            DefaultMutableTreeNode parentNode;
-            TreePath parentPath = jTreeParams.getSelectionPath();
-
-            if (parentPath != null) {
-                parentPath = parentPath.getParentPath();
-                if (parentPath != null) {
-                    parentNode = (DefaultMutableTreeNode)
-                                (parentPath.getLastPathComponent());
-                } else {
-                    // selection is the root node
-                    parentNode = ParamTreeRoot;
-                }
-            } else {
-                //There is no selection. Default to the root node.
-                parentNode = null;
-            }
-            return addObject(parentNode, child, true);
+            child.setID("P" + this.Project.getParameters().size());
+            addParameterItem(child);
         }
-        return null;
     }
 
     /**
      * Add a new item to the tree
      * @param child The ParameterItem to be store the node-to-add
-     * @return The new node
      */
-    public DefaultMutableTreeNode addParameterItem(ParameterItemV2 child) {
-        DefaultMutableTreeNode parentNode;
-        TreePath parentPath = jTreeParams.getSelectionPath();
-
-        if (parentPath == null) {
-            //There is no selection. Default to the root node.
-            parentNode = ParamTreeRoot;
-        } else {
-            parentNode = (DefaultMutableTreeNode)
-                         (parentPath.getLastPathComponent());
-        }
-        return addObject(parentNode, child, true);
-    }
-
-    /**
-     * Utility function for inserting a node into the tree
-     * @param parent The parent location where the child is to be inserted
-     * @param child The child user object to be added
-     * @param shouldBeVisible Adjust display to show the new insertion if set true
-     * @return The new node of the tree
-     */
-    public DefaultMutableTreeNode addObject(DefaultMutableTreeNode parent,
-                                            Object child,
-                                            boolean shouldBeVisible) {
-        if (parent == null) return null;
-
-        DefaultMutableTreeNode childNode =
-                new DefaultMutableTreeNode(child);
-
-        ParamTreeModel.insertNodeInto(childNode, parent,
-                                 parent.getChildCount());
-
-        //Make sure the user can see the lovely new node.
-        if (shouldBeVisible) {
-            TreePath path = new TreePath(childNode.getPath());
-            jTreeParams.scrollPathToVisible(path);
-            jTreeParams.setSelectionPath(path);
-        }
-        return childNode;
+    public void addParameterItem(ParameterItemV2 child) {
+        this.Project.getParameters().add(child);
+        this.CurrentItem = child;
+        this.displayParamDetails();    
+        ParamTableModel.fireTableDataChanged();
     }
 
     /** This method is called from within the constructor to
@@ -490,7 +370,6 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        cmdMoveUp = new javax.swing.JButton();
         jPanel4 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
@@ -515,19 +394,11 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
         jPanel1 = new javax.swing.JPanel();
         jScroll = new javax.swing.JScrollPane();
         cmdAdd = new javax.swing.JButton();
-        cmdDeleteBranch = new javax.swing.JButton();
+        cmdImportParams = new javax.swing.JButton();
         cmdDuplicate = new javax.swing.JButton();
         cmdRemove = new javax.swing.JButton();
 
         jLabel1.setText("Version requirement");
-
-        cmdMoveUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/swap_up.png"))); // NOI18N
-        cmdMoveUp.setToolTipText("Move the selected item up one level.");
-        cmdMoveUp.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdMoveUpActionPerformed(evt);
-            }
-        });
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Parameter item", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11), new java.awt.Color(102, 102, 102))); // NOI18N
 
@@ -541,29 +412,9 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
         txtName.setToolTipText("Memorable name of the parameter");
         txtName.setEnabled(false);
         txtName.setMinimumSize(new java.awt.Dimension(120, 20));
-        txtName.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtNameActionPerformed(evt);
-            }
-        });
-        txtName.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                txtNameFocusLost(evt);
-            }
-        });
 
         txtDescript.setToolTipText("Description of the parameter");
         txtDescript.setEnabled(false);
-        txtDescript.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtDescriptActionPerformed(evt);
-            }
-        });
-        txtDescript.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                txtDescriptFocusLost(evt);
-            }
-        });
 
         cboType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Integer", "Double", "Discrete" }));
         cboType.setToolTipText("Parameter value type");
@@ -583,48 +434,18 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
         txtShortName.setText("PAR1");
         txtShortName.setToolTipText("Parameter ID is used in Job ID. Use short names e.g. p1, p2...");
         txtShortName.setEnabled(false);
-        txtShortName.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtShortNameActionPerformed(evt);
-            }
-        });
-        txtShortName.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                txtShortNameFocusLost(evt);
-            }
-        });
 
         jLabel22.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel22.setText("Search tag: ");
 
         txtSearchString.setToolTipText("The search tag to be put in the model template");
         txtSearchString.setEnabled(false);
-        txtSearchString.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtSearchStringActionPerformed(evt);
-            }
-        });
-        txtSearchString.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                txtSearchStringFocusLost(evt);
-            }
-        });
 
         jLabel24.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel24.setText("Values: ");
 
         txtAltValues.setToolTipText("Specify a list of alternative values. For detailed syntax, please refer to users guide.");
         txtAltValues.setEnabled(false);
-        txtAltValues.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtAltValuesActionPerformed(evt);
-            }
-        });
-        txtAltValues.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                txtAltValuesFocusLost(evt);
-            }
-        });
 
         jLabel26.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel26.setText("Preview: ");
@@ -750,11 +571,11 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
             }
         });
 
-        cmdDeleteBranch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/cross.png"))); // NOI18N
-        cmdDeleteBranch.setToolTipText("Delete the whole branch");
-        cmdDeleteBranch.addActionListener(new java.awt.event.ActionListener() {
+        cmdImportParams.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/cross.png"))); // NOI18N
+        cmdImportParams.setToolTipText("Delete the whole branch");
+        cmdImportParams.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdDeleteBranchActionPerformed(evt);
+                cmdImportParamsActionPerformed(evt);
             }
         });
 
@@ -781,23 +602,23 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jScroll)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cmdRemove, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(cmdDuplicate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(cmdAdd, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdDeleteBranch, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(cmdImportParams, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmdDuplicate, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(cmdAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmdRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(cmdImportParams)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdAdd)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdDuplicate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmdRemove)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmdDeleteBranch)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(cmdRemove))
             .addComponent(jScroll)
         );
 
@@ -824,39 +645,16 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddActionPerformed
-        ParameterItemV2 item = new ParameterItemV2();
-        this.addParameterItem(item);
-        this.CurrentItem = item;
-        this.displayParamDetails();
+        this.addParameterItem(new ParameterItemV2());
 }//GEN-LAST:event_cmdAddActionPerformed
 
     private void cmdRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         removeParameterItem();
 }//GEN-LAST:event_cmdRemoveActionPerformed
 
-    private void cmdMoveUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMoveUpActionPerformed
-        moveUpParameterItem();
-}//GEN-LAST:event_cmdMoveUpActionPerformed
-
     private void cmdDuplicateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDuplicateActionPerformed
         copyParameterItem();
 }//GEN-LAST:event_cmdDuplicateActionPerformed
-
-    private void txtNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameActionPerformed
-        //updateParamDetails();
-}//GEN-LAST:event_txtNameActionPerformed
-
-    private void txtNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusLost
-        //updateParamDetails();
-}//GEN-LAST:event_txtNameFocusLost
-
-    private void txtDescriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDescriptActionPerformed
-        //updateParamDetails();
-}//GEN-LAST:event_txtDescriptActionPerformed
-
-    private void txtDescriptFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDescriptFocusLost
-        //updateParamDetails();
-}//GEN-LAST:event_txtDescriptFocusLost
 
     private void cboTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboTypeActionPerformed
         CurrentItem.setType((ParameterItemV2.VType)cboType.getSelectedItem());
@@ -866,33 +664,9 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
         this.resetAltValueNumbers();
 }//GEN-LAST:event_cboTypeActionPerformed
 
-    private void txtShortNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtShortNameActionPerformed
-        //updateParamDetails();
-}//GEN-LAST:event_txtShortNameActionPerformed
-
-    private void txtShortNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtShortNameFocusLost
-        //updateParamDetails();
-}//GEN-LAST:event_txtShortNameFocusLost
-
-    private void txtSearchStringActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSearchStringActionPerformed
-        //updateParamDetails();
-}//GEN-LAST:event_txtSearchStringActionPerformed
-
-    private void txtSearchStringFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSearchStringFocusLost
-        //updateParamDetails();
-}//GEN-LAST:event_txtSearchStringFocusLost
-
-    private void txtAltValuesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAltValuesActionPerformed
-        //updateParamDetails();
-}//GEN-LAST:event_txtAltValuesActionPerformed
-
-    private void txtAltValuesFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtAltValuesFocusLost
-        //updateParamDetails();
-}//GEN-LAST:event_txtAltValuesFocusLost
-
-    private void cmdDeleteBranchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDeleteBranchActionPerformed
-        deleteParameterBranch();
-    }//GEN-LAST:event_cmdDeleteBranchActionPerformed
+    private void cmdImportParamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdImportParamsActionPerformed
+        importParameterItems();
+    }//GEN-LAST:event_cmdImportParamsActionPerformed
 
     private void cboFixValueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFixValueActionPerformed
         CurrentItem.setSelectedAltValue(cboFixValue.getSelectedIndex());
@@ -908,9 +682,8 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
     private javax.swing.JComboBox cboParamType;
     private javax.swing.JComboBox cboType;
     private javax.swing.JButton cmdAdd;
-    private javax.swing.JButton cmdDeleteBranch;
     private javax.swing.JButton cmdDuplicate;
-    private javax.swing.JButton cmdMoveUp;
+    private javax.swing.JButton cmdImportParams;
     private javax.swing.JButton cmdRemove;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel19;
@@ -934,5 +707,15 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
     private javax.swing.JTextField txtSearchString;
     private javax.swing.JTextField txtShortName;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void tableChanged(TableModelEvent tme) {
+        int row = tme.getFirstRow();
+        int column = tme.getColumn();
+        ParamTableModel model = (ParamTableModel)tme.getSource();
+//        String columnName = model.getColumnName(column);
+        CurrentItem = this.Project.getParameters().get(row);
+        displayParamDetails();
+    }
 
 }
