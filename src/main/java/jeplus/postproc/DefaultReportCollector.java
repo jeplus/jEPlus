@@ -19,7 +19,7 @@
 package jeplus.postproc;
 
 import java.util.ArrayList;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX;
 import org.slf4j.LoggerFactory;
 
@@ -58,15 +58,15 @@ public class DefaultReportCollector extends ResultCollector {
     /**
      * Set the type of project to this collector. It is primarily used for report
      * collection
-     * @param type Project type id in JEPlusProject class
+     * @param type Project type id in JEPlusProjectV2 class
      */
     @Override
-    public void setProjectType (int type) {
+    public void setProjectType (JEPlusProjectV2.ModelType type) {
         switch (type) {
-            case JEPlusProject.EPLUS:
+            case EPLUS:
                 RepReader = EPlusReportReader;
                 break;
-            case JEPlusProject.TRNSYS:
+            case TRNSYS:
                 RepReader = TRNSYSReportReader;
                 break;
             default:

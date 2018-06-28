@@ -27,7 +27,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.INSELConfig;
 import jeplus.JEPlusFrameMain;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import jeplus.util.RelativeDirUtil;
 
 /**
@@ -37,7 +37,7 @@ import jeplus.util.RelativeDirUtil;
 public class JPanel_InselProjectFiles extends javax.swing.JPanel {
 
     JEPlusFrameMain MainGUI = null;
-    protected JEPlusProject Project = null;
+    protected JEPlusProjectV2 Project = null;
     protected DocumentListener DL = null;
     
     /**
@@ -50,7 +50,7 @@ public class JPanel_InselProjectFiles extends javax.swing.JPanel {
     /**
      * Creates new form JPanel_EPlusProjectFiles with parameters
      */
-    public JPanel_InselProjectFiles(JEPlusFrameMain frame, JEPlusProject project) {
+    public JPanel_InselProjectFiles(JEPlusFrameMain frame, JEPlusProjectV2 project) {
         initComponents();
         MainGUI = frame;
         Project = project;

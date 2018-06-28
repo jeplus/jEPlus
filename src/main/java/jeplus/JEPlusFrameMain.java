@@ -48,6 +48,7 @@ import jeplus.agent.InselAgentLocal;
 import jeplus.agent.TrnsysAgentLocal;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
+import jeplus.data.ParameterItemV2;
 import jeplus.data.RVX;
 import jeplus.data.RandomSource;
 import jeplus.gui.*;
@@ -88,8 +89,8 @@ public class JEPlusFrameMain extends JFrame {
     protected JFileChooser fc = new JFileChooser("./");
     protected File DefaultDir = new File ("./");
     protected String CurrentProjectFile = null;
-    protected JEPlusProject Project = new JEPlusProject ();
-    protected JEPlusProject SavedProject = null;
+    protected JEPlusProjectV2 Project = new JEPlusProjectV2 ();
+    protected JEPlusProjectV2 SavedProject = null;
 
     protected EPlusTextPanelOld OutputPanel = null;
     protected EPlusTextPanelOld ResultFilePanel = null;
@@ -134,6 +135,8 @@ public class JEPlusFrameMain extends JFrame {
         initComponents();
 
         this.setTitle(getVersionInfo());
+        
+        this.cboProjectType.setModel(new DefaultComboBoxModel<>(JEPlusProjectV2.ModelType.values()));
 
         // tabTexts.setTabComponentAt(0, new ButtonTabComponent (tabTexts));
         jplParameterTree = new JPanel_ParameterTree (Project);
@@ -229,20 +232,20 @@ public class JEPlusFrameMain extends JFrame {
             this.jMenuViewResult.add(new JSeparator());
             this.addMenuItemResultFile("SimJobIndex.csv");
             this.addMenuItemResultFile("RunTimes.csv");
-            if (this.Project.getProjectType() == JEPlusProject.EPLUS) {
+            if (this.Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
                 ArrayList<ResultCollector> rcs = BatchManager.getAgent().getResultCollectors();
                 for (ResultCollector rc : rcs) {
                     for (int j = 0; j < rc.getResultFiles().size(); j++) {
                         this.addMenuItemResultFile(rc.getResultFiles().get(j));
                     }
                 }
-            }else if (this.Project.getProjectType() == JEPlusProject.TRNSYS) {
+            }else if (this.Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
                 List<String> TRNSYSResultFile = TRNSYSWinTools.getPrintersFunc(Project.getOutputFileNames());
                 for (String names : TRNSYSResultFile) {
                     String[] name = names.split("\\s*[.]\\s*");
                     this.addMenuItemResultFile("SimResults_" + name[0] + ".csv");
                 }
-            }else if (this.Project.getProjectType() == JEPlusProject.INSEL) {
+            }else if (this.Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
                 List<String> INSELResultFile = INSELWinTools.getPrintersFunc(Project.getOutputFileNames());
                 for (String names : INSELResultFile) {
                     String[] name = names.split("\\s*[.]\\s*");
@@ -303,13 +306,6 @@ public class JEPlusFrameMain extends JFrame {
     // =============== End getters and setters ===============
     
     /**
-     * Provided for saving Project as an object file
-     */
-    public void enableWriteObjMenuItem () {
-        this.jMenuItemSaveTree.setEnabled(true);
-    }
-
-    /**
      * Show splash screen
      * @param parent Parent frame of this dialog
      */
@@ -324,7 +320,7 @@ public class JEPlusFrameMain extends JFrame {
      * Retrieve the current project object
      * @return 
      */
-    public JEPlusProject getProject() {
+    public JEPlusProjectV2 getProject() {
         return Project;
     }
 
@@ -333,7 +329,7 @@ public class JEPlusFrameMain extends JFrame {
      * @param Project Project object
      * @param batch Simulation manager object
      */
-    public void setProject(JEPlusProject Project, EPlusBatch batch) {
+    public void setProject(JEPlusProjectV2 Project, EPlusBatch batch) {
         if (Project != null) {
             this.Project = Project;
             this.SavedProject = null;
@@ -349,7 +345,7 @@ public class JEPlusFrameMain extends JFrame {
      * Set project type (E+ or TRNSYS) and disable the selection box
      * @param type Constant for E+ project (0) or TRNSYS project (1)
      */
-    public final void fixProjectType (int type) {
+    public final void fixProjectType (JEPlusProjectV2.ModelType type) {
         setProjectType(type);
         this.cboProjectType.setEnabled(false);
     }
@@ -357,18 +353,18 @@ public class JEPlusFrameMain extends JFrame {
     /**
      * Set project type (E+ or TRNSYS). Trigger project section and execution 
      * section update
-     * @param type Constant for E+ project (0) or TRNSYS project (1)
+     * @param type enum for E+ project or TRNSYS project
      */
-    public final void setProjectType (int type) {
+    public final void setProjectType (JEPlusProjectV2.ModelType type) {
         Project.setProjectType(type);  //??
         // Project section
         initProjectSection();
         // Exec section
-        if (type == JEPlusProject.EPLUS) { // EPlus
+        if (type == JEPlusProjectV2.ModelType.EPLUS) { // EPlus
             this.ExecAgents = EPlusExecAgents;
-        }else if (type == JEPlusProject.TRNSYS) {
+        }else if (type == JEPlusProjectV2.ModelType.TRNSYS) {
             this.ExecAgents = TrnsysExecAgents;
-        }else if (type == JEPlusProject.INSEL) {
+        }else if (type == JEPlusProjectV2.ModelType.INSEL) {
             this.ExecAgents = InselExecAgents;
         }
 //        this.cboExecutionType.removeAllItems();
@@ -378,7 +374,7 @@ public class JEPlusFrameMain extends JFrame {
 //        this.cboExecutionType.setSelectedIndex(0);
         this.cboExecutionTypeActionPerformed(null);
         // Disable post-process tab if TRNSYS
-        if (type != 0) { // not EPlus
+        if (type != JEPlusProjectV2.ModelType.EPLUS) { // not EPlus
             this.tpnMain.setEnabledAt(2, false);
         }else {
             this.tpnMain.setEnabledAt(2, true);
@@ -391,15 +387,15 @@ public class JEPlusFrameMain extends JFrame {
     protected final void initProjectSection () {
         this.jplProjectFilesPanelHolder.removeAll();
         this.jplProjectFilesPanelHolder.setLayout(new BorderLayout());
-        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
             EPlusProjectFilesPanel = new JPanel_EPlusProjectFiles(this, Project);
             this.jplProjectFilesPanelHolder.add(EPlusProjectFilesPanel, BorderLayout.CENTER);
 //            this.Project.getExecSettings().setParentDir("output/");
-        }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
             TrnsysProjectFilesPanel = new JPanel_TrnsysProjectFiles(this, Project);
             this.jplProjectFilesPanelHolder.add(TrnsysProjectFilesPanel, BorderLayout.CENTER);
 //            this.Project.getExecSettings().setParentDir("TRNoutput/");
-        }else if (Project.getProjectType() == JEPlusProject.INSEL) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
             InselProjectFilesPanel = new JPanel_InselProjectFiles(this, Project);
             this.jplProjectFilesPanelHolder.add(InselProjectFilesPanel, BorderLayout.CENTER);
 //            this.Project.getExecSettings().setParentDir("TRNoutput/");
@@ -536,7 +532,7 @@ public class JEPlusFrameMain extends JFrame {
         if (BatchManager.getBatchInfo().isValid()) {
             this.displayInfo("Validation successful!");
             this.displayInfo("Jobs are compiled from " + BatchManager.getNumberOfIDFs() + " models " +
-                    (Project.getProjectType() == JEPlusProject.EPLUS ? 
+                    (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS ? 
                     "and " + BatchManager.getNumberOfWeathers() + " weather files" : "") + 
                     ", with the following");
             this.displayInfo(BatchManager.getBatchInfo().getParamChainsText());
@@ -724,32 +720,6 @@ public class JEPlusFrameMain extends JFrame {
         TpnEditors.setSelectedIndex(tabn);
     }
 
-    /**
-     * Read parameter tree from an object file
-     * @param fn The File object associated with the file
-     * @return successful not not
-     */
-    public boolean deserialize (File fn) {
-        boolean success = true;
-        try (ObjectInputStream or = new ObjectInputStream(new FileInputStream(fn))) {
-            EPlusWorkEnv Env = (EPlusWorkEnv)or.readObject();
-            DefaultMutableTreeNode tree = (DefaultMutableTreeNode)or.readObject();
-            Project.copyFromEnv(Env);
-            Project.setParamTree(tree);
-            // Init project settings
-            initProjectSection();
-            // Init agent settings
-            cboExecutionTypeActionPerformed(null);
-        }catch (IOException ioe) {
-            logger.error("Error reading objects from file " + fn, ioe);
-            success = false;
-        }catch (Exception e) {
-            logger.error("Error happened when reading objects from file " + fn, e);
-            success = false;
-        }
-        return success;
-    }
-
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -767,8 +737,6 @@ public class JEPlusFrameMain extends JFrame {
         chkLHS = new javax.swing.JCheckBox();
         jMenuItemImportJson = new javax.swing.JMenuItem();
         jMenuItemExportJson = new javax.swing.JMenuItem();
-        jMenuItemOpenTree = new javax.swing.JMenuItem();
-        jMenuItemSaveTree = new javax.swing.JMenuItem();
         jSplitPane1 = new javax.swing.JSplitPane();
         tpnMain = new javax.swing.JTabbedPane();
         pnlProject = new javax.swing.JPanel();
@@ -920,24 +888,6 @@ public class JEPlusFrameMain extends JFrame {
             }
         });
 
-        jMenuItemOpenTree.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_get.png"))); // NOI18N
-        jMenuItemOpenTree.setText("Import jE+ v0.5 OBJ file ...");
-        jMenuItemOpenTree.setToolTipText("Import contents of an .obj file (including v0.5 objs) into this project.");
-        jMenuItemOpenTree.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemOpenTreeActionPerformed(evt);
-            }
-        });
-
-        jMenuItemSaveTree.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_put.png"))); // NOI18N
-        jMenuItemSaveTree.setText("Export jE+ v0.5 OBJ file ...");
-        jMenuItemSaveTree.setToolTipText("Export the current project to an .obj file.");
-        jMenuItemSaveTree.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemSaveTreeActionPerformed(evt);
-            }
-        });
-
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1000, 740));
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -1061,7 +1011,7 @@ public class JEPlusFrameMain extends JFrame {
 
         jplModelTest.setBorder(javax.swing.BorderFactory.createTitledBorder("Test Simulation Model"));
 
-        jLabel1.setText("<html>Please go to the next tab (<b>Run</b>) to perform a test run of one or more jobs. Then select below the result folder of one of the jobs.These information may be useful for defining RVX items.</html>");
+        jLabel1.setText("<html>Please go to the next tab (<b>Execution</b>) to perform a test run of one or more jobs. Then select below the result folder of one of the jobs.These information may be useful for defining RVX items.</html>");
 
         txtTestResultFolder.setText("N/A");
         txtTestResultFolder.setToolTipText("The output folder of test simulation");
@@ -1088,7 +1038,7 @@ public class JEPlusFrameMain extends JFrame {
                     .addGroup(jplModelTestLayout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtTestResultFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
+                        .addComponent(txtTestResultFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmdSelectTestFolder, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -1126,7 +1076,7 @@ public class JEPlusFrameMain extends JFrame {
                 .addContainerGap()
                 .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 545, Short.MAX_VALUE)
+                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1793,9 +1743,9 @@ public class JEPlusFrameMain extends JFrame {
             // Reload RVX if depends on external file
             if (Project.getRVIFile() != null) {
                 try {
-                    Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile(), Project.getBaseDir()));
+                    Project.setRvx(RVX.getRVX(Project.getRVIFile(), Project.getBaseDir()));
                 }catch (IOException ioe) {
-                    logger.error("Error reloading RVX from " + Project.resolveRVIDir() + Project.getRVIFile(), ioe);
+                    logger.error("Error reloading RVX from " + Project.getRVIFile(), ioe);
                     Project.setRvx(new RVX());
                 }
             }            
@@ -1934,64 +1884,6 @@ private void cboExecutionTypeActionPerformed(java.awt.event.ActionEvent evt) {//
 private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
     showSplash(this);
 }//GEN-LAST:event_jMenuItemAboutActionPerformed
-
-private void jMenuItemOpenTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemOpenTreeActionPerformed
-    // Select a file to open
-    fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.OBJ));
-    fc.setSelectedFile(new File(""));
-    fc.setCurrentDirectory(DefaultDir);
-    if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-        File file = fc.getSelectedFile();
-        // load object as a project first
-        JEPlusProject proj = JEPlusProject.deserialize(file);
-        if (proj != null) {
-            Project = proj;
-            this.initProjectSection();
-            this.setExecType(Project.getExecSettings().getExecutionType());
-            this.cboExecutionTypeActionPerformed(null);
-            this.initBatchOptions();
-            // this does not change current project file reference
-        }else if (! deserialize(file)) {
-            // if failed, try open it as v0.5 object
-            // warning message
-            JOptionPane.showMessageDialog(
-                this,
-                "<html><p><center>For some reasons, I cannot load project from " + file.getAbsolutePath() + ".<br /></center></p><p><center> Please check again that the file is a jEPlus v0.5 object file.<br /></center></p>",
-                "Error",
-                JOptionPane.CLOSED_OPTION);
-        }
-        // set current path to the location of the obj file only if current project is unknown
-        if (this.CurrentProjectFile == null) DefaultDir = file.getParentFile();
-    }
-    fc.resetChoosableFileFilters();
-    fc.setSelectedFile(new File(""));
-}//GEN-LAST:event_jMenuItemOpenTreeActionPerformed
-
-private void jMenuItemSaveTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveTreeActionPerformed
-    // Select a file to save
-    // fc = new JFileChooser ();
-    fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.OBJ));
-    fc.setSelectedFile(new File(""));
-    // @todo do we need project directory?
-    fc.setCurrentDirectory(DefaultDir);
-    if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-        File file = fc.getSelectedFile();
-        // write object
-        if (! JEPlusProject.serialize(file, this.getProject())) {
-            // warning message
-            JOptionPane.showMessageDialog(
-                this,
-                "The Project cannot be saved to " + file.getAbsolutePath() + "for some reason. Is the fold writable?",
-                "Error",
-                JOptionPane.CLOSED_OPTION);
-        }
-        DefaultDir = file.getParentFile();
-    } else {
-
-    }
-    fc.resetChoosableFileFilters();
-    fc.setSelectedFile(new File(""));
-}//GEN-LAST:event_jMenuItemSaveTreeActionPerformed
 
 private void jMenuItemValidateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemValidateActionPerformed
     this.cmdValidateActionPerformed(evt);
@@ -2236,13 +2128,13 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         int resp = JOptionPane.showConfirmDialog(this, "Are you sure to deleted the whole parameter tree?", "Please confirm", JOptionPane.YES_NO_OPTION);
         if (resp == JOptionPane.YES_OPTION) {
             Project.getParamTree().removeAllChildren();
-            Project.getParamTree().setUserObject(new ParameterItem(Project));
+            Project.getParamTree().setUserObject(new ParameterItemV2());
             this.initProjectSection();
         }
     }//GEN-LAST:event_jMenuItemResetTreeActionPerformed
 
     private void cboProjectTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboProjectTypeActionPerformed
-        this.setProjectType (cboProjectType.getSelectedIndex());
+        this.setProjectType ((JEPlusProjectV2.ModelType)cboProjectType.getSelectedItem());
     }//GEN-LAST:event_cboProjectTypeActionPerformed
 
     private void chkLHSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLHSActionPerformed
@@ -2314,9 +2206,6 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             // dck file path
             path = Project.resolveDCKDir();
             Project.setDCKDir(RelativeDirUtil.getRelativePath(path, base, "/"));
-            // rvi file path
-            path = Project.resolveRVIDir();
-            Project.setRVIDir(RelativeDirUtil.getRelativePath(path, base, "/"));
             // output dir
             path = Project.resolveWorkDir();
             Project.getExecSettings().setParentDir(RelativeDirUtil.getRelativePath(path, base, "/"));
@@ -2333,8 +2222,6 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             Project.setIDFDir(Project.resolveIDFDir());
             // dck file path
             Project.setDCKDir(Project.resolveDCKDir());
-            // rvi file path
-            Project.setRVIDir(Project.resolveRVIDir());
             // output dir
             Project.getExecSettings().setParentDir(Project.resolveWorkDir());
             // update screen
@@ -2679,7 +2566,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         Object [] path = thisleaf.getUserObjectPath();
         Project.getParameters().clear();
         for (Object item : path) {
-            Project.getParameters().add((ParameterItem)item);
+            Project.getParameters().add((ParameterItemV2)item);
         }
         // Detect project changes
         if (Project.isContentChanged() || ! Objects.equals(Project, SavedProject)) {
@@ -2719,26 +2606,31 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private void jMenuItemSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveAsActionPerformed
         // Select a file to save
         // fc = new JFileChooser ();
-        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JEP));
+        fc.setFileFilter(EPlusConfig.getFileFilter(JEPlusConfig.JSON));
         fc.setSelectedFile(new File(CurrentProjectFile == null ? "" : CurrentProjectFile));
         fc.setCurrentDirectory(DefaultDir);
         if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            if (! file.getName().endsWith(".jep"))
-            file = new File (file.getPath().concat(".jep"));
+            if (! file.getName().endsWith(".json"))
+            file = new File (file.getPath().concat(".json"));
             // convert to relative paths?
             // Project.convertToRelativeDir(file.getParentFile());
             // write object
-            if (! Project.saveAsXML(file)) {
+            if (! Project.saveAsJSON(file)) {
                 // warning message
                 JOptionPane.showMessageDialog(
                     this,
                     "The JEPlus Project cannot be saved for some reasons. Check logs for more information.",
                     "Error",
-                    JOptionPane.CLOSED_OPTION);
+                    JOptionPane.CLOSED_OPTION
+                );
             }else {
                 // Update the original copy of project
-                SavedProject = JEPlusProject.loadAsXML(file);
+                try {
+                    SavedProject = JEPlusProjectV2.loadFromJSON(file);
+                }catch (IOException ioe) {
+                    logger.warn("Cannot reload project file after saving!", ioe);
+                }
                 // Update default dir and current project file reference
                 DefaultDir = new File (Project.getBaseDir());
                 this.setCurrentProjectFile(file.getPath());
@@ -2769,7 +2661,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             }else {
                 // Update the original copy of project
                 try {
-                    SavedProject = JEPlusProject.loadFromJSON(file);
+                    SavedProject = JEPlusProjectV2.loadFromJSON(file);
                 }catch (IOException ioe) {
                     logger.error("Error reading saved project from " + file, ioe);
                     SavedProject = null;
@@ -2802,8 +2694,8 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         // Check if changes have been saved; prompt if not
 
         // New project and update GUI
-        Project = new JEPlusProject ();
-        Project.setProjectType(cboProjectType.getSelectedIndex());
+        Project = new JEPlusProjectV2 ();
+        Project.setProjectType((JEPlusProjectV2.ModelType)cboProjectType.getSelectedItem());
         this.initProjectSection();
         this.cboExecutionTypeActionPerformed(null);
         CurrentProjectFile = null;
@@ -2864,14 +2756,12 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JMenuItem jMenuItemMonitor;
     private javax.swing.JMenuItem jMenuItemNew;
     private javax.swing.JMenuItem jMenuItemOpen;
-    private javax.swing.JMenuItem jMenuItemOpenTree;
     private javax.swing.JMenuItem jMenuItemPostprocess;
     private javax.swing.JMenuItem jMenuItemResetTree;
     private javax.swing.JMenuItem jMenuItemRunPython;
     private javax.swing.JMenuItem jMenuItemRunReadVars;
     private javax.swing.JMenuItem jMenuItemSave;
     private javax.swing.JMenuItem jMenuItemSaveAs;
-    private javax.swing.JMenuItem jMenuItemSaveTree;
     private javax.swing.JMenuItem jMenuItemSimulate;
     private javax.swing.JMenuItem jMenuItemStop;
     private javax.swing.JMenuItem jMenuItemToAbsolute;
@@ -2933,12 +2823,12 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     // End of variables declaration//GEN-END:variables
 
     public void openProject (Component parent, File file) {
-        JEPlusProject proj = null;
+        JEPlusProjectV2 proj = null;
         String ext = FilenameUtils.getExtension(file.getName());
         if (ext.equalsIgnoreCase("json")) {
             try {
-                SavedProject = JEPlusProject.loadFromJSON(file);
-                Project = JEPlusProject.loadFromJSON(file);
+                SavedProject = JEPlusProjectV2.loadFromJSON(file);
+                Project = JEPlusProjectV2.loadFromJSON(file);
                 this.setCurrentProjectFile(file.getPath());
             }catch (IOException ioe) {
                 logger.error("Error reading JSON project from " + file, ioe);
@@ -2949,11 +2839,11 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                     "Error",
                     JOptionPane.CLOSED_OPTION);
                 SavedProject = null;
-                Project = new JEPlusProject();
+                Project = new JEPlusProjectV2();
             }
         }else if (ext.equalsIgnoreCase("jep")) {
             SavedProject = null;
-            Project = JEPlusProject.loadAsXML(file);
+            Project = new JEPlusProjectV2(JEPlusProject.loadAsXML(file));
             this.setCurrentProjectFile(FilenameUtils.removeExtension(file.getPath()) + ".json");
             if (Project == null) {
                 // warning message
@@ -2962,14 +2852,14 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
                     "Failed to load project from " + file.getPath() + ". Please check the contents of the project.",
                     "Error",
                     JOptionPane.CLOSED_OPTION);
-                Project = new JEPlusProject();
+                Project = new JEPlusProjectV2();
             }
         }
 
         // GUI update
         // this.initProjectSection();
         // Update project type (E+ or TRNSYS) and gui
-        this.cboProjectType.setSelectedIndex(Project.getProjectType());
+        this.cboProjectType.setSelectedItem(Project.getProjectType());
         this.setProjectType(Project.getProjectType());
         // update Exec Agent's reference to the Execution options
         for (EPlusAgent agent: ExecAgents) {
@@ -2985,9 +2875,9 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     }
 
     public void importProjectFromJson (Component parent, File file) {
-        JEPlusProject proj = null;
+        JEPlusProjectV2 proj = null;
         try {
-            proj = JEPlusProject.loadFromJSON(file);
+            proj = JEPlusProjectV2.loadFromJSON(file);
         }catch (IOException ioe) {
             logger.error("Error opening JSON file " + file.getAbsolutePath(), ioe);
         }
@@ -3003,7 +2893,7 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
             // GUI update
             // this.initProjectSection();
             // Update project type (E+ or TRNSYS) and gui
-            this.cboProjectType.setSelectedIndex(Project.getProjectType());
+            this.cboProjectType.setSelectedItem(Project.getProjectType());
             this.setProjectType(Project.getProjectType());
             // update Exec Agent's reference to the Execution options
             for (EPlusAgent agent: ExecAgents) {

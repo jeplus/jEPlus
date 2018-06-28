@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import jeplus.EPlusBatch;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX;
 import org.slf4j.LoggerFactory;
 
@@ -178,9 +179,9 @@ public class ResultCollector {
     /**
      * Set the type of project to this collector. It is primarily used for report
      * collection
-     * @param type Project type id in JEPlusProject class
+     * @param type Project type in JEPlusProjectV2 class
      */
-    public void setProjectType (int type) {
+    public void setProjectType (JEPlusProjectV2.ModelType type) {
         // To be overridden by subclasses to select reader type
     }
 

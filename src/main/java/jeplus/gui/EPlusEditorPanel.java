@@ -36,7 +36,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.EPlusConfig;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -116,7 +116,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
     /**
      * Reference to the JEPlus Project, for up-to-date search strings
      */
-    protected JEPlusProject Project = null;
+    protected JEPlusProjectV2 Project = null;
 
     /**
      * Current viewing/editing file name
@@ -182,7 +182,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
      * @param type The predefined file type
      * @param project
      */
-    public EPlusEditorPanel(Container container, String title, String filename, FileType type, JEPlusProject project) {
+    public EPlusEditorPanel(Container container, String title, String filename, FileType type, JEPlusProjectV2 project) {
         initComponents();
         initRSTA(type.getRSTA_Style());
         FC.setFileFilter(type.getFileFilter());

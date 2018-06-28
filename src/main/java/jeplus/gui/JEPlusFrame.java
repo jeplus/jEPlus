@@ -20,21 +20,21 @@ package jeplus.gui;
 
 import javax.swing.JFrame;
 import jeplus.EPlusBatch;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 
 /**
- * Wrapper class adds an <code>JEPlusProject</code> instance to the <code>JFrame
+ * Wrapper class adds an <code>JEPlusProjectV2</code> instance to the <code>JFrame
  * </code> class
  * @author yzhang
  */
 public abstract class JEPlusFrame extends JFrame {
 
-    protected JEPlusProject Project = new JEPlusProject ();
+    protected JEPlusProjectV2 Project = new JEPlusProjectV2 ();
 
-    public JEPlusProject getProject() {
+    public JEPlusProjectV2 getProject() {
         return Project;
     }
 
-    public abstract void setProject(JEPlusProject Project, EPlusBatch batch);
+    public abstract void setProject(JEPlusProjectV2 Project, EPlusBatch batch);
 
 }

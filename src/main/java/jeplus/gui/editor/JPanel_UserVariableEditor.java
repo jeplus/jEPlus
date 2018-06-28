@@ -24,7 +24,7 @@ import javax.swing.JTree;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX_UserVar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -284,7 +284,7 @@ public class JPanel_UserVariableEditor extends javax.swing.JPanel {
 
     private void cmdCalcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCalcActionPerformed
         lblErrorMsg.setText("");
-        ScriptEngine engine = JEPlusProject.getScript_Engine();
+        ScriptEngine engine = JEPlusProjectV2.getScript_Engine();
         try {
             engine.eval(this.txaInputVars.getText());
             String res = engine.eval(this.txaFormula.getText()).toString();

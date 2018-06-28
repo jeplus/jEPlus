@@ -26,8 +26,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import javax.swing.tree.*;
-import jeplus.JEPlusProject;
-import jeplus.data.ParameterItem;
+import jeplus.JEPlusProjectV2;
+import jeplus.data.ParameterItemV2;
 import jeplus.util.DNDTree;
 
 /**
@@ -37,14 +37,14 @@ import jeplus.util.DNDTree;
 public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJPanel {
 
     protected String Title = "Parameter Tree";
-    protected ParameterItem CurrentItem = null;
+    protected ParameterItemV2 CurrentItem = null;
     protected DefaultMutableTreeNode ParamTreeRoot = null;
     protected DefaultTreeModel ParamTreeModel = null;
     protected JTree jTreeParams = null;
     private DocumentListener DL = null;
     private boolean DLactive = true;
     /** Reference to project in order to pass on access to parameter items */
-    protected JEPlusProject Project;
+    protected JEPlusProjectV2 Project;
 
     
     /** Creates new form JPanel_ParameterTree */
@@ -57,7 +57,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
      * Creates new form JPanel_ParameterTree
      * @param project 
      */
-    public JPanel_ParameterTree(JEPlusProject project) {
+    public JPanel_ParameterTree(JEPlusProjectV2 project) {
         initComponents();
         setParameterTree(Project);
     }
@@ -83,7 +83,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
      * Set the root of the parameter tree
      * @param project the jEPlus project containing the tree
      */
-    public final void setParameterTree (JEPlusProject project) {
+    public final void setParameterTree (JEPlusProjectV2 project) {
         Project = project;
         if (Project != null) {
             ParamTreeRoot = Project.getParamTree();
@@ -104,7 +104,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
      */
     protected void initParamTree () {
         if (ParamTreeRoot == null) {
-            ParamTreeRoot = new DefaultMutableTreeNode(new ParameterItem(Project));
+            ParamTreeRoot = new DefaultMutableTreeNode(new ParameterItemV2());
         }
         ParamTreeModel = new DefaultTreeModel(ParamTreeRoot);
         // Set tree
@@ -186,9 +186,9 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
             // Selection available
             Object nodeInfo = node.getUserObject();
             if (node.isLeaf()) {
-                CurrentItem = (ParameterItem)nodeInfo;
+                CurrentItem = (ParameterItemV2)nodeInfo;
             } else {
-                CurrentItem = (ParameterItem)nodeInfo;
+                CurrentItem = (ParameterItemV2)nodeInfo;
             }
         }
         displayParamDetails();
@@ -396,7 +396,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
                 return node;
             }else { // if selection is the root
                 this.ParamTreeRoot.removeAllChildren();
-                this.ParamTreeRoot.setUserObject(new ParameterItem(Project));
+                this.ParamTreeRoot.setUserObject(new ParameterItemV2());
                 this.initParamTree();
                 return this.ParamTreeRoot;
             }
@@ -410,7 +410,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
      */
     public DefaultMutableTreeNode copyParameterItem() {
         if (CurrentItem != null) {
-            ParameterItem child = new ParameterItem (CurrentItem);
+            ParameterItemV2 child = new ParameterItemV2 (CurrentItem);
             DefaultMutableTreeNode parentNode;
             TreePath parentPath = jTreeParams.getSelectionPath();
 
@@ -437,7 +437,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
      * @param child The ParameterItem to be store the node-to-add
      * @return The new node
      */
-    public DefaultMutableTreeNode addParameterItem(ParameterItem child) {
+    public DefaultMutableTreeNode addParameterItem(ParameterItemV2 child) {
         DefaultMutableTreeNode parentNode;
         TreePath parentPath = jTreeParams.getSelectionPath();
 
@@ -822,7 +822,7 @@ public class JPanel_ParameterTree extends javax.swing.JPanel implements TitledJP
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddActionPerformed
-        ParameterItem item = new ParameterItem(Project);
+        ParameterItemV2 item = new ParameterItemV2();
         this.addParameterItem(item);
         this.CurrentItem = item;
         this.displayParamDetails();

@@ -34,7 +34,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import jeplus.EPlusBatch;
 import jeplus.EPlusTask;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import org.slf4j.LoggerFactory;
 
 /**

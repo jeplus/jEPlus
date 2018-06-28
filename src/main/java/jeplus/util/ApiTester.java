@@ -25,6 +25,7 @@ import java.util.HashMap;
 import jeplus.EPlusBatch;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import jeplus.agent.EPlusAgentLocal;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,7 @@ public class ApiTester {
     public static void main (String [] args) throws IOException {
         
         // load project file
-        JEPlusProject Project = JEPlusProject.loadAsXML(new File("example_3-RVX_v1.6_E+v8.3/project.jep")); // Or your own project file
+        JEPlusProjectV2 Project = new JEPlusProjectV2(JEPlusProject.loadAsXML(new File("example_3-RVX_v1.6_E+v8.3/project.jep"))); // Or your own project file
 
         // create simulation manager
         EPlusBatch SimManager = new EPlusBatch (null, Project);

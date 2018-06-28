@@ -30,47 +30,29 @@
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
-                              <Component id="chkReadVar" max="32767" attributes="0"/>
-                          </Group>
                           <Component id="jLabel16" alignment="0" max="32767" attributes="1"/>
                           <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
                       </Group>
-                      <Group type="103" groupAlignment="1" attributes="0">
-                          <Group type="102" alignment="1" attributes="0">
-                              <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="txtDCKDir" alignment="1" max="32767" attributes="2"/>
+                                  <Component id="jLabel6" alignment="0" max="32767" attributes="3"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="txtDCKDir" alignment="1" max="32767" attributes="2"/>
-                                          <Component id="jLabel6" alignment="0" max="32767" attributes="3"/>
-                                      </Group>
+                                      <Component id="cboTemplateFile" min="-2" pref="123" max="-2" attributes="1"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Component id="cboTemplateFile" min="-2" pref="123" max="-2" attributes="1"/>
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="cmdSelectTemplateFile" min="-2" pref="27" max="-2" attributes="1"/>
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="cmdEditTemplate" min="-2" pref="28" max="-2" attributes="2"/>
-                                          </Group>
-                                          <Component id="jLabel7" alignment="0" min="-2" pref="190" max="-2" attributes="1"/>
-                                      </Group>
+                                      <Component id="cmdSelectTemplateFile" min="-2" pref="27" max="-2" attributes="1"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="cmdEditTemplate" min="-2" pref="28" max="-2" attributes="2"/>
                                   </Group>
-                                  <Component id="txtOutputFileNames" max="32767" attributes="2"/>
+                                  <Component id="jLabel7" alignment="0" min="-2" pref="190" max="-2" attributes="1"/>
                               </Group>
                           </Group>
-                          <Group type="102" alignment="1" attributes="0">
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="txtRviDir" max="32767" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="cboRviFile" min="-2" pref="128" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="cmdSelectRVIFile" min="-2" pref="26" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="cmdEditRVI" min="-2" pref="26" max="-2" attributes="0"/>
-                          </Group>
+                          <Component id="txtOutputFileNames" max="32767" attributes="2"/>
                       </Group>
                   </Group>
               </Group>
@@ -107,18 +89,6 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="txtOutputFileNames" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                  <Group type="103" alignment="1" groupAlignment="0" attributes="0">
-                      <Component id="cmdSelectRVIFile" alignment="1" min="-2" pref="23" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="cboRviFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtRviDir" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="chkReadVar" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                  </Group>
-                  <Component id="cmdEditRVI" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
@@ -217,52 +187,6 @@
       <Properties>
         <Property name="horizontalAlignment" type="int" value="4"/>
         <Property name="text" type="java.lang.String" value="Printer file name(s):"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JCheckBox" name="chkReadVar">
-      <Properties>
-        <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Use RVX"/>
-        <Property name="toolTipText" type="java.lang.String" value="Select to use the E+ ReadVarsESO untility. "/>
-        <Property name="enabled" type="boolean" value="false"/>
-        <Property name="horizontalAlignment" type="int" value="11"/>
-        <Property name="horizontalTextPosition" type="int" value="10"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JButton" name="cmdEditRVI">
-      <Properties>
-        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/jeplus/images/page_white_edit.png"/>
-        </Property>
-        <Property name="toolTipText" type="java.lang.String" value="Edit the contents of my.rvi"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdEditRVIActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JTextField" name="txtRviDir">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="./"/>
-        <Property name="toolTipText" type="java.lang.String" value="Location of the RVI file. To use a relative path, edit this field manually."/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JButton" name="cmdSelectRVIFile">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="..."/>
-        <Property name="toolTipText" type="java.lang.String" value="Select rvi file (.rvi/.mvi). Single selection only."/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSelectRVIFileActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JComboBox" name="cboRviFile">
-      <Properties>
-        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="1">
-            <StringItem index="0" value="Select file ..."/>
-          </StringArray>
-        </Property>
-        <Property name="toolTipText" type="java.lang.String" value="You can only specify one RVI or MVI file, here"/>
       </Properties>
     </Component>
   </SubComponents>

@@ -100,7 +100,7 @@ public class EPlusBatch extends Thread {
     protected Counter JobCounter = new Counter ();
 
     /** jE+ project (to replace EPlusWorkEnv) */
-    protected JEPlusProject Project = null;
+    protected JEPlusProjectV2 Project = null;
 
     /** E+ work environment for individual jobs */
     //protected EPlusWorkEnv Env = new EPlusWorkEnv();
@@ -137,11 +137,11 @@ public class EPlusBatch extends Thread {
      * @param gui Reference to Main GUI
      * @param project The project definition object
      */
-    public EPlusBatch(JFrame gui, JEPlusProject project) {
+    public EPlusBatch(JFrame gui, JEPlusProjectV2 project) {
         // BatchId = IDprefix + "_" + (EPlusBatch.NextID++);
         GUI = (JEPlusFrameMain) gui;
         Project = project;
-        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
             IDprefix = IDprefixEP;
         }else {
             IDprefix = IDprefixTRN;
@@ -178,13 +178,13 @@ public class EPlusBatch extends Thread {
 //        
 //    }
 
-    public JEPlusProject getProject() {
+    public JEPlusProjectV2 getProject() {
         return Project;
     }
 
-    public void setProject(JEPlusProject Project) {
+    public void setProject(JEPlusProjectV2 Project) {
         this.Project = Project;
-        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
             IDprefix = IDprefixEP;
         }else {
             IDprefix = IDprefixTRN;
@@ -311,7 +311,7 @@ public class EPlusBatch extends Thread {
      */
     public EPlusBatchInfo validateProject() {
         Info = new EPlusBatchInfo();
-        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
             // Parse and validate IDF files
             setIdfFiles(Project.resolveIDFDir(), Project.getIDFTemplate());
             // Pares and validate Weather files
@@ -319,10 +319,10 @@ public class EPlusBatch extends Thread {
             // Check RVX
             if (Project.getRVIFile() != null) {
                 try {
-                    Project.setRvx(RVX.getRVX(Project.resolveRVIDir() + Project.getRVIFile(), Project.getBaseDir()));
+                    Project.setRvx(RVX.getRVX(Project.getRVIFile(), Project.getBaseDir()));
                 } catch (IOException ex) {
                     logger.error("Error loading rvi/rvx file.", ex);
-                    Info.addValidationError("Cannot read rvi/rvx file " + Project.resolveRVIDir() + Project.getRVIFile());
+                    Info.addValidationError("Cannot read rvi/rvx file " + Project.getRVIFile());
                     Info.ValidationSuccessful = false;
                     Project.setRvx(null);
                 }
@@ -331,10 +331,10 @@ public class EPlusBatch extends Thread {
                 Info.addValidationError("RVX is not available. No simulation result will be collected.");
                 Info.ValidationSuccessful = false;
             }
-        }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
             // Parse and validate DCK files
             setIdfFiles(Project.resolveDCKDir(), Project.getDCKTemplate());
-        }else if (Project.getProjectType() == JEPlusProject.INSEL) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
             // Parse and validate DCK files
             setIdfFiles(Project.resolveINSELDir(), Project.getINSELTemplate());
         }
@@ -640,18 +640,18 @@ public class EPlusBatch extends Thread {
         StringBuilder buf = new StringBuilder ("Writing project index. The following files: \n");
         String dir = this.getResolvedEnv().getParentDir();
         String fn;
-        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
             // idf index
             fn = "IndexIDF.csv";
             if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
             // Weather index
             fn = "IndexWthr.csv";
             if (WthrFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
-        }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
             // idf index
             fn = "IndexDCK.csv";
             if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
-        }else if (Project.getProjectType() == JEPlusProject.INSEL) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
             // idf index
             fn = "IndexINSEL.csv";
             if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
@@ -703,18 +703,18 @@ public class EPlusBatch extends Thread {
         }
 
         String tn;
-        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
             tn = tableprefix+"IndexIDF";
             // write idf index table
             if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
             // Weather index
             tn = tableprefix+"IndexWthr";
             if (WthrFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
-        }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
             tn = tableprefix+"IndexDCK";
             // write idf index table
             if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
-        }else if (Project.getProjectType() == JEPlusProject.INSEL) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
             tn = tableprefix+"IndexINSEL";
             // write idf index table
             if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
@@ -892,7 +892,7 @@ public class EPlusBatch extends Thread {
         // Reset TaskGroup's job counter anyway
         this.JobCounter.reset();
         Counter ptr = new Counter();
-        if (Project.getProjectType() == JEPlusProject.EPLUS) {
+        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
             for (int j = 0; j < WthrFiles.size(); j++) {
                 for (int i = 0; i < IdfFiles.size(); i++) {
                     // env is needed to carry individual job settings
@@ -907,7 +907,7 @@ public class EPlusBatch extends Thread {
                     TaskGroup.compile(JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
                 }
             }
-        }else if (Project.getProjectType() == JEPlusProject.TRNSYS) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
             for (int i = 0; i < IdfFiles.size(); i++) {
                 // env is needed to carry individual job settings
                 EPlusWorkEnv env = new EPlusWorkEnv();
@@ -917,7 +917,7 @@ public class EPlusBatch extends Thread {
                 EPlusTaskGroup TaskGroup = new EPlusTaskGroup(env, largeproject? BatchId : tag, null, null);
                 TaskGroup.compile(JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
             }
-        }else if (Project.getProjectType() == JEPlusProject.INSEL) {
+        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
             for (int i = 0; i < IdfFiles.size(); i++) {
                 // env is needed to carry individual job settings
                 EPlusWorkEnv env = new EPlusWorkEnv();
@@ -1422,7 +1422,7 @@ public class EPlusBatch extends Thread {
                 ArrayList chain = Info.ParamChains.get(j);
                 int jobidx = i * n + j;
                 jobs[jobidx][0] = BatchId + "-" + IdfFiles.getIDprefix() + "_" + i + 
-                        (Project.getProjectType() == JEPlusProject.EPLUS ? 
+                        (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS ? 
                         "-" + WthrFiles.getIDprefix() + "_" + 0 : "");  // job_id
                 jobs[jobidx][1] = Integer.toString(0);  // weather id
                 jobs[jobidx][2] = Integer.toString(i);  // idf id
@@ -1725,7 +1725,7 @@ public class EPlusBatch extends Thread {
     public static HashMap<String, HashMap<String, Double>> getDerivativeResultsJython (RVX rvx, HashMap<String, ArrayList<ArrayList<double []>>> data) {
         if (rvx != null) {
             // Initialize Jython script engine
-            ScriptEngine engine = JEPlusProject.getScript_Engine();
+            ScriptEngine engine = JEPlusProjectV2.getScript_Engine();
 
             HashMap<String, HashMap<String, Double>> derived = new HashMap<> ();
             if (data != null && !data.isEmpty()) {

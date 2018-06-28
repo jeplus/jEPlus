@@ -167,7 +167,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         AltValueList = new ArrayList<> ();
         Scripts = new ArrayList<> ();
         // Initialize Jython script engine
-        ScriptEngine engine = JEPlusProject.getScript_Engine();
+        ScriptEngine engine = JEPlusProjectV2.getScript_Engine();
         
         // size of keys and vals must be the same
         for (int i=0; i<prevkey.size(); i++) {

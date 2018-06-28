@@ -19,7 +19,6 @@
 package jeplus.gui;
 
 import java.io.File;
-import java.io.IOException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -28,10 +27,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.EPlusConfig;
 import jeplus.JEPlusFrameMain;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import jeplus.util.RelativeDirUtil;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -46,7 +43,7 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
     final private static org.slf4j.Logger logger = LoggerFactory.getLogger(JPanel_TrnsysProjectFiles.class);
 
     JEPlusFrameMain MainGUI = null;
-    protected JEPlusProject Project = null;
+    protected JEPlusProjectV2 Project = null;
     protected DocumentListener DL = null;
     
     /**
@@ -58,8 +55,10 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
     
     /**
      * Creates new form JPanel_EPlusProjectFiles with parameters
+     * @param frame
+     * @param project
      */
-    public JPanel_EPlusProjectFiles(JEPlusFrameMain frame, JEPlusProject project) {
+    public JPanel_EPlusProjectFiles(JEPlusFrameMain frame, JEPlusProjectV2 project) {
         initComponents();
         MainGUI = frame;
         Project = project;
@@ -78,14 +77,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         }else {
             cboWeatherFile.setModel(new DefaultComboBoxModel (new String [] {"Select files..."}));
         }
-        chkReadVar.setSelected(Project.isUseReadVars());
-        txtRviDir.setText(Project.getRVIDir());
-        if (Project.getRVIFile() != null) {
-            cboRviFile.setModel(new DefaultComboBoxModel (new String [] {Project.getRVIFile()}));
-        }else {
-            cboRviFile.setModel(new DefaultComboBoxModel (new String [] {"Select a file..."}));
-        }
-        this.chkReadVarActionPerformed(null);
         
         // Set listeners to text fields
         DL = new DocumentListener () {
@@ -93,7 +84,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
             Document DocProjNotes = txtGroupNotes.getDocument();
             Document DocIdfDir = txtIdfDir.getDocument();
             Document DocWthrDir = txtWthrDir.getDocument();
-            Document DocRviDir = txtRviDir.getDocument();
 
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -106,8 +96,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
                     Project.setIDFDir(txtIdfDir.getText());
                 }else if (src == DocWthrDir) {
                     Project.setWeatherDir(txtWthrDir.getText());
-                }else if (src == DocRviDir) {
-                    Project.setRVIDir(txtRviDir.getText());
                 }
             }
             @Override
@@ -123,7 +111,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         txtGroupNotes.getDocument().addDocumentListener(DL);
         txtIdfDir.getDocument().addDocumentListener(DL);
         txtWthrDir.getDocument().addDocumentListener(DL);
-        txtRviDir.getDocument().addDocumentListener(DL);
     }
 
     /**
@@ -135,11 +122,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        chkReadVar = new javax.swing.JCheckBox();
-        txtRviDir = new javax.swing.JTextField();
-        cboRviFile = new javax.swing.JComboBox();
-        cmdSelectRVIFile = new javax.swing.JButton();
-        cmdEditRVI = new javax.swing.JButton();
         txtIdfDir = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         jLabel16 = new javax.swing.JLabel();
@@ -156,39 +138,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         cmdSelectTemplateFile = new javax.swing.JButton();
         cboWeatherFile = new javax.swing.JComboBox();
         cmdEditTemplate = new javax.swing.JButton();
-
-        chkReadVar.setSelected(true);
-        chkReadVar.setText("Use Extended RVI");
-        chkReadVar.setToolTipText("Select to use the E+ ReadVarsESO untility. ");
-        chkReadVar.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        chkReadVar.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-        chkReadVar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkReadVarActionPerformed(evt);
-            }
-        });
-
-        txtRviDir.setText("./");
-        txtRviDir.setToolTipText("Location of the RVI file. To use a relative path, edit this field manually.");
-
-        cboRviFile.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select file ..." }));
-        cboRviFile.setToolTipText("You can only specify one RVI or MVI file, here");
-
-        cmdSelectRVIFile.setText("...");
-        cmdSelectRVIFile.setToolTipText("Select rvi file (.rvi/.mvi). Single selection only.");
-        cmdSelectRVIFile.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectRVIFileActionPerformed(evt);
-            }
-        });
-
-        cmdEditRVI.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_edit.png"))); // NOI18N
-        cmdEditRVI.setToolTipText("Edit the contents of my.rvi");
-        cmdEditRVI.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdEditRVIActionPerformed(evt);
-            }
-        });
 
         txtIdfDir.setText("./");
         txtIdfDir.setToolTipText("Location of the IDF/IMF files. To use a relative path, edit this field manually.");
@@ -333,86 +282,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void chkReadVarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkReadVarActionPerformed
-        Project.setUseReadVars(true);
-    }//GEN-LAST:event_chkReadVarActionPerformed
-
-    private void cmdEditRVIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEditRVIActionPerformed
-
-        // Test if the template file is present
-        String fn = (String) cboRviFile.getSelectedItem();
-        if (fn.startsWith("Select ")) {
-            fn = "my.rvx";
-        }
-        String templfn = RelativeDirUtil.checkAbsolutePath(txtRviDir.getText() + fn, Project.getBaseDir());
-        File ftmpl = new File(templfn);
-        if (!ftmpl.exists()) {
-            int n = JOptionPane.showConfirmDialog(
-                    this,
-                    "<html><p><center>" + templfn + " does not exist."
-                    + "Do you want to copy one from an existing file?</center></p>"
-                    + "<p> Alternatively, select 'NO' to create this file. </p>",
-                    "RVI file not available",
-                    JOptionPane.YES_NO_OPTION);
-            if (n == JOptionPane.YES_OPTION) {
-                // Select a file to open
-                if (this.chkReadVar.isSelected()) {
-                    MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVX));
-                }else {
-                    MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVI));
-                }
-                MainGUI.getFileChooser().setMultiSelectionEnabled(false);
-                MainGUI.getFileChooser().setSelectedFile(new File(""));
-                String rvidir = RelativeDirUtil.checkAbsolutePath(txtRviDir.getText(), Project.getBaseDir());
-                MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir));
-                if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                    File file = MainGUI.getFileChooser().getSelectedFile();
-                    try {
-                        FileUtils.copyFile(file, new File(templfn));
-                        cboRviFile.setModel(new DefaultComboBoxModel(new String[]{fn}));
-                        Project.setRVIDir(txtRviDir.getText());
-                        Project.setRVIFile(fn);
-                    } catch (IOException ex) {
-                        logger.error("Error copying RVX from source.", ex);
-                    }
-                }
-                MainGUI.getFileChooser().resetChoosableFileFilters();
-                MainGUI.getFileChooser().setSelectedFile(new File(""));
-            }else if (n == JOptionPane.NO_OPTION) {
-                
-            }else {
-                return;
-            }
-        }
-        int idx = MainGUI.getTpnEditors().indexOfTab(fn);
-        if (idx >= 0) {
-            MainGUI.getTpnEditors().setSelectedIndex(idx);
-        } else {
-            EPlusEditorPanel RviFilePanel;
-            if (FilenameUtils.getExtension(fn).equals("rvx")) {
-                RviFilePanel = new EPlusEditorPanel(
-                        MainGUI.getTpnEditors(),
-                        fn,
-                        templfn,
-                        EPlusEditorPanel.FileType.RVX,
-                        null);
-            }else {
-                RviFilePanel = new EPlusEditorPanel(
-                        MainGUI.getTpnEditors(),
-                        fn,
-                        templfn,
-                        EPlusEditorPanel.FileType.RVI,
-                        null);
-            }
-            int ti = MainGUI.getTpnEditors().getTabCount();
-            MainGUI.getTpnEditors().addTab(fn, RviFilePanel);
-            RviFilePanel.setTabId(ti);
-            MainGUI.getTpnEditors().setSelectedIndex(ti);
-            MainGUI.getTpnEditors().setTabComponentAt(ti, new ButtonTabComponent(MainGUI.getTpnEditors(), RviFilePanel));
-            MainGUI.getTpnEditors().setToolTipTextAt(ti, templfn);
-        }
-    }//GEN-LAST:event_cmdEditRVIActionPerformed
-
     private void cmdEditWeatherActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEditWeatherActionPerformed
         // Test if the template file is present
         String fn = (String) cboWeatherFile.getSelectedItem();
@@ -455,31 +324,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
             MainGUI.getTpnEditors().setToolTipTextAt(ti, templfn);
         }
     }//GEN-LAST:event_cmdEditWeatherActionPerformed
-
-    private void cmdSelectRVIFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectRVIFileActionPerformed
-        // Select a file to open
-        if (this.chkReadVar.isSelected()) {
-            MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVX));
-        }else {
-            MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVI));
-        }
-        MainGUI.getFileChooser().setMultiSelectionEnabled(false);
-        MainGUI.getFileChooser().setSelectedFile(new File(""));
-        String rvidir = RelativeDirUtil.checkAbsolutePath(txtRviDir.getText(), Project.getBaseDir());
-        MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir));
-        if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = MainGUI.getFileChooser().getSelectedFile();
-            String dir = file.getParent() + File.separator;
-            String reldir = RelativeDirUtil.getRelativePath(dir, Project.getBaseDir(), "/");
-            txtRviDir.setText(reldir);
-            String name = file.getName();
-            cboRviFile.setModel(new DefaultComboBoxModel(new String[]{name}));
-            Project.setRVIDir(reldir);
-            Project.setRVIFile(name);
-        }
-        MainGUI.getFileChooser().resetChoosableFileFilters();
-        MainGUI.getFileChooser().setSelectedFile(new File(""));
-    }//GEN-LAST:event_cmdSelectRVIFileActionPerformed
 
     private void cmdSelectWeatherFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectWeatherFileActionPerformed
         // Select a file to open
@@ -593,14 +437,10 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
     }//GEN-LAST:event_cmdEditTemplateActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox cboRviFile;
     private javax.swing.JComboBox cboTemplateFile;
     private javax.swing.JComboBox cboWeatherFile;
-    private javax.swing.JCheckBox chkReadVar;
-    private javax.swing.JButton cmdEditRVI;
     private javax.swing.JButton cmdEditTemplate;
     private javax.swing.JButton cmdEditWeather;
-    private javax.swing.JButton cmdSelectRVIFile;
     private javax.swing.JButton cmdSelectTemplateFile;
     private javax.swing.JButton cmdSelectWeatherFile;
     private javax.swing.JLabel jLabel10;
@@ -612,7 +452,6 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
     private javax.swing.JTextField txtGroupID;
     private javax.swing.JTextField txtGroupNotes;
     private javax.swing.JTextField txtIdfDir;
-    private javax.swing.JTextField txtRviDir;
     private javax.swing.JTextField txtWthrDir;
     // End of variables declaration//GEN-END:variables
 }

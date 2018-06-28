@@ -157,12 +157,12 @@ public class Main {
         boolean showGUI = true;
         // Prepare simulation manager
         if (prjfile != null) {
-            JEPlusProject project = null;
+            JEPlusProjectV2 project = null;
             if (prjfile.endsWith(".jep")) {
-                project = JEPlusProject.loadAsXML(new File(prjfile));
+                project = new JEPlusProjectV2(JEPlusProject.loadAsXML(new File(prjfile)));
             }else if (prjfile.endsWith(".json")) {
                 try {
-                    project = JEPlusProject.loadFromJSON(new File(prjfile));
+                    project = JEPlusProjectV2.loadFromJSON(new File(prjfile));
                 }catch (IOException ioe) {
                     logger.error("Cannot open " + prjfile, ioe);
                 }

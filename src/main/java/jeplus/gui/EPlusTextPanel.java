@@ -32,7 +32,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import jeplus.util.FastDefaultStyledDocument;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +79,7 @@ public class EPlusTextPanel extends javax.swing.JPanel implements DocumentListen
     /** Current viewing stream */
     protected BufferedReader CurrentStream = null;    // members related to the contents and 
     /** Reference to the JEPlus Project, for up-to-date search strings */
-    protected JEPlusProject Project = null;
+    protected JEPlusProjectV2 Project = null;
     protected Timer AutoUpdateTimer = null;
     
     /** Model for the text content */
@@ -326,7 +326,7 @@ public class EPlusTextPanel extends javax.swing.JPanel implements DocumentListen
      * @param mode Viewer/Editor Mode of the panel
      * @param filename The name of the file to be openned
      */
-    public EPlusTextPanel(Container container, String title, int mode, FileFilter filefilter, String filename, JEPlusProject project) {
+    public EPlusTextPanel(Container container, String title, int mode, FileFilter filefilter, String filename, JEPlusProjectV2 project) {
         this();
         try {
             if (mode == VIEWER_MODE) {

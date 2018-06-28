@@ -19,20 +19,16 @@
 package jeplus.gui;
 
 import java.io.File;
-import java.io.IOException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
-import jeplus.EPlusConfig;
 import jeplus.JEPlusFrameMain;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import jeplus.TRNSYSConfig;
 import jeplus.util.RelativeDirUtil;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -47,7 +43,7 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
     final private static org.slf4j.Logger logger = LoggerFactory.getLogger(JPanel_TrnsysProjectFiles.class);
 
     JEPlusFrameMain MainGUI = null;
-    protected JEPlusProject Project = null;
+    protected JEPlusProjectV2 Project = null;
     protected DocumentListener DL = null;
     
     /**
@@ -59,8 +55,10 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
     
     /**
      * Creates new form JPanel_EPlusProjectFiles with parameters
+     * @param frame
+     * @param project
      */
-    public JPanel_TrnsysProjectFiles(JEPlusFrameMain frame, JEPlusProject project) {
+    public JPanel_TrnsysProjectFiles(JEPlusFrameMain frame, JEPlusProjectV2 project) {
         initComponents();
         MainGUI = frame;
         Project = project;
@@ -74,12 +72,6 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
             cboTemplateFile.setModel(new DefaultComboBoxModel (new String [] {"Select files..."}));
         }
         txtOutputFileNames.setText(Project.getOutputFileNames());
-        txtRviDir.setText(Project.getRVIDir());
-        if (Project.getRVIFile() != null) {
-            cboRviFile.setModel(new DefaultComboBoxModel (new String [] {Project.getRVIFile()}));
-        }else {
-            cboRviFile.setModel(new DefaultComboBoxModel (new String [] {"Select a file..."}));
-        }
         
         // Set listeners to text fields
         DL = new DocumentListener () {
@@ -87,7 +79,6 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
             Document DocProjNotes = txtGroupNotes.getDocument();
             Document DocDCKDir = txtDCKDir.getDocument();
             Document DocOutputFiles = txtOutputFileNames.getDocument();
-            Document DocRviDir = txtRviDir.getDocument();
 
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -100,8 +91,6 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
                     Project.setDCKDir(txtDCKDir.getText());
                 }else if (src == DocOutputFiles) {
                     Project.setOutputFileNames(txtOutputFileNames.getText());
-                }else if (src == DocRviDir) {
-                    Project.setRVIDir(txtRviDir.getText());
                 }
             }
             @Override
@@ -117,7 +106,6 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
         txtGroupNotes.getDocument().addDocumentListener(DL);
         txtDCKDir.getDocument().addDocumentListener(DL);
         txtOutputFileNames.getDocument().addDocumentListener(DL);
-        txtRviDir.getDocument().addDocumentListener(DL);
     }
 
     /**
@@ -142,11 +130,6 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
         cmdSelectTemplateFile = new javax.swing.JButton();
         cmdEditTemplate = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        chkReadVar = new javax.swing.JCheckBox();
-        cmdEditRVI = new javax.swing.JButton();
-        txtRviDir = new javax.swing.JTextField();
-        cmdSelectRVIFile = new javax.swing.JButton();
-        cboRviFile = new javax.swing.JComboBox();
 
         txtDCKDir.setText("./");
         txtDCKDir.setToolTipText("Location of the DCK/TRD files. To use a relative path, edit this field manually.");
@@ -195,35 +178,6 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel1.setText("Printer file name(s):");
 
-        chkReadVar.setSelected(true);
-        chkReadVar.setText("Use RVX");
-        chkReadVar.setToolTipText("Select to use the E+ ReadVarsESO untility. ");
-        chkReadVar.setEnabled(false);
-        chkReadVar.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        chkReadVar.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-
-        cmdEditRVI.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_edit.png"))); // NOI18N
-        cmdEditRVI.setToolTipText("Edit the contents of my.rvi");
-        cmdEditRVI.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdEditRVIActionPerformed(evt);
-            }
-        });
-
-        txtRviDir.setText("./");
-        txtRviDir.setToolTipText("Location of the RVI file. To use a relative path, edit this field manually.");
-
-        cmdSelectRVIFile.setText("...");
-        cmdSelectRVIFile.setToolTipText("Select rvi file (.rvi/.mvi). Single selection only.");
-        cmdSelectRVIFile.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectRVIFileActionPerformed(evt);
-            }
-        });
-
-        cboRviFile.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select file ..." }));
-        cboRviFile.setToolTipText("You can only specify one RVI or MVI file, here");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -241,38 +195,24 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
                         .addComponent(txtGroupNotes))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addGap(11, 11, 11)
-                                .addComponent(chkReadVar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGap(6, 6, 6)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtDCKDir, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(txtDCKDir, javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addComponent(cboTemplateFile, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(cboTemplateFile, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(cmdSelectTemplateFile, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(cmdEditTemplate, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                    .addComponent(txtOutputFileNames)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtRviDir)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cboRviFile, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cmdSelectRVIFile, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cmdEditRVI, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                        .addComponent(cmdSelectTemplateFile, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(cmdEditTemplate, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(txtOutputFileNames))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -300,15 +240,6 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtOutputFileNames, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(cmdSelectRVIFile, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(cboRviFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtRviDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkReadVar)))
-                    .addComponent(cmdEditRVI))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -376,116 +307,9 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_cmdEditTemplateActionPerformed
 
-    private void cmdSelectRVIFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectRVIFileActionPerformed
-        // Select a file to open
-        if (this.chkReadVar.isSelected()) {
-            MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVX));
-        }else {
-            MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVI));
-        }
-        MainGUI.getFileChooser().setMultiSelectionEnabled(false);
-        MainGUI.getFileChooser().setSelectedFile(new File(""));
-        String rvidir = RelativeDirUtil.checkAbsolutePath(txtRviDir.getText(), Project.getBaseDir());
-        MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir));
-        if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = MainGUI.getFileChooser().getSelectedFile();
-            String dir = file.getParent() + File.separator;
-            String reldir = RelativeDirUtil.getRelativePath(dir, Project.getBaseDir(), "/");
-            txtRviDir.setText(reldir);
-            String name = file.getName();
-            cboRviFile.setModel(new DefaultComboBoxModel(new String[]{name}));
-            Project.setRVIDir(reldir);
-            Project.setRVIFile(name);
-        }
-        MainGUI.getFileChooser().resetChoosableFileFilters();
-        MainGUI.getFileChooser().setSelectedFile(new File(""));
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cmdSelectRVIFileActionPerformed
-
-    private void cmdEditRVIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEditRVIActionPerformed
-
-        // Test if the template file is present
-        String fn = (String) cboRviFile.getSelectedItem();
-        if (fn.startsWith("Select ")) {
-            fn = "my.rvx";
-        }
-        String templfn = RelativeDirUtil.checkAbsolutePath(txtRviDir.getText() + fn, Project.getBaseDir());
-        File ftmpl = new File(templfn);
-        if (!ftmpl.exists()) {
-            int n = JOptionPane.showConfirmDialog(
-                    this,
-                    "<html><p><center>" + templfn + " does not exist."
-                    + "Do you want to copy one from an existing file?</center></p>"
-                    + "<p> Alternatively, select 'NO' to create this file. </p>",
-                    "RVI file not available",
-                    JOptionPane.YES_NO_OPTION);
-            if (n == JOptionPane.YES_OPTION) {
-                // Select a file to open
-                if (this.chkReadVar.isSelected()) {
-                    MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVX));
-                }else {
-                    MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVI));
-                }
-                MainGUI.getFileChooser().setMultiSelectionEnabled(false);
-                MainGUI.getFileChooser().setSelectedFile(new File(""));
-                String rvidir = RelativeDirUtil.checkAbsolutePath(txtRviDir.getText(), Project.getBaseDir());
-                MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir));
-                if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                    File file = MainGUI.getFileChooser().getSelectedFile();
-                    try {
-                        FileUtils.copyFile(file, new File(templfn));
-                        cboRviFile.setModel(new DefaultComboBoxModel(new String[]{fn}));
-                        Project.setRVIDir(txtRviDir.getText());
-                        Project.setRVIFile(fn);
-                    } catch (IOException ex) {
-                        logger.error("Error copying RVX from source.", ex);
-                    }
-                }
-                MainGUI.getFileChooser().resetChoosableFileFilters();
-                MainGUI.getFileChooser().setSelectedFile(new File(""));
-            }else if (n == JOptionPane.NO_OPTION) {
-                
-            }else {
-                return;
-            }
-        }
-        int idx = MainGUI.getTpnEditors().indexOfTab(fn);
-        if (idx >= 0) {
-            MainGUI.getTpnEditors().setSelectedIndex(idx);
-        } else {
-            EPlusEditorPanel RviFilePanel;
-            if (FilenameUtils.getExtension(fn).equals("rvx")) {
-                RviFilePanel = new EPlusEditorPanel(
-                        MainGUI.getTpnEditors(),
-                        fn,
-                        templfn,
-                        EPlusEditorPanel.FileType.RVX,
-                        null);
-            }else {
-                RviFilePanel = new EPlusEditorPanel(
-                        MainGUI.getTpnEditors(),
-                        fn,
-                        templfn,
-                        EPlusEditorPanel.FileType.RVI,
-                        null);
-            }
-            int ti = MainGUI.getTpnEditors().getTabCount();
-            MainGUI.getTpnEditors().addTab(fn, RviFilePanel);
-            RviFilePanel.setTabId(ti);
-            MainGUI.getTpnEditors().setSelectedIndex(ti);
-            MainGUI.getTpnEditors().setTabComponentAt(ti, new ButtonTabComponent(MainGUI.getTpnEditors(), RviFilePanel));
-            MainGUI.getTpnEditors().setToolTipTextAt(ti, templfn);
-        }
-
-    }//GEN-LAST:event_cmdEditRVIActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox cboRviFile;
     private javax.swing.JComboBox cboTemplateFile;
-    private javax.swing.JCheckBox chkReadVar;
-    private javax.swing.JButton cmdEditRVI;
     private javax.swing.JButton cmdEditTemplate;
-    private javax.swing.JButton cmdSelectRVIFile;
     private javax.swing.JButton cmdSelectTemplateFile;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -497,6 +321,5 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
     private javax.swing.JTextField txtGroupID;
     private javax.swing.JTextField txtGroupNotes;
     private javax.swing.JTextField txtOutputFileNames;
-    private javax.swing.JTextField txtRviDir;
     // End of variables declaration//GEN-END:variables
 }

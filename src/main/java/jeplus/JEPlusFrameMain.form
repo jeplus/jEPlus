@@ -75,30 +75,6 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemExportJsonActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JMenuItem" name="jMenuItemOpenTree">
-      <Properties>
-        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/jeplus/images/page_white_get.png"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Import jE+ v0.5 OBJ file ..."/>
-        <Property name="toolTipText" type="java.lang.String" value="Import contents of an .obj file (including v0.5 objs) into this project."/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemOpenTreeActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JMenuItem" name="jMenuItemSaveTree">
-      <Properties>
-        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/jeplus/images/page_white_put.png"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Export jE+ v0.5 OBJ file ..."/>
-        <Property name="toolTipText" type="java.lang.String" value="Export the current project to an .obj file."/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemSaveTreeActionPerformed"/>
-      </Events>
-    </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBarMain">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenuFile">
@@ -847,7 +823,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jplModelTest" min="-2" pref="102" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="jplRVX" pref="545" max="32767" attributes="0"/>
+                          <Component id="jplRVX" pref="559" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -873,7 +849,7 @@
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="txtTestResultFolder" pref="290" max="32767" attributes="0"/>
+                                      <Component id="txtTestResultFolder" pref="372" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="cmdSelectTestFolder" min="-2" pref="25" max="-2" attributes="1"/>
                                   </Group>
@@ -901,7 +877,7 @@
                   <SubComponents>
                     <Component class="javax.swing.JLabel" name="jLabel1">
                       <Properties>
-                        <Property name="text" type="java.lang.String" value="&lt;html&gt;Please go to the next tab (&lt;b&gt;Run&lt;/b&gt;) to perform a test run of one or more jobs. Then select below the result folder of one of the jobs.These information may be useful for defining RVX items.&lt;/html&gt;"/>
+                        <Property name="text" type="java.lang.String" value="&lt;html&gt;Please go to the next tab (&lt;b&gt;Execution&lt;/b&gt;) to perform a test run of one or more jobs. Then select below the result folder of one of the jobs.These information may be useful for defining RVX items.&lt;/html&gt;"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtTestResultFolder">

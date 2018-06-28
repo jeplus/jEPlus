@@ -35,7 +35,7 @@ import jeplus.EPlusWinTools;
 import jeplus.IDFmodel;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusFrameMain;
-import jeplus.JEPlusProject;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX;
 import jeplus.event.IF_ConfigChangedEventHandler;
@@ -55,7 +55,7 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel implements IF_C
     protected EPlusTextPanelOld LogPanel = null;
     protected JFileChooser fc = new JFileChooser("./");
     protected JEPlusConfig Config = null;
-    protected JEPlusProject Project = null;
+    protected JEPlusProjectV2 Project = null;
     protected String CurrentFolder = "./";
     protected boolean ConverterAvailable = false;
 
@@ -65,7 +65,7 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel implements IF_C
      * @param config
      * @param project
      */
-    public JPanel_IDFVersionUpdater(JEPlusFrameMain hostframe, JEPlusConfig config, JEPlusProject project) {
+    public JPanel_IDFVersionUpdater(JEPlusFrameMain hostframe, JEPlusConfig config, JEPlusProjectV2 project) {
         MainFrame = hostframe;
         initComponents();
         LogPanel = MainFrame.getOutputPanel();
@@ -77,7 +77,7 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel implements IF_C
         setProject (project);
     }
 
-    public final void setProject (JEPlusProject project) {
+    public final void setProject (JEPlusProjectV2 project) {
         if (project != null) {
             Project = project;
             if (fc == null) {
@@ -491,16 +491,16 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel implements IF_C
         RVX rvx = Project.getRvx();
         if (rvx != null && rvx.getRVIs() != null && ! rvx.getRVIs().isEmpty()) {
             for (RVX_RVIitem item : rvx.getRVIs()) {
-                list.add(RelativeDirUtil.checkAbsolutePath(item.getFileName(), Project.resolveRVIDir()));
+                list.add(RelativeDirUtil.checkAbsolutePath(item.getFileName(), Project.getBaseDir()));
             }
         }
         txtStatus.setText(list.size() + " files found ...");
         LogPanel.getPrintStream().println("The project contains: ");
         jProgressBar.setMaximum(list.size());
         try (PrintWriter fw = new PrintWriter (new FileWriter (CurrentFolder + File.separator + "convlist.lst"))) {
-            for (int i=0; i<list.size(); i++) {
-                fw.println(list.get(i));
-                LogPanel.getPrintStream().println(list.get(i));
+            for (String item : list) {
+                fw.println(item);
+                LogPanel.getPrintStream().println(item);
             }
         }catch (IOException ioe) {
             logger.error("", ioe);
@@ -560,7 +560,7 @@ public class JPanel_IDFVersionUpdater extends javax.swing.JPanel implements IF_C
 
     public static void main (String [] args) {
         JFrame frame = new JFrame ("IDF Version Converter");
-        JPanel_IDFVersionUpdater panel = new JPanel_IDFVersionUpdater (null, JEPlusConfig.getDefaultInstance(), new JEPlusProject ());
+        JPanel_IDFVersionUpdater panel = new JPanel_IDFVersionUpdater (null, JEPlusConfig.getDefaultInstance(), new JEPlusProjectV2 ());
         frame.getContentPane().add(panel);
         panel.startLogThread();
         frame.setSize(700, 500);

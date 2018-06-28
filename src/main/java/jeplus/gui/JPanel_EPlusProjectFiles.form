@@ -1,56 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.8" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
-  <NonVisualComponents>
-    <Component class="javax.swing.JCheckBox" name="chkReadVar">
-      <Properties>
-        <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Use Extended RVI"/>
-        <Property name="toolTipText" type="java.lang.String" value="Select to use the E+ ReadVarsESO untility. "/>
-        <Property name="horizontalAlignment" type="int" value="11"/>
-        <Property name="horizontalTextPosition" type="int" value="10"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkReadVarActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JTextField" name="txtRviDir">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="./"/>
-        <Property name="toolTipText" type="java.lang.String" value="Location of the RVI file. To use a relative path, edit this field manually."/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JComboBox" name="cboRviFile">
-      <Properties>
-        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-          <StringArray count="1">
-            <StringItem index="0" value="Select file ..."/>
-          </StringArray>
-        </Property>
-        <Property name="toolTipText" type="java.lang.String" value="You can only specify one RVI or MVI file, here"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JButton" name="cmdSelectRVIFile">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="..."/>
-        <Property name="toolTipText" type="java.lang.String" value="Select rvi file (.rvi/.mvi). Single selection only."/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSelectRVIFileActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JButton" name="cmdEditRVI">
-      <Properties>
-        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/jeplus/images/page_white_edit.png"/>
-        </Property>
-        <Property name="toolTipText" type="java.lang.String" value="Edit the contents of my.rvi"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdEditRVIActionPerformed"/>
-      </Events>
-    </Component>
-  </NonVisualComponents>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
