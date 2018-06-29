@@ -55,25 +55,24 @@ public class TrnsysResultCollector extends ResultCollector {
         }
         int ResCollected = 0;
         ResultFiles.clear();
-        try {
-            // RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
-            RVX rvx = JobOwner.getProject().getRvx();
-            if (rvx != null && rvx.getTRNs() != null) {
-                for (RVX_TRNSYSitem item : rvx.getTRNs()) {
-                    String fn = item.getTableName() + ".csv";
-                    ResultFiles.add(fn);
-                    ResWriter = new DefaultCSVWriter(null, fn);
-                    ResReader = new TRNSYSOutputReader (item.getPlotterName() + ".csv");
-                    ResultHeader = new HashMap <>();
-                    ResultTable = new ArrayList <> ();
+        RVX rvx = JobOwner.getProject().getRvx();
+        if (rvx != null && rvx.getTRNs() != null) {
+            for (RVX_TRNSYSitem item : rvx.getTRNs()) {
+                String fn = item.getTableName() + ".csv";
+                ResultFiles.add(fn);
+                ResWriter = new DefaultCSVWriter(null, fn);
+                ResReader = new TRNSYSOutputReader (item.getPlotterName() + ".csv");
+                ResultHeader = new HashMap <>();
+                ResultTable = new ArrayList <> ();
+                try {
                     ResReader.readResult(JobOwner, JobOwner.getResolvedEnv().getParentDir(), ResultHeader, ResultTable);
                     if (PostProc != null) {PostProc.postProcess(ResultHeader, ResultTable);}
                     ResWriter.writeResult(JobOwner, ResultHeader, ResultTable);
-                    ResCollected += ResultTable.size();
+                }catch (Exception ex) {
+                    logger.error("Error processing TRNSYS results from " + item.getPlotterName() + " to " + fn, ex);
                 }
+                ResCollected += ResultTable.size();
             }
-        }catch (Exception ex) {
-            logger.error("Error reading RVX file " + JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile(), ex);
         }
         return ResCollected;
     }

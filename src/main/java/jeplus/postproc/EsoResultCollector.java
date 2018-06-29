@@ -57,31 +57,30 @@ public class EsoResultCollector extends ResultCollector {
         }
         int ResCollected = 0;
         ResultFiles.clear();
-        try {
-            // RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
-            RVX rvx = JobOwner.getProject().getRvx();
-            if (rvx != null && rvx.getRVIs() != null) {
-                for (RVX_RVIitem item : rvx.getRVIs()) {
-                    String fn = item.getTableName() + ".csv";
-                    ResultFiles.add(fn);
-                    ResWriter = new DefaultCSVWriter(null, fn);
-                    ResReader = new EPlusRVIReader(
-                            JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(JobOwner.getProject().getEPlusModelVersion()),
-                            RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getResolvedEnv().getRVIDir()), 
-                            item.getFrequency(), 
-                            fn, 
-                            item.isUsedInCalc()
-                    );
-                    ResultHeader = new HashMap <>();
-                    ResultTable = new ArrayList <> ();
+        RVX rvx = JobOwner.getProject().getRvx();
+        if (rvx != null && rvx.getRVIs() != null) {
+            for (RVX_RVIitem item : rvx.getRVIs()) {
+                String fn = item.getTableName() + ".csv";
+                ResultFiles.add(fn);
+                ResWriter = new DefaultCSVWriter(null, fn);
+                ResReader = new EPlusRVIReader(
+                        JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(JobOwner.getProject().getEPlusModelVersion()),
+                        RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
+                        item.getFrequency(), 
+                        fn, 
+                        item.isUsedInCalc()
+                );
+                ResultHeader = new HashMap <>();
+                ResultTable = new ArrayList <> ();
+                try {
                     ResReader.readResult(JobOwner, JobOwner.getResolvedEnv().getParentDir(), ResultHeader, ResultTable);
                     if (PostProc != null) {PostProc.postProcess(ResultHeader, ResultTable);}
                     ResWriter.writeResult(JobOwner, ResultHeader, ResultTable);
-                    ResCollected += ResultTable.size();
+                }catch (Exception ex) {
+                    logger.error("Error reading RVI/MVI file " + item.getFileName(), ex);
                 }
+                ResCollected += ResultTable.size();
             }
-        }catch (Exception ex) {
-            logger.error("Error reading RVX file " + JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile(), ex);
         }
         return ResCollected;
     }

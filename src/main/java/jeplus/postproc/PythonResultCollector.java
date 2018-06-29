@@ -59,62 +59,61 @@ public class PythonResultCollector extends ResultCollector {
         }
         int ResCollected = 0;
         ResultFiles.clear();
-        try {
-            // RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
-            RVX rvx = JobOwner.getProject().getRvx();
-            if (rvx != null && rvx.getScripts() != null) {
-                for (RVX_ScriptItem item : rvx.getScripts()) {
-                    String fn = item.getTableName() + ".csv";
-                    ResultFiles.add(fn);
-                    if (item.isOnEachJob()) {
-                        ResWriter = new DefaultCSVWriter(null, fn);
-                        ResReader = new EPlusScriptReader(
-                                RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
-                                item.getPythonVersion(), 
-                                JobOwner.getProject().getBaseDir(), 
-                                item.getArguments(), 
-                                fn);
-                        ResultHeader = new HashMap <>();
-                        ResultTable = new ArrayList <> ();
+        RVX rvx = JobOwner.getProject().getRvx();
+        if (rvx != null && rvx.getScripts() != null) {
+            for (RVX_ScriptItem item : rvx.getScripts()) {
+                String fn = item.getTableName() + ".csv";
+                ResultFiles.add(fn);
+                if (item.isOnEachJob()) {
+                    ResWriter = new DefaultCSVWriter(null, fn);
+                    ResReader = new EPlusScriptReader(
+                            RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
+                            item.getPythonVersion(), 
+                            JobOwner.getProject().getBaseDir(), 
+                            item.getArguments(), 
+                            fn);
+                    ResultHeader = new HashMap <>();
+                    ResultTable = new ArrayList <> ();
+                    try {
                         ResReader.readResult(JobOwner, JobOwner.getResolvedEnv().getParentDir(), ResultHeader, ResultTable);
                         ResWriter.writeResult(JobOwner, ResultHeader, ResultTable);
                         ResCollected += ResultTable.size();
-                    }else {
-                        ResWriter = new DefaultCSVWriter(null, null);
-                        ResReader = new EPlusScriptReader(null, null, null, null, null);
-                        StringBuilder buf = new StringBuilder ();
-                        try {
-                            // Get finished jobs
-                            List <EPlusTask> JobQueue = JobOwner.getAgent().getFinishedJobs();
-                            // Collect Job List
-                            for (EPlusTask job : JobQueue) {
-                                buf.append(job.getJobID()).append(";");
-                            } // done with loading
-                        }catch (NullPointerException npe) {
-                        }
-                        JEPlusConfig config = JEPlusConfig.getDefaultInstance();
-                        String workdir = JobOwner.getResolvedEnv().getParentDir();
-                        try (PrintStream out = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (workdir + "PyConsole.log", true))) {
-                            PythonTools.runPython(
-                                    config, 
-                                    RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getResolvedEnv().getRVIDir()), 
-                                    item.getPythonVersion(), 
-                                    JobOwner.getProject().getBaseDir(),
-                                    workdir, 
-                                    buf.toString(), 
-                                    fn, 
-                                    item.getArguments(), 
-                                    out
-                            );
-                            ResCollected ++;
-                        }catch (Exception ex) {
-                            logger.error("Error when calling Python script " + item.getFileName(), ex);
-                        }
+                    }catch (Exception ex) {
+                        logger.error("Error running Python script " + item.getFileName() + " to collect results in each job folder.", ex);
+                    }
+                }else {
+                    ResWriter = new DefaultCSVWriter(null, null);
+                    ResReader = new EPlusScriptReader(null, null, null, null, null);
+                    StringBuilder buf = new StringBuilder ();
+                    try {
+                        // Get finished jobs
+                        List <EPlusTask> JobQueue = JobOwner.getAgent().getFinishedJobs();
+                        // Collect Job List
+                        for (EPlusTask job : JobQueue) {
+                            buf.append(job.getJobID()).append(";");
+                        } // done with loading
+                    }catch (NullPointerException npe) {
+                    }
+                    JEPlusConfig config = JEPlusConfig.getDefaultInstance();
+                    String workdir = JobOwner.getResolvedEnv().getParentDir();
+                    try (PrintStream out = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (workdir + "PyConsole.log", true))) {
+                        PythonTools.runPython(
+                                config, 
+                                RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
+                                item.getPythonVersion(), 
+                                JobOwner.getProject().getBaseDir(),
+                                workdir, 
+                                buf.toString(), 
+                                fn, 
+                                item.getArguments(), 
+                                out
+                        );
+                        ResCollected ++;
+                    }catch (Exception ex) {
+                        logger.error("Error when calling Python script " + item.getFileName(), ex);
                     }
                 }
             }
-        }catch (Exception ex) {
-            logger.error("Error reading RVX file " + JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile(), ex);
         }
         return ResCollected;
     }

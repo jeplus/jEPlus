@@ -31,6 +31,7 @@ import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
 import jeplus.data.ParameterItemV2;
 import jeplus.data.RVX;
+import jeplus.data.RVX_ScriptItem;
 import jeplus.data.RandomSource;
 import jeplus.data.RouletteWheel;
 import jeplus.util.CsvUtil;
@@ -569,6 +570,33 @@ public class JEPlusProjectV2 implements Serializable {
     }
     
     /**
+     * This function checks Python dependency of the project
+     * @return Python versions required in a set
+     */
+    @JsonIgnore
+    public HashSet<String> getPythonDependency () {
+        HashSet<String> versions = new HashSet<>();
+        // Input scripts
+        for (ParameterItemV2 item: Parameters) {
+            if (item.getValuesString().toLowerCase().startsWith("@jython")) {
+                versions.add("python2");
+            }else if (item.getValuesString().toLowerCase().startsWith("@python2")) {
+                versions.add("python2");
+            }else if (item.getValuesString().toLowerCase().startsWith("@python3")) {
+                versions.add("python3");
+            }
+        }
+        // Output scripts
+        if (this.Rvx.getScripts() != null) {
+            for (RVX_ScriptItem item : Rvx.getScripts()) {
+                versions.add(item.getPythonVersion().toLowerCase());
+            }
+        }
+        // Return
+        return versions;
+    }
+    
+    /**
      * Copy from Project V1. New project state is set to 'changed' after cloning
      * @param proj Project V1 object to be copied
      */
@@ -640,7 +668,7 @@ public class JEPlusProjectV2 implements Serializable {
         env.IDFTemplate = IDFTemplate;
         env.WeatherDir = this.resolveWeatherDir();
         env.WeatherFile = WeatherFile;
-        env.RVIDir = "";
+        env.RVIDir = this.BaseDir;
         env.RVIFile = RVIFile;
         env.ProjectType = ProjectType;
         env.DCKDir = this.resolveDCKDir();

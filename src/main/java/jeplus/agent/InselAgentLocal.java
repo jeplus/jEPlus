@@ -22,10 +22,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import jeplus.*;
+import static jeplus.agent.EPlusAgent.logger;
 import jeplus.data.ExecutionOptions;
 import jeplus.gui.JFrameAgentLocalMonitor;
 import jeplus.gui.JPanel_LocalControllerOptions;
@@ -42,7 +44,7 @@ import jeplus.postproc.*;
  */
 public class InselAgentLocal extends EPlusAgent {
 
-    protected INSELConfig Config = null;
+    protected JEPlusConfig Config = null;
 
     /**
      * Construct with Exec settings
@@ -52,8 +54,8 @@ public class InselAgentLocal extends EPlusAgent {
         super("Local batch simulation controller", settings);
         this.QueueCapacity = 10000;
         this.attachDefaultCollector();
-        Config = JEPlusConfig.getDefaultInstance().getINSELConfigs().get("INSEL");
-        SettingsPanel = new jeplus.gui.JPanel_InselSettings (Config);
+        Config = JEPlusConfig.getDefaultInstance();
+        SettingsPanel = new jeplus.gui.JPanel_InselSettings (Config.getINSELConfigs().get("INSEL"));
     }
 
     /**
@@ -265,8 +267,8 @@ public class InselAgentLocal extends EPlusAgent {
      */
     @Override
     public boolean checkAgentSettings() {
-        String bindir = Config.getResolvedInselBinDir();
-        String exe = Config.getResolvedInselEXEC();
+        String bindir = Config.getINSELConfigs().get("INSEL").getResolvedInselBinDir();
+        String exe = Config.getINSELConfigs().get("INSEL").getResolvedInselEXEC();
 
         boolean success = new File(exe).exists();
         if (! success) {
@@ -275,6 +277,28 @@ public class InselAgentLocal extends EPlusAgent {
                 this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Error: " + exe + " is not accessible.");
             }catch (Exception ex) {
                 System.err.println("[" + this.AgentID + "]: Settings error: " + exe + " is not accessible.");
+            }
+        }
+        Set<String> PyVersions = this.getJobOwner().getProject().getPythonDependency();
+        if (PyVersions.contains("python2")) {
+            if (Config.getPython2EXE() == null || ! new File (Config.getPython2EXE()).exists()) {
+                success = false;
+                try {
+                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python2 executable to handle the scripts in the project!");
+                    this.JobOwner.getBatchInfo().setValidationSuccessful(false);
+                }catch (Exception ex) {
+                    logger.error("[" + this.AgentID + "]: Version checking error.", ex);
+                }
+            }            
+        }else if (PyVersions.contains("python3")) {
+            if (Config.getPython3EXE() == null || ! new File (Config.getPython3EXE()).exists()) {
+                success = false;
+                try {
+                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python3 executable to handle the scripts in the project!");
+                    this.JobOwner.getBatchInfo().setValidationSuccessful(false);
+                }catch (Exception ex) {
+                    logger.error("[" + this.AgentID + "]: Version checking error. ", ex);
+                }
             }
         }
         return success;

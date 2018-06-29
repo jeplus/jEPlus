@@ -297,10 +297,11 @@ public class JPanel_UserSuppliedItmeEditor extends javax.swing.JPanel {
         MainGUI.getFileChooser().setMultiSelectionEnabled(false);
         MainGUI.getFileChooser().setSelectedFile(new File(""));
         String rvidir = RelativeDirUtil.checkAbsolutePath(txtCsvFile.getText(), BaseDir);
-        MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir));
+        MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir).getParentFile());
         if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = MainGUI.getFileChooser().getSelectedFile();
-            txtCsvFile.setText(file.getAbsolutePath());
+            String relpath = RelativeDirUtil.getRelativePath(file.getParent(), BaseDir, "/");
+            txtCsvFile.setText(relpath + file.getName());
         }
         MainGUI.getFileChooser().resetChoosableFileFilters();
         MainGUI.getFileChooser().setSelectedFile(new File(""));

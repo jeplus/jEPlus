@@ -46,25 +46,24 @@ public class CsvResultCollector extends ResultCollector {
         }
         int ResCollected = 0;
         ResultFiles.clear();
-        try {
-            // RVX rvx = RVX.getRVX(JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile());
-            RVX rvx = JobOwner.getProject().getRvx();
-            if (rvx != null && rvx.getCSVs() != null) {
-                for (RVX_CSVitem item : rvx.getCSVs()) {
-                    String fn = item.getTableName() + ".csv";
-                    ResultFiles.add(fn);
-                    ResWriter = new DefaultCSVWriter(null, fn);
-                    ResReader = new EPlusCsvReader (item);
-                    ResultHeader = new HashMap <>();
-                    ResultTable = new ArrayList <> ();
+        RVX rvx = JobOwner.getProject().getRvx();
+        if (rvx != null && rvx.getCSVs() != null) {
+            for (RVX_CSVitem item : rvx.getCSVs()) {
+                String fn = item.getTableName() + ".csv";
+                ResultFiles.add(fn);
+                ResWriter = new DefaultCSVWriter(null, fn);
+                ResReader = new EPlusCsvReader (item);
+                ResultHeader = new HashMap <>();
+                ResultTable = new ArrayList <> ();
+                try {
                     ResReader.readResult(JobOwner, JobOwner.getResolvedEnv().getParentDir(), ResultHeader, ResultTable);
                     if (PostProc != null) {PostProc.postProcess(ResultHeader, ResultTable);}
                     ResWriter.writeResult(JobOwner, ResultHeader, ResultTable);
-                    ResCollected += ResultTable.size();
+                }catch (Exception ex) {
+                    logger.error("Error reading from CSV output for " + item.getTableName() + ".csv", ex);
                 }
+                ResCollected += ResultTable.size();
             }
-        }catch (Exception ex) {
-            logger.error("Error reading RVX file " + JobOwner.getResolvedEnv().getRVIDir() + JobOwner.getResolvedEnv().getRVIFile(), ex);
         }
         return ResCollected;
     }

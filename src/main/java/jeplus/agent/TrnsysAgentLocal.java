@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -43,7 +44,7 @@ import jeplus.postproc.*;
  */
 public class TrnsysAgentLocal extends EPlusAgent {
     
-    protected TRNSYSConfig Config = null;
+    protected JEPlusConfig Config = null;
 
     /**
      * Construct with Exec settings
@@ -53,8 +54,8 @@ public class TrnsysAgentLocal extends EPlusAgent {
         super("Local batch simulation controller", settings);
         this.QueueCapacity = 10000;
         this.attachDefaultCollector();
-        Config = JEPlusConfig.getDefaultInstance().getTRNSYSConfigs().get("TRNSYS");
-        SettingsPanel = new jeplus.gui.JPanel_TrnsysSettings (Config);
+        Config = JEPlusConfig.getDefaultInstance();
+        SettingsPanel = new jeplus.gui.JPanel_TrnsysSettings (Config.getTRNSYSConfigs().get("TRNSYS"));
     }
 
     /**
@@ -269,8 +270,8 @@ public class TrnsysAgentLocal extends EPlusAgent {
      */
     @Override
     public boolean checkAgentSettings() {
-        String bindir = Config.getResolvedTRNSYSBinDir();
-        String exe = Config.getResolvedTRNSYSEXEC();
+        String bindir = Config.getTRNSYSConfigs().get("TRNSYS").getResolvedTRNSYSBinDir();
+        String exe = Config.getTRNSYSConfigs().get("TRNSYS").getResolvedTRNSYSEXEC();
 
         boolean success = new File(exe).exists();
         if (! success) {
@@ -279,6 +280,28 @@ public class TrnsysAgentLocal extends EPlusAgent {
                 this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Error: " + exe + " is not accessible.");
             }catch (Exception ex) {
                 System.err.println("[" + this.AgentID + "]: Settings error: " + exe + " is not accessible.");
+            }
+        }
+        Set<String> PyVersions = this.getJobOwner().getProject().getPythonDependency();
+        if (PyVersions.contains("python2")) {
+            if (Config.getPython2EXE() == null || ! new File (Config.getPython2EXE()).exists()) {
+                success = false;
+                try {
+                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python2 executable to handle the scripts in the project!");
+                    this.JobOwner.getBatchInfo().setValidationSuccessful(false);
+                }catch (Exception ex) {
+                    logger.error("[" + this.AgentID + "]: Version checking error.", ex);
+                }
+            }            
+        }else if (PyVersions.contains("python3")) {
+            if (Config.getPython3EXE() == null || ! new File (Config.getPython3EXE()).exists()) {
+                success = false;
+                try {
+                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python3 executable to handle the scripts in the project!");
+                    this.JobOwner.getBatchInfo().setValidationSuccessful(false);
+                }catch (Exception ex) {
+                    logger.error("[" + this.AgentID + "]: Version checking error. ", ex);
+                }
             }
         }
         return success;

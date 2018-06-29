@@ -18,8 +18,10 @@
  ***************************************************************************/
 package jeplus.agent;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -235,19 +237,34 @@ public class EPlusAgentLocal extends EPlusAgent {
         boolean success = false;
         VersionInfo IdfVer = new VersionInfo (this.getJobOwner().getProject().getEPlusModelVersion());
         success = Config.getEPlusConfigs().containsKey(IdfVer);
-//        for (VersionInfo ver : Config.getEPlusConfigs().keySet()) {
-//            // Check if E+ version is for the current project
-//            VersionInfo EpVer = new VersionInfo (ver);
-//            if (IdfVer.equals(EpVer)) { 
-//                success = true;
-//            }
-//        }
         if (! success) {
             try {
                 this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find an E+ installation to handle model version " + IdfVer + " of the project!");
                 this.JobOwner.getBatchInfo().setValidationSuccessful(false);
             }catch (Exception ex) {
                 System.err.println("[" + this.AgentID + "]: Version checking error. ");
+            }
+        }
+        Set<String> PyVersions = this.getJobOwner().getProject().getPythonDependency();
+        if (PyVersions.contains("python2")) {
+            if (Config.getPython2EXE() == null || ! new File (Config.getPython2EXE()).exists()) {
+                success = false;
+                try {
+                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python2 executable to handle the scripts in the project!");
+                    this.JobOwner.getBatchInfo().setValidationSuccessful(false);
+                }catch (Exception ex) {
+                    logger.error("[" + this.AgentID + "]: Version checking error.", ex);
+                }
+            }            
+        }else if (PyVersions.contains("python3")) {
+            if (Config.getPython3EXE() == null || ! new File (Config.getPython3EXE()).exists()) {
+                success = false;
+                try {
+                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python3 executable to handle the scripts in the project!");
+                    this.JobOwner.getBatchInfo().setValidationSuccessful(false);
+                }catch (Exception ex) {
+                    logger.error("[" + this.AgentID + "]: Version checking error. ", ex);
+                }
             }
         }
         return success;
