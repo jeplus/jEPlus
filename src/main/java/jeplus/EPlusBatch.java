@@ -40,7 +40,7 @@ import javax.script.ScriptException;
 import javax.swing.JFrame;
 import javax.swing.tree.DefaultMutableTreeNode;
 import jeplus.agent.*;
-import jeplus.data.ParameterItem;
+import jeplus.data.ParameterItemV2;
 import jeplus.data.Counter;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.FileList;
@@ -397,15 +397,15 @@ public class EPlusBatch extends Thread {
 
             // get this leaf's parent path. Each path has to be of equal length and
             // contains the same set of search strings
-            // ArrayList<ParameterItem> thischain = new ArrayList<ParameterItem> ();
+            // ArrayList<ParameterItemV2> thischain = new ArrayList<ParameterItemV2> ();
             try {
                 // First leaf
                 Object[] path = thisleaf.getUserObjectPath();
                 this.Info.ParamChains.add(new ArrayList (Arrays.asList(path)));
                 int chainlen = path.length;
                 for (int i = 0; i < chainlen; i++) {
-                    if (!info.SearchStrings.contains(((ParameterItem) path[i]).getSearchString())) {
-                        info.SearchStrings.add(((ParameterItem) path[i]).getSearchString());
+                    if (!info.SearchStrings.contains(((ParameterItemV2) path[i]).getSearchString())) {
+                        info.SearchStrings.add(((ParameterItemV2) path[i]).getSearchString());
                     } else {// Error
                         info.addValidationError("Duplicate search string: Level " + i + " - Node " + path[i].toString());
                         ok = false;
@@ -423,14 +423,14 @@ public class EPlusBatch extends Thread {
                     ArrayList<String> thisset = new ArrayList<>();
                     for (int i = 0; i < path.length; i++) {
                         // test against the first chain
-                        if (!info.SearchStrings.contains(((ParameterItem) path[i]).getSearchString())) {
+                        if (!info.SearchStrings.contains(((ParameterItemV2) path[i]).getSearchString())) {
                             // Found new search string
                             info.addValidationError("Found new search string: Level " + i + " - Node " + path[i].toString());
                             ok = false;
                         }
                         // test for duplication
-                        if (!thisset.contains(((ParameterItem) path[i]).getSearchString())) {
-                            thisset.add(((ParameterItem) path[i]).getSearchString());
+                        if (!thisset.contains(((ParameterItemV2) path[i]).getSearchString())) {
+                            thisset.add(((ParameterItemV2) path[i]).getSearchString());
                         } else {// Error
                             info.addValidationError("Duplicate search string: Level " + i + " - Node " + path[i].toString());
                             ok = false;
@@ -447,7 +447,7 @@ public class EPlusBatch extends Thread {
             // a unique id.
             try {
                 for (Enumeration e = ParaTree.breadthFirstEnumeration(); e.hasMoreElements();) {
-                    ParameterItem item = (ParameterItem) ((DefaultMutableTreeNode) e.nextElement()).getUserObject();
+                    ParameterItemV2 item = (ParameterItemV2) ((DefaultMutableTreeNode) e.nextElement()).getUserObject();
                     if (!info.ShortNames.contains(item.getID())) {
                         info.ShortNames.add(item.getID());
                         info.ParamList.add(item);
@@ -632,110 +632,110 @@ public class EPlusBatch extends Thread {
         return nResCollected;
     }
     
-    /**
-     * Create and write full parameter indexes to .csv files in the output directory
-     * @return A report of the list of files and in which directory they've been written
-     */
-    public String writeProjectIndexCSV() {
-        StringBuilder buf = new StringBuilder ("Writing project index. The following files: \n");
-        String dir = this.getResolvedEnv().getParentDir();
-        String fn;
-        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
-            // idf index
-            fn = "IndexIDF.csv";
-            if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
-            // Weather index
-            fn = "IndexWthr.csv";
-            if (WthrFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
-        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
-            // idf index
-            fn = "IndexDCK.csv";
-            if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
-        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
-            // idf index
-            fn = "IndexINSEL.csv";
-            if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
-        }
-        // Parameter index
-        if (Info.isValid() && Info.ParamList != null) {
-            for (ParameterItem item : Info.ParamList) {
-                fn = "Index" + item.getID() + ".csv";
-                if (item.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
-            }
-        }
-        // Job index
-        if (JobQueue != null) {
-            fn = "IndexJobs.csv";
-            if (this.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
-        }
-        buf.append("have been created in ").append(dir).append("\n");
-        // done
-        return buf.toString();
-    }
-
-
-    /**
-     * Create and write full parameter indexes to a sql script file in the output directory
-     * @param dbname
-     * @param tableprefix
-     * @return A report of the list of tables and in which directory they've been written
-     */
-    public String writeProjectIndexSQL(String dbname, String tableprefix) {
-        // idf index
-        String sqlfile = "CreateJobDB.sql";
-        StringBuilder buf = new StringBuilder ("Creating project index SQL script " + sqlfile);
-        String dir = this.getResolvedEnv().getParentDir();
-        buf.append(" in ").append(dir).append("...\n");
-        sqlfile = dir + sqlfile;
-        boolean ok = true;
-        // Create and use db
-        try (PrintWriter fw = new PrintWriter(new FileWriter(sqlfile))) {
-            fw.println("--\n-- Database: `" + dbname + "`\n-- Created by jEPlus\n--");
-            fw.println("CREATE DATABASE `" + dbname + "` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;");
-            fw.println("USE `" + dbname + "`;");
-            fw.println("-- --------------------------------------------------------");
-            fw.println();
-            buf.append("The script creates a database named ").append(dbname).append(", with the following tables: \n");
-        }catch (Exception ex) {
-            logger.error("", ex);
-            buf.append(" failed. Please check the file is writable.\n");
-            return buf.toString();
-        }
-
-        String tn;
-        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
-            tn = tableprefix+"IndexIDF";
-            // write idf index table
-            if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
-            // Weather index
-            tn = tableprefix+"IndexWthr";
-            if (WthrFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
-        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
-            tn = tableprefix+"IndexDCK";
-            // write idf index table
-            if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
-        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
-            tn = tableprefix+"IndexINSEL";
-            // write idf index table
-            if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
-        }
-        // Parameter index
-        if (Info.isValid() && Info.ParamList != null) {
-            for (ParameterItem item : Info.ParamList) {
-                tn = tableprefix+"Index" + item.getID();
-                if (item.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
-            }
-        }
+//    /**
+//     * Create and write full parameter indexes to .csv files in the output directory
+//     * @return A report of the list of files and in which directory they've been written
+//     */
+//    public String writeProjectIndexCSV() {
+//        StringBuilder buf = new StringBuilder ("Writing project index. The following files: \n");
+//        String dir = this.getResolvedEnv().getParentDir();
+//        String fn;
+//        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
+//            // idf index
+//            fn = "IndexIDF.csv";
+//            if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+//            // Weather index
+//            fn = "IndexWthr.csv";
+//            if (WthrFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+//        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
+//            // idf index
+//            fn = "IndexDCK.csv";
+//            if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+//        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
+//            // idf index
+//            fn = "IndexINSEL.csv";
+//            if (IdfFiles.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+//        }
+//        // Parameter index
+//        if (Info.isValid() && Info.ParamList != null) {
+//            for (ParameterItemV2 item : Info.ParamList) {
+//                fn = "Index" + item.getID() + ".csv";
+//                if (item.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
+//            }
+//        }
 //        // Job index
 //        if (JobQueue != null) {
-//            tn = tableprefix+"IndexJobs";
-//            if (this.exportSQL(sqlfile, tn)) buf.append("\n").append(tn).append("\n");
+//            fn = "IndexJobs.csv";
+//            if (this.exportCSV(dir + fn)) buf.append("\t").append(fn).append("\n");
 //        }
-        // done
-        buf.append("Done!\n");
-        return buf.toString();
-    }
-
+//        buf.append("have been created in ").append(dir).append("\n");
+//        // done
+//        return buf.toString();
+//    }
+//
+//
+//    /**
+//     * Create and write full parameter indexes to a sql script file in the output directory
+//     * @param dbname
+//     * @param tableprefix
+//     * @return A report of the list of tables and in which directory they've been written
+//     */
+//    public String writeProjectIndexSQL(String dbname, String tableprefix) {
+//        // idf index
+//        String sqlfile = "CreateJobDB.sql";
+//        StringBuilder buf = new StringBuilder ("Creating project index SQL script " + sqlfile);
+//        String dir = this.getResolvedEnv().getParentDir();
+//        buf.append(" in ").append(dir).append("...\n");
+//        sqlfile = dir + sqlfile;
+//        boolean ok = true;
+//        // Create and use db
+//        try (PrintWriter fw = new PrintWriter(new FileWriter(sqlfile))) {
+//            fw.println("--\n-- Database: `" + dbname + "`\n-- Created by jEPlus\n--");
+//            fw.println("CREATE DATABASE `" + dbname + "` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;");
+//            fw.println("USE `" + dbname + "`;");
+//            fw.println("-- --------------------------------------------------------");
+//            fw.println();
+//            buf.append("The script creates a database named ").append(dbname).append(", with the following tables: \n");
+//        }catch (Exception ex) {
+//            logger.error("", ex);
+//            buf.append(" failed. Please check the file is writable.\n");
+//            return buf.toString();
+//        }
+//
+//        String tn;
+//        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
+//            tn = tableprefix+"IndexIDF";
+//            // write idf index table
+//            if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+//            // Weather index
+//            tn = tableprefix+"IndexWthr";
+//            if (WthrFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+//        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
+//            tn = tableprefix+"IndexDCK";
+//            // write idf index table
+//            if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+//        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
+//            tn = tableprefix+"IndexINSEL";
+//            // write idf index table
+//            if (IdfFiles.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+//        }
+//        // Parameter index
+//        if (Info.isValid() && Info.ParamList != null) {
+//            for (ParameterItemV2 item : Info.ParamList) {
+//                tn = tableprefix+"Index" + item.getID();
+//                if (item.exportSQL(sqlfile, tn)) buf.append("\t").append(tn).append("\n");
+//            }
+//        }
+////        // Job index
+////        if (JobQueue != null) {
+////            tn = tableprefix+"IndexJobs";
+////            if (this.exportSQL(sqlfile, tn)) buf.append("\n").append(tn).append("\n");
+////        }
+//        // done
+//        buf.append("Done!\n");
+//        return buf.toString();
+//    }
+//
     public boolean exportCSV(String fn) {
         try (PrintWriter fw = new PrintWriter(new FileWriter(fn))) {
             String[] header = new String[8 + Info.ShortNames.size()];
@@ -904,7 +904,7 @@ public class EPlusBatch extends Thread {
                     String tag = BatchId + "-" + IdfFiles.getIDprefix() + "_" + i +
                             "-" + WthrFiles.getIDprefix() + "_" + j;
                     EPlusTaskGroup TaskGroup = new EPlusTaskGroup(env, largeproject? BatchId : tag, null, null);
-                    TaskGroup.compile(JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
+                    TaskGroup.compile(Project, JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
                 }
             }
         }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
@@ -915,7 +915,7 @@ public class EPlusBatch extends Thread {
                 env.DCKTemplate = IdfFiles.get(i);
                 String tag = BatchId + "-" + IdfFiles.getIDprefix() + "_" + i;
                 EPlusTaskGroup TaskGroup = new EPlusTaskGroup(env, largeproject? BatchId : tag, null, null);
-                TaskGroup.compile(JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
+                TaskGroup.compile(Project, JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
             }
         }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
             for (int i = 0; i < IdfFiles.size(); i++) {
@@ -925,7 +925,7 @@ public class EPlusBatch extends Thread {
                 env.INSELTemplate = IdfFiles.get(i);
                 String tag = BatchId + "-" + IdfFiles.getIDprefix() + "_" + i;
                 EPlusTaskGroup TaskGroup = new EPlusTaskGroup(env, largeproject? BatchId : tag, null, null);
-                TaskGroup.compile(JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
+                TaskGroup.compile(Project, JobQueue, JobCounter, Project.getParamTree(), largeproject, indexlist, ptr);
             }
         }
         // Force garbage collection
@@ -1101,12 +1101,12 @@ public class EPlusBatch extends Thread {
                 ArrayList<String> keys = new ArrayList<> ();
                 ArrayList<String> vals = new ArrayList<> ();
                 for (Object param : params) {
-                    ParameterItem item = (ParameterItem) param;
+                    ParameterItemV2 item = (ParameterItemV2) param;
                     keys.add(item.getSearchString());
                     if (job.containsKey(item.getID())) {
                         vals.add(job.get(item.getID()).toString());
                     }else {
-                        vals.add(item.getAlternativeValues()[0]);
+                        vals.add(item.getAlternativeValues(Project)[0]);
                     }
                 }
                 keys.trimToSize();
@@ -1217,7 +1217,7 @@ public class EPlusBatch extends Thread {
                 for (int i=0; i<jobs.length; i++) {
                     jobArray[i] = jobs[i].split("\\s*,\\s*");
                     for (int j=3; j<jobArray[i].length; j++) {
-                        jobArray[i][j] = ((ParameterItem)items[j-3]).getAlternativeValues()[Integer.parseInt(jobArray[i][j])];
+                        jobArray[i][j] = ((ParameterItemV2)items[j-3]).getAlternativeValues(Project)[Integer.parseInt(jobArray[i][j])];
                     }
                 }
                 this.buildJobs(jobArray);
@@ -1387,7 +1387,7 @@ public class EPlusBatch extends Thread {
      * @return Index list of selected jobs
      */
     public long [] getRandomJobList (int njobs, Random randomsrc) {
-        long alljobs = Info.getTotalNumberOfJobs();
+        long alljobs = Info.getTotalNumberOfJobs(Project);
         // Check njobs not exceeding total number of jobs
         njobs = (int)Math.min((long)njobs, alljobs);
         long [] list = new long [njobs];
@@ -1427,8 +1427,8 @@ public class EPlusBatch extends Thread {
                 jobs[jobidx][1] = Integer.toString(0);  // weather id
                 jobs[jobidx][2] = Integer.toString(i);  // idf id
                 for (int k=0; k<chain.size(); k++) {
-                    ParameterItem item = (ParameterItem)chain.get(k);
-                    jobs[jobidx][k+3] = item.getAlternativeValues()[0];
+                    ParameterItemV2 item = (ParameterItemV2)chain.get(k);
+                    jobs[jobidx][k+3] = item.getAlternativeValues(Project)[0];
                     jobs[jobidx][0] += "-" + item.getID() + "_0";
                 }
             }

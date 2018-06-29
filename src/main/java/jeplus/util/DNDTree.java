@@ -23,7 +23,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 import java.awt.dnd.*;
-import jeplus.data.ParameterItem;
+import jeplus.data.ParameterItemV2;
 import org.slf4j.LoggerFactory;
 
 public class DNDTree extends JTree {
@@ -60,9 +60,9 @@ public class DNDTree extends JTree {
 
     public static DefaultMutableTreeNode makeDeepCopy(DefaultMutableTreeNode node) {
         Object uobj = node.getUserObject();
-        if (uobj instanceof ParameterItem) {
+        if (uobj instanceof ParameterItemV2) {
             try {
-                uobj = ((ParameterItem) uobj).clone();
+                uobj = ((ParameterItemV2) uobj).clone();
             } catch (CloneNotSupportedException ex) {
                 logger.error("Cannot make copy of user object.", ex);
             }

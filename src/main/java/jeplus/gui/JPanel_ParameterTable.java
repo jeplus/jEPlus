@@ -18,6 +18,7 @@
  ***************************************************************************/
 package jeplus.gui;
 
+import java.awt.Color;
 import java.io.File;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -31,6 +32,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.text.Document;
 import jeplus.EPlusConfig;
@@ -44,6 +46,23 @@ import jeplus.util.CsvUtil;
  */
 public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJPanel, TableModelListener {
 
+    class ValidityCellRenderer extends DefaultTableCellRenderer {
+        boolean editable = true;
+        public ValidityCellRenderer (boolean editable) { 
+            super(); 
+            if (! editable) {
+                this.setBackground(Color.lightGray);
+            }
+        }
+        public void setValidity (boolean valid) {
+            if (valid) {
+                this.setForeground(Color.black);
+            }else {
+                this.setForeground(Color.red);
+            }
+        }
+    }
+    
     protected String Title = "Parameter Table";
     protected ParameterItemV2 CurrentItem = null;
     protected ParamTableModel ParamTableModel = null;
@@ -105,31 +124,39 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
         cboType.setModel(new DefaultComboBoxModel<> (ParameterItemV2.VType.values()));
         // Set up table
         jTableParams = new JTable(ParamTableModel);
+        jTableParams.setDefaultRenderer(String.class, new ValidityCellRenderer(true));
+        jTableParams.setDefaultRenderer(Integer.class, new ValidityCellRenderer(false));
         // Column sizes
         TableColumn column = null;
+        JComboBox comboBox = null;
         for (int i = 0; i < 7; i++) {
             column = jTableParams.getColumnModel().getColumn(i);
-            if (i == 0) {
-                column.setPreferredWidth(20); //# column is small
-            } else if (i == 1) {
-                column.setPreferredWidth(70); //# column is small
-            } else if (i == 2) {
+            if (i == 0) { //#
+                column.setMinWidth(30);
+                column.setPreferredWidth(20);
+                column.setMaxWidth(50);
+            } else if (i == 1) { // P-Type
+                column.setPreferredWidth(70); 
+                comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.PType.values()));
+                column.setCellEditor(new DefaultCellEditor(comboBox));
+            } else if (i == 2) { // P-ID
                 column.setPreferredWidth(30); //# column is small
-            } else if (i == 4) {
+            } else if (i == 3) { // Search Tag
+                column.setPreferredWidth(100); //# column is small
+            } else if (i == 4) { // V-Type
                 column.setPreferredWidth(60); //# column is small
-            } else if (i == 6) {
-                column.setPreferredWidth(25); //# column is small
+                comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.VType.values()));
+                column.setCellEditor(new DefaultCellEditor(comboBox));
+            } else if (i == 5) { // Values string
+                column.setPreferredWidth(200); //# column is small
+            } else if (i == 6) { // N
+                column.setMinWidth(30);
+                column.setPreferredWidth(25);
+                column.setMaxWidth(50);
             } else {
                 column.setPreferredWidth(120);
             }
         }
-        // Column editor
-        TableColumn PTypeColumn = jTableParams.getColumnModel().getColumn(1);
-        JComboBox comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.PType.values()));
-        PTypeColumn.setCellEditor(new DefaultCellEditor(comboBox));        
-        TableColumn VTypeColumn = jTableParams.getColumnModel().getColumn(4);
-        comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.VType.values()));
-        VTypeColumn.setCellEditor(new DefaultCellEditor(comboBox));        
         // Selection listener
         jTableParams.getSelectionModel().addListSelectionListener(new ListSelectionListener (){
             @Override
@@ -714,8 +741,10 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
         int column = tme.getColumn();
         ParamTableModel model = (ParamTableModel)tme.getSource();
 //        String columnName = model.getColumnName(column);
-        CurrentItem = this.Project.getParameters().get(row);
-        displayParamDetails();
+//        CurrentItem = this.Project.getParameters().get(row);
+        if (column >= 0) {
+            displayParamDetails();
+        }
     }
 
 }

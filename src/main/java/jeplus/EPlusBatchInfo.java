@@ -18,7 +18,7 @@
  ***************************************************************************/
 package jeplus;
 
-import jeplus.data.ParameterItem;
+import jeplus.data.ParameterItemV2;
 import java.util.ArrayList;
 import jeplus.data.FileList;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class EPlusBatchInfo {
     protected FileList Models = null;
     protected FileList WeatherFiles = null;
     protected ArrayList<ArrayList> ParamChains = null;
-    protected ArrayList<ParameterItem> ParamList = null;
+    protected ArrayList<ParameterItemV2> ParamList = null;
     protected ArrayList<String> SearchStrings = null;
     protected ArrayList<String> ShortNames = null;
     protected ArrayList<String> ValidationErrors = null;
@@ -84,11 +84,11 @@ public class EPlusBatchInfo {
         this.ParamChains = ParamChains;
     }
 
-    public ArrayList<ParameterItem> getParamList() {
+    public ArrayList<ParameterItemV2> getParamList() {
         return ParamList;
     }
 
-    public void setParamList(ArrayList<ParameterItem> ParamList) {
+    public void setParamList(ArrayList<ParameterItemV2> ParamList) {
         this.ParamList = ParamList;
     }
 
@@ -166,15 +166,15 @@ public class EPlusBatchInfo {
      * List parameter chains in text form
      * @return Text string of the parameter chains
      */
-    public String getParamChainsText () {
+    public String getParamChainsText (JEPlusProjectV2 project) {
         StringBuilder buf = new StringBuilder ("Parameter Chains: ");
         if (ParamChains.size() > 0) {
             buf.append("\n");
             for (ArrayList chain: ParamChains) {
                 long n = 1;
-                for (ParameterItem param: (ArrayList<ParameterItem>)chain) {
+                for (ParameterItemV2 param: (ArrayList<ParameterItemV2>)chain) {
                     buf.append(param.getID()).append("(\"").append(param.getSearchString()).append("\") --> ");
-                    n *= param.getNAltValues();
+                    n *= param.getNAltValues(project);
                 }
                 buf.append(n).append( " jobs\n");
             }
@@ -189,13 +189,13 @@ public class EPlusBatchInfo {
      * takes into account if any parameter's value is fixed
      * @return Total number of jobs in the current project
      */
-    public long getTotalNumberOfJobs () {
+    public long getTotalNumberOfJobs (JEPlusProjectV2 project) {
         long total = 0;
         if (Models != null && ParamChains.size() > 0) {
             for (ArrayList chain: ParamChains) {
                 long n = 1;
-                for (ParameterItem param: (ArrayList<ParameterItem>)chain) {
-                    n *= (param.getSelectedAltValue() > 0) ? 1 : param.getNAltValues();
+                for (ParameterItemV2 param: (ArrayList<ParameterItemV2>)chain) {
+                    n *= (param.getSelectedAltValue() > 0) ? 1 : param.getNAltValues(project);
                 }
                 total += n;
             }
@@ -210,13 +210,13 @@ public class EPlusBatchInfo {
      * parameter values are counted.
      * @return The total search space size of the project
      */
-    public long getTotalSolutionSpace () {
+    public long getTotalSolutionSpace (JEPlusProjectV2 project) {
         long total = 0;
         if (Models != null && ParamChains.size() > 0) {
             for (ArrayList chain: ParamChains) {
                 long n = 1;
-                for (ParameterItem param: (ArrayList<ParameterItem>)chain) {
-                    n *= param.getNAltValues();
+                for (ParameterItemV2 param: (ArrayList<ParameterItemV2>)chain) {
+                    n *= param.getNAltValues(project);
                 }
                 total += n;
             }

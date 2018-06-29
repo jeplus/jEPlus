@@ -47,7 +47,6 @@ import jeplus.agent.EPlusAgentLocal;
 import jeplus.agent.InselAgentLocal;
 import jeplus.agent.TrnsysAgentLocal;
 import jeplus.data.ExecutionOptions;
-import jeplus.data.ParameterItem;
 import jeplus.data.ParameterItemV2;
 import jeplus.data.RVX;
 import jeplus.data.RandomSource;
@@ -94,7 +93,7 @@ public class JEPlusFrameMain extends JFrame {
 
     protected EPlusTextPanelOld OutputPanel = null;
     protected EPlusTextPanelOld ResultFilePanel = null;
-    protected JPanel_ParameterTree jplParameterTree = null;
+//    protected JPanel_ParameterTree jplParameterTree = null;
     protected JPanel_ParameterTable jplParameterTable = null;
     protected JPanel_RVXTree jplRvxTree = null;
     // Project file panel for EnerygPlus
@@ -140,8 +139,8 @@ public class JEPlusFrameMain extends JFrame {
         this.cboProjectType.setModel(new DefaultComboBoxModel<>(JEPlusProjectV2.ModelType.values()));
 
         // tabTexts.setTabComponentAt(0, new ButtonTabComponent (tabTexts));
-        jplParameterTree = new JPanel_ParameterTree ();
-        jplParamTreeHolder.add(this.jplParameterTree, BorderLayout.CENTER);
+//        jplParameterTree = new JPanel_ParameterTree ();
+//        jplParamTreeHolder.add(this.jplParameterTree, BorderLayout.CENTER);
         jplParameterTable = new JPanel_ParameterTable ();
         jplParamTableHolder.add(this.jplParameterTable, BorderLayout.CENTER);
         jplRvxTree = new JPanel_RVXTree (this, Project.getBaseDir(), Project.getRvx());
@@ -403,7 +402,7 @@ public class JEPlusFrameMain extends JFrame {
             this.jplProjectFilesPanelHolder.add(InselProjectFilesPanel, BorderLayout.CENTER);
 //            this.Project.getExecSettings().setParentDir("TRNoutput/");
         }
-        jplParameterTree.setParameterTree(Project);
+//        jplParameterTree.setParameterTree(Project);
         jplParameterTable.setProject(Project);
         jplRvxTree.setContents(this, Project.getBaseDir(), Project.getRvx());
     }
@@ -539,9 +538,9 @@ public class JEPlusFrameMain extends JFrame {
                     (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS ? 
                     "and " + BatchManager.getNumberOfWeathers() + " weather files" : "") + 
                     ", with the following");
-            this.displayInfo(BatchManager.getBatchInfo().getParamChainsText());
+            this.displayInfo(BatchManager.getBatchInfo().getParamChainsText(BatchManager.getProject()));
             //this.displayInfo("" + BatchManager.getNumberOfJobs() + " jobs have been identified.\n");
-            long totalJobs = BatchManager.getBatchInfo().getTotalNumberOfJobs();
+            long totalJobs = BatchManager.getBatchInfo().getTotalNumberOfJobs(BatchManager.getProject());
             String strTotalJobs = totalJobs >= 0 ? LargeIntFormatter.format(totalJobs) : "More than 9.2 x 10^18 ";
             this.displayInfo("" + strTotalJobs + " jobs have been identified in total.\n");
             this.displayInfo("Simulation work directories and results will be stored in: " + Project.resolveWorkDir());
@@ -590,10 +589,10 @@ public class JEPlusFrameMain extends JFrame {
             TpnEditors.setSelectedComponent(OutputPanel);
         }
         // Check batch size and exec agent's capacity
-        if (BatchManager.getBatchInfo().getTotalNumberOfJobs() > BatchManager.getAgent().getQueueCapacity()) {
+        if (BatchManager.getBatchInfo().getTotalNumberOfJobs(BatchManager.getProject()) > BatchManager.getAgent().getQueueCapacity()) {
             // Project is too large
             StringBuilder buf = new StringBuilder ("<html><p>The estimated batch size (");
-            buf.append(LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs()));
+            buf.append(LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs(BatchManager.getProject())));
             buf.append(") exceeds the capacity of ").append(BatchManager.getAgent().getAgentID()).append(" (");
             buf.append(LargeIntFormatter.format(BatchManager.getAgent().getQueueCapacity()));
             buf.append("). </p><p>A large batch may cause jEPlus to crash. Please choose a different agent, or use random sampling or optimisation.</p>");
@@ -622,10 +621,10 @@ public class JEPlusFrameMain extends JFrame {
     public boolean createJobList (String file, String dir) {
         if (this.validateBatchJobs()) {
             // Check batch size and exec agent's capacity
-            if (BatchManager.getBatchInfo().getTotalNumberOfJobs() > 100000 /* BatchManager.getAgent().getQueueCapacity() */) {
+            if (BatchManager.getBatchInfo().getTotalNumberOfJobs(BatchManager.getProject()) > 100000 /* BatchManager.getAgent().getQueueCapacity() */) {
                 // Project is too large
                 StringBuilder buf = new StringBuilder ("<html><p>The estimated batch size (");
-                buf.append(LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs()));
+                buf.append(LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs(BatchManager.getProject())));
                 buf.append(") exceeds 10,000. </p><p>Are you sure to create a list of all jobs?</p>");
                 buf.append("<p>Select Yes if you want to go ahead generate the job list file. </p>");
                 int res = JOptionPane.showConfirmDialog(this, buf.toString(), "List is too long", JOptionPane.YES_NO_OPTION);
@@ -665,10 +664,10 @@ public class JEPlusFrameMain extends JFrame {
         }
         if (opt == EPlusBatch.SampleType.SHUFFLE) {
             // Check batch size 
-            if (BatchManager.getBatchInfo().getTotalNumberOfJobs() > 10000000) { // larger than 10M cases
+            if (BatchManager.getBatchInfo().getTotalNumberOfJobs(BatchManager.getProject()) > 10000000) { // larger than 10M cases
                 // Project is too large
                 StringBuilder buf = new StringBuilder ("<html><p>The estimated solution space size (");
-                buf.append(LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs()));
+                buf.append(LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs(BatchManager.getProject())));
                 buf.append(") is too big. </p><p>Creating a random sample may take a (very) long time. </p>");
                 buf.append("<p>The Latin Hypercube Sampling method is more suitable.</p><p>Are you sure you want to continue? </p>");
                 int res = JOptionPane.showConfirmDialog(this, buf.toString(), "Solution space is too large", JOptionPane.YES_NO_OPTION);
@@ -741,6 +740,10 @@ public class JEPlusFrameMain extends JFrame {
         chkLHS = new javax.swing.JCheckBox();
         jMenuItemImportJson = new javax.swing.JMenuItem();
         jMenuItemExportJson = new javax.swing.JMenuItem();
+        jMenuItemCreateIndex = new javax.swing.JMenuItem();
+        jMenuItemJESSClient = new javax.swing.JMenuItem();
+        jMenuItemJEPlusEA = new javax.swing.JMenuItem();
+        jplParamTreeHolder = new javax.swing.JPanel();
         jSplitPane1 = new javax.swing.JSplitPane();
         tpnMain = new javax.swing.JTabbedPane();
         pnlProject = new javax.swing.JPanel();
@@ -748,7 +751,6 @@ public class JEPlusFrameMain extends JFrame {
         jplProjectFilesPanelHolder = new javax.swing.JPanel();
         jPanel_EPlusProjectFiles2 = new jeplus.gui.JPanel_EPlusProjectFiles();
         jTabbedPane1 = new javax.swing.JTabbedPane();
-        jplParamTreeHolder = new javax.swing.JPanel();
         jplParamTableHolder = new javax.swing.JPanel();
         cboProjectType = new javax.swing.JComboBox();
         jLabel2 = new javax.swing.JLabel();
@@ -815,10 +817,6 @@ public class JEPlusFrameMain extends JFrame {
         jMenuItemViewReports = new javax.swing.JMenuItem();
         jSeparator9 = new javax.swing.JPopupMenu.Separator();
         jMenuItemCreateJobList = new javax.swing.JMenuItem();
-        jMenuItemCreateIndex = new javax.swing.JMenuItem();
-        jSeparator12 = new javax.swing.JPopupMenu.Separator();
-        jMenuItemJESSClient = new javax.swing.JMenuItem();
-        jMenuItemJEPlusEA = new javax.swing.JMenuItem();
         jMenuTools = new javax.swing.JMenu();
         jMenuItemConfig = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JSeparator();
@@ -890,6 +888,34 @@ public class JEPlusFrameMain extends JFrame {
             }
         });
 
+        jMenuItemCreateIndex.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_key.png"))); // NOI18N
+        jMenuItemCreateIndex.setText("Create parameter indexes");
+        jMenuItemCreateIndex.setToolTipText("Create index tables for the parameters in this project.");
+        jMenuItemCreateIndex.setEnabled(false);
+        jMenuItemCreateIndex.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemCreateIndexActionPerformed(evt);
+            }
+        });
+
+        jMenuItemJESSClient.setText("Launch JESS Client");
+        jMenuItemJESSClient.setEnabled(false);
+        jMenuItemJESSClient.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemJESSClientActionPerformed(evt);
+            }
+        });
+
+        jMenuItemJEPlusEA.setText("Launch jEPlus+EA");
+        jMenuItemJEPlusEA.setEnabled(false);
+        jMenuItemJEPlusEA.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemJEPlusEAActionPerformed(evt);
+            }
+        });
+
+        jplParamTreeHolder.setLayout(new java.awt.BorderLayout());
+
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1000, 740));
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -898,7 +924,6 @@ public class JEPlusFrameMain extends JFrame {
             }
         });
 
-        jSplitPane1.setBorder(null);
         jSplitPane1.setDividerLocation(580);
         jSplitPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jSplitPane1.setOpaque(false);
@@ -925,11 +950,8 @@ public class JEPlusFrameMain extends JFrame {
             .addComponent(jPanel_EPlusProjectFiles2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
-        jplParamTreeHolder.setLayout(new java.awt.BorderLayout());
-        jTabbedPane1.addTab("Parameter Tree", jplParamTreeHolder);
-
         jplParamTableHolder.setLayout(new java.awt.BorderLayout());
-        jTabbedPane1.addTab("Table View", jplParamTableHolder);
+        jTabbedPane1.addTab("Parameter Table", jplParamTableHolder);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -1024,7 +1046,7 @@ public class JEPlusFrameMain extends JFrame {
                     .addGroup(jplModelTestLayout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtTestResultFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
+                        .addComponent(txtTestResultFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 371, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmdSelectTestFolder, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -1062,7 +1084,7 @@ public class JEPlusFrameMain extends JFrame {
                 .addContainerGap()
                 .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
+                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 571, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1301,14 +1323,14 @@ public class JEPlusFrameMain extends JFrame {
             pnlUtilitiesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlUtilitiesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 473, Short.MAX_VALUE)
+                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 554, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlUtilitiesLayout.setVerticalGroup(
             pnlUtilitiesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlUtilitiesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 686, Short.MAX_VALUE)
+                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1528,36 +1550,6 @@ public class JEPlusFrameMain extends JFrame {
             }
         });
         jMenuAction.add(jMenuItemCreateJobList);
-
-        jMenuItemCreateIndex.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_white_key.png"))); // NOI18N
-        jMenuItemCreateIndex.setText("Create parameter indexes");
-        jMenuItemCreateIndex.setToolTipText("Create index tables for the parameters in this project.");
-        jMenuItemCreateIndex.setEnabled(false);
-        jMenuItemCreateIndex.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemCreateIndexActionPerformed(evt);
-            }
-        });
-        jMenuAction.add(jMenuItemCreateIndex);
-        jMenuAction.add(jSeparator12);
-
-        jMenuItemJESSClient.setText("Launch JESS Client");
-        jMenuItemJESSClient.setEnabled(false);
-        jMenuItemJESSClient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemJESSClientActionPerformed(evt);
-            }
-        });
-        jMenuAction.add(jMenuItemJESSClient);
-
-        jMenuItemJEPlusEA.setText("Launch jEPlus+EA");
-        jMenuItemJEPlusEA.setEnabled(false);
-        jMenuItemJEPlusEA.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemJEPlusEAActionPerformed(evt);
-            }
-        });
-        jMenuAction.add(jMenuItemJEPlusEA);
 
         jMenuBarMain.add(jMenuAction);
 
@@ -1836,7 +1828,7 @@ private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:even
 private void cmdValidateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdValidateActionPerformed
     if (validateBatchJobs()) {
         JOptionPane.showMessageDialog(this, "Validation successful! " +
-                LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs()) + " jobs identified.\n\n" +
+                LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs(BatchManager.getProject())) + " jobs identified.\n\n" +
                 "Please note that the search strings in the template file(s) have not been verified. You should also check any external\n" +
                 "referencesin the template file(s), e.g. the absolute path names in '##fileprefix' or '##include'. It is also a good \n" +
                 "idea to test a few jobs before running the whole batch.",
@@ -1993,15 +1985,6 @@ private void jMenuItemViewLogActionPerformed(java.awt.event.ActionEvent evt) {//
 private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemViewReportsActionPerformed
     this.openViewTabForFile(BatchManager.getResolvedEnv().getParentDir() + "RunTimes.csv");
 }//GEN-LAST:event_jMenuItemViewReportsActionPerformed
-
-private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCreateIndexActionPerformed
-    if (BatchManager.getBatchInfo().isValid()) {
-        displayInfo (BatchManager.writeProjectIndexCSV());
-        displayInfo (BatchManager.writeProjectIndexSQL("JEPLUSDB", BatchManager.BatchId));
-    }else {
-        displayInfo ("Project is invalid. Please use the \'Validate Jobs\' command in \'Actions\' menu first, and correct all errors, then try create indexes again.");
-    }
-}//GEN-LAST:event_jMenuItemCreateIndexActionPerformed
 
     private void jMenuItemViewIndexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemViewIndexActionPerformed
         this.openViewTabForFile(BatchManager.getResolvedEnv().getParentDir() + "SimJobIndex.csv");
@@ -2699,6 +2682,15 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
         }       
     }//GEN-LAST:event_cmdSelectTestFolderActionPerformed
 
+    private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemCreateIndexActionPerformed
+        if (BatchManager.getBatchInfo().isValid()) {
+//            displayInfo (BatchManager.writeProjectIndexCSV());
+//            displayInfo (BatchManager.writeProjectIndexSQL("JEPLUSDB", BatchManager.BatchId));
+        }else {
+            displayInfo ("Project is invalid. Please use the \'Validate Jobs\' command in \'Actions\' menu first, and correct all errors, then try create indexes again.");
+        }
+    }//GEN-LAST:event_jMenuItemCreateIndexActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane TpnEditors;
     private javax.swing.JTabbedPane TpnUtilities;
@@ -2768,7 +2760,6 @@ private void jMenuItemCreateIndexActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPanel jPanel4;
     private jeplus.gui.JPanel_EPlusProjectFiles jPanel_EPlusProjectFiles2;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JPopupMenu.Separator jSeparator12;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JPopupMenu.Separator jSeparator5;

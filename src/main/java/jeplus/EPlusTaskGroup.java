@@ -18,7 +18,7 @@
  ***************************************************************************/
 package jeplus;
 
-import jeplus.data.ParameterItem;
+import jeplus.data.ParameterItemV2;
 import java.util.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import jeplus.data.Counter;
@@ -58,7 +58,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
     /** Alt values ArrayList */
     protected ArrayList<String> AltValueList;
     /** The current variable to be evaluated in the sub-jobs */
-    protected ParameterItem CurrentVariable = null;
+    protected ParameterItemV2 CurrentVariable = null;
 
     /**
      * Construct an EnergyPlus task group
@@ -94,6 +94,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
 
     /**
      * Compile a task group to create jobs from the given parameter tree
+     * @param project
      * @param jobs Job list to which new jobs are added
      * @param jobcount A global counter for jobs
      * @param tree The parameter tree from which the task group is to be compiled.
@@ -102,7 +103,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
      * @param ptr Current pointer to the item in index list
      * @return Successful or not
      */
-    public boolean compile(List <EPlusTask> jobs, Counter jobcount, DefaultMutableTreeNode tree, boolean autolabel, long [] indexlist, Counter ptr) {
+    public boolean compile(JEPlusProjectV2 project, List <EPlusTask> jobs, Counter jobcount, DefaultMutableTreeNode tree, boolean autolabel, long [] indexlist, Counter ptr) {
         // If all jobs in the index list have been found, return directly
         if (indexlist != null && ptr.getValue() >= indexlist.length) return true;
         // Otherwise, compile...
@@ -111,9 +112,9 @@ public class EPlusTaskGroup implements EPlusJobItem {
         if (tree.isLeaf()) {
             // Create sub-tasks
             try {
-                ParameterItem item = (ParameterItem)tree.getUserObject();
+                ParameterItemV2 item = (ParameterItemV2)tree.getUserObject();
                 this.CurrentVariable = item;
-                String [] vals = item.getAlternativeValues();
+                String [] vals = item.getAlternativeValues(project);
                 if (indexlist == null) {
                     if (item.getSelectedAltValue() > 0) {
                         // Fixing on one value
@@ -248,8 +249,8 @@ public class EPlusTaskGroup implements EPlusJobItem {
         }else {
             // Create sub-groups
             try {
-                ParameterItem item = (ParameterItem)tree.getUserObject();
-                String [] vals = item.getAlternativeValues();
+                ParameterItemV2 item = (ParameterItemV2)tree.getUserObject();
+                String [] vals = item.getAlternativeValues(project);
                 if (item.getSelectedAltValue() > 0) {
                     int i = item.getSelectedAltValue() - 1;
                     ArrayList<String> keys = (ArrayList<String>)SearchStringList.clone();
@@ -262,7 +263,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
                     for (Enumeration e = tree.children(); e.hasMoreElements();) {
                         try {
                             DefaultMutableTreeNode c = (DefaultMutableTreeNode)e.nextElement();
-                            group.compile(jobs, jobcount, c, autolabel, indexlist, ptr);
+                            group.compile(project, jobs, jobcount, c, autolabel, indexlist, ptr);
                         }catch (ClassCastException cce) {
                             logger.error("", cce);
                             success = false;
@@ -283,7 +284,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
                         for (Enumeration e = tree.children(); e.hasMoreElements();) {
                             try {
                                 DefaultMutableTreeNode c = (DefaultMutableTreeNode)e.nextElement();
-                                group.compile(jobs, jobcount, c, autolabel, indexlist, ptr);
+                                group.compile(project, jobs, jobcount, c, autolabel, indexlist, ptr);
                             }catch (ClassCastException cce) {
                                 logger.error("", cce);
                                 success = false;
