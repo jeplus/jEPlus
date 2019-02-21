@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.Properties;
 import javax.swing.filechooser.FileFilter;
 import jeplus.util.RelativeDirUtil;
@@ -61,6 +62,25 @@ public class RadianceConfig extends ConfigFileNames {
     public RadianceConfig() {
         super ();
         ScreenFile = null;
+    }
+
+    public static RadianceConfig loadFromFile(String fn) {
+        RadianceConfig cfg = new RadianceConfig ();
+        Properties prop = new Properties();
+        try {
+            prop.load(new FileReader(fn));
+            cfg.RadianceBinDir = prop.getProperty("RadianceBinDir", null);
+            cfg.RadianceLibDir = prop.getProperty("RadianceLibDir", null);
+            cfg.DaySimBinDir = prop.getProperty("DaySimBinDir", null);
+            cfg.DaySimLibDir = prop.getProperty("DaySimLibDir", null);
+        } catch (FileNotFoundException fnfe) {
+            logger.error("Specified configue file " + fn + " is not found. Null configuration is returned!", fnfe);
+            cfg = null;
+        }catch (IOException ex) {
+            logger.error("Error loading configure file " + fn + ". Null configuration is returned!", ex);
+            cfg = null;
+        }
+        return cfg;
     }
 
     public String getRadianceBinDir() {
@@ -139,24 +159,6 @@ public class RadianceConfig extends ConfigFileNames {
         return dir;
     }
     
-    public boolean loadFromFile(String fn) {
-        Properties prop = new Properties();
-        try {
-            prop.load(new FileReader(fn));
-            RadianceBinDir = prop.getProperty("RadianceBinDir", null);
-            RadianceLibDir = prop.getProperty("RadianceLibDir", null);
-            DaySimBinDir = prop.getProperty("DaySimBinDir", null);
-            DaySimLibDir = prop.getProperty("DaySimLibDir", null);
-        } catch (FileNotFoundException fnfe) {
-            logger.error("Specified configue file " + fn + " is not found.", fnfe);
-            return false;
-        }catch (Exception ex) {
-            logger.error("Error loading configure file " + fn, ex);
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Get a <code>javax.swing.filechooser.FileFilter</code> for predefined file 
      * types.

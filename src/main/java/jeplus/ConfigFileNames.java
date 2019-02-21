@@ -50,6 +50,7 @@ public class ConfigFileNames implements Serializable {
     public static final int JEP = 21;
     public static final int ZIP = 22;
     public static final int JSON = 23;
+    public static final int JEP_OR_JSON = 29;
     public static final int PYTHON = 24;
     public static final int XML = 25;
     public static final int RVX = 26;
@@ -146,6 +147,8 @@ public class ConfigFileNames implements Serializable {
                             return (extension.equalsIgnoreCase(".zip"));
                         case JSON:
                             return (extension.equalsIgnoreCase(".json"));
+                        case JEP_OR_JSON:
+                            return (extension.equalsIgnoreCase(".json") || extension.equalsIgnoreCase(".jep"));
                         case PYTHON:
                             return (extension.equalsIgnoreCase(".py"));
                         case XML:
@@ -183,6 +186,8 @@ public class ConfigFileNames implements Serializable {
                         return "Zipped jEPlus Project input files (.zip)";
                     case JSON:
                         return "JEPlus JSON project file (.json)";
+                    case JEP_OR_JSON:
+                        return "JEPlus project file v2.x JSON (.json) or v1.x JEP (.jep)";
                     case PYTHON:
                         return "Python script file (.py)";
                     case XML:

@@ -164,7 +164,7 @@ public class JEPlusFrameMain extends JFrame {
         TpnEditors.add(OutputPanel);
         TpnEditors.setSelectedComponent(OutputPanel);
         
-        jplProgConfPanel = new JPanelProgConfiguration (null, JEPlusConfig.getDefaultInstance());
+        jplProgConfPanel = new JPanelProgConfiguration (null, JEPlusConfig.getDefaultInstance(), JPanelProgConfiguration.Layout.WIDE);
         jplIDFConvPanel = new JPanel_IDFVersionUpdater (this, JEPlusConfig.getDefaultInstance(), this.getProject());
         jplPythonPanel = new JPanelRunPython (this, JEPlusConfig.getDefaultInstance(), getProject() == null ? "./" : getProject().resolveWorkDir());
         jplReadVarsPanel = new JPanel_RunReadVars(this, JEPlusConfig.getDefaultInstance());
@@ -2512,7 +2512,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private void jMenuItemConfigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemConfigActionPerformed
         JDialog ConfigDialog = new JDialog (this, "Configuration file: ", true);
         if (jplProgConfPanel == null) {
-            jplProgConfPanel = new JPanelProgConfiguration(ConfigDialog, JEPlusConfig.getDefaultInstance());
+            jplProgConfPanel = new JPanelProgConfiguration(ConfigDialog, JEPlusConfig.getDefaultInstance(), JPanelProgConfiguration.Layout.WIDE);
         }else {
             jplProgConfPanel.setHostWindow(ConfigDialog);
         }
@@ -2520,7 +2520,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         ConfigDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         ConfigDialog.setTitle(ConfigDialog.getTitle() + jplProgConfPanel.getConfigFile());
         ConfigDialog.pack();
-        ConfigDialog.setSize(900, 650);
+        ConfigDialog.setSize(1000, 600);
         ConfigDialog.setLocationRelativeTo(this);
         ConfigDialog.setVisible(true);
     }//GEN-LAST:event_jMenuItemConfigActionPerformed
@@ -2563,7 +2563,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
 
         // Save EnergyPlus settings
         String currentdate = SimpleDateFormat.getDateInstance(SimpleDateFormat.MEDIUM).format(new Date());
-        JEPlusConfig.getDefaultInstance().saveAsJSON(new File(JEPlusConfig.DefaultConfigFile));
+        JEPlusConfig.getDefaultInstance().saveAsJSON(new File(JEPlusConfig.getDefaultConfigFile()));
         // Exit
         if (this.getFrameCloseOperation() == JEPlusFrameMain.EXIT_ON_CLOSE) {
             System.exit(-1);

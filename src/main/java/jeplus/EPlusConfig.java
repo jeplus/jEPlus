@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -139,24 +140,25 @@ public class EPlusConfig extends ConfigFileNames {
         Valid = false;
     }
     
-    public boolean loadFromFile (String fn) {
+    public static EPlusConfig loadFromFile (String fn) {
+        EPlusConfig cfg = new EPlusConfig();
         Properties prop = new Properties ();
         try {
             prop.load(new FileReader (fn));
-            EPlusBinDir = prop.getProperty("EPlusBinDir", getDefEPlusBinDir());
-            EPlusEPMacroEXE = prop.getProperty("EPlusEPMacroEXE", EPlusBinDir + getDefEPlusEPMacro());
-            EPlusExpandObjectsEXE = prop.getProperty("EPlusExpandObjectsEXE", EPlusBinDir + getDefEPlusExpandObjects());
-            EPlusEXE = prop.getProperty("EPlusEXE", EPlusBinDir + getDefEPlusEXEC());
-            EPlusReadVarsEXE = prop.getProperty("EPlusReadVarsEXE", EPlusBinDir + getDefEPlusReadVars());
-            ScreenFile = prop.getProperty("ScreenFile", "console.log");
+            cfg.EPlusBinDir = prop.getProperty("EPlusBinDir", getDefEPlusBinDir());
+            cfg.EPlusEPMacroEXE = prop.getProperty("EPlusEPMacroEXE", cfg.EPlusBinDir + getDefEPlusEPMacro());
+            cfg.EPlusExpandObjectsEXE = prop.getProperty("EPlusExpandObjectsEXE", cfg.EPlusBinDir + getDefEPlusExpandObjects());
+            cfg.EPlusEXE = prop.getProperty("EPlusEXE", cfg.EPlusBinDir + getDefEPlusEXEC());
+            cfg.EPlusReadVarsEXE = prop.getProperty("EPlusReadVarsEXE", cfg.EPlusBinDir + getDefEPlusReadVars());
+            cfg.ScreenFile = prop.getProperty("ScreenFile", "console.log");
         }catch (FileNotFoundException fnfe) {
-            logger.error("Specified configue file " + fn + " is not found.");
-            return false;
-        }catch (Exception ex) {
-            logger.error("Error loading configure file " + fn, ex);
-            return false;
+            logger.error("Specified configue file " + fn + " is not found. Null configuration is returned!");
+            cfg = null;
+        }catch (IOException ex) {
+            logger.error("Error loading configure file " + fn + ". Null configuration is returned!", ex);
+            cfg = null;
         }
-        return true;
+        return cfg;
     }
 
     public List<String> validate () {

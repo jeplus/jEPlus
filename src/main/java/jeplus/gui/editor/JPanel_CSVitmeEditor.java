@@ -118,6 +118,7 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
         Csv = csv;
         txtCsvFile.setText(Csv.getSourceCsv());
         txtReport.setText(Csv.getFromReport());
+        txtFor.setText(Csv.getFromFor());
         txtTable.setText(Csv.getFromTable());
         txtColumn.setText(Csv.getFromColumn());
         txtRow.setText(Csv.getFromRow());

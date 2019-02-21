@@ -127,7 +127,7 @@ public class Main {
      */
     public void mainFunction (CommandLine commandline) {
         // jE+ Configuration file
-        String cfgfile = JEPlusConfig.DefaultConfigFile;
+        String cfgfile = JEPlusConfig.getDefaultConfigFile();
         // load E+ configuration
         boolean showSplash = false;
         if (! new File (cfgfile).exists()) { 

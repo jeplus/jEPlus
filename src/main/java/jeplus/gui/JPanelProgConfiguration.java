@@ -35,20 +35,36 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
 
     protected Window HostWindow = null;
     
+    public enum Layout { 
+        TALL,
+        WIDE
+    };
+    
+    
     /**
      * Creates new form JPanelProgConfiguration
      * @param host
      * @param config
+     * @param layout
      */
-    public JPanelProgConfiguration(Window host, JEPlusConfig config) {
+    public JPanelProgConfiguration(Window host, JEPlusConfig config, Layout layout) {
         initComponents();
         HostWindow = host;
         jplEpPanelHolder.add(EpPanel, BorderLayout.CENTER);
         setConfig (config);
+        switch (layout) {
+            case TALL:
+                this.remove(jplInfo);
+                this.add(jplInfo, BorderLayout.SOUTH);
+                break;
+            case WIDE:
+            default:
+                // This is the default. No need to do anything
+        }
     }
 
     public String getConfigFile() {
-        return JEPlusConfig.DefaultConfigFile;
+        return JEPlusConfig.getDefaultConfigFile();
     }
 
     /** 
@@ -98,8 +114,6 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         this.txtPython2Exe.setText(Config.getPython2EXE() == null ? "Select Python 2 exe..." : Config.getPython2EXE());
         this.txtPython3Exe.setText(Config.getPython3EXE() == null ? "Select Python 3 exe..." : Config.getPython3EXE());
         this.txtVerConvDir.setText(Config.getEPlusVerConvDir() == null ? "Select Version Converter dir ..." : Config.getEPlusVerConvDir());
-        this.txtJESSClientDir.setText(Config.getJESSClientDir() == null ? "Select JESS Client dir ..." : Config.getJESSClientDir());
-        this.txtJEPlusEADir.setText(Config.getJEPlusEADir() == null ? "Select jEPlus+EA dir ..." : Config.getJEPlusEADir());
     }
 
     /**
@@ -205,45 +219,6 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         }
         buf.append("<p></p>");
         
-        // JESS Client folder
-        dir = new File (txtJESSClientDir.getText());
-        buf.append("<p><em>JESS Client:</em></p>");
-        if (! (dir.exists() && dir.isDirectory())) {
-            txtJESSClientDir.setForeground(Color.red);
-            buf.append("<p>Specified JESS client dir ").append(dir.getAbsolutePath()).append(" does not exist!</p>");
-        }else {
-            String version = EPlusWinTools.runJavaProgram(dir.getAbsolutePath(), "jess_client_v3.jar", new String [] {"-version"});
-            buf.append("<p>");
-            if (version.startsWith("Error")) {
-                txtJESSClientDir.setForeground(Color.red);
-                buf.append("Failed to check client version: " + version);
-            }else {
-                txtJESSClientDir.setForeground(Color.black);
-                buf.append("Found JESS Client ");
-                buf.append(version);
-            }
-            buf.append("</p>");
-        }
-        buf.append("<p></p>");
-
-        // jEPlus+EA folder
-        dir = new File (txtJEPlusEADir.getText());
-        buf.append("<p><em>jEPlus+EA:</em></p>");
-        if (! (dir.exists() && dir.isDirectory())) {
-            txtJEPlusEADir.setForeground(Color.red);
-            buf.append("<p>Specified jEPlus+EA dir ").append(dir.getAbsolutePath()).append(" does not exist!</p>");
-        }else {
-            buf.append("<p>");
-            if (new File (dir, "jEPlus+EA.jar").exists()){
-                txtJEPlusEADir.setForeground(Color.black);
-                buf.append("Found jEPlus+EA.jar ");
-            }else {
-                txtJEPlusEADir.setForeground(Color.red);
-                buf.append("Cannot find jEPlus+EA.jar");
-            }
-            buf.append("</p>");
-        }
-
         buf.append("<p></p></html>");
         lblInformation.setText(buf.toString());
     }
@@ -272,7 +247,11 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         jLabel10 = new javax.swing.JLabel();
         cboEPlusVersion = new javax.swing.JComboBox();
         cmdEnergyPlusDetails1 = new javax.swing.JButton();
-        jplEpPanelHolder = new javax.swing.JPanel();
+        jplConfig = new javax.swing.JPanel();
+        jPanel6 = new javax.swing.JPanel();
+        cmdSelectVerConvDir = new javax.swing.JButton();
+        txtVerConvDir = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         txtTrnsysBinDir = new javax.swing.JTextField();
         cmdSelectTrnsysDir = new javax.swing.JButton();
@@ -289,21 +268,12 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         txtPython2Exe = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jPanel3 = new javax.swing.JPanel();
-        cmdSave = new javax.swing.JButton();
-        jPanel5 = new javax.swing.JPanel();
-        txtJEPlusEADir = new javax.swing.JTextField();
-        cmdSelectJEPlusEA = new javax.swing.JButton();
-        cmdSelectClient = new javax.swing.JButton();
-        txtJESSClientDir = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        jplEpPanelHolder = new javax.swing.JPanel();
+        jplInfo = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         lblInformation = new javax.swing.JLabel();
-        jPanel6 = new javax.swing.JPanel();
-        cmdSelectVerConvDir = new javax.swing.JButton();
-        txtVerConvDir = new javax.swing.JTextField();
-        jLabel8 = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        cmdSave = new javax.swing.JButton();
 
         cmdSelectEPlusDir.setText("...");
         cmdSelectEPlusDir.setToolTipText("Select the folder where EnergyPlus.exe and Energy+.idd are located");
@@ -345,8 +315,52 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
             }
         });
 
-        jplEpPanelHolder.setBorder(javax.swing.BorderFactory.createTitledBorder("EnergyPlus"));
-        jplEpPanelHolder.setLayout(new java.awt.BorderLayout());
+        setLayout(new java.awt.BorderLayout());
+
+        jplConfig.setMinimumSize(new java.awt.Dimension(500, 520));
+
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("E+ Version Converter"));
+
+        cmdSelectVerConvDir.setText("...");
+        cmdSelectVerConvDir.setToolTipText("Select the root working directory");
+        cmdSelectVerConvDir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdSelectVerConvDirActionPerformed(evt);
+            }
+        });
+
+        txtVerConvDir.setText("Select E+ version converter ...");
+        txtVerConvDir.setToolTipText("Select the location where the version converter is installed");
+
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        jLabel8.setText("Version Converter Dir: ");
+        jLabel8.setMaximumSize(new java.awt.Dimension(116, 14));
+        jLabel8.setMinimumSize(new java.awt.Dimension(116, 14));
+        jLabel8.setPreferredSize(new java.awt.Dimension(116, 14));
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtVerConvDir)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmdSelectVerConvDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtVerConvDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmdSelectVerConvDir)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("TRNSYS"));
 
@@ -401,7 +415,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtTrnsysBinDir, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtTrnsysEXE, javax.swing.GroupLayout.Alignment.TRAILING))
+                            .addComponent(txtTrnsysEXE, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(cmdSelectTRNexe, 0, 1, Short.MAX_VALUE)
@@ -500,6 +514,46 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jplEpPanelHolder.setBorder(javax.swing.BorderFactory.createTitledBorder("EnergyPlus"));
+        jplEpPanelHolder.setLayout(new java.awt.BorderLayout());
+
+        javax.swing.GroupLayout jplConfigLayout = new javax.swing.GroupLayout(jplConfig);
+        jplConfig.setLayout(jplConfigLayout);
+        jplConfigLayout.setHorizontalGroup(
+            jplConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jplConfigLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jplConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jplEpPanelHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jplConfigLayout.setVerticalGroup(
+            jplConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jplConfigLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jplEpPanelHolder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        add(jplConfig, java.awt.BorderLayout.CENTER);
+
+        jplInfo.setMinimumSize(new java.awt.Dimension(500, 300));
+        jplInfo.setPreferredSize(new java.awt.Dimension(500, 300));
+
+        lblInformation.setBackground(new java.awt.Color(204, 204, 204));
+        lblInformation.setText("jLabel2");
+        lblInformation.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        jScrollPane1.setViewportView(lblInformation);
+
         cmdSave.setText("Save Configuration and Close");
         cmdSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -508,165 +562,28 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         });
         jPanel3.add(cmdSave);
 
-        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("JESS Client & jEPlus+EA"));
-
-        txtJEPlusEADir.setText("Select jEPlus+EA's location ...");
-        txtJEPlusEADir.setToolTipText("Select the location where jEPlus+EA is installed");
-
-        cmdSelectJEPlusEA.setText("...");
-        cmdSelectJEPlusEA.setToolTipText("Select the root working directory");
-        cmdSelectJEPlusEA.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectJEPlusEAActionPerformed(evt);
-            }
-        });
-
-        cmdSelectClient.setText("...");
-        cmdSelectClient.setToolTipText("Select the root working directory");
-        cmdSelectClient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectClientActionPerformed(evt);
-            }
-        });
-
-        txtJESSClientDir.setText("Select the JESS client's location ...");
-        txtJESSClientDir.setToolTipText("Select the location where the JESS Client is installed");
-
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel2.setText("JESS Client Directory: ");
-        jLabel2.setMaximumSize(new java.awt.Dimension(116, 14));
-        jLabel2.setMinimumSize(new java.awt.Dimension(116, 14));
-        jLabel2.setPreferredSize(new java.awt.Dimension(116, 14));
-
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel4.setText("jEPlus+EA Directory: ");
-        jLabel4.setMaximumSize(new java.awt.Dimension(116, 14));
-        jLabel4.setMinimumSize(new java.awt.Dimension(116, 14));
-        jLabel4.setPreferredSize(new java.awt.Dimension(116, 14));
-
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
+        javax.swing.GroupLayout jplInfoLayout = new javax.swing.GroupLayout(jplInfo);
+        jplInfo.setLayout(jplInfoLayout);
+        jplInfoLayout.setHorizontalGroup(
+            jplInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jplInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtJESSClientDir)
-                    .addComponent(txtJEPlusEADir))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmdSelectClient, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectJEPlusEA, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtJESSClientDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectClient)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtJEPlusEADir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectJEPlusEA)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        lblInformation.setBackground(new java.awt.Color(204, 204, 204));
-        lblInformation.setText("jLabel2");
-        lblInformation.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        jScrollPane1.setViewportView(lblInformation);
-
-        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("E+ Version Converter"));
-
-        cmdSelectVerConvDir.setText("...");
-        cmdSelectVerConvDir.setToolTipText("Select the root working directory");
-        cmdSelectVerConvDir.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectVerConvDirActionPerformed(evt);
-            }
-        });
-
-        txtVerConvDir.setText("Select E+ version converter ...");
-        txtVerConvDir.setToolTipText("Select the location where the version converter is installed");
-
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel8.setText("Version Converter Dir: ");
-        jLabel8.setMaximumSize(new java.awt.Dimension(116, 14));
-        jLabel8.setMinimumSize(new java.awt.Dimension(116, 14));
-        jLabel8.setPreferredSize(new java.awt.Dimension(116, 14));
-
-        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
-        jPanel6.setLayout(jPanel6Layout);
-        jPanel6Layout.setHorizontalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtVerConvDir)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmdSelectVerConvDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        jPanel6Layout.setVerticalGroup(
-            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtVerConvDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectVerConvDir)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jplEpPanelHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
+                .addGroup(jplInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE)
                     .addComponent(jScrollPane1))
                 .addContainerGap())
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+        jplInfoLayout.setVerticalGroup(
+            jplInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jplInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1)
-                        .addGap(18, 18, 18)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jplEpPanelHolder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 94, Short.MAX_VALUE)))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 447, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
+
+        add(jplInfo, java.awt.BorderLayout.EAST);
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdSelectEPlusDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectEPlusDirActionPerformed
@@ -685,7 +602,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
 //            Config.setEPlusReadVars(bindir + EPlusConfig.getDefEPlusReadVars());
 //            initSettings();
 //            checkSettings();
-            Config.saveAsJSON(new File(JEPlusConfig.DefaultConfigFile));
+            Config.saveAsJSON(new File(getConfigFile()));
         }
         fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
     }//GEN-LAST:event_cmdSelectEPlusDirActionPerformed
@@ -779,43 +696,11 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     }//GEN-LAST:event_cmdSelectPython2ExeActionPerformed
 
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
-        Config.saveAsJSON(new File(JEPlusConfig.DefaultConfigFile));
+        Config.saveAsJSON(new File(getConfigFile()));
         if (HostWindow != null) {
             HostWindow.dispose();
         }
     }//GEN-LAST:event_cmdSaveActionPerformed
-
-    private void cmdSelectJEPlusEAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectJEPlusEAActionPerformed
-        // Select a directory to open
-        fc.resetChoosableFileFilters();
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            String fn = file.getAbsolutePath();
-            String bindir = fn + File.separator;
-            Config.setJEPlusEADir(bindir);
-            txtJEPlusEADir.setText(bindir);
-            checkSettings();
-        }
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-    }//GEN-LAST:event_cmdSelectJEPlusEAActionPerformed
-
-    private void cmdSelectClientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectClientActionPerformed
-        // Select a directory to open
-        fc.resetChoosableFileFilters();
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            String fn = file.getAbsolutePath();
-            String bindir = fn + File.separator;
-            Config.setJESSClientDir(bindir);
-            txtJESSClientDir.setText(bindir);
-            checkSettings();
-        }
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-    }//GEN-LAST:event_cmdSelectClientActionPerformed
 
     private void cmdSelectVerConvDirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectVerConvDirActionPerformed
         // Select a directory to open
@@ -853,9 +738,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     private javax.swing.JButton cmdEnergyPlusDetails;
     private javax.swing.JButton cmdEnergyPlusDetails1;
     private javax.swing.JButton cmdSave;
-    private javax.swing.JButton cmdSelectClient;
     private javax.swing.JButton cmdSelectEPlusDir;
-    private javax.swing.JButton cmdSelectJEPlusEA;
     private javax.swing.JButton cmdSelectPython2Exe;
     private javax.swing.JButton cmdSelectPython3Exe;
     private javax.swing.JButton cmdSelectTRNexe;
@@ -863,9 +746,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     private javax.swing.JButton cmdSelectVerConvDir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -874,14 +755,13 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel jplConfig;
     private javax.swing.JPanel jplEpPanelHolder;
+    private javax.swing.JPanel jplInfo;
     private javax.swing.JLabel lblInformation;
     private javax.swing.JTextField txtEPlusBinDir;
-    private javax.swing.JTextField txtJEPlusEADir;
-    private javax.swing.JTextField txtJESSClientDir;
     private javax.swing.JTextField txtPython2Exe;
     private javax.swing.JTextField txtPython3Exe;
     private javax.swing.JTextField txtTrnsysBinDir;

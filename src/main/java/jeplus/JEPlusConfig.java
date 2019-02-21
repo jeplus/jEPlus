@@ -57,6 +57,8 @@ public class JEPlusConfig extends ConfigFileNames {
 
     /** Reference to configure file */
     public static String DefaultConfigFile = "tools.json";
+    public static String getDefaultConfigFile () { return DefaultConfigFile; }
+    public static void setDefaultConfigFile (String fn) { DefaultConfigFile = fn; }
 
     /** EPlus configurations */
     protected List<EPlusConfig> EPlusList = new ArrayList<>();
