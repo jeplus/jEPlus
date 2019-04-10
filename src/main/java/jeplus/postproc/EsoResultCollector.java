@@ -21,6 +21,7 @@ package jeplus.postproc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import jeplus.EPlusBatch;
+import jeplus.EPlusConfig;
 import jeplus.JEPlusConfig;
 import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX;
@@ -36,12 +37,29 @@ public class EsoResultCollector extends ResultCollector {
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(EsoResultCollector.class);
     
+    protected EPlusConfig Config = null;
+    
     /**
      * Empty constructor. Actual assignment of readers and writers are done in the <code>collectResutls()</code> function
      * @param Desc Description of this collector
      */
     public EsoResultCollector (String Desc) {
         super (Desc);
+        this.RepReader = null;
+        this.RepWriter = null;
+        this.ResReader = null;
+        this.ResWriter = null;
+        this.IdxWriter = null;
+    }
+
+    /**
+     * Empty constructor with assigned EPlusConfig object. Actual assignment of readers and writers are done in the <code>collectResutls()</code> function
+     * @param Desc Description of this collector
+     * @param config Assigned EPlusConfig object to be used by this collector
+     */
+    public EsoResultCollector (String Desc, EPlusConfig config) {
+        super (Desc);
+        Config = config;
         this.RepReader = null;
         this.RepWriter = null;
         this.ResReader = null;
@@ -64,7 +82,7 @@ public class EsoResultCollector extends ResultCollector {
                 ResultFiles.add(fn);
                 ResWriter = new DefaultCSVWriter(null, fn);
                 ResReader = new EPlusRVIReader(
-                        JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(JobOwner.getProject().getEPlusModelVersion()),
+                        Config == null ? JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(JobOwner.getProject().getEPlusModelVersion()) : Config,
                         RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
                         item.getFrequency(), 
                         fn, 
