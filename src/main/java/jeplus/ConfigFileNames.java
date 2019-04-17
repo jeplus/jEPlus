@@ -18,6 +18,9 @@
  ***************************************************************************/
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,7 +37,17 @@ import org.slf4j.LoggerFactory;
  * @version 0.5c
  * @since 0.1
  */
-public class ConfigFileNames implements Serializable {
+//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+//              include = JsonTypeInfo.As.PROPERTY,
+//              property = "type")
+//@JsonSubTypes({
+//    @Type(value = EPlusConfig.class, name = "E+"),
+//    @Type(value = TRNSYSConfig.class, name = "TRNSYS"),
+//    @Type(value = INSELConfig.class, name = "INSEL"),
+//    @Type(value = RadianceConfig.class, name = "Radiance")
+//    })
+
+public abstract class ConfigFileNames implements Serializable {
 
     /** Logger */
     private final static org.slf4j.Logger logger = LoggerFactory.getLogger(ConfigFileNames.class);
