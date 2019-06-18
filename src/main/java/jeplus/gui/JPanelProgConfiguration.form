@@ -512,7 +512,7 @@
           <SubComponents>
             <Component class="javax.swing.JButton" name="cmdSave">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Save Configuration and Close"/>
+                <Property name="text" type="java.lang.String" value="Save Configuration"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSaveActionPerformed"/>

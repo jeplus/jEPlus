@@ -554,7 +554,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         lblInformation.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         jScrollPane1.setViewportView(lblInformation);
 
-        cmdSave.setText("Save Configuration and Close");
+        cmdSave.setText("Save Configuration");
         cmdSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdSaveActionPerformed(evt);
