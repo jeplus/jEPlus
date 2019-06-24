@@ -80,7 +80,7 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
      */
     public final void initSettings () {
         txtBinDir.setText(Config.getTRNSYSBinDir());
-        txtTrnsysEXE.setText(Config.getTRNSYSEXEC());
+        txtTrnsysEXE.setText(Config.getTRNSYSEXE());
     }
 
     /**
@@ -219,7 +219,7 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
             String name = file.getPath();
             txtTrnsysEXE.setText(name);
             txtTrnsysEXE.setForeground(Color.black);
-            Config.setTRNSYSEXEC(name);
+            Config.setTRNSYSEXE(name);
         }
         fc.resetChoosableFileFilters();
 }//GEN-LAST:event_cmdSelectTRNexeActionPerformed
@@ -232,8 +232,8 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
             File file = fc.getSelectedFile();
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
-            Config.setTRNSYSBinDir(bindir);
-//            Config.setTRNSYSEXEC(new File (bindir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath());
+            Config.setNewTRNSYSBinDir(bindir);
+//            Config.setTRNSYSEXE(new File (bindir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath());
 //            initSettings();
 //            checkSettings();
         }

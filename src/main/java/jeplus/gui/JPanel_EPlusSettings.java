@@ -270,7 +270,7 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
             EPlusConfig cfg = new EPlusConfig();
-            cfg.setEPlusBinDir(bindir);
+            cfg.setNewEPlusBinDir(bindir);
             EPlusConfig cur = getSelectedConfig();
             Config.getEPlusConfigs().put(cfg.getVersion(), cfg);
             Config.setCurrentEPlus(cfg);

@@ -107,7 +107,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         if (! Config.getTRNSYSConfigs().isEmpty()) {
             cboTrnVersion.setModel(new DefaultComboBoxModel (Config.getTRNSYSConfigs().keySet().toArray(new String [0])));
             txtTrnsysBinDir.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSBinDir());
-            txtTrnsysEXE.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSEXEC());
+            txtTrnsysEXE.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSEXE());
         }else {
             txtTrnsysBinDir.setText("Select a TRNSYS installation ...");
         }
@@ -595,11 +595,11 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
             File file = fc.getSelectedFile();
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
-            getSelectedEPlusConfig().setEPlusBinDir(bindir);
-//            Config.setEPlusEPMacro(bindir + EPlusConfig.getDefEPlusEPMacro());
-//            Config.setEPlusExpandObjects(bindir + EPlusConfig.getDefEPlusExpandObjects());
-//            Config.setEPlusEXEC(bindir + EPlusConfig.getDefEPlusEXEC());
-//            Config.setEPlusReadVars(bindir + EPlusConfig.getDefEPlusReadVars());
+            getSelectedEPlusConfig().setNewEPlusBinDir(bindir);
+//            Config.setEPlusEPMacroEXE(bindir + EPlusConfig.getDefEPlusEPMacro());
+//            Config.setEPlusExpandObjectsEXE(bindir + EPlusConfig.getDefEPlusExpandObjects());
+//            Config.setEPlusEXE(bindir + EPlusConfig.getDefEPlusEXEC());
+//            Config.setEPlusReadVarsEXE(bindir + EPlusConfig.getDefEPlusReadVars());
 //            initSettings();
 //            checkSettings();
             Config.saveAsJSON(new File(getConfigFile()));
@@ -638,8 +638,8 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
             File file = fc.getSelectedFile();
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
-            getSelectedTrnsysConfig().setTRNSYSBinDir(bindir);
-//            Config.setTRNSYSEXEC(new File (bindir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath());
+            getSelectedTrnsysConfig().setNewTRNSYSBinDir(bindir);
+//            Config.setTRNSYSEXE(new File (bindir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath());
 //            initSettings();
 //            checkSettings();
         }
@@ -655,7 +655,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
             String name = file.getPath();
             txtTrnsysEXE.setText(name);
             txtTrnsysEXE.setForeground(Color.black);
-            getSelectedTrnsysConfig().setTRNSYSEXEC(name);
+            getSelectedTrnsysConfig().setTRNSYSEXE(name);
         }
         fc.resetChoosableFileFilters();
         checkSettings ();
@@ -724,7 +724,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
 
     private void cboTrnVersionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboTrnVersionActionPerformed
         txtTrnsysBinDir.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSBinDir());
-        txtTrnsysEXE.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSEXEC());
+        txtTrnsysEXE.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSEXE());
     }//GEN-LAST:event_cboTrnVersionActionPerformed
 
     private void cmdEnergyPlusDetails1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnergyPlusDetails1ActionPerformed

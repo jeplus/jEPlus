@@ -72,7 +72,7 @@ public class EPlusConfig extends ConfigFileNames {
     private static final String EPlusExpandObjects_WIN = "ExpandObjects.exe"; // Eplus windows ExpandObjects
     private static final String EPlusExpandObjects_LIN = "ExpandObjects"; // Eplus Linux ExpandObjects
     private static final String EPlusEXEC_WIN = "EnergyPlus.exe"; // Eplus windows exec
-    private static final String EPlusEXEC_LIN = "EnergyPlus"; // Eplus Linux kernel
+    private static final String EPlusEXEC_LIN = "energyplus"; // Eplus Linux kernel
     private static final String EPlusReadVars_WIN = "PostProcess/ReadVarsEso.exe"; // Eplus windows ReadVarEso.exe
     private static final String EPlusReadVars_LIN = "PostProcess/ReadVarsEso"; // Eplus Linux rvEsoKernel
     private static final String EPDefINI = "Energy+.ini";
@@ -119,11 +119,10 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** EnergyPlus settings */
     protected String EPlusBinDir = null;
-    protected String EPlusEPMacroEXE = null;
+    protected String EPlusEPMacro = null;
     protected String EPlusEXE = null;
-    protected String EPlusReadVarsEXE = null;
-    protected String EPlusExpandObjectsEXE = null;
-    protected int    NThreads = 0;
+    protected String EPlusReadVars = null;
+    protected String EPlusExpandObjects = null;
     protected VersionInfo Version = null;
     
     /** This config is valid or not */
@@ -131,10 +130,10 @@ public class EPlusConfig extends ConfigFileNames {
 
     public EPlusConfig () {
         EPlusBinDir = getDefEPlusBinDir();
-        EPlusEPMacroEXE = EPlusBinDir + getDefEPlusEPMacro();
+        EPlusEPMacro = EPlusBinDir + getDefEPlusEPMacro();
         EPlusEXE = EPlusBinDir + getDefEPlusEXEC();
-        EPlusReadVarsEXE = EPlusBinDir + getDefEPlusReadVars();
-        EPlusExpandObjectsEXE = EPlusBinDir + getDefEPlusExpandObjects();
+        EPlusReadVars = EPlusBinDir + getDefEPlusReadVars();
+        EPlusExpandObjects = EPlusBinDir + getDefEPlusExpandObjects();
         ScreenFile = "console.log"; // no screen log file if set to null
         Version = new VersionInfo ("8.7");
         Valid = false;
@@ -146,11 +145,20 @@ public class EPlusConfig extends ConfigFileNames {
         try {
             prop.load(new FileReader (fn));
             cfg.EPlusBinDir = prop.getProperty("EPlusBinDir", getDefEPlusBinDir());
-            cfg.EPlusEPMacroEXE = prop.getProperty("EPlusEPMacroEXE", cfg.EPlusBinDir + getDefEPlusEPMacro());
-            cfg.EPlusExpandObjectsEXE = prop.getProperty("EPlusExpandObjectsEXE", cfg.EPlusBinDir + getDefEPlusExpandObjects());
+            cfg.EPlusEPMacro = prop.getProperty("EPlusEPMacroEXE", cfg.EPlusBinDir + getDefEPlusEPMacro());
+            cfg.EPlusExpandObjects = prop.getProperty("EPlusExpandObjectsEXE", cfg.EPlusBinDir + getDefEPlusExpandObjects());
             cfg.EPlusEXE = prop.getProperty("EPlusEXE", cfg.EPlusBinDir + getDefEPlusEXEC());
-            cfg.EPlusReadVarsEXE = prop.getProperty("EPlusReadVarsEXE", cfg.EPlusBinDir + getDefEPlusReadVars());
+            cfg.EPlusReadVars = prop.getProperty("EPlusReadVarsEXE", cfg.EPlusBinDir + getDefEPlusReadVars());
             cfg.ScreenFile = prop.getProperty("ScreenFile", "console.log");
+            cfg.getEPlusVersion();
+            List<String> issues = cfg.validate();
+            if (! cfg.isValid()) {
+                StringBuilder buf = new StringBuilder ("E+ Configuration loaded from " + fn + " contains the following errors: ");
+                for (String line : issues) {
+                    buf.append("\n").append(line);
+                }
+                logger.warn(buf.toString());
+            }
         }catch (FileNotFoundException fnfe) {
             logger.error("Specified configue file " + fn + " is not found. Null configuration is returned!");
             cfg = null;
@@ -177,7 +185,7 @@ public class EPlusConfig extends ConfigFileNames {
         Valid = ok;
         ok = new File(exe).exists();
         if (! ok) {
-            invalid.add(getEPlusEXEC());
+            invalid.add(getEPlusEXE());
         }
         Valid &= ok;
         ok = new File(epmacro).exists();
@@ -223,16 +231,22 @@ public class EPlusConfig extends ConfigFileNames {
         return dir;
     }
 
+    public void setEPlusBinDir(String EPlusBinDir) {
+        this.EPlusBinDir = EPlusBinDir;
+        this.getEPlusVersion();
+    }
+
     /** 
      * Set Bin Directory
      * @param dir 
      */
-    public void setEPlusBinDir(String dir) {
+    @JsonIgnore
+    public void setNewEPlusBinDir(String dir) {
         EPlusBinDir = dir;
-        EPlusEPMacroEXE = EPlusBinDir + EPlusConfig.getDefEPlusEPMacro();
-        EPlusExpandObjectsEXE = EPlusBinDir + EPlusConfig.getDefEPlusExpandObjects();
+        EPlusEPMacro = EPlusBinDir + EPlusConfig.getDefEPlusEPMacro();
+        EPlusExpandObjects = EPlusBinDir + EPlusConfig.getDefEPlusExpandObjects();
         EPlusEXE = EPlusBinDir + EPlusConfig.getDefEPlusEXEC();
-        EPlusReadVarsEXE = EPlusBinDir + EPlusConfig.getDefEPlusReadVars();
+        EPlusReadVars = EPlusBinDir + EPlusConfig.getDefEPlusReadVars();
         this.validate();
         this.getEPlusVersion();
         fireConfigChangedEvent ();
@@ -248,7 +262,7 @@ public class EPlusConfig extends ConfigFileNames {
     }
 
     /** Get EnergyPlus executable */
-    public String getEPlusEXEC() {
+    public String getEPlusEXE() {
         return EPlusEXE;
     }
 
@@ -260,7 +274,7 @@ public class EPlusConfig extends ConfigFileNames {
     }
 
     /** Set EnergyPlus executable */
-    public void setEPlusEXEC(String name) {
+    public void setEPlusEXE(String name) {
         EPlusEXE = name;
         fireConfigChangedEvent ();
     }
@@ -276,19 +290,19 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** Get EnergyPlus ReadVarsESO executable */
     public String getEPlusReadVars() {
-        return EPlusReadVarsEXE;
+        return EPlusReadVars;
     }
 
     /** Get full EPlus readvarseso command path */
     @JsonIgnore
     public String getResolvedReadVars() {
-        String cmd = RelativeDirUtil.checkAbsolutePath(EPlusReadVarsEXE, UserBaseDir);
+        String cmd = RelativeDirUtil.checkAbsolutePath(EPlusReadVars, UserBaseDir);
         return cmd;
     }
 
     /** Set EnergyPlus ReadVarsESO executable */
     public void setEPlusReadVars(String name) {
-        EPlusReadVarsEXE = name;
+        EPlusReadVars = name;
         fireConfigChangedEvent ();
     }
 
@@ -303,19 +317,19 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** Get EnergyPlus EPMacro executable */
     public String getEPlusEPMacro() {
-        return EPlusEPMacroEXE;
+        return EPlusEPMacro;
     }
 
     /** Get full EPlus epmacro command path */
     @JsonIgnore
     public String getResolvedEPMacro() {
-        String cmd = RelativeDirUtil.checkAbsolutePath(EPlusEPMacroEXE, UserBaseDir);
+        String cmd = RelativeDirUtil.checkAbsolutePath(EPlusEPMacro, UserBaseDir);
         return cmd;
     }
 
     /** Set EnergyPlus EPMacro executable */
     public void setEPlusEPMacro(String name) {
-        EPlusEPMacroEXE = name;
+        EPlusEPMacro = name;
         fireConfigChangedEvent ();
     }
 
@@ -330,34 +344,38 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** Get EnergyPlus ExpandObjects executable */
     public String getEPlusExpandObjects() {
-        return EPlusExpandObjectsEXE;
+        return EPlusExpandObjects;
     }
 
     /** Get full EPlus ExpandObjects command path */
     @JsonIgnore
     public String getResolvedExpandObjects() {
-        String cmd = RelativeDirUtil.checkAbsolutePath(EPlusExpandObjectsEXE, UserBaseDir);
+        String cmd = RelativeDirUtil.checkAbsolutePath(EPlusExpandObjects, UserBaseDir);
         return cmd;
     }
 
     /** Set EnergyPlus ExpandObjects executable */
     public void setEPlusExpandObjects(String name) {
-        EPlusExpandObjectsEXE = name;
+        EPlusExpandObjects = name;
         fireConfigChangedEvent ();
     }
 
+    @JsonIgnore
     public VersionInfo getVersion() {
         return Version;
     }
 
+    @JsonIgnore
     public void setVersion(VersionInfo Version) {
         this.Version = Version;
     }
 
+    @JsonIgnore
     public boolean isValid() {
         return Valid;
     }
 
+    @JsonIgnore
     public void setValid(boolean Valid) {
         this.Valid = Valid;
     }

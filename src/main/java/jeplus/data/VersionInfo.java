@@ -72,6 +72,16 @@ public class VersionInfo implements Comparable {
     }
     
     
+    /**
+     * Get version string containing only the major.minor form
+     * @return Version string
+     */
+    public String toMajorMinorString () {
+        StringBuilder buf = new StringBuilder();
+        buf.append(Major).append(".").append(Minor);
+        return buf.toString();
+    }
+
     @Override
     public String toString () {
         StringBuilder buf = new StringBuilder();

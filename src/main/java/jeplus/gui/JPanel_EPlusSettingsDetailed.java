@@ -79,7 +79,7 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
      */
     public final void initSettings () {
         txtBinDir.setText(Config.getEPlusBinDir());
-        txtEPlusEXE.setText(Config.getEPlusEXEC());
+        txtEPlusEXE.setText(Config.getEPlusEXE());
         txtReadVarEXE.setText(Config.getEPlusReadVars());
         txtEPMacroEXE.setText(Config.getEPlusEPMacro());
         txtExpandObjectsEXE.setText(Config.getEPlusExpandObjects());
@@ -319,7 +319,7 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
             String name = file.getPath();
             txtEPlusEXE.setText(name);
             txtEPlusEXE.setForeground(Color.black);
-            Config.setEPlusEXEC(name);
+            Config.setEPlusEXE(name);
         }
         fc.resetChoosableFileFilters();
 }//GEN-LAST:event_cmdSelectEPexeActionPerformed
@@ -350,11 +350,11 @@ public class JPanel_EPlusSettingsDetailed extends javax.swing.JPanel implements 
             File file = fc.getSelectedFile();
             String fn = file.getAbsolutePath();
             String bindir = fn + File.separator;
-            Config.setEPlusBinDir(bindir);
-//            Config.setEPlusEPMacro(bindir + EPlusConfig.getDefEPlusEPMacro());
-//            Config.setEPlusExpandObjects(bindir + EPlusConfig.getDefEPlusExpandObjects());
-//            Config.setEPlusEXEC(bindir + EPlusConfig.getDefEPlusEXEC());
-//            Config.setEPlusReadVars(bindir + EPlusConfig.getDefEPlusReadVars());
+            Config.setNewEPlusBinDir(bindir);
+//            Config.setEPlusEPMacroEXE(bindir + EPlusConfig.getDefEPlusEPMacro());
+//            Config.setEPlusExpandObjectsEXE(bindir + EPlusConfig.getDefEPlusExpandObjects());
+//            Config.setEPlusEXE(bindir + EPlusConfig.getDefEPlusEXEC());
+//            Config.setEPlusReadVarsEXE(bindir + EPlusConfig.getDefEPlusReadVars());
 //            initSettings();
 //            checkSettings();
         }

@@ -182,10 +182,15 @@ public class TRNSYSConfig extends ConfigFileNames {
         return TRNSYSBinDir;
     }
 
+    public void setTRNSYSBinDir(String TRNSYSBinDir) {
+        this.TRNSYSBinDir = TRNSYSBinDir;
+    }
+
     /**
      * Set Bin Directory
      */
-    public void setTRNSYSBinDir(String dir) {
+    @JsonIgnore
+    public void setNewTRNSYSBinDir(String dir) {
         TRNSYSBinDir = dir;
         TRNSYSEXE = new File (TRNSYSBinDir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath();
         fireConfigChangedEvent ();
@@ -211,14 +216,14 @@ public class TRNSYSConfig extends ConfigFileNames {
     /**
      * Get TRNSYS executable
      */
-    public String getTRNSYSEXEC() {
+    public String getTRNSYSEXE() {
         return TRNSYSEXE;
     }
 
     /**
      * Set TRNSYS executable
      */
-    public void setTRNSYSEXEC(String name) {
+    public void setTRNSYSEXE(String name) {
         TRNSYSEXE = name;
         fireConfigChangedEvent ();
     }

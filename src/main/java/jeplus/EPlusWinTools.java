@@ -578,34 +578,37 @@ public class EPlusWinTools {
                 }
             }
 
-            // Run EnergyPlus ReadVarsESO
-            if (useReadVars) {
-                CmdLine = config.getResolvedReadVars() + " " + EPlusConfig.getEPDefRvi();
-                EPProc = Runtime.getRuntime().exec(CmdLine, null, new File(WorkDir));
-                // Console logger
-                try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
-                    if (outs != null) {
-                        outs.println("# Calling ReadVarsESO - " + (new SimpleDateFormat()).format(new Date()));
-                        outs.println("# Command line: " + WorkDir + ">" + CmdLine);
-                        outs.flush();
-                    }
-                    StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
-                    StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
-                    p_out.start();
-                    p_err.start();
-                    ExitValue = EPProc.waitFor();
-                    p_out.join();
-                    p_err.join();
-                    if (outs != null) {
-                        outs.println("# ReadVarsESO returns: " + ExitValue);
-                        outs.flush();
+            if (ExitValue == 0) {
+                // Run EnergyPlus ReadVarsESO -- this is no longer used
+                if (useReadVars) {
+                    CmdLine = config.getResolvedReadVars() + " " + EPlusConfig.getEPDefRvi();
+                    EPProc = Runtime.getRuntime().exec(CmdLine, null, new File(WorkDir));
+                    // Console logger
+                    try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
+                        if (outs != null) {
+                            outs.println("# Calling ReadVarsESO - " + (new SimpleDateFormat()).format(new Date()));
+                            outs.println("# Command line: " + WorkDir + ">" + CmdLine);
+                            outs.flush();
+                        }
+                        StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
+                        StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
+                        p_out.start();
+                        p_err.start();
+                        ExitValue = EPProc.waitFor();
+                        p_out.join();
+                        p_err.join();
+                        if (outs != null) {
+                            outs.println("# ReadVarsESO returns: " + ExitValue);
+                            outs.flush();
+                        }
                     }
                 }
+                // set it to successful
+                ExitValue = 0;
             }
-            // set it to successful
-            ExitValue = 0;
         } catch (Exception ex) {
             logger.error("Error executing E+ binaries.", ex);
+            ExitValue = -99;
         }
 
         // Return Radiance exit value
