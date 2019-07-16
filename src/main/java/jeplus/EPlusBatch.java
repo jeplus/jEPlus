@@ -968,9 +968,9 @@ public class EPlusBatch extends Thread {
             return -5;
         }
         String [] searchstr = Info.getSearchStringsArray();
-        if (searchstr.length != jobArray[0].length - 3) {
+        if (searchstr.length != jobArray[0].length - (Project.getProjectType()==JEPlusProjectV2.ModelType.EPLUS ? 3 : 2)) {
             logger.error("EPlusBatch.buildJobs(): Supplied job array does not comply with project definition. "
-                    + searchstr.length + " variables are present, whereas " + jobArray[0].length + " values are given.");
+                    + (searchstr.length+(Project.getProjectType()==JEPlusProjectV2.ModelType.EPLUS ? 2 : 1)) + " variables are present, whereas " + (jobArray[0].length-1) + " values are given.");
             return -6;
         }
         // env is needed to carry individual job settings
@@ -990,14 +990,14 @@ public class EPlusBatch extends Thread {
                     switch (env.getProjectType()) {
                         case TRNSYS:
                             try {
-                                env.DCKTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
+                                env.DCKTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][1]));
                             }catch (NumberFormatException nfe) {
-                                env.DCKTemplate = jobArray[i][2];
+                                env.DCKTemplate = jobArray[i][1];
                             }
                             // Collect search strings
                             for (int j=0; j<searchstr.length; j++) {
                                 keys.add(searchstr[j]);
-                                vals.add(jobArray[i][j+3]);
+                                vals.add(jobArray[i][j+2]);
                             }
                             keys.trimToSize();
                             vals.trimToSize();
@@ -1005,14 +1005,14 @@ public class EPlusBatch extends Thread {
                             break;
                         case INSEL:
                             try {
-                                env.INSELTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
+                                env.INSELTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][1]));
                             }catch (NumberFormatException nfe) {
-                                env.INSELTemplate = jobArray[i][2];
+                                env.INSELTemplate = jobArray[i][1];
                             }
                             // Collect search strings
                             for (int j=0; j<searchstr.length; j++) {
                                 keys.add(searchstr[j]);
-                                vals.add(jobArray[i][j+3]);
+                                vals.add(jobArray[i][j+2]);
                             }
                             keys.trimToSize();
                             vals.trimToSize();

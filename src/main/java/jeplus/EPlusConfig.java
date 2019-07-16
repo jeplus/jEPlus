@@ -18,7 +18,9 @@
  ***************************************************************************/
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -120,6 +122,8 @@ public class EPlusConfig extends ConfigFileNames {
     /** EnergyPlus settings */
     protected String EPlusBinDir = null;
     protected String EPlusEPMacro = null;
+    @JsonProperty("eplusEXE")	
+    @JsonAlias({"eplusEXEC"})
     protected String EPlusEXE = null;
     protected String EPlusReadVars = null;
     protected String EPlusExpandObjects = null;

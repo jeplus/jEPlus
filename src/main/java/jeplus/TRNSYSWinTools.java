@@ -700,7 +700,7 @@ public class TRNSYSWinTools {
         Process EPProc = null;
         try {
             // Run TRNSYS executable
-            String CmdLine = config.getResolvedTRNSYSEXEC() + " " + dckfile + " /n /h";
+            String CmdLine = "\"" + config.getResolvedTRNSYSEXEC() + "\" " + dckfile + " /n /h";
             EPProc = Runtime.getRuntime().exec(CmdLine, null, new File(WorkDir));
             // Console logger
             try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {

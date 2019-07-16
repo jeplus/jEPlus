@@ -18,11 +18,16 @@
  ***************************************************************************/
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import javax.swing.filechooser.FileFilter;
 import jeplus.util.RelativeDirUtil;
@@ -92,8 +97,13 @@ public class TRNSYSConfig extends ConfigFileNames {
      * TRNSYS settings
      */
     protected String TRNSYSBinDir = null;
+    @JsonProperty("trnsysEXE")	
+    @JsonAlias({"trnsysEXEC", "trnsysexec"})
     protected String TRNSYSEXE = null;
 
+    /** This config is valid or not */
+    protected boolean Valid = false;
+    
     public TRNSYSConfig() {
         super ();
         TRNSYSBinDir = getDefTRNSYSBinDir();
@@ -110,9 +120,10 @@ public class TRNSYSConfig extends ConfigFileNames {
             ScreenFile = prop.getProperty("ScreenFile", "jeplus.log");
         } catch (FileNotFoundException fnfe) {
             // do nothing and reture false;
+            logger.warn("TRNSYS config file " + fn + " does not exist.");
             return false;
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (IOException ex) {
+            logger.error("Error loading TRNSYS config from " + fn, ex);
             return false;
         }
         return true;
@@ -120,6 +131,7 @@ public class TRNSYSConfig extends ConfigFileNames {
 
     /**
      * Get User ID file
+     * @return 
      */
     @JsonIgnore
     public String getUserID() {
@@ -130,15 +142,15 @@ public class TRNSYSConfig extends ConfigFileNames {
                 return null;
             } else {
                 String filename = null;
-                for (int i = 0; i < children.length; i++) {
-                    if ((children[i].endsWith(".id")) && (children[i].startsWith("user"))) {
-                        filename = children[i];
+                for (String children1 : children) {
+                    if ((children1.endsWith(".id")) && (children1.startsWith("user"))) {
+                        filename = children1;
                     }
                 }
                 return filename;
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.error("Error locating TRNSYS user id file. No file named user*.id is found in " + TRNSYSBinDir, ex);
             return null;
         }
     }
@@ -151,25 +163,44 @@ public class TRNSYSConfig extends ConfigFileNames {
     @JsonIgnore
     public String getTRNSYSVersion() {
         String vers = null;
-        try {
-            BufferedReader fi = new BufferedReader(new FileReader(TRNSYSBinDir + getUserID()));
+        try (BufferedReader fi = new BufferedReader(new FileReader(TRNSYSBinDir + getUserID()));){
             String line = fi.readLine();
             while (line != null) {
                 if (line.trim().startsWith("MakeId")) {
-                    vers = "Version " + line.charAt(6) + line.charAt(7) + "." + (line.trim().substring(14)).toString();
+                    vers = "Version " + line.charAt(6) + line.charAt(7) + "." + (line.trim().substring(14));
                 }
                 line = fi.readLine();
             }
             fi.close();
             return vers;
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (IOException ex) {
+            logger.error("Error extracting TRNSYS version number from the user id file " + TRNSYSBinDir + getUserID(), ex);
             return null;
         }
     }
 
+    public List<String> validate () {
+        String bindir = getResolvedTRNSYSBinDir();
+        String exe = getResolvedTRNSYSEXEC();
+        String userid = getUserID();
+
+        List<String> invalid = new ArrayList<> ();
+        boolean ok = new File(bindir + userid).exists();
+        if (! ok) {
+            invalid.add(this.getTRNSYSBinDir());
+        }
+        Valid = ok;
+        ok = new File(exe).exists();
+        if (! ok) {
+            invalid.add(getTRNSYSEXE());
+        }
+        Valid &= ok;
+        return invalid;
+    }
+    
     /**
      * Get Default Bin Directory
+     * @return 
      */
     public static String getDefTRNSYSBinDir() {
         return TRNSYSBinDir_WIN;
@@ -177,6 +208,7 @@ public class TRNSYSConfig extends ConfigFileNames {
 
     /**
      * Get Bin Directory
+     * @return 
      */
     public String getTRNSYSBinDir() {
         return TRNSYSBinDir;
@@ -186,18 +218,31 @@ public class TRNSYSConfig extends ConfigFileNames {
         this.TRNSYSBinDir = TRNSYSBinDir;
     }
 
+    @JsonIgnore
+    public boolean isValid() {
+        return Valid;
+    }
+
+    @JsonIgnore
+    public void setValid(boolean Valid) {
+        this.Valid = Valid;
+    }
+
     /**
      * Set Bin Directory
+     * @param dir
      */
     @JsonIgnore
     public void setNewTRNSYSBinDir(String dir) {
         TRNSYSBinDir = dir;
         TRNSYSEXE = new File (TRNSYSBinDir + TRNSYSConfig.getDefTRNSYSEXEC()).getAbsolutePath();
+        this.validate();
         fireConfigChangedEvent ();
     }
 
     /**
      * Get Bin Directory
+     * @return 
      */
     @JsonIgnore
     public String getResolvedTRNSYSBinDir() {
@@ -208,6 +253,7 @@ public class TRNSYSConfig extends ConfigFileNames {
 
     /**
      * Get TRNSYS executable
+     * @return 
      */
     public static String getDefTRNSYSEXEC() {
         return TRNSYSEXEC_WIN;
@@ -215,6 +261,7 @@ public class TRNSYSConfig extends ConfigFileNames {
 
     /**
      * Get TRNSYS executable
+     * @return 
      */
     public String getTRNSYSEXE() {
         return TRNSYSEXE;
@@ -222,6 +269,7 @@ public class TRNSYSConfig extends ConfigFileNames {
 
     /**
      * Set TRNSYS executable
+     * @param name
      */
     public void setTRNSYSEXE(String name) {
         TRNSYSEXE = name;
@@ -230,6 +278,7 @@ public class TRNSYSConfig extends ConfigFileNames {
 
     /**
      * Get full TRNSYS exec command path
+     * @return 
      */
     @JsonIgnore
     public String getResolvedTRNSYSEXEC() {
@@ -238,43 +287,57 @@ public class TRNSYSConfig extends ConfigFileNames {
     }
 
     /**
-     *      */
+     *
+     * @return  
+     */
     public static String getTRNSYSDefOutCSV() {
         return TRNSYSDefOutCSV;
     }
 
     /**
-     *      */
+     *
+     * @return  
+     */
     public static String getTRNSYSDefDCK() {
         return TRNSYSDefDCK;
     }
 
     /**
-     *      */
+     *
+     * @return  
+     */
     public static String getTRNSYSDefLST() {
         return TRNSYSDefLST;
     }
 
     /**
-     *      */
+     *
+     * @return  
+     */
     public static String getTRNSYSDefLOG() {
         return TRNSYSDefLOG;
     }
 
     /**
-     *      */
+     *
+     * @return  
+     */
     public static String getTRNSYSFort() {
         return TRNSYSFort;
     }
 
     /**
-     *      */
+     *
+     * @return  
+     */
     public static String getTRNSYSDCKExt() {
         return TRNSYSDCKExt;
     }
 
     /**
-     *      */
+     *
+     * @return  
+     */
     public static String getTRNSYSTRDExt() {
         return TRNSYSTRDExt;
     }
@@ -302,11 +365,11 @@ public class TRNSYSConfig extends ConfigFileNames {
                         case TRNINPUT:
                             return (extension.equals(getTRNSYSDCKExt())
                                     || extension.equals(getTRNSYSTRDExt())
-                                    || extension.equals(".lst")) ? true : false;
+                                    || extension.equals(".lst"));
                         case DCK:
-                            return (extension.equals(".dck")) ? true : false;
+                            return (extension.equals(".dck"));
                         case TRD:
-                            return (extension.equals(".trd")) ? true : false;
+                            return (extension.equals(".trd"));
                         case TREXE:
                             return (filename.equals("TRNexe.exe"));
                         case TRDLL:

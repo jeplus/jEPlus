@@ -106,8 +106,10 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         EpPanel.setConfig(Config);
         if (! Config.getTRNSYSConfigs().isEmpty()) {
             cboTrnVersion.setModel(new DefaultComboBoxModel (Config.getTRNSYSConfigs().keySet().toArray(new String [0])));
-            txtTrnsysBinDir.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSBinDir());
-            txtTrnsysEXE.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSEXE());
+            cboTrnVersion.setSelectedIndex(0);
+            cboTrnVersionActionPerformed(null);
+            Config.getCurrentTRNSYS().removeAllListeners();
+            Config.getCurrentTRNSYS().addListener(this);
         }else {
             txtTrnsysBinDir.setText("Select a TRNSYS installation ...");
         }
@@ -723,8 +725,10 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     }//GEN-LAST:event_cboEPlusVersionActionPerformed
 
     private void cboTrnVersionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboTrnVersionActionPerformed
-        txtTrnsysBinDir.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSBinDir());
-        txtTrnsysEXE.setText(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()).getTRNSYSEXE());
+        Config.setCurrentTRNSYS(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()));
+        txtTrnsysBinDir.setText(Config.getCurrentTRNSYS().getTRNSYSBinDir());
+        txtTrnsysEXE.setText(Config.getCurrentTRNSYS().getTRNSYSEXE());
+        checkSettings();
     }//GEN-LAST:event_cboTrnVersionActionPerformed
 
     private void cmdEnergyPlusDetails1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnergyPlusDetails1ActionPerformed

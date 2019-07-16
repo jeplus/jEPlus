@@ -78,6 +78,8 @@ public class JEPlusConfig extends ConfigFileNames {
     protected transient TreeMap<String, RadianceConfig> RadianceConfigs = new TreeMap<>();
     /** Current selected EPlus Config */
     protected transient EPlusConfig CurrentEPlus = null;
+    /** Current selected TRNSYS Config */
+    protected transient TRNSYSConfig CurrentTRNSYS = null;
 
     /** Recent projects */
     protected List<String> RecentProjects = new ArrayList<>();
@@ -217,6 +219,16 @@ public class JEPlusConfig extends ConfigFileNames {
     @JsonIgnore
     public void setCurrentEPlus(EPlusConfig CurrentEPlus) {
         this.CurrentEPlus = CurrentEPlus;
+    }
+
+    @JsonIgnore
+    public TRNSYSConfig getCurrentTRNSYS() {
+        return CurrentTRNSYS;
+    }
+
+    @JsonIgnore
+    public void setCurrentTRNSYS(TRNSYSConfig CurrentTRNSYS) {
+        this.CurrentTRNSYS = CurrentTRNSYS;
     }
 
     public List<String> getRecentProjects() {

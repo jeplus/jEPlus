@@ -30,7 +30,7 @@ import javax.script.ScriptException;
 import jeplus.util.PythonTools;
 import jeplus.util.RelativeDirUtil;
 import org.apache.commons.io.FileUtils;
-import org.jsoup.helper.StringUtil;
+import org.jsoup.internal.StringUtil;
 import org.slf4j.LoggerFactory;
 
 /**

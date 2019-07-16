@@ -77,10 +77,11 @@ public class JEPlusFrameMain extends JFrame {
     
     protected NumberFormat LargeIntFormatter = new DecimalFormat("###,###,###,###,###,###");
 
-    public final static String version = "2.0.0_beta";
+    public final static String version = "2.0.0 Beta";
     public final static String version_ps = "_2_0";
+    public final static String year = "2018,2019";
     public final static String osName = System.getProperty( "os.name" );
-    protected static String VersionInfo = "jEPlus (version " + version + ") for " + osName;
+    protected static String VersionInfo = "jEPlus (version " + version + ")";
     
     protected static JEPlusFrameMain CurrentMainWindow = null;
     public static JEPlusFrameMain getCurrentMainGUI () { return CurrentMainWindow; }
@@ -377,9 +378,9 @@ public class JEPlusFrameMain extends JFrame {
         this.cboExecutionTypeActionPerformed(null);
         // Disable post-process tab if TRNSYS
         if (type != JEPlusProjectV2.ModelType.EPLUS) { // not EPlus
-            this.tpnMain.setEnabledAt(2, false);
+            this.tpnMain.setEnabledAt(3, false);
         }else {
-            this.tpnMain.setEnabledAt(2, true);
+            this.tpnMain.setEnabledAt(3, true);
         }
     }
     

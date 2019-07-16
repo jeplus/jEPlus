@@ -93,7 +93,7 @@ public class TRNSYSTask extends EPlusTask {
     public void run() {
         Executed = true;
          // EPlus config
-        TRNSYSConfig config = JEPlusConfig.getDefaultInstance().getTRNSYSConfigs().get("all");
+        TRNSYSConfig config = JEPlusConfig.getDefaultInstance().getTRNSYSConfigs().get("TRNSYS");
        // Prepare work directory
         boolean ok = TRNSYSWinTools.prepareWorkDir(getWorkingDir());
         // Write DCK file

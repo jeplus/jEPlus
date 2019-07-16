@@ -362,23 +362,19 @@ public class JEPlusProjectV2 implements Serializable {
         this.RVIFile = RVIFile;
     }
 
-    @JsonIgnore
     public String getDCKDir() {
         return DCKDir;
     }
 
-    @JsonIgnore
     public void setDCKDir(String DCKDir) {
         ContentChanged = true;
         this.DCKDir = DCKDir;
     }
 
-    @JsonIgnore
     public String getDCKTemplate() {
         return DCKTemplate;
     }
 
-    @JsonIgnore
     public void setDCKTemplate(String DCKTemplate) {
         ContentChanged = true;
         this.DCKTemplate = DCKTemplate;
@@ -406,12 +402,10 @@ public class JEPlusProjectV2 implements Serializable {
         this.INSELTemplate = INSELTemplate;
     }
 
-    @JsonIgnore
     public String getOutputFileNames() {
         return OutputFileNames;
     }
 
-    @JsonIgnore
     public void setOutputFileNames(String OutputFileNames) {
         ContentChanged = true;
         this.OutputFileNames = OutputFileNames;

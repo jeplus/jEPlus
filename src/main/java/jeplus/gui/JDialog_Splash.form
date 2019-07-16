@@ -107,8 +107,8 @@
         <Component class="javax.swing.JLabel" name="jLabel4">
           <Properties>
             <Property name="horizontalAlignment" type="int" value="0"/>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;This software has been provided by Dr Yi Zhang&lt;/a&gt; under the GPLv3 (&lt;a href=&gt;http://www.gnu.org/licenses/gpl-3.0.html&lt;/a&gt;)&lt;p&gt; &lt;p&gt;Contributors: &lt;p&gt;Dr Ivan Korolija (testing, examples and tutorials) &lt;p&gt;Jos&#xe9; Santiago Villar (TRNSYS functions)&lt;/center&gt;"/>
-            <Property name="toolTipText" type="java.lang.String" value="Contact Yi at yizhang@dmu.ac.uk"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;&lt;p&gt;This software is provided by Dr Yi Zhang under the GPLv3 (&lt;a href=&gt;http://www.gnu.org/licenses/gpl-3.0.html&lt;/a&gt;)&lt;/p&gt;&lt;/center&gt;"/>
+            <Property name="toolTipText" type="java.lang.String" value="Contact Yi at yi@jeplus.org"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel5">

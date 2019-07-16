@@ -33,7 +33,7 @@ public class JDialog_Splash extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         super.setLocationRelativeTo(parent);
-        lblCopyright.setText("<html>Version " + JEPlusFrameMain.version + "  © 2011 <p>Yi Zhang <p> United Kingdom");
+        lblCopyright.setText("<html>Version " + JEPlusFrameMain.version + "<p>© " + JEPlusFrameMain.year + ", Dr Yi Zhang <p> United Kingdom <p> All rights reserved");
     }
 
     /** This method is called from within the constructor to
@@ -60,8 +60,8 @@ public class JDialog_Splash extends javax.swing.JDialog {
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/jeplus_v1.5_logo.png"))); // NOI18N
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("<html><center>This software has been provided by Dr Yi Zhang</a> under the GPLv3 (<a href=>http://www.gnu.org/licenses/gpl-3.0.html</a>)<p> <p>Contributors: <p>Dr Ivan Korolija (testing, examples and tutorials) <p>José Santiago Villar (TRNSYS functions)</center>");
-        jLabel4.setToolTipText("Contact Yi at yizhang@dmu.ac.uk");
+        jLabel4.setText("<html><center><p>This software is provided by Dr Yi Zhang under the GPLv3 (<a href=>http://www.gnu.org/licenses/gpl-3.0.html</a>)</p></center>");
+        jLabel4.setToolTipText("Contact Yi at yi@jeplus.org");
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
