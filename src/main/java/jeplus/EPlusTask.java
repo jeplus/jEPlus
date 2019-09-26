@@ -196,6 +196,8 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                     for (String tag: map.keySet()) {
                         formula = formula.replaceAll(tag, map.get(tag));
                     }
+                    // Replace "math.func()" with "Math.func()"
+                    formula = formula.replaceAll("math\\.", "Math.");
                     try {
                         vstrs[j] = engine.eval(formula).toString();
                     }catch (ScriptException spe) {

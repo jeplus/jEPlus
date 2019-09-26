@@ -25,8 +25,6 @@ import java.math.RoundingMode;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.tree.DefaultMutableTreeNode;
-import jeplus.JEPlusProject;
 import jeplus.JEPlusProjectV2;
 import jeplus.util.CsvUtil;
 import jeplus.util.RelativeDirUtil;
@@ -827,6 +825,8 @@ public class ParameterItemV2 implements Serializable, Cloneable {
             newstr = bufstr.replace(item.getID(), item.getSearchString());
             bufstr = newstr;
         }
+        // Replace v1.x Python's "math.func()" to JavaScript's "Math.func()"
+        newstr = bufstr.replaceAll("math\\.", "Math.");
         return new String [] {"?=" + newstr};
     }
 
