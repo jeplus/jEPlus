@@ -335,7 +335,12 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File[] files = MainGUI.getFileChooser().getSelectedFiles();
             String dir = files[0].getParent() + File.separator;
-            String reldir = RelativeDirUtil.getRelativePath(dir, Project.getBaseDir(), "/");
+            String reldir = null;
+// Relative form disabled 
+//            try {
+//                reldir = RelativeDirUtil.getRelativePath(dir, Project.getBaseDir(), "/");
+//            }catch (Exception ex) {}
+            if (reldir==null) { reldir = dir; }
             txtWthrDir.setText(reldir);
             String[] names = new String[files.length];
             names[0] = files[0].getName();
@@ -362,7 +367,12 @@ public class JPanel_EPlusProjectFiles extends javax.swing.JPanel {
         if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File[] files = MainGUI.getFileChooser().getSelectedFiles();
             String dir = files[0].getParent() + File.separator;
-            String reldir = RelativeDirUtil.getRelativePath(dir, Project.getBaseDir(), "/");
+            String reldir = null;
+// Relative form disabled 
+//            try {
+//                reldir = RelativeDirUtil.getRelativePath(dir, Project.getBaseDir(), "/");
+//            }catch (Exception ex) {}
+            if (reldir==null) { reldir = dir; }
             txtIdfDir.setText(reldir);
             String[] names = new String[files.length];
             names[0] = files[0].getName();

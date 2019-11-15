@@ -194,6 +194,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
                         txpPreview.setText(getAltValuesPreview());
                         resetAltValueNumbers();
                     }
+                    Project.setContentChanged(true);
                     ParamTableModel.fireTableDataChanged();
                 }
             }
@@ -359,6 +360,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
         ParameterItemV2 deleted = null;
         if (idx >= 0) {
             deleted = this.Project.getParameters().remove(idx);
+            Project.setContentChanged(true);
             CurrentItem = this.Project.getParameters().get(Math.max(0, idx-1));
             ParamTableModel.fireTableDataChanged();
         }
@@ -382,7 +384,10 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
      */
     public void addParameterItem(ParameterItemV2 child) {
         this.Project.getParameters().add(child);
+        Project.setContentChanged(true);
         this.CurrentItem = child;
+        int last = this.Project.getParameters().size() - 1;
+        this.jTableParams.setRowSelectionInterval(last, last);
         this.displayParamDetails();    
         ParamTableModel.fireTableDataChanged();
     }
@@ -598,8 +603,8 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
             }
         });
 
-        cmdImportParams.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/cross.png"))); // NOI18N
-        cmdImportParams.setToolTipText("Delete the whole branch");
+        cmdImportParams.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_go.png"))); // NOI18N
+        cmdImportParams.setToolTipText("Import parameter table");
         cmdImportParams.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdImportParamsActionPerformed(evt);
@@ -637,16 +642,16 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(cmdImportParams)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdAdd)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdDuplicate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmdRemove))
-            .addComponent(jScroll)
+                .addComponent(cmdRemove)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -672,7 +677,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddActionPerformed
-        this.addParameterItem(new ParameterItemV2());
+        this.addParameterItem(new ParameterItemV2(Project.getParameters().size()));
 }//GEN-LAST:event_cmdAddActionPerformed
 
     private void cmdRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
@@ -689,6 +694,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
         CurrentItem.setValuesString(CurrentItem.getValuesString());
         txpPreview.setText(getAltValuesPreview());
         this.resetAltValueNumbers();
+        if (DLactive) Project.setContentChanged(true);
 }//GEN-LAST:event_cboTypeActionPerformed
 
     private void cmdImportParamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdImportParamsActionPerformed
@@ -697,10 +703,12 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
 
     private void cboFixValueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFixValueActionPerformed
         CurrentItem.setSelectedAltValue(cboFixValue.getSelectedIndex());
+        if (DLactive) Project.setContentChanged(true);
     }//GEN-LAST:event_cboFixValueActionPerformed
 
     private void cboParamTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboParamTypeActionPerformed
         CurrentItem.setParamType((ParameterItemV2.PType)cboParamType.getSelectedItem());
+        if (DLactive) Project.setContentChanged(true);
     }//GEN-LAST:event_cboParamTypeActionPerformed
 
 

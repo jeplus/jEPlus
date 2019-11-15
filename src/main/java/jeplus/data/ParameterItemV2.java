@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -39,6 +40,16 @@ import org.slf4j.LoggerFactory;
  * @version 0.5b
  * @since 0.1
  */
+@JsonPropertyOrder({ 
+    "paramType", 
+    "id", 
+    "name", 
+    "description", 
+    "searchString", 
+    "type",
+    "valuesString", 
+    "selectedAltValue"
+})
 public class ParameterItemV2 implements Serializable, Cloneable {
 
     /** Logger */

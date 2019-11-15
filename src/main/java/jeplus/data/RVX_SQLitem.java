@@ -18,11 +18,11 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
-//	"sqls" : [
-
+// "sqls" : [
 //		{
 //			"tableName" : "ChillerCap",
 //			"columnHeaders" : "Chiller Nominal Capacity [W]",
@@ -36,7 +36,13 @@ import java.util.Objects;
 //                      "usedInCalc" : true
 //		}
 //	],
-public class RVX_SQLitem implements Serializable {
+@JsonPropertyOrder({
+    "sqlcommand", 
+    "tableName", 
+    "columnHeaders", 
+    "useInCalc"
+})
+public class RVX_SQLitem implements Serializable, IF_RVXItem {
     private String TableName = "SqlTable.csv"; // E.g.
     private String ColumnHeaders = ""; // E.g. "Temperature [K], Heating [kWh]"
     private String SQLcommand = ""; // E.g.
@@ -114,5 +120,17 @@ public class RVX_SQLitem implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void copyFrom(IF_RVXItem item) {
+        try {
+            RVX_SQLitem src = (RVX_SQLitem)item;
+            TableName     = src.TableName    ;
+            ColumnHeaders = src.ColumnHeaders;
+            SQLcommand    = src.SQLcommand   ;
+            UsedInCalc    = src.UsedInCalc   ;
+        }catch (ClassCastException cce) {
+        }
     }
 }

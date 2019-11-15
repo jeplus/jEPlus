@@ -18,6 +18,7 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -34,7 +35,18 @@ import java.util.Objects;
 //                      "usedInCalc" : true
 //		}
 //	],
-public class RVX_CSVitem implements Serializable {
+@JsonPropertyOrder({ 
+    "sourceCsv", 
+    "fromReport", 
+    "fromFor", 
+    "fromTable", 
+    "fromColumn", 
+    "fromRow", 
+    "tableName",
+    "columnHeaders", 
+    "usedInCalc"
+})
+public class RVX_CSVitem implements Serializable, IF_RVXItem {
     private String SourceCsv = "eplustbl.csv"; 
     private String FromReport = ""; 
     private String FromFor = null;
@@ -121,22 +133,23 @@ public class RVX_CSVitem implements Serializable {
     public String toString () {
         return TableName + ":" + ColumnHeaders + "(" + SourceCsv + ")" + (UsedInCalc ? "" : "*");
     }
-
+    
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 61 * hash + Objects.hashCode(this.SourceCsv);
-        hash = 61 * hash + Objects.hashCode(this.FromReport);
-        hash = 61 * hash + Objects.hashCode(this.FromTable);
-        hash = 61 * hash + Objects.hashCode(this.FromColumn);
-        hash = 61 * hash + Objects.hashCode(this.FromRow);
-        hash = 61 * hash + Objects.hashCode(this.TableName);
-        hash = 61 * hash + Objects.hashCode(this.ColumnHeaders);
-        hash = 61 * hash + (this.UsedInCalc ? 1 : 0);
+        int hash = 5;
+        hash = 11 * hash + Objects.hashCode(this.SourceCsv);
+        hash = 11 * hash + Objects.hashCode(this.FromReport);
+        hash = 11 * hash + Objects.hashCode(this.FromFor);
+        hash = 11 * hash + Objects.hashCode(this.FromTable);
+        hash = 11 * hash + Objects.hashCode(this.FromColumn);
+        hash = 11 * hash + Objects.hashCode(this.FromRow);
+        hash = 11 * hash + Objects.hashCode(this.TableName);
+        hash = 11 * hash + Objects.hashCode(this.ColumnHeaders);
+        hash = 11 * hash + (this.UsedInCalc ? 1 : 0);
         return hash;
     }
 
-    @Override
+    @Override    
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -157,6 +170,9 @@ public class RVX_CSVitem implements Serializable {
         if (!Objects.equals(this.FromReport, other.FromReport)) {
             return false;
         }
+        if (!Objects.equals(this.FromFor, other.FromFor)) {
+            return false;
+        }
         if (!Objects.equals(this.FromTable, other.FromTable)) {
             return false;
         }
@@ -174,6 +190,21 @@ public class RVX_CSVitem implements Serializable {
         }
         return true;
     }
-    
-    
+
+    @Override
+    public void copyFrom(IF_RVXItem item) {
+        try {
+            RVX_CSVitem other = (RVX_CSVitem)item;
+            this.SourceCsv = other.SourceCsv;
+            this.FromReport = other.FromReport;
+            this.FromFor = other.FromFor;
+            this.FromTable = other.FromTable;
+            this.FromColumn = other.FromColumn;
+            this.FromRow = other.FromRow;
+            this.TableName = other.TableName;
+            this.ColumnHeaders = other.ColumnHeaders;
+            this.UsedInCalc = other.UsedInCalc;
+        }catch (ClassCastException cce) {
+        }
+    }
 }

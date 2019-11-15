@@ -18,6 +18,7 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -34,7 +35,17 @@ import java.util.Objects;
 //                      "enabled" : true
 //		}
 //	]
-public class RVX_Objective implements Serializable {
+@JsonPropertyOrder({ 
+    "identifier", 
+    "caption", 
+    "formula", 
+    "scaling", 
+    "min",
+    "max", 
+    "weight",
+    "enabled"
+})
+public class RVX_Objective implements Serializable, IF_RVXItem {
     private String Identifier = "t1";
     private String Formula = "c1";
     private String Caption = "Objective 1 []";
@@ -186,6 +197,22 @@ public class RVX_Objective implements Serializable {
             return false;
         }
         return true;
+    }
+    
+    @Override
+    public void copyFrom(IF_RVXItem item) {
+        try {
+            RVX_Objective src = (RVX_Objective)item;
+            Identifier = src.Identifier;
+            Formula    = src.Formula   ;
+            Caption    = src.Caption   ;
+            Scaling    = src.Scaling   ;
+            Min        = src.Min       ;
+            Max        = src.Max       ;
+            Weight     = src.Weight    ;
+            Enabled    = src.Enabled   ;
+        }catch (ClassCastException cce) {
+        }
     }
     
 }

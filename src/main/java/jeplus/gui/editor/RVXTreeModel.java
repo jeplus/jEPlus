@@ -166,7 +166,7 @@ public class RVXTreeModel extends DefaultTreeModel {
         }
         root.add(TRNs);
         
-        DefaultMutableTreeNode UserVars = new DefaultMutableTreeNode (new GroupType ("UserVars", "Result collection configuration", rvx.getUserVars(), RVX_UserVar.class));
+        DefaultMutableTreeNode UserVars = new DefaultMutableTreeNode (new GroupType ("ReportVars", "Result collection configuration", rvx.getUserVars(), RVX_UserVar.class));
         for (RVX_UserVar item : rvx.getUserVars()) {
             UserVars.add(new DefaultMutableTreeNode (item, false));
         }

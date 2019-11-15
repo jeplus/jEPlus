@@ -29,11 +29,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -45,8 +47,14 @@ import jeplus.data.Counter;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.FileList;
 import jeplus.data.RVX;
+import jeplus.data.RVX_CSVitem;
 import jeplus.data.RVX_Constraint;
 import jeplus.data.RVX_Objective;
+import jeplus.data.RVX_RVIitem;
+import jeplus.data.RVX_SQLitem;
+import jeplus.data.RVX_ScriptItem;
+import jeplus.data.RVX_TRNSYSitem;
+import jeplus.data.RVX_UserSuppliedItem;
 import jeplus.data.RVX_UserVar;
 import jeplus.postproc.ResultCollector;
 import jeplus.simpleparser.Parser;
@@ -311,32 +319,116 @@ public class EPlusBatch extends Thread {
      */
     public EPlusBatchInfo validateProject() {
         Info = new EPlusBatchInfo();
-        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
-            // Parse and validate IDF files
-            setIdfFiles(Project.resolveIDFDir(), Project.getIDFTemplate());
-            // Pares and validate Weather files
-            setWthrFiles(Project.resolveWeatherDir(), Project.getWeatherFile());
-            // Check RVX
-            if (Project.getRVIFile() != null) {
-                try {
-                    Project.setRvx(RVX.getRVX(Project.getRVIFile(), Project.getBaseDir()));
-                } catch (IOException ex) {
-                    logger.error("Error loading rvi/rvx file.", ex);
-                    Info.addValidationError("Cannot read rvi/rvx file " + Project.getRVIFile());
+        if (null != Project.getProjectType()) switch (Project.getProjectType()) {
+            case EPLUS:
+                // Parse and validate IDF files
+                setIdfFiles(Project.resolveIDFDir(), Project.getIDFTemplate());
+                // Pares and validate Weather files
+                setWthrFiles(Project.resolveWeatherDir(), Project.getWeatherFile());
+                // Check RVX
+                if (Project.getRVIFile() != null) {
+                    try {
+                        Project.setRvx(RVX.getRVX(Project.getRVIFile(), Project.getBaseDir()));
+                    } catch (IOException ex) {
+                        logger.error("Error loading rvi/rvx file.", ex);
+                        Info.addValidationError("Cannot read rvi/rvx file " + Project.getRVIFile());
+                        Info.ValidationSuccessful = false;
+                        Project.setRvx(null);
+                    }
+                }   
+                if (Project.getRvx() == null) {
+                    Info.addValidationError("Project may be malformed as RVX is not available. ");
                     Info.ValidationSuccessful = false;
-                    Project.setRvx(null);
+                }else {
+                    // Check if any results being collected and collision of output tables
+                    boolean hasCollector = false;
+                    Set<String> tables = new HashSet<>();
+                    for (RVX_RVIitem item : Project.getRvx().getRVIs()) {
+                        hasCollector = true;
+                        if (! tables.add(item.getTableName())) {
+                            Info.addValidationError("RVI item output table name is already in use: " + item.getFileName() + " --> " + item.getTableName() + ".csv");
+                            Info.ValidationSuccessful = false;
+                        }
+                    }
+                    for (RVX_CSVitem item : Project.getRvx().getCSVs()) {
+                        hasCollector = true;
+                        if (! tables.add(item.getTableName())) {
+                            Info.addValidationError("CSV item output table name is already in use: " + item.getFromTable() + " --> " + item.getTableName() + ".csv");
+                            Info.ValidationSuccessful = false;
+                        }
+                    }
+                    for (RVX_SQLitem item : Project.getRvx().getSQLs()) {
+                        hasCollector = true;
+                        if (! tables.add(item.getTableName())) {
+                            Info.addValidationError("SQL item output table name is already in use: " + item.getTableName() + ".csv");
+                            Info.ValidationSuccessful = false;
+                        }
+                    }
+                    for (RVX_ScriptItem item : Project.getRvx().getScripts()) {
+                        hasCollector = true;
+                        if (! tables.add(item.getTableName())) {
+                            Info.addValidationError("Script item output table name is already in use: " + item.getFileName() + " --> " + item.getTableName() + ".csv");
+                            Info.ValidationSuccessful = false;
+                        }
+                    }
+                    for (RVX_UserSuppliedItem item : Project.getRvx().getUserSupplied()) {
+                        hasCollector = true;
+                        if (! tables.add(item.getTableName())) {
+                            Info.addValidationError("UserSupplied item output table name is already in use: " + item.getFileName() + " --> " + item.getTableName() + ".csv");
+                            Info.ValidationSuccessful = false;
+                        }
+                    }
+                    for (RVX_TRNSYSitem item : Project.getRvx().getTRNs()) {
+                        hasCollector = true;
+                        if (! tables.add(item.getTableName())) {
+                            Info.addValidationError("TRNSYS item output table name is already in use: " + item.getPlotterName() + " --> " + item.getTableName() + ".csv");
+                            Info.ValidationSuccessful = false;
+                        }
+                    }
+                    // Add warning if no collector is defined
+                    if (! hasCollector) {
+                        Info.addValidationError("Warning: no RVX collector is defined. JEPlus will only collect simulation stats.");
+                    }
+                    // Check if userVars are defined and for any duplicate variable names
+                    boolean varsDefined = false;
+                    Set<String> varIds = new HashSet<>();
+                    for (RVX_UserVar item : Project.getRvx().getUserVars()) {
+                        varsDefined = true;
+                        if (! varIds.add(item.getIdentifier())) {
+                            Info.addValidationError("Output Variable name is already in use: " + item.toString());
+                            Info.ValidationSuccessful = false;
+                        }
+                    }
+                    for (RVX_Constraint item : Project.getRvx().getConstraints()) {
+                        varsDefined = true;
+                        if (! varIds.add(item.getIdentifier())) {
+                            Info.addValidationError("Constraint name is already in use: " + item.toString());
+                            Info.ValidationSuccessful = false;
+                        }
+                    }
+                    for (RVX_Objective item : Project.getRvx().getObjectives()) {
+                        varsDefined = true;
+                        if (! varIds.add(item.getIdentifier())) {
+                            Info.addValidationError("Object name is already in use: " + item.toString());
+                            Info.ValidationSuccessful = false;
+                        }
+                    }
+                    // Add warning if no report variables is defined
+                    if (! varsDefined) {
+                        Info.addValidationError("Warning: no report variable is defined. This project may not work with jEPlus+EA.");
+                    }
                 }
-            }
-            if (Project.getRvx() == null) {
-                Info.addValidationError("RVX is not available. No simulation result will be collected.");
-                Info.ValidationSuccessful = false;
-            }
-        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
-            // Parse and validate DCK files
-            setIdfFiles(Project.resolveDCKDir(), Project.getDCKTemplate());
-        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
-            // Parse and validate DCK files
-            setIdfFiles(Project.resolveINSELDir(), Project.getINSELTemplate());
+                break;
+            case TRNSYS:
+                // Parse and validate DCK files
+                setIdfFiles(Project.resolveDCKDir(), Project.getDCKTemplate());
+                break;
+            case INSEL:
+                // Parse and validate INSEL files
+                setIdfFiles(Project.resolveINSELDir(), Project.getINSELTemplate());
+                break;
+            default:
+                break;
         }
         // Check ExecSettings
         validateExecSettings ();

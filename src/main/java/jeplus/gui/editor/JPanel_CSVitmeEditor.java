@@ -23,6 +23,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.JEPlusFrameMain;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX_CSVitem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,10 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
 
     JEPlusFrameMain MainGUI = null;
     JTree HostTree = null;
-    protected String BaseDir = null;
+    protected JEPlusProjectV2 Project = null;
     protected RVX_CSVitem Csv = null;
     protected DocumentListener DL = null;
+    private boolean DLActive = false;
 
     /**
      * Creates new form JPanel_RVXEditor
@@ -53,14 +55,14 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
      * Creates new form JPanel_EPlusProjectFiles with parameters
      * @param frame
      * @param tree
-     * @param basedir
+     * @param prj
      * @param csv
      */
-    public JPanel_CSVitmeEditor(JEPlusFrameMain frame, JTree tree, String basedir, RVX_CSVitem csv) {
+    public JPanel_CSVitmeEditor(JEPlusFrameMain frame, JTree tree, JEPlusProjectV2 prj, RVX_CSVitem csv) {
         initComponents();
         MainGUI = frame;
         HostTree = tree;
-        BaseDir = basedir;
+        Project = prj;
         setItem (csv);
         
         DL = new DocumentListener () {
@@ -75,25 +77,28 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                Document src = e.getDocument();
-                if(src == DocCsvFile) {
-                    Csv.setSourceCsv(txtCsvFile.getText());
-                }else if (src == DocReport) {
-                    Csv.setFromReport(txtReport.getText());
-                }else if (src == DocFor) {
-                    Csv.setFromFor(txtFor.getText());
-                }else if (src == DocTable) {
-                    Csv.setFromTable(txtTable.getText());
-                }else if (src == DocColumn) {
-                    Csv.setFromColumn(txtColumn.getText());
-                }else if (src == DocRow) {
-                    Csv.setFromRow(txtRow.getText());
-                }else if (src == DocHeaders) {
-                    Csv.setColumnHeaders(txtHeaders.getText());
-                }else if (src == DocResultTable) {
-                    Csv.setTableName(txtResultTable.getText());
+                if (DLActive) {
+                    Document src = e.getDocument();
+                    if(src == DocCsvFile) {
+                        Csv.setSourceCsv(txtCsvFile.getText().trim());
+                    }else if (src == DocReport) {
+                        Csv.setFromReport(txtReport.getText().trim());
+                    }else if (src == DocFor) {
+                        Csv.setFromFor(txtFor.getText().trim());
+                    }else if (src == DocTable) {
+                        Csv.setFromTable(txtTable.getText().trim());
+                    }else if (src == DocColumn) {
+                        Csv.setFromColumn(txtColumn.getText().trim());
+                    }else if (src == DocRow) {
+                        Csv.setFromRow(txtRow.getText().trim());
+                    }else if (src == DocHeaders) {
+                        Csv.setColumnHeaders(txtHeaders.getText().trim());
+                    }else if (src == DocResultTable) {
+                        Csv.setTableName(txtResultTable.getText().trim());
+                    }
+                    Project.setContentChanged(true);
+                    HostTree.update(HostTree.getGraphics());
                 }
-                HostTree.update(HostTree.getGraphics());
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
@@ -112,6 +117,7 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
         txtRow.getDocument().addDocumentListener(DL);
         txtHeaders.getDocument().addDocumentListener(DL);
         txtResultTable.getDocument().addDocumentListener(DL);
+        DLActive = true;
     }
     
     protected final void setItem (RVX_CSVitem csv) {
@@ -290,8 +296,11 @@ public class JPanel_CSVitmeEditor extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void chkAggregateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAggregateActionPerformed
-        Csv.setUsedInCalc(chkAggregate.isSelected());
-        HostTree.update(HostTree.getGraphics());
+        if (DLActive) {
+            Csv.setUsedInCalc(chkAggregate.isSelected());
+            Project.setContentChanged(true);
+            HostTree.update(HostTree.getGraphics());
+        }
     }//GEN-LAST:event_chkAggregateActionPerformed
 
 

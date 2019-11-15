@@ -34,9 +34,10 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -49,7 +50,13 @@ import jeplus.agent.TrnsysAgentLocal;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItemV2;
 import jeplus.data.RVX;
+import jeplus.data.RVX_CSVitem;
+import jeplus.data.RVX_RVIitem;
+import jeplus.data.RVX_SQLitem;
+import jeplus.data.RVX_ScriptItem;
+import jeplus.data.RVX_UserSuppliedItem;
 import jeplus.data.RandomSource;
+import jeplus.event.IF_ProjectChangedHandler;
 import jeplus.gui.*;
 import jeplus.gui.editor.JPanel_RVXTree;
 import jeplus.postproc.ResultCollector;
@@ -66,7 +73,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @since 1.0
  */
-public class JEPlusFrameMain extends JFrame {
+public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler {
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusFrameMain.class);
@@ -135,16 +142,18 @@ public class JEPlusFrameMain extends JFrame {
         
         initComponents();
 
-        this.setTitle(getVersionInfo());
+        this.setTitle(getVersionInfo() + " - New Project");
         
         this.cboProjectType.setModel(new DefaultComboBoxModel<>(JEPlusProjectV2.ModelType.values()));
+        // Diable INSEL
+        this.cboProjectType.removeItem(JEPlusProjectV2.ModelType.INSEL);
 
         // tabTexts.setTabComponentAt(0, new ButtonTabComponent (tabTexts));
 //        jplParameterTree = new JPanel_ParameterTree ();
 //        jplParamTreeHolder.add(this.jplParameterTree, BorderLayout.CENTER);
         jplParameterTable = new JPanel_ParameterTable ();
         jplParamTableHolder.add(this.jplParameterTable, BorderLayout.CENTER);
-        jplRvxTree = new JPanel_RVXTree (this, Project.getBaseDir(), Project.getRvx());
+        jplRvxTree = new JPanel_RVXTree ();
         jplRVX.add(this.jplRvxTree, BorderLayout.CENTER);
         initProjectSection();
         initBatchOptions();
@@ -173,6 +182,8 @@ public class JEPlusFrameMain extends JFrame {
         TpnUtilities.add("Run Python", jplPythonPanel);
         TpnUtilities.add("IDF Converter", jplIDFConvPanel);
         TpnUtilities.add("Run ReadVars", jplReadVarsPanel);
+        
+        this.Project.addListener(this);
         
         // put the frame in the centre of screen
         Toolkit tk = Toolkit.getDefaultToolkit();
@@ -303,7 +314,7 @@ public class JEPlusFrameMain extends JFrame {
         this.CurrentProjectFile = CurrentProjectFile;
         if (! JEPlusConfig.getDefaultInstance().getRecentProjects().contains(CurrentProjectFile))
             JEPlusConfig.getDefaultInstance().getRecentProjects().add(0, CurrentProjectFile);
-        this.setTitle(getVersionInfo() + " - " + CurrentProjectFile);
+        this.setTitle(getVersionInfo() + " - " + CurrentProjectFile + (Project.isContentChanged()?"*":""));
     }
 
     // =============== End getters and setters ===============
@@ -334,10 +345,14 @@ public class JEPlusFrameMain extends JFrame {
      */
     public void setProject(JEPlusProjectV2 Project, EPlusBatch batch) {
         if (Project != null) {
+            if ( this.Project!= null) {
+                this.Project.removeListener(this);
+            }
             this.Project = Project;
             this.SavedProject = null;
             this.initProjectSection();
             this.cboExecutionTypeActionPerformed(null);
+            this.Project.addListener(this);
         }
         if (batch != null) {
             this.BatchManager = batch;
@@ -359,22 +374,21 @@ public class JEPlusFrameMain extends JFrame {
      * @param type enum for E+ project or TRNSYS project
      */
     public final void setProjectType (JEPlusProjectV2.ModelType type) {
-        Project.setProjectType(type);  //??
-        // Project section
+        Project.setProjectType(type);
         initProjectSection();
-        // Exec section
-        if (type == JEPlusProjectV2.ModelType.EPLUS) { // EPlus
-            this.ExecAgents = EPlusExecAgents;
-        }else if (type == JEPlusProjectV2.ModelType.TRNSYS) {
-            this.ExecAgents = TrnsysExecAgents;
-        }else if (type == JEPlusProjectV2.ModelType.INSEL) {
-            this.ExecAgents = InselExecAgents;
+        if (null != type) switch (type) {
+            case EPLUS:
+                this.ExecAgents = EPlusExecAgents;
+                break;
+            case TRNSYS:
+                this.ExecAgents = TrnsysExecAgents;
+                break;
+            case INSEL:
+                this.ExecAgents = InselExecAgents;
+                break;
+            default:
+                break;
         }
-//        this.cboExecutionType.removeAllItems();
-//        for (int i=0; i<ExecAgents.size(); i++) {
-//            this.cboExecutionType.addItem(ExecAgents.get(i).getAgentID());
-//        }
-//        this.cboExecutionType.setSelectedIndex(0);
         this.cboExecutionTypeActionPerformed(null);
         // Disable post-process tab if TRNSYS
         if (type != JEPlusProjectV2.ModelType.EPLUS) { // not EPlus
@@ -390,22 +404,24 @@ public class JEPlusFrameMain extends JFrame {
     protected final void initProjectSection () {
         this.jplProjectFilesPanelHolder.removeAll();
         this.jplProjectFilesPanelHolder.setLayout(new BorderLayout());
-        if (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS) {
-            EPlusProjectFilesPanel = new JPanel_EPlusProjectFiles(this, Project);
-            this.jplProjectFilesPanelHolder.add(EPlusProjectFilesPanel, BorderLayout.CENTER);
-//            this.Project.getExecSettings().setParentDir("output/");
-        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.TRNSYS) {
-            TrnsysProjectFilesPanel = new JPanel_TrnsysProjectFiles(this, Project);
-            this.jplProjectFilesPanelHolder.add(TrnsysProjectFilesPanel, BorderLayout.CENTER);
-//            this.Project.getExecSettings().setParentDir("TRNoutput/");
-        }else if (Project.getProjectType() == JEPlusProjectV2.ModelType.INSEL) {
-            InselProjectFilesPanel = new JPanel_InselProjectFiles(this, Project);
-            this.jplProjectFilesPanelHolder.add(InselProjectFilesPanel, BorderLayout.CENTER);
-//            this.Project.getExecSettings().setParentDir("TRNoutput/");
+        if (null != Project.getProjectType()) switch (Project.getProjectType()) {
+            case EPLUS:
+                EPlusProjectFilesPanel = new JPanel_EPlusProjectFiles(this, Project);
+                this.jplProjectFilesPanelHolder.add(EPlusProjectFilesPanel, BorderLayout.CENTER);
+                break;
+            case TRNSYS:
+                TrnsysProjectFilesPanel = new JPanel_TrnsysProjectFiles(this, Project);
+                this.jplProjectFilesPanelHolder.add(TrnsysProjectFilesPanel, BorderLayout.CENTER);
+                break;
+            case INSEL:
+                InselProjectFilesPanel = new JPanel_InselProjectFiles(this, Project);
+                this.jplProjectFilesPanelHolder.add(InselProjectFilesPanel, BorderLayout.CENTER);
+                break;
+            default:
+                break;
         }
-//        jplParameterTree.setParameterTree(Project);
         jplParameterTable.setProject(Project);
-        jplRvxTree.setContents(this, Project.getBaseDir(), Project.getRvx());
+        jplRvxTree.setContents(this, Project);
     }
 
     /**
@@ -415,7 +431,6 @@ public class JEPlusFrameMain extends JFrame {
         this.txtJobListFile.setText(Project.getExecSettings().getJobListFile());
         this.txtTestRandomN.setText(Integer.toString(Project.getExecSettings().getNumberOfJobs()));
         this.txtRandomSeed.setText(Long.toString(Project.getExecSettings().getRandomSeed()));
-        this.chkLHS.setSelected(Project.getExecSettings().isUseLHS());
         this.cboSampleOpt.setSelectedItem(Project.getExecSettings().getSampleOpt());
         switch (Project.getExecSettings().getSubSet()) {
             case ExecutionOptions.CHAINS: 
@@ -535,6 +550,7 @@ public class JEPlusFrameMain extends JFrame {
         success = success && BatchManager.Agent.checkAgentSettings();
         if (BatchManager.getBatchInfo().isValid()) {
             this.displayInfo("Validation successful!");
+            this.displayInfo(BatchManager.getBatchInfo().getValidationErrorsText());
             this.displayInfo("Jobs are compiled from " + BatchManager.getNumberOfIDFs() + " models " +
                     (Project.getProjectType() == JEPlusProjectV2.ModelType.EPLUS ? 
                     "and " + BatchManager.getNumberOfWeathers() + " weather files" : "") + 
@@ -738,7 +754,6 @@ public class JEPlusFrameMain extends JFrame {
         rdoTestFirstN = new javax.swing.JRadioButton();
         txtTestFirstN = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
-        chkLHS = new javax.swing.JCheckBox();
         jMenuItemImportJson = new javax.swing.JMenuItem();
         jMenuItemExportJson = new javax.swing.JMenuItem();
         jMenuItemCreateIndex = new javax.swing.JMenuItem();
@@ -864,14 +879,6 @@ public class JEPlusFrameMain extends JFrame {
         txtTestFirstN.setEnabled(false);
 
         jLabel9.setText("jobs");
-
-        chkLHS.setText("LHS");
-        chkLHS.setEnabled(false);
-        chkLHS.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkLHSActionPerformed(evt);
-            }
-        });
 
         jMenuItemImportJson.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/view_as_json.png"))); // NOI18N
         jMenuItemImportJson.setText("Import JSON project ...");
@@ -1019,8 +1026,10 @@ public class JEPlusFrameMain extends JFrame {
         tpnMain.addTab("Project Params", pnlProject);
 
         jplModelTest.setBorder(javax.swing.BorderFactory.createTitledBorder("Test Simulation Model"));
+        jplModelTest.setEnabled(false);
 
         jLabel1.setText("<html>Please go to the next tab (<b>Execution</b>) to perform a test run of one or more jobs. Then select below the result folder of one of the jobs.These information may be useful for defining RVX items.</html>");
+        jLabel1.setEnabled(false);
 
         txtTestResultFolder.setText("N/A");
         txtTestResultFolder.setToolTipText("The output folder of test simulation");
@@ -1028,6 +1037,7 @@ public class JEPlusFrameMain extends JFrame {
 
         cmdSelectTestFolder.setText("...");
         cmdSelectTestFolder.setToolTipText("Select the output folder of a test simulation");
+        cmdSelectTestFolder.setEnabled(false);
         cmdSelectTestFolder.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdSelectTestFolderActionPerformed(evt);
@@ -1035,6 +1045,7 @@ public class JEPlusFrameMain extends JFrame {
         });
 
         jLabel3.setText("Select the result folder: ");
+        jLabel3.setEnabled(false);
 
         javax.swing.GroupLayout jplModelTestLayout = new javax.swing.GroupLayout(jplModelTest);
         jplModelTest.setLayout(jplModelTestLayout);
@@ -1702,7 +1713,7 @@ public class JEPlusFrameMain extends JFrame {
             // Check if files need to be saved first
             for (int i=1; i<TpnEditors.getTabCount(); i++) {
                 try {
-                    EPlusTextPanel etp = (EPlusTextPanel)TpnEditors.getComponentAt(i);
+                    EPlusEditorPanel etp = (EPlusEditorPanel)TpnEditors.getComponentAt(i);
                     if (etp.isContentChanged()) {
                         TpnEditors.setSelectedIndex(i);
                         int ans = JOptionPane.showConfirmDialog(this,
@@ -1711,6 +1722,7 @@ public class JEPlusFrameMain extends JFrame {
                             JOptionPane.YES_NO_OPTION);
                         if (ans == JOptionPane.YES_OPTION) {
                             etp.saveFileContent();
+                            etp.setContentChanged(false);
                         }
                     }
                 }catch (ClassCastException cce) {
@@ -1830,6 +1842,7 @@ private void cmdValidateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     if (validateBatchJobs()) {
         JOptionPane.showMessageDialog(this, "Validation successful! " +
                 LargeIntFormatter.format(BatchManager.getBatchInfo().getTotalNumberOfJobs(BatchManager.getProject())) + " jobs identified.\n\n" +
+                BatchManager.getBatchInfo().getValidationErrorsText() + "\n" +
                 "Please note that the search strings in the template file(s) have not been verified. You should also check any external\n" +
                 "referencesin the template file(s), e.g. the absolute path names in '##fileprefix' or '##include'. It is also a good \n" +
                 "idea to test a few jobs before running the whole batch.",
@@ -1925,7 +1938,6 @@ private void rdoTestChainsActionPerformed(java.awt.event.ActionEvent evt) {//GEN
         Project.getExecSettings().setSubSet(ExecutionOptions.CHAINS);
         this.txtTestFirstN.setEnabled(false);
         this.txtTestRandomN.setEnabled(false);
-        this.chkLHS.setEnabled(false);
         this.txtRandomSeed.setEnabled(false);
         this.txtJobListFile.setEnabled(false);
         this.cmdSelectJobListFile.setEnabled(false);
@@ -1938,7 +1950,6 @@ private void rdoTestRandomNActionPerformed(java.awt.event.ActionEvent evt) {//GE
         Project.getExecSettings().setSubSet(ExecutionOptions.RANDOM);
         this.txtTestFirstN.setEnabled(false);
         this.txtTestRandomN.setEnabled(true);
-        this.chkLHS.setEnabled(true);
         this.txtRandomSeed.setEnabled(true);
         this.txtJobListFile.setEnabled(false);
         this.cmdSelectJobListFile.setEnabled(false);
@@ -1952,7 +1963,6 @@ private void rdoTestFirstNActionPerformed(java.awt.event.ActionEvent evt) {//GEN
         Project.getExecSettings().setSubSet(ExecutionOptions.CHAINS);
         this.txtTestFirstN.setEnabled(true);
         this.txtTestRandomN.setEnabled(false);
-        this.chkLHS.setEnabled(false);
         this.txtRandomSeed.setEnabled(false);
         this.txtJobListFile.setEnabled(false);
         this.cmdSelectJobListFile.setEnabled(false);
@@ -2051,12 +2061,18 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         if (idx >= 0) {
             TpnEditors.setSelectedIndex(idx);
         }else {
-            EPlusTextPanel JobFilePanel = new EPlusTextPanel(
+//            EPlusTextPanel JobFilePanel = new EPlusTextPanel(
+//                    TpnEditors,
+//                    fn,
+//                    EPlusTextPanel.EDITOR_MODE,
+//                    EPlusConfig.getFileFilter(EPlusConfig.LIST),
+//                    templfn,
+//                    null);
+            EPlusEditorPanel JobFilePanel = new EPlusEditorPanel(
                     TpnEditors,
                     fn,
-                    EPlusTextPanel.EDITOR_MODE,
-                    EPlusConfig.getFileFilter(EPlusConfig.LIST),
                     templfn,
+                    EPlusEditorPanel.FileType.PLAIN,
                     null);
             int ti = TpnEditors.getTabCount();
             this.TpnEditors.addTab(txtJobListFile.getText(), JobFilePanel);
@@ -2073,7 +2089,6 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
             Project.getExecSettings().setSubSet(ExecutionOptions.FILE);
             this.txtTestFirstN.setEnabled(false);
             this.txtTestRandomN.setEnabled(false);
-            this.chkLHS.setEnabled(false);
             this.txtRandomSeed.setEnabled(false);
             this.txtJobListFile.setEnabled(true);
             this.cmdSelectJobListFile.setEnabled(true);
@@ -2086,7 +2101,6 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
             Project.getExecSettings().setSubSet(ExecutionOptions.ALL);
             this.txtTestFirstN.setEnabled(false);
             this.txtTestRandomN.setEnabled(false);
-            this.chkLHS.setEnabled(false);
             this.txtRandomSeed.setEnabled(false);
             this.txtJobListFile.setEnabled(false);
             this.cmdSelectJobListFile.setEnabled(false);
@@ -2098,7 +2112,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         int resp = JOptionPane.showConfirmDialog(this, "Are you sure to deleted the whole parameter tree?", "Please confirm", JOptionPane.YES_NO_OPTION);
         if (resp == JOptionPane.YES_OPTION) {
             Project.getParamTree().removeAllChildren();
-            Project.getParamTree().setUserObject(new ParameterItemV2());
+            Project.getParamTree().setUserObject(new ParameterItemV2(0));
             this.initProjectSection();
         }
     }//GEN-LAST:event_jMenuItemResetTreeActionPerformed
@@ -2106,10 +2120,6 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private void cboProjectTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboProjectTypeActionPerformed
         this.setProjectType ((JEPlusProjectV2.ModelType)cboProjectType.getSelectedItem());
     }//GEN-LAST:event_cboProjectTypeActionPerformed
-
-    private void chkLHSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLHSActionPerformed
-        Project.getExecSettings().setUseLHS(this.chkLHS.isSelected());
-    }//GEN-LAST:event_chkLHSActionPerformed
 
     private void jMenuItemMonitorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemMonitorActionPerformed
         if (BatchManager != null && BatchManager.getAgent() != null) {
@@ -2155,30 +2165,17 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
 
     private void jMenuItemToRelativeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemToRelativeActionPerformed
         if (Project != null) {
-            // Project base
-            String base;
-            int resp = JOptionPane.showConfirmDialog(this, "<html><p>Relative path will be calculated against the location where the "
-                    + "project is saved. Do you want to save your project first?</p><p>Current location is: " 
-                    + Project.getBaseDir() + " </p></html>", "Save project?", JOptionPane.YES_NO_CANCEL_OPTION);
-            if (resp == JOptionPane.CANCEL_OPTION) {
-                return;
-            }else if (resp == JOptionPane.YES_OPTION) {
-                this.jMenuItemSaveAsActionPerformed(null);
+            if (this.CurrentProjectFile == null) {
+                int resp = JOptionPane.showConfirmDialog(this, "<html><p>Relative path will be calculated against the location where the "
+                        + "project is saved. Do you want to save your project first?</p><p>Current location is: " 
+                        + Project.getBaseDir() + " </p></html>", "Save project?", JOptionPane.YES_NO_CANCEL_OPTION);
+                if (resp == JOptionPane.CANCEL_OPTION) {
+                    return;
+                }else if (resp == JOptionPane.YES_OPTION) {
+                    this.jMenuItemSaveAsActionPerformed(null);
+                }
             }
-            base = Project.getBaseDir();
-            
-            // Weather file path
-            String path = Project.resolveWeatherDir();
-            Project.setWeatherDir(RelativeDirUtil.getRelativePath(path, base, "/"));
-            // idf file path
-            path = Project.resolveIDFDir();
-            Project.setIDFDir(RelativeDirUtil.getRelativePath(path, base, "/"));
-            // dck file path
-            path = Project.resolveDCKDir();
-            Project.setDCKDir(RelativeDirUtil.getRelativePath(path, base, "/"));
-            // output dir
-            path = Project.resolveWorkDir();
-            Project.getExecSettings().setParentDir(RelativeDirUtil.getRelativePath(path, base, "/"));
+            Project.convertToRelativeDir();
             // update screen
             this.initProjectSection();
             this.cboExecutionTypeActionPerformed(null);
@@ -2186,17 +2183,10 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     }//GEN-LAST:event_jMenuItemToRelativeActionPerformed
 
     private void jMenuItemToAbsoluteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemToAbsoluteActionPerformed
-            // Weather file path
-            Project.setWeatherDir(Project.resolveWeatherDir());
-            // idf file path
-            Project.setIDFDir(Project.resolveIDFDir());
-            // dck file path
-            Project.setDCKDir(Project.resolveDCKDir());
-            // output dir
-            Project.getExecSettings().setParentDir(Project.resolveWorkDir());
-            // update screen
-            this.initProjectSection();
-            this.cboExecutionTypeActionPerformed(null);
+        Project.convertToAbsoluteDir();
+        // update screen
+        this.initProjectSection();
+        this.cboExecutionTypeActionPerformed(null);
     }//GEN-LAST:event_jMenuItemToAbsoluteActionPerformed
 
     private void jMenuItemExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportTableActionPerformed
@@ -2539,7 +2529,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
             Project.getParameters().add((ParameterItemV2)item);
         }
         // Detect project changes
-        if (Project.isContentChanged() || ! Objects.equals(Project, SavedProject)) {
+        if (Project.isContentChanged() /*|| ! Objects.equals(Project, SavedProject)*/) {
             // Save the project file before exit?
             String cfn = this.CurrentProjectFile;
             int n = JOptionPane.showConfirmDialog(
@@ -2556,9 +2546,9 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         // Check opened files
         for (int i=TpnEditors.getTabCount()-1; i>=0; i--) {
             try {
-                ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+                boolean cancel = ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+                if (cancel) return;
             }catch (ClassCastException | NullPointerException cce) {
-
             }
         }
 
@@ -2567,7 +2557,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         JEPlusConfig.getDefaultInstance().saveAsJSON(new File(JEPlusConfig.getDefaultConfigFile()));
         // Exit
         if (this.getFrameCloseOperation() == JEPlusFrameMain.EXIT_ON_CLOSE) {
-            System.exit(-1);
+            System.exit(0);
         }else {
             this.dispose();
         }
@@ -2581,10 +2571,13 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         fc.setCurrentDirectory(DefaultDir);
         if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            if (! file.getName().endsWith(".json"))
-            file = new File (file.getPath().concat(".json"));
+            if (! file.getName().endsWith(".json")) {
+                file = new File (file.getPath().concat(".json"));
+            }
             // convert to relative paths?
-            // Project.convertToRelativeDir(file.getParentFile());
+            Project.setBaseDir(file.getParent());
+            // Not to convert automatically on saving the new project
+            // boolean ok = Project.convertToRelativeDir(file.getParentFile());
             // write object
             if (! Project.saveAsJSON(file)) {
                 // warning message
@@ -2643,6 +2636,29 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     }//GEN-LAST:event_jMenuItemSaveActionPerformed
 
     private void jMenuItemOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemOpenActionPerformed
+        // Save current project
+        if (Project.isContentChanged() /*|| ! Objects.equals(Project, SavedProject)*/) {
+            // Save the project file before exit?
+            String cfn = this.CurrentProjectFile;
+            int n = JOptionPane.showConfirmDialog(
+                this,
+                "Do you want to save the current project to " + (cfn==null? "file" : cfn) + " before opening another project?",
+                "Save project",
+                JOptionPane.YES_NO_CANCEL_OPTION);
+            if (n == JOptionPane.CANCEL_OPTION) {
+                return;
+            }else if (n == JOptionPane.YES_OPTION) {
+                this.jMenuItemSaveActionPerformed(null);
+            }
+        }
+        // Check opened files
+        for (int i=TpnEditors.getTabCount()-1; i>=1; i--) {
+            try {
+                boolean cancel = ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+                if (cancel) return;
+            }catch (ClassCastException | NullPointerException cce) {
+            }
+        }
         // Select a file to open
         fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JSON));
         fc.addChoosableFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JEP));
@@ -2662,7 +2678,30 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private void jMenuItemNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemNewActionPerformed
 
         // Check if changes have been saved; prompt if not
+        if (Project.isContentChanged() /*|| ! Objects.equals(Project, SavedProject)*/) {
+            // Save the project file before exit?
+            String cfn = this.CurrentProjectFile;
+            int n = JOptionPane.showConfirmDialog(
+                this,
+                "Do you want to save the current project to " + (cfn==null? "file" : cfn) + " before creating a new project?",
+                "Save project",
+                JOptionPane.YES_NO_CANCEL_OPTION);
+            if (n == JOptionPane.CANCEL_OPTION) {
+                return;
+            }else if (n == JOptionPane.YES_OPTION) {
+                this.jMenuItemSaveActionPerformed(null);
+            }
+        }
+        // Check opened files
+        for (int i=TpnEditors.getTabCount()-1; i>=1; i--) {
+            try {
+                boolean cancel = ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+                if (cancel) return;
+            }catch (ClassCastException | NullPointerException cce) {
+            }
+        }
 
+        Project.removeAllListeners();
         // New project and update GUI
         Project = new JEPlusProjectV2 ();
         Project.setProjectType((JEPlusProjectV2.ModelType)cboProjectType.getSelectedItem());
@@ -2670,6 +2709,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         this.cboExecutionTypeActionPerformed(null);
         CurrentProjectFile = null;
         this.setTitle(getVersionInfo() + " - New Project");
+        Project.addListener(this);
     }//GEN-LAST:event_jMenuItemNewActionPerformed
 
     private void cmdSelectTestFolderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectTestFolderActionPerformed
@@ -2699,7 +2739,6 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JComboBox cboExecutionType;
     private javax.swing.JComboBox cboProjectType;
     private javax.swing.JComboBox cboSampleOpt;
-    private javax.swing.JCheckBox chkLHS;
     private javax.swing.JCheckBox chkOverride;
     private javax.swing.JButton cmdEditJobListFile;
     private javax.swing.JButton cmdSelectJobListFile;
@@ -2799,6 +2838,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     // End of variables declaration//GEN-END:variables
 
     public void openProject (Component parent, File file) {
+        if (Project != null) {Project.removeAllListeners();}
         JEPlusProjectV2 proj = null;
         String ext = FilenameUtils.getExtension(file.getName());
         if (ext.equalsIgnoreCase("json")) {
@@ -2848,6 +2888,8 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         DefaultDir = new File (Project.getBaseDir());
         // Batch options gui
         this.initBatchOptions();
+        // Attach listener
+        Project.addListener(this);
     }
 
     public void importProjectFromJson (Component parent, File file) {
@@ -2889,9 +2931,34 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         final File file = new File (fn);
         JMenuItem item = new JMenuItem (file.getAbsolutePath());
         item.setToolTipText(fn);
+        final JEPlusFrameMain gui = this;
         item.addActionListener(new ActionListener () {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Check if the current project should be saved
+                if (Project.isContentChanged() /*|| ! Objects.equals(Project, SavedProject)*/) {
+                    // Save the project file before exit?
+                    String cfn = CurrentProjectFile;
+                    int n = JOptionPane.showConfirmDialog(
+                        gui,
+                        "Do you want to save the current project to " + (cfn==null? "file" : cfn) + " before creating a new project?",
+                        "Save project",
+                        JOptionPane.YES_NO_CANCEL_OPTION);
+                    if (n == JOptionPane.CANCEL_OPTION) {
+                        return;
+                    }else if (n == JOptionPane.YES_OPTION) {
+                        jMenuItemSaveActionPerformed(null);
+                    }
+                }
+                // Check opened files
+                for (int i=TpnEditors.getTabCount()-1; i>=1; i--) {
+                    try {
+                        boolean cancel = ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+                        if (cancel) return;
+                    }catch (ClassCastException | NullPointerException cce) {
+                    }
+                }
+                // Open the recent project
                 openProject(null, file);
             }
         });
@@ -3000,6 +3067,26 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
             TpnEditors.setTabComponentAt(ti, new ButtonTabComponent(TpnEditors, TextFilePanel));
             TpnEditors.setToolTipTextAt(ti, ftmpl.getPath());
         }
+    }
+
+    @Override
+    public void projectChanged(JEPlusProjectV2 new_prj) {
+        this.setTitle(getVersionInfo() + " - " + (CurrentProjectFile==null?"New Project":CurrentProjectFile) + (Project.isContentChanged()?"*":""));
+        for (int i=1; i<TpnEditors.getTabCount(); i++) {
+            try {
+                EPlusEditorPanel etp = (EPlusEditorPanel)TpnEditors.getComponentAt(i);
+                switch (etp.getContentType()) {
+                    case IDF:
+                    case TRNSYS:
+                        etp.updateSearchStrings((Project == null) ? null : Project.getSearchStrings());
+                        break;
+                    default:
+                }
+            }catch (ClassCastException cce) {
+
+            }
+        }
+        
     }
 
 }

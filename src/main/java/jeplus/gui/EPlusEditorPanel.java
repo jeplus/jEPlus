@@ -37,6 +37,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.EPlusConfig;
 import jeplus.JEPlusProjectV2;
+import jeplus.TRNSYSConfig;
 import jeplus.data.RVX;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
@@ -72,6 +73,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         PYTHON(SyntaxConstants.SYNTAX_STYLE_PYTHON, EPlusConfig.getFileFilter(EPlusConfig.PYTHON)),
         CSV(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, EPlusConfig.getFileFilter(EPlusConfig.CSV)),
         PLAIN(SyntaxConstants.SYNTAX_STYLE_NONE, EPlusConfig.getFileFilter(EPlusConfig.ALL)),
+        TRNSYS(SyntaxConstants.SYNTAX_STYLE_NONE, TRNSYSConfig.getFileFilter(TRNSYSConfig.TRNINPUT)),
         XML(SyntaxConstants.SYNTAX_STYLE_XML, EPlusConfig.getFileFilter(EPlusConfig.XML));
 
         private final String RSTA_Style;
@@ -143,6 +145,10 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         this.notifyContentChange(ContentChanged);
     }
 
+    public FileType getContentType() {
+        return ContentType;
+    }
+
     @Override
     public String getTitle() {
         return Title;
@@ -198,6 +204,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         this.Project = project;
         switch (ContentType) {
             case IDF:
+            case TRNSYS:
                 updateSearchStrings((Project == null) ? null : Project.getSearchStrings());
                 this.cmdLoad.setEnabled(true);
                 this.cmdCheck.setEnabled(false);
@@ -362,6 +369,13 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         } catch (Exception ex) {
             logger.error("", ex);
         }
+    }
+
+    /**
+     * Save the string content to the current file
+     */
+    public void saveFileContent() {
+        saveFileContent(this.CurrentFileName, rsTextArea.getText());
     }
 
     public final void updateSearchStrings(String[] searchstrings) {
@@ -688,7 +702,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
     }
 
     @Override
-    public void closeTextPanel() {
+    public boolean closeTextPanel() {
         // Confirm save before open another file
         if (this.isContentChanged()) {
             int ans = JOptionPane.showConfirmDialog(this,
@@ -696,7 +710,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
                     "Save to file?",
                     JOptionPane.YES_NO_CANCEL_OPTION);
             if (ans == JOptionPane.CANCEL_OPTION) {
-                return;
+                return true;
             } else if (ans == JOptionPane.YES_OPTION) {
                 this.cmdSaveActionPerformed(null);
             }
@@ -710,6 +724,7 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
             ((JTabbedPane) ContainerComponent).remove(this);
             TabId = 0;
         }
+        return false;
     }
 
 }

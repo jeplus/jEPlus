@@ -18,10 +18,11 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
-//	"userSupplied" : [
+// "userSupplied" : [
 //		{
 //			"fileName" : "ExternResultTable.csv",
 //			"headerRow" : 0,
@@ -31,7 +32,15 @@ import java.util.Objects;
 //			"tableName" : "UserResults"
 //		}
 //	],
-public class RVX_UserSuppliedItem implements Serializable {
+@JsonPropertyOrder({ 
+    "fileName", 
+    "headerRow", 
+    "jobIdColumn", 
+    "dataColumns", 
+    "missingValue",
+    "tableName"
+})
+public class RVX_UserSuppliedItem implements Serializable, IF_RVXItem {
     private String FileName = "ExternResultTable.csv";
     private int HeaderRow = 0;
     private int JobIdColumn = 1;
@@ -136,4 +145,19 @@ public class RVX_UserSuppliedItem implements Serializable {
         }
         return true;
     }
+    
+    @Override
+    public void copyFrom(IF_RVXItem item) {
+        try {
+            RVX_UserSuppliedItem src = (RVX_UserSuppliedItem)item;
+            FileName     = src.FileName     ;
+            HeaderRow    = src.HeaderRow    ;
+            JobIdColumn  = src.JobIdColumn  ;
+            DataColumns  = src.DataColumns  ;
+            MissingValue = src.MissingValue ;
+            TableName    = src.TableName    ;
+        }catch (ClassCastException cce) {
+        }
+    }
+    
 }

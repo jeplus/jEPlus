@@ -129,7 +129,7 @@ public class RelativeDirUtil {
         String abspath;
         File path = new File(thispath);
         if (!path.isAbsolute()) {
-            path = new File(BaseDir + thispath);
+            path = new File(BaseDir + (BaseDir.endsWith(File.separator)?"":File.separator) + thispath);
         }
         try {
             abspath = path.getCanonicalPath();
@@ -148,9 +148,10 @@ public class RelativeDirUtil {
      * @param basePath basePath is calculated from this file
      * @param pathSeparator directory separator. The platform default is not assumed so that we can test Unix behaviour when running on
      * Windows (for example)
+     * @param isFile Flag marking the path is for a file. Otherwise a file separator is appended to the end of the resolved path
      * @return
      */
-    public static String getRelativePath(String targetPath, String basePath, String pathSeparator) {
+    public static String getRelativePath(String targetPath, String basePath, String pathSeparator, boolean isFile) {
 
         // Normalize the paths
         String normalizedTargetPath = FilenameUtils.normalizeNoEndSeparator(targetPath);
@@ -227,7 +228,7 @@ public class RelativeDirUtil {
         }else {
             relative.append(normalizedTargetPath.substring(common.length()));
         }
-        return relative.append(pathSeparator).toString();
+        return (isFile ? relative.toString() : relative.append(pathSeparator).toString());
     }
 
     static class PathResolutionException extends RuntimeException {
@@ -242,7 +243,7 @@ public class RelativeDirUtil {
      */
     public static void main(String args[]) {
         
-        System.out.println(getRelativePath("D:\\4\\jEPlus_v2.0.0_beta\\example_1-params_E+v8.3\\my.rvi", "D:\\4\\jEPlus_v2.0.0_beta\\example_2-params_E+v8.3\\my.rvi", "/"));
+        System.out.println(getRelativePath("D:\\4\\jEPlus_v2.0.0_beta\\example_1-params_E+v8.3\\my.rvi", "D:\\4\\jEPlus_v2.0.0_beta\\example_2-params_E+v8.3\\my.rvi", "/", false));
         if (args.length != 2) {
             System.out.println("RelativePath <home> <file>");
             return;

@@ -44,15 +44,6 @@
         <Property name="text" type="java.lang.String" value="jobs"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="chkLHS">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="LHS"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkLHSActionPerformed"/>
-      </Events>
-    </Component>
     <Component class="javax.swing.JMenuItem" name="jMenuItemImportJson">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
@@ -797,6 +788,7 @@
                         <TitledBorder title="Test Simulation Model"/>
                       </Border>
                     </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
 
                   <Layout>
@@ -838,6 +830,7 @@
                     <Component class="javax.swing.JLabel" name="jLabel1">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="&lt;html&gt;Please go to the next tab (&lt;b&gt;Execution&lt;/b&gt;) to perform a test run of one or more jobs. Then select below the result folder of one of the jobs.These information may be useful for defining RVX items.&lt;/html&gt;"/>
+                        <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="txtTestResultFolder">
@@ -851,6 +844,7 @@
                       <Properties>
                         <Property name="text" type="java.lang.String" value="..."/>
                         <Property name="toolTipText" type="java.lang.String" value="Select the output folder of a test simulation"/>
+                        <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                       <Events>
                         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSelectTestFolderActionPerformed"/>
@@ -859,6 +853,7 @@
                     <Component class="javax.swing.JLabel" name="jLabel3">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Select the result folder: "/>
+                        <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                   </SubComponents>

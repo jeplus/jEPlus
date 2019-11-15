@@ -143,7 +143,7 @@ public class EPlusBatchInfo {
      * @return Text of all error messages recorded
      */
     public String getValidationErrorsText() {
-        StringBuilder buf = new StringBuilder ("Validation " + (ValidationSuccessful? "successful: " : "failed") + "\n");
+        StringBuilder buf = new StringBuilder ("Validation result: " + (ValidationSuccessful? "pass" : "fail") + "\n");
         for (String ValidationError : ValidationErrors) {
             buf.append(ValidationError).append("\n");
         }

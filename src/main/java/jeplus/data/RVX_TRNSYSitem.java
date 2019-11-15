@@ -18,10 +18,11 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
-//	"trnsys" : [
+// "trnsys" : [
 //		{
 //			"plotterName" : "plotter1",
 //                      "aggregation" : "None",
@@ -29,7 +30,13 @@ import java.util.Objects;
 //                      "usedInCalc" : true
 //		}
 //	],
-public class RVX_TRNSYSitem implements Serializable {
+@JsonPropertyOrder({
+    "plotterName", 
+    "aggregation", 
+    "tableName", 
+    "useInCalc"
+})
+public class RVX_TRNSYSitem implements Serializable, IF_RVXItem {
     public enum ColumnAggregationOption {
         LastRow/*,
         Sum,
@@ -114,4 +121,17 @@ public class RVX_TRNSYSitem implements Serializable {
         }
         return true;
     }
+
+    @Override
+    public void copyFrom(IF_RVXItem item) {
+        try {
+            RVX_TRNSYSitem src = (RVX_TRNSYSitem)item;
+            PlotterName = src.PlotterName ;
+            Aggregation = src.Aggregation ;
+            TableName   = src.TableName   ;
+            UsedInCalc  = src.UsedInCalc  ;
+        }catch (ClassCastException cce) {
+        }
+    }
+    
 }

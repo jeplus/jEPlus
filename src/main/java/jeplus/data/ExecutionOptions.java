@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 import jeplus.EPlusBatch;
@@ -27,6 +28,20 @@ import jeplus.EPlusBatch;
  * Data object representing execution options model
  * @author yzhang
  */
+@JsonPropertyOrder({ 
+    "numThreads", 
+    "workDir", 
+    "subSet", 
+    "sampleOpt", 
+    "randomSeed", 
+    "numberOfJobs", 
+    "jobListFile", 
+    "rerunAll",
+    "keepJEPlusFiles", 
+    "keepEPlusFiles", 
+    "deleteSelectedFiles", 
+    "selectedFiles"
+})
 public class ExecutionOptions implements Serializable {
     
     private static final long serialVersionUID = -1400077773086505500L;
@@ -69,10 +84,6 @@ public class ExecutionOptions implements Serializable {
     protected boolean DeleteSelectedFiles = false;
     /** Selected file name patterns to keep */
     protected String SelectedFiles = "*.dxf *.htm *.mtd *.mdd *.rdd *.shd *.out *.audit *.eio *.idd *.bnd *.ini";
-    /** Whether or not to try collect results from E+ SQLite output file */
-//    protected boolean UseSQLite = true;
-    /** Whether or not to try look up further information from a user-specified spreadsheet */
-//    protected boolean UseUserSpreadsheet = true;
 
     // PBS specific options
     /** PBS job script template file name */
@@ -86,13 +97,6 @@ public class ExecutionOptions implements Serializable {
     /** JESS Client configuration file name */
     protected String ClientConfigFile = null;
     
-//    /** Remote server address */
-//    protected String RemoteServerAddr = null;
-//    /** Remote server port number */
-//    protected int RemoteServerPort = -1;
-//    /** Packed file name */
-//    protected String PackedFile = null;
-
     // Last batch options
     /** job set within the project */
     protected int SubSet = ALL;
@@ -198,50 +202,42 @@ public class ExecutionOptions implements Serializable {
         this.WorkDir = WorkDir;
     }
 
+    @JsonIgnore
     public String getPBSscriptFile() {
         return PBSscriptFile;
     }
 
-//    public String getRemoteServerAddr() {
-//        return RemoteServerAddr;
-//    }
-//
-//    public void setRemoteServerAddr(String RemoteServerAddr) {
-//        this.RemoteServerAddr = RemoteServerAddr;
-//    }
-//
-//    public int getRemoteServerPort() {
-//        return RemoteServerPort;
-//    }
-//
-//    public void setRemoteServerPort(int RemoteServerPort) {
-//        this.RemoteServerPort = RemoteServerPort;
-//    }
-
+    @JsonIgnore
     public String getServerConfigFile() {
         return ServerConfigFile;
     }
 
+    @JsonIgnore
     public void setServerConfigFile(String ServerConfigFile) {
         this.ServerConfigFile = ServerConfigFile;
     }
 
+    @JsonIgnore
     public void setPBSscriptFile(String PBSscriptFile) {
         this.PBSscriptFile = PBSscriptFile;
     }
 
+    @JsonIgnore
     public int getDelay() {
         return Delay;
     }
 
+    @JsonIgnore
     public void setDelay(int Delay) {
         this.Delay = Delay;
     }
 
+    @JsonIgnore
     public int getExecutionType() {
         return ExecutionType;
     }
 
+    @JsonIgnore
     public void setExecutionType(int ExecutionType) {
         this.ExecutionType = ExecutionType;
     }
@@ -262,10 +258,12 @@ public class ExecutionOptions implements Serializable {
         this.KeepJEPlusFiles = KeepJEPlusFiles;
     }
 
+    @JsonIgnore
     public boolean isKeepJobDir() {
         return KeepJobDir;
     }
 
+    @JsonIgnore
     public void setKeepJobDir(boolean KeepJobDir) {
         this.KeepJobDir = KeepJobDir;
     }
@@ -278,10 +276,12 @@ public class ExecutionOptions implements Serializable {
         this.DeleteSelectedFiles = KeepSelectedFiles;
     }
 
+    @JsonIgnore
     public int getOMPThreads() {
         return OMPThreads;
     }
 
+    @JsonIgnore
     public void setOMPThreads(int OMPThreads) {
         this.OMPThreads = OMPThreads;
     }
@@ -312,18 +312,12 @@ public class ExecutionOptions implements Serializable {
         this.WorkDir = ParentDir;
     }
 
-//    public String getPackedFile() {
-//        return PackedFile;
-//    }
-//
-//    public void setPackedFile(String PackedFile) {
-//        this.PackedFile = PackedFile;
-//    }
-
+    @JsonIgnore
     public int getJobSubmissionCap() {
         return JobSubmissionCap;
     }
 
+    @JsonIgnore
     public void setJobSubmissionCap(int JobSubmissionCap) {
         this.JobSubmissionCap = JobSubmissionCap;
     }
@@ -368,10 +362,12 @@ public class ExecutionOptions implements Serializable {
         this.NumberOfJobs = NumberOfJobs;
     }
 
+    @JsonIgnore
     public boolean isUseLHS() {
         return UseLHS;
     }
 
+    @JsonIgnore
     public void setUseLHS(boolean UseLHS) {
         this.UseLHS = UseLHS;
     }

@@ -19,6 +19,7 @@
 package jeplus;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.*;
@@ -31,9 +32,14 @@ import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
 import jeplus.data.ParameterItemV2;
 import jeplus.data.RVX;
+import jeplus.data.RVX_CSVitem;
+import jeplus.data.RVX_RVIitem;
+import jeplus.data.RVX_SQLitem;
 import jeplus.data.RVX_ScriptItem;
+import jeplus.data.RVX_UserSuppliedItem;
 import jeplus.data.RandomSource;
 import jeplus.data.RouletteWheel;
+import jeplus.event.IF_ProjectChangedHandler;
 import jeplus.util.CsvUtil;
 import jeplus.util.RelativeDirUtil;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
@@ -49,6 +55,23 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  * @since 1.0
  */
+@JsonPropertyOrder({ 
+    "projectType", 
+    "projectID", 
+    "projectNotes", 
+    "weatherDir", 
+    "weatherFile", 
+    "idfdir", 
+    "idftemplate", 
+    "dckdir",
+    "dcktemplate", 
+    "outputFileNames", 
+    "paramFile", 
+    "rvifile",
+    "parameters",
+    "rvx",
+    "execSettings"
+})
 public class JEPlusProjectV2 implements Serializable {
 
     /** Logger */
@@ -68,11 +91,21 @@ public class JEPlusProjectV2 implements Serializable {
         EPLUS, TRNSYS, INSEL
     }
     
+    transient protected List<IF_ProjectChangedHandler> Listeners = new ArrayList<>();
+    public void addListener (IF_ProjectChangedHandler listener) { Listeners.add(listener); }
+    public void removeListener (IF_ProjectChangedHandler listener) { Listeners.remove(listener); }
+    public void removeAllListeners () { Listeners.clear(); }
+    public void fireProjectChanged () {
+        for (IF_ProjectChangedHandler listener : Listeners) {
+            listener.projectChanged(this);
+        }
+    }
+    
     /** This is the working directory of the program */
     protected static String UserBaseDir = System.getProperty("user.dir") + File.separator;
     
     /** Flag marking whether this project has been changed since last save/load */
-    transient private boolean ContentChanged = true;
+    transient private boolean ContentChanged = false;
     
     /** Base directory of the project, i.e. the location where the project file is saved */
     protected String BaseDir = null;
@@ -142,7 +175,7 @@ public class JEPlusProjectV2 implements Serializable {
         OutputFileNames = "trnsysout.csv";  // fixed on one file name for the time being
         ExecSettings = new ExecutionOptions ();
         Parameters = new ArrayList<> ();
-        Parameters.add(new ParameterItemV2());
+        Parameters.add(new ParameterItemV2(0));
         BaseDir = new File ("./").getAbsolutePath() + File.separator;
         Rvx = new RVX();
     }
@@ -200,6 +233,8 @@ public class JEPlusProjectV2 implements Serializable {
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         try (FileOutputStream fw = new FileOutputStream(file); ) {
             mapper.writeValue(fw, this);
+            ContentChanged = false;
+            fireProjectChanged();
             logger.info("Project saved to " + file.getAbsolutePath());
         }catch (Exception ex) {
             logger.error("Error saving project to JSON.", ex);
@@ -241,8 +276,8 @@ public class JEPlusProjectV2 implements Serializable {
                 logger.error("Cannot read the project's RVX file", ioe);
             }
         }
-        // Default project format remains .jep, so newly imported project is unsaved.
-        project.ContentChanged = true;
+        // Freshly loaded from json, hence saved status
+        project.ContentChanged = false;
         // Return
         return project;
     }
@@ -274,7 +309,7 @@ public class JEPlusProjectV2 implements Serializable {
 
     public void setProjectType(ModelType ProjectType) {
         if (this.ProjectType != ProjectType) {
-            ContentChanged = true;
+            setContentChanged(true);
         }
         this.ProjectType = ProjectType;
         
@@ -286,7 +321,7 @@ public class JEPlusProjectV2 implements Serializable {
 
     public void setProjectID(String ProjectID) {
         if (! Objects.equals(this.ProjectID, ProjectID)) {
-            ContentChanged = true;
+            setContentChanged(true);
         }
         this.ProjectID = ProjectID;
     }
@@ -297,7 +332,7 @@ public class JEPlusProjectV2 implements Serializable {
 
     public void setProjectNotes(String ProjectNotes) {
         if (! Objects.equals(this.ProjectNotes, ProjectNotes)) {
-            ContentChanged = true;
+            setContentChanged(true);
         }
         this.ProjectNotes = ProjectNotes;
     }
@@ -307,7 +342,7 @@ public class JEPlusProjectV2 implements Serializable {
     }
 
     public void setExecSettings(ExecutionOptions ExecSettings) {
-        ContentChanged = true;
+        setContentChanged(true);
         this.ExecSettings = ExecSettings;
     }
 
@@ -317,7 +352,7 @@ public class JEPlusProjectV2 implements Serializable {
 
     public void setIDFDir(String IDFDir) {
         if (! Objects.equals(this.IDFDir, IDFDir)) {
-            ContentChanged = true;
+            setContentChanged(true);
         }
         this.IDFDir = IDFDir;
     }
@@ -328,7 +363,7 @@ public class JEPlusProjectV2 implements Serializable {
 
     public void setIDFTemplate(String IDFTemplate) {
         if (! Objects.equals(this.IDFTemplate, IDFTemplate)) {
-            ContentChanged = true;
+            setContentChanged(true);
         }
         this.IDFTemplate = IDFTemplate;
     }
@@ -341,6 +376,9 @@ public class JEPlusProjectV2 implements Serializable {
     @JsonIgnore
     public void setContentChanged(boolean ContentChanged) {
         this.ContentChanged = ContentChanged;
+        if (this.ContentChanged) {
+            fireProjectChanged ();
+        }
     }
 
     public ArrayList<ParameterItemV2> getParameters() {
@@ -357,7 +395,7 @@ public class JEPlusProjectV2 implements Serializable {
 
     public void setRVIFile(String RVIFile) {
         if (! Objects.equals(this.RVIFile, RVIFile)) {
-            ContentChanged = true;
+            setContentChanged(true);
         }
         this.RVIFile = RVIFile;
     }
@@ -367,7 +405,7 @@ public class JEPlusProjectV2 implements Serializable {
     }
 
     public void setDCKDir(String DCKDir) {
-        ContentChanged = true;
+        setContentChanged(true);
         this.DCKDir = DCKDir;
     }
 
@@ -376,7 +414,9 @@ public class JEPlusProjectV2 implements Serializable {
     }
 
     public void setDCKTemplate(String DCKTemplate) {
-        ContentChanged = true;
+        if (! Objects.equals(this.DCKTemplate, DCKTemplate)) {
+            setContentChanged(true);
+        }
         this.DCKTemplate = DCKTemplate;
     }
 
@@ -387,7 +427,7 @@ public class JEPlusProjectV2 implements Serializable {
 
     @JsonIgnore
     public void setINSELDir(String INSELDir) {
-        ContentChanged = true;
+        setContentChanged(true);
         this.INSELDir = INSELDir;
     }
 
@@ -398,7 +438,7 @@ public class JEPlusProjectV2 implements Serializable {
 
     @JsonIgnore
     public void setINSELTemplate(String INSELTemplate) {
-        ContentChanged = true;
+        setContentChanged(true);
         this.INSELTemplate = INSELTemplate;
     }
 
@@ -407,7 +447,7 @@ public class JEPlusProjectV2 implements Serializable {
     }
 
     public void setOutputFileNames(String OutputFileNames) {
-        ContentChanged = true;
+        setContentChanged(true);
         this.OutputFileNames = OutputFileNames;
     }
 
@@ -416,8 +456,8 @@ public class JEPlusProjectV2 implements Serializable {
     }
 
     public void setWeatherDir(String WeatherDir) {
-        if (! Objects.equals(this.ProjectNotes, ProjectNotes)) {
-            ContentChanged = true;
+        if (! Objects.equals(this.WeatherDir, WeatherDir)) {
+            setContentChanged(true);
         }
         this.WeatherDir = WeatherDir;
     }
@@ -428,7 +468,7 @@ public class JEPlusProjectV2 implements Serializable {
 
     public void setWeatherFile(String WeatherFile) {
         if (! Objects.equals(this.WeatherFile, WeatherFile)) {
-            ContentChanged = true;
+            setContentChanged(true);
         }
         this.WeatherFile = WeatherFile;
     }
@@ -438,7 +478,7 @@ public class JEPlusProjectV2 implements Serializable {
     }
 
     public void setParamFile(String ParamFile) {
-        ContentChanged = true;
+        setContentChanged(true);
         this.ParamFile = ParamFile;
     }
 
@@ -447,7 +487,7 @@ public class JEPlusProjectV2 implements Serializable {
     }
 
     public void setRvx(RVX Rvx) {
-        ContentChanged = true;
+        setContentChanged(true);
         this.Rvx = Rvx;
     }
 
@@ -458,27 +498,20 @@ public class JEPlusProjectV2 implements Serializable {
     
     // A new set of resolveXYZFile functions
     
-    /**
-     * Set the base directory of the current project to the given paths. Once the
-     * new paths are set, the relative paths of all project files are recalculated,
-     * and the absolute paths converted to relative form.
-     * @param BaseDir The new base directory for this project
+    /** 
+     * Resolve the path to the given file/path using the project's base folder
+     * @param path The path of the file or a directory, can be in relative or absolute form
+     * @param isFile Flag marking the path is for a file. Otherwise a file separator is appended to the end of the resolved path
+     * @return Resolved absolute paths
      */
-    public void updateBaseDir(String BaseDir) {
-        // First to convert all paths to absolute using the existing Base
-        this.setWeatherDir(this.resolveWeatherDir());   // Weather file path
-        this.setIDFDir(this.resolveIDFDir());        // idf file path
-        this.setDCKDir(this.resolveDCKDir());        // dck file path
-        this.getExecSettings().setParentDir(this.resolveWorkDir());        // output dir
-        // Update BaseDir
-        this.BaseDir = BaseDir;
-        // Calculate relative dir from the new base
-        this.setWeatherDir(RelativeDirUtil.getRelativePath(this.getWeatherDir(), this.BaseDir, "/"));   // Weather file path
-        this.setIDFDir(RelativeDirUtil.getRelativePath(this.getIDFDir(), this.BaseDir, "/"));        // idf file path
-        this.setDCKDir(RelativeDirUtil.getRelativePath(this.getDCKDir(), this.BaseDir, "/"));        // dck file path
-        this.getExecSettings().setParentDir(RelativeDirUtil.getRelativePath(this.getExecSettings().getParentDir(), this.BaseDir, "/"));        // output dir
+    public String resolvePath (String path, boolean isFile) {
+        String abspath = RelativeDirUtil.checkAbsolutePath(path, BaseDir);
+        if (! isFile) {
+            abspath = abspath.concat(abspath.endsWith(File.separator)?"":File.separator);
+        }
+        return abspath;
     }
-
+    
     /** 
      * Resolve the path to the project's work (a.k.a. parent) directory. If
      * relative path is used, it is relative to the project folder
@@ -596,7 +629,7 @@ public class JEPlusProjectV2 implements Serializable {
      */
     protected final void copyFromProjectV1 (JEPlusProject proj) {
         if (proj != null) {
-            ContentChanged = true;  // set content changed for the new project obj
+            setContentChanged(true);  // set content changed for the new project obj
             BaseDir = proj.BaseDir;
             ProjectType = proj.ProjectType == 0 ? ModelType.EPLUS : (proj.ProjectType == 1 ? ModelType.TRNSYS : ModelType.INSEL);
             ProjectID = proj.ProjectID;
@@ -649,7 +682,7 @@ public class JEPlusProjectV2 implements Serializable {
         ExecSettings.setSelectedFiles(env.SelectedFiles);
         ExecSettings.setRerunAll(env.ForceRerun);
         // Mark content changed
-        ContentChanged = true;
+        setContentChanged(true);
     }
 
     /**
@@ -749,38 +782,68 @@ public class JEPlusProjectV2 implements Serializable {
     /**
      * Convert all directories to relative paths to where the project base (the
      * location of the project file, for example) is.
-     * @param Base The base directory of the project
      * @return conversion successful or not
      */
-    protected boolean convertToRelativeDir (File Base) {
-        if (Base != null && Base.exists()) {
-            File idf = new File (IDFDir);
-            File wthr = new File (WeatherDir);
-            File out = new File (ExecSettings.getWorkDir());
-            if (idf.exists() && wthr.exists() && out.exists()) {
-                IDFDir = RelativeDirUtil.getRelativePath(Base, idf);
-                WeatherDir = RelativeDirUtil.getRelativePath(Base, wthr);
-                ExecSettings.setParentDir(RelativeDirUtil.getRelativePath(Base, out));
-                // Mark content changed
-                ContentChanged = true;
-                return true;
-            }
+    protected void convertToRelativeDir () {
+        // Weather file path
+        WeatherDir = RelativeDirUtil.getRelativePath(resolveWeatherDir(), BaseDir, "/", false);
+        // idf file path
+        IDFDir = RelativeDirUtil.getRelativePath(resolveIDFDir(), BaseDir, "/", false);
+        // dck file path
+        DCKDir = RelativeDirUtil.getRelativePath(resolveDCKDir(), BaseDir, "/", false);
+        // output dir
+        ExecSettings.setParentDir(RelativeDirUtil.getRelativePath(resolveWorkDir(), BaseDir, "/", false));
+        // Files referenced in RVX
+        for (RVX_RVIitem item : Rvx.getRVIs()) {
+            item.setFileName(RelativeDirUtil.getRelativePath(resolvePath(item.getFileName(), true), BaseDir, "/", true));
         }
-        return false;
+        for (RVX_CSVitem item : Rvx.getCSVs()) {
+            // No conversion needed
+        }
+        for (RVX_SQLitem item : Rvx.getSQLs()) {
+            // No conversion needed now. In the future maybe, if sql comes from a file
+            // item.setFileName(RelativeDirUtil.getRelativePath(resolvePath(item.getFileName()), BaseDir, "/"));
+        }
+        for (RVX_ScriptItem item : Rvx.getScripts()) {
+            item.setFileName(RelativeDirUtil.getRelativePath(resolvePath(item.getFileName(), true), BaseDir, "/", true));
+        }
+        for (RVX_UserSuppliedItem item : Rvx.getUserSupplied()) {
+            item.setFileName(RelativeDirUtil.getRelativePath(resolvePath(item.getFileName(), true), BaseDir, "/", true));
+        }
+        setContentChanged(true);
     }
 
     /**
      * Convert all directories to absolute paths.
      * @param base The base directory of the project
      */
-    protected void convertToAbsoluteDir (File base) {
-        IDFDir = new File (base, IDFDir).getAbsolutePath();
-        WeatherDir = new File (base, WeatherDir).getAbsolutePath();
-        ExecSettings.setParentDir(new File (base, ExecSettings.getWorkDir()).getAbsolutePath());
-        //ExecSettings.setPBSscriptFile(new File (base, ExecSettings.getPBSscriptFile()).getAbsolutePath());
-        //ExecSettings.setServerConfigFile(new File (base, ExecSettings.getServerConfigFile()).getAbsolutePath());
-        // Mark content changed
-        ContentChanged = true;
+    protected void convertToAbsoluteDir () {
+        // Weather file path
+        WeatherDir = resolveWeatherDir();
+        // idf file path
+        IDFDir = resolveIDFDir();
+        // dck file path
+        DCKDir = resolveDCKDir();
+        // output dir
+        ExecSettings.setParentDir(resolveWorkDir());
+        // Files referenced in RVX
+        for (RVX_RVIitem item : Rvx.getRVIs()) {
+            item.setFileName(resolvePath(item.getFileName(), true));
+        }
+        for (RVX_CSVitem item : Rvx.getCSVs()) {
+            // No conversion needed
+        }
+        for (RVX_SQLitem item : Rvx.getSQLs()) {
+            // No conversion needed now. In the future maybe, if sql comes from a file
+            // item.setFileName(RelativeDirUtil.getRelativePath(resolvePath(item.getFileName()), BaseDir, "/"));
+        }
+        for (RVX_ScriptItem item : Rvx.getScripts()) {
+            item.setFileName(resolvePath(item.getFileName(), true));
+        }
+        for (RVX_UserSuppliedItem item : Rvx.getUserSupplied()) {
+            item.setFileName(resolvePath(item.getFileName(), true));
+        }
+        setContentChanged(true);
     }
 
     /**
@@ -865,7 +928,7 @@ public class JEPlusProjectV2 implements Serializable {
                 }
             }
             // Mark content changed
-            ContentChanged = true;
+            setContentChanged(true);
             return true;
         }
         return false;

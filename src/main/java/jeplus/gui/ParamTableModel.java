@@ -112,6 +112,9 @@ public class ParamTableModel extends AbstractTableModel {
             case 6:
                 break;
         }
-        if (changed) fireTableCellUpdated(row, col);
+        if (changed) {
+            Project.setContentChanged(true);
+            fireTableCellUpdated(row, col);
+        }
     }    
 }

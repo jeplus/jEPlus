@@ -161,6 +161,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         jLabel15.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel15.setText("Start delay: ");
 
+        txtThreadDelay.setEditable(false);
         txtThreadDelay.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         txtThreadDelay.setText("1000");
         txtThreadDelay.setToolTipText("Time delay (in milliseconds) between the start of each thread.");

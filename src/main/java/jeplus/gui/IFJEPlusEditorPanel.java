@@ -27,8 +27,9 @@ public interface IFJEPlusEditorPanel {
     /**
      * Confirm closing the current file. User will be prompted to save if the
      * content of the file has been changed.
+     * @return cancel flag
      */
-    void closeTextPanel();
+    boolean closeTextPanel();
 
     /**
      * Get tab id of this panel in the host tabbed pane

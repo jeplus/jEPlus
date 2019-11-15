@@ -18,6 +18,7 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -36,7 +37,19 @@ import java.util.Objects;
 //                      "enabled" : true
 //		}
 //	],
-public class RVX_Constraint implements Serializable {
+@JsonPropertyOrder({ 
+    "identifier", 
+    "caption", 
+    "formula", 
+    "scaling", 
+    "lb", 
+    "ub", 
+    "min",
+    "max", 
+    "weight",
+    "enabled"
+})
+public class RVX_Constraint implements Serializable, IF_RVXItem {
     private String Identifier = "s1";
     private String Formula = "c1";
     private String Caption = "Constraint 1 []";
@@ -217,6 +230,24 @@ public class RVX_Constraint implements Serializable {
             return false;
         }
         return true;
+    }
+    
+    @Override
+    public void copyFrom(IF_RVXItem item) {
+        try {
+            RVX_Constraint src = (RVX_Constraint)item;
+            Identifier = src.Identifier;
+            Formula    = src.Formula   ;
+            Caption    = src.Caption   ;
+            Scaling    = src.Scaling   ;
+            LB         = src.LB        ;
+            UB         = src.UB        ;
+            Min        = src.Min       ;
+            Max        = src.Max       ;
+            Weight     = src.Weight    ;
+            Enabled    = src.Enabled   ;
+        }catch (ClassCastException cce) {
+        }
     }
     
 }

@@ -24,6 +24,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.JEPlusFrameMain;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX_TRNSYSitem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +40,10 @@ public class JPanel_TRNSYSitemEditor extends javax.swing.JPanel {
 
     JEPlusFrameMain MainGUI = null;
     JTree HostTree = null;
-    protected String BaseDir = null;
+    protected JEPlusProjectV2 Project = null;
     protected RVX_TRNSYSitem Trnsys = null;
     protected DocumentListener DL = null;
+    private boolean DLActive = false;
 
     /**
      * Creates new form JPanel_RVXEditor
@@ -54,14 +56,14 @@ public class JPanel_TRNSYSitemEditor extends javax.swing.JPanel {
      * Creates new form JPanel_EPlusProjectFiles with parameters
      * @param frame
      * @param tree
-     * @param basedir
+     * @param prj
      * @param trnsys
      */
-    public JPanel_TRNSYSitemEditor(JEPlusFrameMain frame, JTree tree, String basedir, RVX_TRNSYSitem trnsys) {
+    public JPanel_TRNSYSitemEditor(JEPlusFrameMain frame, JTree tree, JEPlusProjectV2 prj, RVX_TRNSYSitem trnsys) {
         initComponents();
         MainGUI = frame;
         HostTree = tree;
-        BaseDir = basedir;
+        Project = prj;
         this.cboColAgg.setModel(new DefaultComboBoxModel (RVX_TRNSYSitem.ColumnAggregationOption.values()));
         setItem (trnsys);
         
@@ -71,13 +73,16 @@ public class JPanel_TRNSYSitemEditor extends javax.swing.JPanel {
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                Document src = e.getDocument();
-                if(src == DocPlotter) {
-                    Trnsys.setPlotterName(txtPlotter.getText());
-                }else if (src == DocResultTable) {
-                    Trnsys.setTableName(txtResultTable.getText());
+                if (DLActive) {
+                    Document src = e.getDocument();
+                    if(src == DocPlotter) {
+                        Trnsys.setPlotterName(txtPlotter.getText().trim());
+                    }else if (src == DocResultTable) {
+                        Trnsys.setTableName(txtResultTable.getText().trim());
+                    }
+                    Project.setContentChanged(true);
+                    HostTree.update(HostTree.getGraphics());
                 }
-                HostTree.update(HostTree.getGraphics());
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
@@ -90,6 +95,7 @@ public class JPanel_TRNSYSitemEditor extends javax.swing.JPanel {
         };
         txtPlotter.getDocument().addDocumentListener(DL);
         txtResultTable.getDocument().addDocumentListener(DL);
+        DLActive = true;
     }
     
     protected final void setItem (RVX_TRNSYSitem script) {
@@ -212,13 +218,19 @@ public class JPanel_TRNSYSitemEditor extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cboColAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboColAggActionPerformed
-        Trnsys.setAggregation(cboColAgg.getSelectedItem().toString());
-        HostTree.update(HostTree.getGraphics());
+        if (DLActive) {
+            Trnsys.setAggregation(cboColAgg.getSelectedItem().toString());
+            Project.setContentChanged(true);
+            HostTree.update(HostTree.getGraphics());
+        }
     }//GEN-LAST:event_cboColAggActionPerformed
 
     private void chkAggregationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAggregationActionPerformed
-        Trnsys.setUsedInCalc(chkAggregation.isSelected());
-        HostTree.update(HostTree.getGraphics());
+        if (DLActive) {
+            Trnsys.setUsedInCalc(chkAggregation.isSelected());
+            Project.setContentChanged(true);
+            HostTree.update(HostTree.getGraphics());
+        }
     }//GEN-LAST:event_chkAggregationActionPerformed
 
 

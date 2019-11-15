@@ -26,6 +26,8 @@ import javax.swing.JFrame;
 import javax.swing.JTree;
 import javax.swing.tree.*;
 import jeplus.JEPlusFrameMain;
+import jeplus.JEPlusProjectV2;
+import jeplus.data.IF_RVXItem;
 import jeplus.data.RVX;
 import jeplus.data.RVX_CSVitem;
 import jeplus.data.RVX_Constraint;
@@ -49,11 +51,11 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JPanel_RVXTree.class);
 
     JEPlusFrameMain MainGUI = null;
-    String BaseDir = null;
-    protected RVX Rvx;
+    protected JEPlusProjectV2 Project;
 
     protected String Title = "RVX Editor";
     protected DefaultMutableTreeNode CurrentGroup = null;
+    protected Object CurrentObject = null;
     protected RVXTreeModel RvxTreeModel = null;
     protected JTree jTreeRvx = null;
 
@@ -61,26 +63,18 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
     /** Creates new form JPanel_ParameterTree */
     public JPanel_RVXTree() {
         initComponents();
-        setRvx(new RVX());
+//        setRvx(new RVX());
     }
     
     /** 
      * Creates new form JPanel_ParameterTree
      * @param frame
-     * @param rvx
-     * @param basedir
+     * @param project
      */
-    public JPanel_RVXTree(JEPlusFrameMain frame, String basedir, RVX rvx) {
-        initComponents();
+    public void setContents (JEPlusFrameMain frame, JEPlusProjectV2 project) {
         MainGUI = frame;
-        BaseDir = basedir;
-        setRvx(rvx);
-    }
-    
-    public void setContents (JEPlusFrameMain frame, String basedir, RVX rvx) {
-        MainGUI = frame;
-        BaseDir = basedir;
-        setRvx(rvx);
+        Project = project;
+        initRVXTree(Project.getRvx());
     }
 
     /**
@@ -101,21 +95,10 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
     }
 
     /**
-     * Set the root of the parameter tree
-     * @param rvx the RVX object to be represented as the tree
-     */
-    public final void setRvx (RVX rvx) {
-        Rvx = rvx;
-        if (Rvx != null) {
-            initRVXTree();
-        }
-    }
-
-    /**
      * initialises the parameter tree, by setting up tree nodes and tree model
      */
-    protected void initRVXTree () {
-        RvxTreeModel = new RVXTreeModel (Rvx);
+    protected void initRVXTree (RVX rvx) {
+        RvxTreeModel = new RVXTreeModel (rvx);
         jTreeRvx = new JTree (RvxTreeModel);
         jTreeRvx.setCellRenderer(RvxTreeModel.getRenderer());
         
@@ -132,6 +115,7 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         });
 //        jTreeRvx.setSelectionPath(new TreePath (RVXTreeRoot.getLastLeaf().getPath()));
         this.jScroll.setViewportView(jTreeRvx);
+        displayRvxItemDetails(null);
     }
 
     /**
@@ -146,11 +130,14 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
                     TreePath path = new TreePath(((DefaultMutableTreeNode)node.getFirstChild()).getPath());
                     jTreeRvx.scrollPathToVisible(path);
                     jTreeRvx.setSelectionPath(path);
+                }else {
+                    displayRvxItemDetails(null);
                 }
                 CurrentGroup = node;
             }else {
                 CurrentGroup = (DefaultMutableTreeNode)node.getParent();
-                displayRvxItemDetails(node.getUserObject());
+                CurrentObject = node.getUserObject();
+                displayRvxItemDetails(CurrentObject);
             }
         }
     }
@@ -163,28 +150,31 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
      */
     protected void displayRvxItemDetails(Object item) {
         jplItemEditorHolder.removeAll();
-        if (item instanceof RVX_RVIitem) {
-            jplItemEditorHolder.add(new JPanel_RVIitmeEditor(MainGUI, jTreeRvx, BaseDir, (RVX_RVIitem)item));
-        }else if (item instanceof RVX_SQLitem) {
-            jplItemEditorHolder.add(new JPanel_SQLitmeEditor(MainGUI, jTreeRvx, BaseDir, (RVX_SQLitem)item));
-        }else if (item instanceof RVX_ScriptItem) {
-            jplItemEditorHolder.add(new JPanel_ScriptItmeEditor(MainGUI, jTreeRvx, BaseDir, (RVX_ScriptItem)item));
-        }else if (item instanceof RVX_CSVitem) {
-            jplItemEditorHolder.add(new JPanel_CSVitmeEditor(MainGUI, jTreeRvx, BaseDir, (RVX_CSVitem)item));
-        }else if (item instanceof RVX_UserSuppliedItem) {
-            jplItemEditorHolder.add(new JPanel_UserSuppliedItmeEditor(MainGUI, jTreeRvx, BaseDir, (RVX_UserSuppliedItem)item));
-        }else if (item instanceof RVX_TRNSYSitem) {
-            jplItemEditorHolder.add(new JPanel_TRNSYSitemEditor(MainGUI, jTreeRvx, BaseDir, (RVX_TRNSYSitem)item));
-        }else if (item instanceof RVX_UserVar) {
-            jplItemEditorHolder.add(new JPanel_UserVariableEditor(jTreeRvx, (RVX_UserVar)item));
-        }else if (item instanceof RVX_Constraint) {
-            jplItemEditorHolder.add(new JPanel_ConstraintEditor(jTreeRvx, (RVX_Constraint)item));
-        }else if (item instanceof RVX_Objective) {
-            jplItemEditorHolder.add(new JPanel_ObjectiveEditor(jTreeRvx, (RVX_Objective)item));
-        }else {
-            
+        if (item != null) {
+            if (item instanceof RVX_RVIitem) {
+                jplItemEditorHolder.add(new JPanel_RVIitmeEditor(MainGUI, jTreeRvx, Project, (RVX_RVIitem)item));
+            }else if (item instanceof RVX_SQLitem) {
+                jplItemEditorHolder.add(new JPanel_SQLitmeEditor(MainGUI, jTreeRvx, Project, (RVX_SQLitem)item));
+            }else if (item instanceof RVX_ScriptItem) {
+                jplItemEditorHolder.add(new JPanel_ScriptItmeEditor(MainGUI, jTreeRvx, Project, (RVX_ScriptItem)item));
+            }else if (item instanceof RVX_CSVitem) {
+                jplItemEditorHolder.add(new JPanel_CSVitmeEditor(MainGUI, jTreeRvx, Project, (RVX_CSVitem)item));
+            }else if (item instanceof RVX_UserSuppliedItem) {
+                jplItemEditorHolder.add(new JPanel_UserSuppliedItmeEditor(MainGUI, jTreeRvx, Project, (RVX_UserSuppliedItem)item));
+            }else if (item instanceof RVX_TRNSYSitem) {
+                jplItemEditorHolder.add(new JPanel_TRNSYSitemEditor(MainGUI, jTreeRvx, Project, (RVX_TRNSYSitem)item));
+            }else if (item instanceof RVX_UserVar) {
+                jplItemEditorHolder.add(new JPanel_UserVariableEditor(jTreeRvx, Project, (RVX_UserVar)item));
+            }else if (item instanceof RVX_Constraint) {
+                jplItemEditorHolder.add(new JPanel_ConstraintEditor(jTreeRvx, Project, (RVX_Constraint)item));
+            }else if (item instanceof RVX_Objective) {
+                jplItemEditorHolder.add(new JPanel_ObjectiveEditor(jTreeRvx, Project, (RVX_Objective)item));
+            }else {
+
+            }
         }
         jplItemEditorHolder.revalidate();
+        jplItemEditorHolder.repaint();
     }
 
     /**
@@ -199,6 +189,7 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
             int idx = CurrentGroup.getIndex(node);
             if (idx >= 0) {
                 ((RVXTreeModel.GroupType)CurrentGroup.getUserObject()).getList().remove(idx);
+                Project.setContentChanged(true);
                 RvxTreeModel.removeNodeFromParent(node);
                 jTreeRvx.scrollPathToVisible(path);
                 jTreeRvx.setSelectionPath(path);
@@ -219,8 +210,31 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
                 try {
                     Object newitem = curgroup.getItemClass().newInstance();
                     curgroup.getList().add(newitem);
+                    Project.setContentChanged(true);
                     return addObject(CurrentGroup, newitem, true);
                 } catch (InstantiationException | IllegalAccessException ex) {
+                    logger.error("Error", ex);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add a new item to the tree
+     * @return The new node
+     */
+    public DefaultMutableTreeNode duplicateRvxItem() {
+        if (CurrentGroup != null && CurrentObject != null) {
+            RVXTreeModel.GroupType curgroup = (RVXTreeModel.GroupType)CurrentGroup.getUserObject();
+            if (curgroup.getItemClass() != null) {
+                try {
+                    Object newitem = curgroup.getItemClass().newInstance();
+                    ((IF_RVXItem)newitem).copyFrom((IF_RVXItem)CurrentObject);
+                    curgroup.getList().add(newitem);
+                    Project.setContentChanged(true);
+                    return addObject(CurrentGroup, newitem, true);
+                } catch (InstantiationException | IllegalAccessException | ClassCastException ex ) {
                     logger.error("Error", ex);
                 }
             }
@@ -272,6 +286,7 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         cmdNew = new javax.swing.JButton();
         cmdUndo = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
+        cmdDuplicate = new javax.swing.JButton();
 
         jplItemEditorHolder.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "RVX Item", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11), new java.awt.Color(102, 102, 102))); // NOI18N
         jplItemEditorHolder.setMinimumSize(new java.awt.Dimension(12, 250));
@@ -322,6 +337,14 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
             }
         });
 
+        cmdDuplicate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_copy.png"))); // NOI18N
+        cmdDuplicate.setToolTipText("Make a copy of the current item.");
+        cmdDuplicate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdDuplicateActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -335,26 +358,29 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
                     .addComponent(cmdImport, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmdNew, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmdUndo, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                    .addComponent(cmdRemove, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(cmdDuplicate, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(cmdNew)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdImport)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdUndo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(1, 1, 1)
-                        .addComponent(cmdAdd)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdRemove))
-                    .addComponent(jScroll, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(cmdNew)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmdImport)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmdUndo)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmdAdd)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(cmdDuplicate)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmdRemove)
+                .addGap(16, 16, 16))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jScroll)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -372,9 +398,9 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jplItemEditorHolder, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
+                .addComponent(jplItemEditorHolder, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -390,27 +416,31 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
 }//GEN-LAST:event_cmdRemoveActionPerformed
 
     private void cmdImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdImportActionPerformed
-        ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
-        try {
-            RVX rvx = mapper.readValue(new File ("D:\\4\\jEPlus_v1.7.0_beta\\example_3-RVX_v1.6_E+v8.3\\my.rvx"), RVX.class);
-            setRvx (rvx);
-        } catch (IOException ex) {
-            logger.error("Failed to open RVX file!", ex);
-        }
-        
+//        ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
+//        try {
+//            RVX rvx = mapper.readValue(new File ("D:\\4\\jEPlus_v1.7.0_beta\\example_3-RVX_v1.6_E+v8.3\\my.rvx"), RVX.class);
+//            setRvx (rvx);
+//        } catch (IOException ex) {
+//            logger.error("Failed to open RVX file!", ex);
+//        }
     }//GEN-LAST:event_cmdImportActionPerformed
 
     private void cmdNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdNewActionPerformed
-        setRvx (new RVX());
+        // setRvx (new RVX());
     }//GEN-LAST:event_cmdNewActionPerformed
 
     private void cmdUndoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdUndoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmdUndoActionPerformed
 
+    private void cmdDuplicateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDuplicateActionPerformed
+        this.duplicateRvxItem();
+    }//GEN-LAST:event_cmdDuplicateActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdDuplicate;
     private javax.swing.JButton cmdImport;
     private javax.swing.JButton cmdNew;
     private javax.swing.JButton cmdRemove;
@@ -420,17 +450,5 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPanel jplItemEditorHolder;
     // End of variables declaration//GEN-END:variables
-
-    public static void main (String [] args) throws IOException {
-        ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
-        RVX rvx = mapper.readValue(new File ("D:\\4\\jEPlus_v1.7.0_beta\\example_3-RVX_v1.6_E+v8.3\\my.rvx"), RVX.class);
-        JFrame frame = new JFrame("RVXTree tester");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new JPanel_RVXTree(null, "D:\\4\\jEPlus_v1.7.0_beta\\example_3-RVX_v1.6_E+v8.3\\", rvx));
-        frame.pack();
-        frame.setVisible(true);
-        
-        
-    }
 
 }

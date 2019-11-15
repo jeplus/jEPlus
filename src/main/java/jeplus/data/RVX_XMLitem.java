@@ -18,10 +18,11 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
-//	"xmls" : [
+// "xmls" : [
 //		{
 //			"tableName" : "ChillerCap",
 //			"columnHeaders" : "Chiller Nominal Capacity [W]",
@@ -29,7 +30,13 @@ import java.util.Objects;
 //                      "useInCalc" : true
 //		}
 //	],
-public class RVX_XMLitem implements Serializable {
+@JsonPropertyOrder({ 
+    "tableName", 
+    "columnHeaders", 
+    "xpath", 
+    "useInCalc"
+})
+public class RVX_XMLitem implements Serializable, IF_RVXItem {
     private String TableName = "SqlTable.csv"; // E.g.
     private String ColumnHeaders = ""; // E.g. "Temperature [K], Heating [kWh]"
     private String XPath = ""; // E.g.
@@ -103,6 +110,18 @@ public class RVX_XMLitem implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void copyFrom(IF_RVXItem item) {
+        try {
+            RVX_XMLitem src = (RVX_XMLitem)item;
+            TableName     = src.TableName     ;
+            ColumnHeaders = src.ColumnHeaders ;
+            XPath         = src.XPath         ;
+            UsedInCalc    = src.UsedInCalc    ;
+        }catch (ClassCastException cce) {
+        }
     }
     
 }

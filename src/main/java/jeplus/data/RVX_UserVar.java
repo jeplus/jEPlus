@@ -18,11 +18,11 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
-//	"userVars" : [
-
+// "userVars" : [
 //		{
 //			"identifier" : "v2",
 //			"formula" : "c2",
@@ -30,7 +30,13 @@ import java.util.Objects;
 //			"report" : false
 //		}
 //	],
-public class RVX_UserVar implements Serializable {
+@JsonPropertyOrder({ 
+    "identifier", 
+    "caption", 
+    "formula", 
+    "report"
+})
+public class RVX_UserVar implements Serializable, IF_RVXItem {
     private String Identifier = "v1";
     private String Formula = "0";
     private String Caption = "Variable 1 []";
@@ -110,6 +116,18 @@ public class RVX_UserVar implements Serializable {
             return false;
         }
         return true;
+    }
+    
+    @Override
+    public void copyFrom(IF_RVXItem item) {
+        try {
+            RVX_UserVar src = (RVX_UserVar)item;
+            Identifier = src.Identifier;
+            Formula    = src.Formula   ;
+            Caption    = src.Caption   ;
+            Report     = src.Report    ;
+        }catch (ClassCastException cce) {
+        }
     }
     
 }

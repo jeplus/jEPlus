@@ -28,6 +28,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.EPlusConfig;
 import jeplus.JEPlusFrameMain;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX_RVIitem;
 import jeplus.gui.ButtonTabComponent;
 import jeplus.gui.EPlusEditorPanel;
@@ -46,9 +47,10 @@ public class JPanel_RVIitmeEditor extends javax.swing.JPanel {
 
     JEPlusFrameMain MainGUI = null;
     JTree HostTree = null;
-    protected String BaseDir = null;
+    protected JEPlusProjectV2 Project = null;
     protected RVX_RVIitem Rvi = null;
     protected DocumentListener DL = null;
+    private boolean DLActive = false;
 
     /**
      * Creates new form JPanel_RVXEditor
@@ -61,14 +63,14 @@ public class JPanel_RVIitmeEditor extends javax.swing.JPanel {
      * Creates new form JPanel_EPlusProjectFiles with parameters
      * @param frame
      * @param tree
-     * @param basedir
+     * @param prj
      * @param rvi
      */
-    public JPanel_RVIitmeEditor(JEPlusFrameMain frame, JTree tree, String basedir, RVX_RVIitem rvi) {
+    public JPanel_RVIitmeEditor(JEPlusFrameMain frame, JTree tree, JEPlusProjectV2 prj, RVX_RVIitem rvi) {
         initComponents();
         MainGUI = frame;
         HostTree = tree;
-        BaseDir = basedir;
+        Project = prj;
         this.cboFrequency.setModel(new DefaultComboBoxModel (RVX_RVIitem.Frequencies.values()));
         setRviItem (rvi);
         
@@ -78,13 +80,16 @@ public class JPanel_RVIitmeEditor extends javax.swing.JPanel {
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                Document src = e.getDocument();
-                if(src == DocRviFile) {
-                    Rvi.setFileName(txtRviFile.getText());
-                }else if (src == DocResultTable) {
-                    Rvi.setTableName(txtResultTable.getText());
+                if (DLActive) {
+                    Document src = e.getDocument();
+                    if(src == DocRviFile) {
+                        Rvi.setFileName(txtRviFile.getText().trim());
+                    }else if (src == DocResultTable) {
+                        Rvi.setTableName(txtResultTable.getText().trim());
+                    }
+                    Project.setContentChanged(true);
+                    HostTree.update(HostTree.getGraphics());
                 }
-                HostTree.update(HostTree.getGraphics());
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
@@ -97,6 +102,7 @@ public class JPanel_RVIitmeEditor extends javax.swing.JPanel {
         };
         txtRviFile.getDocument().addDocumentListener(DL);
         txtResultTable.getDocument().addDocumentListener(DL);
+        DLActive = true;
     }
     
     protected final void setRviItem (RVX_RVIitem rvi) {
@@ -237,7 +243,7 @@ public class JPanel_RVIitmeEditor extends javax.swing.JPanel {
                     .addComponent(txtResultTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkAggregate)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(36, 36, 36))
@@ -249,12 +255,11 @@ public class JPanel_RVIitmeEditor extends javax.swing.JPanel {
         MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.RVI));
         MainGUI.getFileChooser().setMultiSelectionEnabled(false);
         MainGUI.getFileChooser().setSelectedFile(new File(""));
-        String rvidir = RelativeDirUtil.checkAbsolutePath(txtRviFile.getText(), BaseDir);
+        String rvidir = RelativeDirUtil.checkAbsolutePath(txtRviFile.getText(), Project.getBaseDir());
         MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir).getParentFile());
         if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = MainGUI.getFileChooser().getSelectedFile();
-            String relpath = RelativeDirUtil.getRelativePath(file.getParent(), BaseDir, "/");
-            txtRviFile.setText(relpath + file.getName());
+            txtRviFile.setText(file.getAbsolutePath());
         }
         MainGUI.getFileChooser().resetChoosableFileFilters();
         MainGUI.getFileChooser().setSelectedFile(new File(""));
@@ -264,7 +269,7 @@ public class JPanel_RVIitmeEditor extends javax.swing.JPanel {
 
         // Test if the template file is present
         String fn = txtRviFile.getText();
-        String templfn = RelativeDirUtil.checkAbsolutePath(txtRviFile.getText(), BaseDir);
+        String templfn = RelativeDirUtil.checkAbsolutePath(txtRviFile.getText(), Project.getBaseDir());
         File ftmpl = new File(templfn);
         if (!ftmpl.exists()) {
             int n = JOptionPane.showConfirmDialog(
@@ -299,13 +304,19 @@ public class JPanel_RVIitmeEditor extends javax.swing.JPanel {
     }//GEN-LAST:event_cmdEditRVIActionPerformed
 
     private void cboFrequencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFrequencyActionPerformed
-        Rvi.setFrequency(cboFrequency.getSelectedItem().toString());
-        HostTree.update(HostTree.getGraphics());
+        if (DLActive) {
+            Rvi.setFrequency(cboFrequency.getSelectedItem().toString());
+            Project.setContentChanged(true);
+            HostTree.update(HostTree.getGraphics());
+        }
     }//GEN-LAST:event_cboFrequencyActionPerformed
 
     private void chkAggregateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAggregateActionPerformed
-        Rvi.setUsedInCalc(chkAggregate.isSelected());
-        HostTree.update(HostTree.getGraphics());
+        if (DLActive) {
+            Rvi.setUsedInCalc(chkAggregate.isSelected());
+            Project.setContentChanged(true);
+            HostTree.update(HostTree.getGraphics());
+        }
     }//GEN-LAST:event_chkAggregateActionPerformed
 
 

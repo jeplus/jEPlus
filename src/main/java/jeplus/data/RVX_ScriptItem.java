@@ -18,10 +18,11 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
 
-//	"scripts" : [
+// "scripts" : [
 //		{
 //			"fileName" : "readRunTimes_jy.py",
 //			"pythonVersion" : "jython",
@@ -30,7 +31,14 @@ import java.util.Objects;
 //			"tableName" : "CpuTime"
 //		}
 //	],
-public class RVX_ScriptItem implements Serializable {
+@JsonPropertyOrder({ 
+    "fileName", 
+    "pythonVersion", 
+    "onEachJob", 
+    "arguments", 
+    "tableName"
+})
+public class RVX_ScriptItem implements Serializable, IF_RVXItem {
     
     public enum Language {
         python2,
@@ -127,5 +135,18 @@ public class RVX_ScriptItem implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void copyFrom(IF_RVXItem item) {
+        try {
+            RVX_ScriptItem src = (RVX_ScriptItem)item;
+            FileName      = src.FileName     ;
+            PythonVersion = src.PythonVersion;
+            OnEachJob     = src.OnEachJob    ;
+            Arguments     = src.Arguments    ;
+            TableName     = src.TableName    ;
+        }catch (ClassCastException cce) {
+        }
     }
 }

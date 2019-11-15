@@ -28,7 +28,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.EPlusConfig;
 import jeplus.JEPlusFrameMain;
-import jeplus.data.RVX_RVIitem;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX_ScriptItem;
 import jeplus.gui.ButtonTabComponent;
 import jeplus.gui.EPlusEditorPanel;
@@ -47,9 +47,10 @@ public class JPanel_ScriptItmeEditor extends javax.swing.JPanel {
 
     JEPlusFrameMain MainGUI = null;
     JTree HostTree = null;
-    protected String BaseDir = null;
+    protected JEPlusProjectV2 Project = null;
     protected RVX_ScriptItem Script = null;
     protected DocumentListener DL = null;
+    private boolean DLActive = false;
 
     /**
      * Creates new form JPanel_RVXEditor
@@ -62,14 +63,14 @@ public class JPanel_ScriptItmeEditor extends javax.swing.JPanel {
      * Creates new form JPanel_EPlusProjectFiles with parameters
      * @param frame
      * @param tree
-     * @param basedir
+     * @param prj
      * @param script
      */
-    public JPanel_ScriptItmeEditor(JEPlusFrameMain frame, JTree tree, String basedir, RVX_ScriptItem script) {
+    public JPanel_ScriptItmeEditor(JEPlusFrameMain frame, JTree tree, JEPlusProjectV2 prj, RVX_ScriptItem script) {
         initComponents();
         MainGUI = frame;
         HostTree = tree;
-        BaseDir = basedir;
+        Project = prj;
         this.cboLanguage.setModel(new DefaultComboBoxModel (RVX_ScriptItem.Language.values()));
         setScriptItem (script);
         
@@ -80,15 +81,18 @@ public class JPanel_ScriptItmeEditor extends javax.swing.JPanel {
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                Document src = e.getDocument();
-                if(src == DocRviFile) {
-                    Script.setFileName(txtScriptFile.getText());
-                }else if (src == DocArgs) {
-                    Script.setArguments(txtArgs.getText());
-                }else if (src == DocResultTable) {
-                    Script.setTableName(txtResultTable.getText());
+                if (DLActive) {
+                    Document src = e.getDocument();
+                    if(src == DocRviFile) {
+                        Script.setFileName(txtScriptFile.getText().trim());
+                    }else if (src == DocArgs) {
+                        Script.setArguments(txtArgs.getText().trim());
+                    }else if (src == DocResultTable) {
+                        Script.setTableName(txtResultTable.getText().trim());
+                    }
+                    Project.setContentChanged(true);
+                    HostTree.update(HostTree.getGraphics());
                 }
-                HostTree.update(HostTree.getGraphics());
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
@@ -102,6 +106,7 @@ public class JPanel_ScriptItmeEditor extends javax.swing.JPanel {
         txtScriptFile.getDocument().addDocumentListener(DL);
         txtArgs.getDocument().addDocumentListener(DL);
         txtResultTable.getDocument().addDocumentListener(DL);
+        DLActive = true;
     }
     
     protected final void setScriptItem (RVX_ScriptItem script) {
@@ -271,12 +276,11 @@ public class JPanel_ScriptItmeEditor extends javax.swing.JPanel {
         MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.PYTHON));
         MainGUI.getFileChooser().setMultiSelectionEnabled(false);
         MainGUI.getFileChooser().setSelectedFile(new File(""));
-        String rvidir = RelativeDirUtil.checkAbsolutePath(txtScriptFile.getText(), BaseDir);
+        String rvidir = RelativeDirUtil.checkAbsolutePath(txtScriptFile.getText(), Project.getBaseDir());
         MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir).getParentFile());
         if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = MainGUI.getFileChooser().getSelectedFile();
-            String relpath = RelativeDirUtil.getRelativePath(file.getParent(), BaseDir, "/");
-            txtScriptFile.setText(relpath + file.getName());
+            txtScriptFile.setText(file.getAbsolutePath());
         }
         MainGUI.getFileChooser().resetChoosableFileFilters();
         MainGUI.getFileChooser().setSelectedFile(new File(""));
@@ -286,7 +290,7 @@ public class JPanel_ScriptItmeEditor extends javax.swing.JPanel {
 
         // Test if the template file is present
         String fn = txtScriptFile.getText();
-        String templfn = RelativeDirUtil.checkAbsolutePath(txtScriptFile.getText(), BaseDir);
+        String templfn = RelativeDirUtil.checkAbsolutePath(txtScriptFile.getText(), Project.getBaseDir());
         File ftmpl = new File(templfn);
         if (!ftmpl.exists()) {
             int n = JOptionPane.showConfirmDialog(
@@ -321,13 +325,19 @@ public class JPanel_ScriptItmeEditor extends javax.swing.JPanel {
     }//GEN-LAST:event_cmdEditScriptActionPerformed
 
     private void cboLanguageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboLanguageActionPerformed
-        Script.setPythonVersion(cboLanguage.getSelectedItem().toString());
-        HostTree.update(HostTree.getGraphics());
+        if (DLActive) {
+            Script.setPythonVersion(cboLanguage.getSelectedItem().toString());
+            Project.setContentChanged(true);
+            HostTree.update(HostTree.getGraphics());
+        }
     }//GEN-LAST:event_cboLanguageActionPerformed
 
     private void chkOnEachJobActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkOnEachJobActionPerformed
-        Script.setOnEachJob(chkOnEachJob.isSelected());
-        HostTree.update(HostTree.getGraphics());
+        if (DLActive) {
+            Script.setOnEachJob(chkOnEachJob.isSelected());
+            Project.setContentChanged(true);
+            HostTree.update(HostTree.getGraphics());
+        }
     }//GEN-LAST:event_chkOnEachJobActionPerformed
 
 

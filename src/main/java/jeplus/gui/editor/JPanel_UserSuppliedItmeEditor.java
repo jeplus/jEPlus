@@ -28,6 +28,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.EPlusConfig;
 import jeplus.JEPlusFrameMain;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX_UserSuppliedItem;
 import jeplus.gui.ButtonTabComponent;
 import jeplus.gui.EPlusEditorPanel;
@@ -46,9 +47,10 @@ public class JPanel_UserSuppliedItmeEditor extends javax.swing.JPanel {
 
     JEPlusFrameMain MainGUI = null;
     JTree HostTree = null;
-    protected String BaseDir = null;
+    protected JEPlusProjectV2 Project = null;
     protected RVX_UserSuppliedItem UserCsv = null;
     protected DocumentListener DL = null;
+    private boolean DLActive = false;
 
     /**
      * Creates new form JPanel_RVXEditor
@@ -61,14 +63,14 @@ public class JPanel_UserSuppliedItmeEditor extends javax.swing.JPanel {
      * Creates new form JPanel_EPlusProjectFiles with parameters
      * @param frame
      * @param tree
-     * @param basedir
+     * @param prj
      * @param csv
      */
-    public JPanel_UserSuppliedItmeEditor(JEPlusFrameMain frame, JTree tree, String basedir, RVX_UserSuppliedItem csv) {
+    public JPanel_UserSuppliedItmeEditor(JEPlusFrameMain frame, JTree tree, JEPlusProjectV2 prj, RVX_UserSuppliedItem csv) {
         initComponents();
         MainGUI = frame;
         HostTree = tree;
-        BaseDir = basedir;
+        Project = prj;
         setItem (csv);
         
         DL = new DocumentListener () {
@@ -81,39 +83,42 @@ public class JPanel_UserSuppliedItmeEditor extends javax.swing.JPanel {
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                Document src = e.getDocument();
-                if(src == DocCsvFile) {
-                    UserCsv.setFileName(txtCsvFile.getText());
-                }else if (src == DocHeaderRowNo) {
-                    try {
-                        UserCsv.setHeaderRow(Integer.parseInt(txtHeaderRowNo.getText()));
-                        txtHeaderRowNo.setForeground(Color.black);
-                    }catch (NumberFormatException nfe) {
-                        txtHeaderRowNo.setForeground(Color.red);
-                        UserCsv.setHeaderRow(0);
+                if (DLActive) {
+                    Document src = e.getDocument();
+                    if(src == DocCsvFile) {
+                        UserCsv.setFileName(txtCsvFile.getText());
+                    }else if (src == DocHeaderRowNo) {
+                        try {
+                            UserCsv.setHeaderRow(Integer.parseInt(txtHeaderRowNo.getText().trim()));
+                            txtHeaderRowNo.setForeground(Color.black);
+                        }catch (NumberFormatException nfe) {
+                            txtHeaderRowNo.setForeground(Color.red);
+                            UserCsv.setHeaderRow(0);
+                        }
+                    }else if (src == DocJobIDColumnNo) {
+                        try {
+                            UserCsv.setJobIdColumn(Integer.parseInt(txtJobIDColumnNo.getText().trim()));
+                            txtJobIDColumnNo.setForeground(Color.black);
+                        }catch (NumberFormatException nfe) {
+                            txtJobIDColumnNo.setForeground(Color.red);
+                            UserCsv.setJobIdColumn(0);
+                        }
+                    }else if (src == DocDataColumns) {
+                        UserCsv.setDataColumns(txtDataColumns.getText().trim());
+                    }else if (src == DocMissingValue) {
+                        try {
+                            UserCsv.setMissingValue(Double.parseDouble(txtMissingValue.getText().trim()));
+                            txtMissingValue.setForeground(Color.black);
+                        }catch (NumberFormatException nfe) {
+                            txtMissingValue.setForeground(Color.red);
+                            UserCsv.setMissingValue(0);
+                        }
+                    }else if (src == DocResultTable) {
+                        UserCsv.setTableName(txtResultTable.getText().trim());
                     }
-                }else if (src == DocJobIDColumnNo) {
-                    try {
-                        UserCsv.setJobIdColumn(Integer.parseInt(txtJobIDColumnNo.getText()));
-                        txtJobIDColumnNo.setForeground(Color.black);
-                    }catch (NumberFormatException nfe) {
-                        txtJobIDColumnNo.setForeground(Color.red);
-                        UserCsv.setJobIdColumn(0);
-                    }
-                }else if (src == DocDataColumns) {
-                    UserCsv.setDataColumns(txtDataColumns.getText());
-                }else if (src == DocMissingValue) {
-                    try {
-                        UserCsv.setMissingValue(Double.parseDouble(txtMissingValue.getText()));
-                        txtMissingValue.setForeground(Color.black);
-                    }catch (NumberFormatException nfe) {
-                        txtMissingValue.setForeground(Color.red);
-                        UserCsv.setMissingValue(0);
-                    }
-                }else if (src == DocResultTable) {
-                    UserCsv.setTableName(txtResultTable.getText());
+                    Project.setContentChanged(true);
+                    HostTree.update(HostTree.getGraphics());
                 }
-                HostTree.update(HostTree.getGraphics());
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
@@ -130,6 +135,7 @@ public class JPanel_UserSuppliedItmeEditor extends javax.swing.JPanel {
         txtDataColumns.getDocument().addDocumentListener(DL);
         txtMissingValue.getDocument().addDocumentListener(DL);
         txtResultTable.getDocument().addDocumentListener(DL);
+        DLActive = true;
     }
     
     protected final void setItem (RVX_UserSuppliedItem csv) {
@@ -256,17 +262,18 @@ public class JPanel_UserSuppliedItmeEditor extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel4)
-                            .addComponent(txtCsvFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(cmdEditCsv)
-                        .addComponent(cmdSelectFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txtCsvFile, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(cmdSelectFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGap(4, 4, 4)))
+                    .addComponent(cmdEditCsv))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtHeaderRowNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -287,7 +294,7 @@ public class JPanel_UserSuppliedItmeEditor extends javax.swing.JPanel {
                     .addComponent(jLabel2)
                     .addComponent(txtResultTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -296,12 +303,11 @@ public class JPanel_UserSuppliedItmeEditor extends javax.swing.JPanel {
         MainGUI.getFileChooser().setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.CSV));
         MainGUI.getFileChooser().setMultiSelectionEnabled(false);
         MainGUI.getFileChooser().setSelectedFile(new File(""));
-        String rvidir = RelativeDirUtil.checkAbsolutePath(txtCsvFile.getText(), BaseDir);
+        String rvidir = RelativeDirUtil.checkAbsolutePath(txtCsvFile.getText(), Project.getBaseDir());
         MainGUI.getFileChooser().setCurrentDirectory(new File(rvidir).getParentFile());
         if (MainGUI.getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = MainGUI.getFileChooser().getSelectedFile();
-            String relpath = RelativeDirUtil.getRelativePath(file.getParent(), BaseDir, "/");
-            txtCsvFile.setText(relpath + file.getName());
+            txtCsvFile.setText(file.getAbsolutePath());
         }
         MainGUI.getFileChooser().resetChoosableFileFilters();
         MainGUI.getFileChooser().setSelectedFile(new File(""));
@@ -311,7 +317,7 @@ public class JPanel_UserSuppliedItmeEditor extends javax.swing.JPanel {
 
         // Test if the template file is present
         String fn = txtCsvFile.getText();
-        String templfn = RelativeDirUtil.checkAbsolutePath(txtCsvFile.getText(), BaseDir);
+        String templfn = RelativeDirUtil.checkAbsolutePath(txtCsvFile.getText(), Project.getBaseDir());
         File ftmpl = new File(templfn);
         if (!ftmpl.exists()) {
             int n = JOptionPane.showConfirmDialog(

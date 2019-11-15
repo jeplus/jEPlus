@@ -650,11 +650,11 @@ public class JEPlusProject implements Serializable {
         // Update BaseDir
         this.BaseDir = BaseDir;
         // Calculate relative dir from the new base
-        this.setWeatherDir(RelativeDirUtil.getRelativePath(this.getWeatherDir(), this.BaseDir, "/"));   // Weather file path
-        this.setIDFDir(RelativeDirUtil.getRelativePath(this.getIDFDir(), this.BaseDir, "/"));        // idf file path
-        this.setDCKDir(RelativeDirUtil.getRelativePath(this.getDCKDir(), this.BaseDir, "/"));        // dck file path
-        this.setRVIDir(RelativeDirUtil.getRelativePath(this.getRVIDir(), this.BaseDir, "/"));        // rvi file path
-        this.getExecSettings().setParentDir(RelativeDirUtil.getRelativePath(this.getExecSettings().getParentDir(), this.BaseDir, "/"));        // output dir
+        this.setWeatherDir(RelativeDirUtil.getRelativePath(this.getWeatherDir(), this.BaseDir, "/", false));   // Weather file path
+        this.setIDFDir(RelativeDirUtil.getRelativePath(this.getIDFDir(), this.BaseDir, "/", false));        // idf file path
+        this.setDCKDir(RelativeDirUtil.getRelativePath(this.getDCKDir(), this.BaseDir, "/", false));        // dck file path
+        this.setRVIDir(RelativeDirUtil.getRelativePath(this.getRVIDir(), this.BaseDir, "/", false));        // rvi file path
+        this.getExecSettings().setParentDir(RelativeDirUtil.getRelativePath(this.getExecSettings().getParentDir(), this.BaseDir, "/", false));        // output dir
     }
 
     /** 

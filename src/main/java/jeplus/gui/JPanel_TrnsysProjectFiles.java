@@ -291,12 +291,18 @@ public class JPanel_TrnsysProjectFiles extends javax.swing.JPanel {
         if (idx >= 0) {
             MainGUI.getTpnEditors().setSelectedIndex(idx);
         } else {
-            EPlusTextPanel TemplFilePanel = new EPlusTextPanel(
+//            EPlusTextPanel TemplFilePanel = new EPlusTextPanel(
+//                    MainGUI.getTpnEditors(),
+//                    fn,
+//                    EPlusTextPanel.EDITOR_MODE,
+//                    TRNSYSConfig.getFileFilter(TRNSYSConfig.TRNINPUT),
+//                    templfn,
+//                    Project);
+            EPlusEditorPanel TemplFilePanel = new EPlusEditorPanel(
                     MainGUI.getTpnEditors(),
                     fn,
-                    EPlusTextPanel.EDITOR_MODE,
-                    TRNSYSConfig.getFileFilter(TRNSYSConfig.TRNINPUT),
                     templfn,
+                    EPlusEditorPanel.FileType.TRNSYS,
                     Project);
             int ti = MainGUI.getTpnEditors().getTabCount();
             TemplFilePanel.setTabId(ti);

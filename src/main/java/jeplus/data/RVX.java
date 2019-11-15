@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +41,18 @@ import org.slf4j.LoggerFactory;
  * Main RVX class
  * @author Yi
  */
+@JsonPropertyOrder({ 
+    "notes", 
+    "rvis", 
+    "csvs", 
+    "sqls", 
+    "scripts", 
+    "userSupplied", 
+    "trns", 
+    "userVars",
+    "objectives", 
+    "constraints"
+})
 public class RVX implements Serializable {
     
     /** Logger */
@@ -292,7 +305,7 @@ public class RVX implements Serializable {
 
             // RVI section points to this RVI file
             RVX_RVIitem rvi = new RVX_RVIitem();
-            rvi.setFileName(RelativeDirUtil.getRelativePath(new File(rvxfile).getParent(), basedir, "/") + new File(rvxfile).getName());
+            rvi.setFileName(RelativeDirUtil.getRelativePath(new File(rvxfile).getCanonicalPath(), basedir, "/", true));
             rvi.setTableName("SimResults");
             rvx.getRVIs().add(rvi);
 

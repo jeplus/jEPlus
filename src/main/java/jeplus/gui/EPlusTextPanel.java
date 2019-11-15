@@ -701,9 +701,10 @@ public class EPlusTextPanel extends javax.swing.JPanel implements DocumentListen
     /**
      * Confirm closing the current file. User will be prompted to save if the
      * content of the file has been changed.
+     * @return cancel flag
      */
     @Override
-    public void closeTextPanel () {
+    public boolean closeTextPanel () {
         // Confirm save before open another file
         if (this.isContentChanged()) {
             int ans = JOptionPane.showConfirmDialog(this,
@@ -711,7 +712,7 @@ public class EPlusTextPanel extends javax.swing.JPanel implements DocumentListen
                 "Save to file?",
                 JOptionPane.YES_NO_CANCEL_OPTION);
             if (ans == JOptionPane.CANCEL_OPTION) {
-                return;
+                return true;
             }else if (ans == JOptionPane.YES_OPTION) {
                 this.cmdSaveActionPerformed(null);
             }
@@ -734,6 +735,7 @@ public class EPlusTextPanel extends javax.swing.JPanel implements DocumentListen
         if (AutoUpdateTimer != null) {
             AutoUpdateTimer.stop();
         }
+        return false;
     }
 
     /** This method is called from within the constructor to

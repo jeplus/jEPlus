@@ -23,6 +23,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 import jeplus.JEPlusFrameMain;
+import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX_SQLitem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,10 @@ public class JPanel_SQLitmeEditor extends javax.swing.JPanel {
 
     JEPlusFrameMain MainGUI = null;
     JTree HostTree = null;
-    protected String BaseDir = null;
+    protected JEPlusProjectV2 Project = null;
     protected RVX_SQLitem Sql = null;
     protected DocumentListener DL = null;
+    private boolean DLActive = false;
 
     /**
      * Creates new form JPanel_RVXEditor
@@ -53,14 +55,14 @@ public class JPanel_SQLitmeEditor extends javax.swing.JPanel {
      * Creates new form JPanel_EPlusProjectFiles with parameters
      * @param frame
      * @param tree
-     * @param basedir
+     * @param prj
      * @param sql
      */
-    public JPanel_SQLitmeEditor(JEPlusFrameMain frame, JTree tree, String basedir, RVX_SQLitem sql) {
+    public JPanel_SQLitmeEditor(JEPlusFrameMain frame, JTree tree, JEPlusProjectV2 prj, RVX_SQLitem sql) {
         initComponents();
         MainGUI = frame;
         HostTree = tree;
-        BaseDir = basedir;
+        Project = prj;
         setSqlItem (sql);
         
         DL = new DocumentListener () {
@@ -70,15 +72,18 @@ public class JPanel_SQLitmeEditor extends javax.swing.JPanel {
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                Document src = e.getDocument();
-                if(src == DocSQL) {
-                    Sql.setSQLcommand(txaSQL.getText());
-                }else if (src == DocHeaders) {
-                    Sql.setColumnHeaders(txtHeaders.getText());
-                }else if (src == DocResultTable) {
-                    Sql.setTableName(txtResultTable.getText());
+                if (DLActive) {
+                    Document src = e.getDocument();
+                    if(src == DocSQL) {
+                        Sql.setSQLcommand(txaSQL.getText());
+                    }else if (src == DocHeaders) {
+                        Sql.setColumnHeaders(txtHeaders.getText());
+                    }else if (src == DocResultTable) {
+                        Sql.setTableName(txtResultTable.getText().trim());
+                    }
+                    Project.setContentChanged(true);
+                    HostTree.update(HostTree.getGraphics());
                 }
-                HostTree.update(HostTree.getGraphics());
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
@@ -92,6 +97,7 @@ public class JPanel_SQLitmeEditor extends javax.swing.JPanel {
         txaSQL.getDocument().addDocumentListener(DL);
         txtHeaders.getDocument().addDocumentListener(DL);
         txtResultTable.getDocument().addDocumentListener(DL);
+        DLActive = true;
     }
     
     protected final void setSqlItem (RVX_SQLitem sql) {
@@ -209,8 +215,11 @@ public class JPanel_SQLitmeEditor extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void chkAggregateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAggregateActionPerformed
-        Sql.setUsedInCalc(chkAggregate.isSelected());
-        HostTree.update(HostTree.getGraphics());
+        if (DLActive) {
+            Sql.setUsedInCalc(chkAggregate.isSelected());
+            Project.setContentChanged(true);
+            HostTree.update(HostTree.getGraphics());
+        }
     }//GEN-LAST:event_chkAggregateActionPerformed
 
 
