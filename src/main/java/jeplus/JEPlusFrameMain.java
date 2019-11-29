@@ -34,10 +34,8 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -50,11 +48,6 @@ import jeplus.agent.TrnsysAgentLocal;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItemV2;
 import jeplus.data.RVX;
-import jeplus.data.RVX_CSVitem;
-import jeplus.data.RVX_RVIitem;
-import jeplus.data.RVX_SQLitem;
-import jeplus.data.RVX_ScriptItem;
-import jeplus.data.RVX_UserSuppliedItem;
 import jeplus.data.RandomSource;
 import jeplus.event.IF_ProjectChangedHandler;
 import jeplus.gui.*;
@@ -3028,6 +3021,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
                     // Load EnergyPlus settings
                     if (showSplash) {
                         showSplash(frame);
+                        frame.jMenuItemConfigActionPerformed(null);
                         // this.cmdEditEPlusSettingsActionPerformed(null);
                     }
                 }

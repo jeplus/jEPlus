@@ -18,7 +18,15 @@
  ***************************************************************************/
 package jeplus.gui;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import javax.swing.JOptionPane;
 import jeplus.JEPlusFrameMain;
+import static jeplus.JEPlusFrameMain.version;
+import static jeplus.JEPlusFrameMain.version_ps;
 
 /**
  * jEPlus splash window
@@ -50,6 +58,7 @@ public class JDialog_Splash extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         lblCopyright = new javax.swing.JLabel();
+        cmdLicense = new javax.swing.JButton();
         cmdOk = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -60,7 +69,7 @@ public class JDialog_Splash extends javax.swing.JDialog {
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/jeplus_v1.5_logo.png"))); // NOI18N
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("<html><center><p>This software is provided by Dr Yi Zhang under the GPLv3 (<a href=>http://www.gnu.org/licenses/gpl-3.0.html</a>)</p></center>");
+        jLabel4.setText("<html><center><p>This software is provided by Dr Yi Zhang under the open-source GPLv3 license</p></center>");
         jLabel4.setToolTipText("Contact Yi at yi@jeplus.org");
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
@@ -70,21 +79,40 @@ public class JDialog_Splash extends javax.swing.JDialog {
         lblCopyright.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         lblCopyright.setText("<html>Version 1.1  © 2011 <p>De Montfort University <p> United Kingdom");
 
+        cmdLicense.setBackground(new java.awt.Color(255, 255, 255));
+        cmdLicense.setForeground(new java.awt.Color(0, 0, 255));
+        cmdLicense.setText("https://www.gnu.org/licenses/gpl-3.0.html");
+        cmdLicense.setToolTipText("Go to license details");
+        cmdLicense.setBorder(null);
+        cmdLicense.setBorderPainted(false);
+        cmdLicense.setContentAreaFilled(false);
+        cmdLicense.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        cmdLicense.setFocusPainted(false);
+        cmdLicense.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdLicenseActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 467, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 467, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 337, Short.MAX_VALUE)
                             .addComponent(lblCopyright, javax.swing.GroupLayout.DEFAULT_SIZE, 337, Short.MAX_VALUE))))
                 .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(cmdLicense, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(114, 114, 114))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -96,9 +124,11 @@ public class JDialog_Splash extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblCopyright, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGap(45, 45, 45)
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmdLicense, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(44, Short.MAX_VALUE))
         );
 
         cmdOk.setText("Ok");
@@ -138,6 +168,25 @@ public class JDialog_Splash extends javax.swing.JDialog {
         this.dispose();
     }//GEN-LAST:event_cmdOkActionPerformed
 
+    private void cmdLicenseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdLicenseActionPerformed
+
+        Desktop desktop = null;
+        if (Desktop.isDesktopSupported()) {
+            desktop = Desktop.getDesktop();
+            if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+                    URI uri;
+                    try {
+                        uri = new URI("https://www.gnu.org/licenses/gpl-3.0.html");
+                        desktop.browse(uri);
+                    } catch (URISyntaxException | IOException ex1) {
+                        JOptionPane.showMessageDialog(this, "https://www.gnu.org/licenses/gpl-3.0.html may not be accessible. Please try locate the page manually.");
+                    }
+            }else {
+                JOptionPane.showMessageDialog(this, "Cannot open browser for license information. Please go to https://www.gnu.org/licenses/gpl-3.0.html");
+            }
+        }        
+    }//GEN-LAST:event_cmdLicenseActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -158,6 +207,7 @@ public class JDialog_Splash extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cmdLicense;
     private javax.swing.JButton cmdOk;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;

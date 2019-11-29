@@ -171,7 +171,8 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
         });
 
         txtBinDir.setEditable(false);
-        txtBinDir.setText("C:/EnergyPlusV2-2-0/");
+        txtBinDir.setForeground(new java.awt.Color(255, 0, 0));
+        txtBinDir.setText("Select EnergyPlus folder...");
         txtBinDir.setToolTipText("This is the directory where 'Energy+.idd' is located");
 
         jLabel6.setText("E+ binary diretory:");

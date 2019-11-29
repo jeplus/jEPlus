@@ -38,7 +38,7 @@ public class JPanel_TrnsysSettings extends javax.swing.JPanel implements TitledJ
     protected final JFileChooser fc = new JFileChooser("./");
     protected TRNSYSConfig Config = new TRNSYSConfig();
     public final void setConfig(TRNSYSConfig config) {
-        if (Config != config) {
+        if (config != null && Config != config) {
             if (Config != null) {
                 Config.removeListener(this);
             }

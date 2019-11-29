@@ -103,7 +103,11 @@ public class JPanel_RunReadVars extends javax.swing.JPanel implements IF_ConfigC
     }
     
     private String getSelectedReadVars() {
-        return ((EPlusConfig)this.cboEPlusVersion.getSelectedItem()).getResolvedReadVars();
+        EPlusConfig cfg = (EPlusConfig)this.cboEPlusVersion.getSelectedItem();
+        if (cfg != null) {
+            return cfg.getResolvedReadVars();
+        }
+        return "NA";
     }
 
     /**

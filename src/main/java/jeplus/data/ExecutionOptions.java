@@ -118,7 +118,7 @@ public class ExecutionOptions implements Serializable {
         JobSubmissionCap = 100;
         RerunAll = true;
         Delay = 100;
-        WorkDir = "output/";
+        WorkDir = "../output/";
         KeepJobDir = true;
         KeepJEPlusFiles = true;
         KeepEPlusFiles = true;

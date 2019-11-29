@@ -37,7 +37,7 @@ public class JPanel_InselSettings extends javax.swing.JPanel implements TitledJP
     protected final JFileChooser fc = new JFileChooser("./");
     protected INSELConfig Config = new INSELConfig();
     public final void setConfig(INSELConfig config) {
-        if (Config != config) {
+        if (config != null && Config != config) {
             if (Config != null) {
                 Config.removeListener(this);
             }

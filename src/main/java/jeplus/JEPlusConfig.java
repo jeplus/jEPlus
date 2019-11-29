@@ -120,21 +120,21 @@ public class JEPlusConfig extends ConfigFileNames {
      */
     public JEPlusConfig () {
         super ();
-        EPlusConfig epcfg = new EPlusConfig();
-        EPlusList.add(epcfg);
-        EPlusConfigs.put(epcfg.getVersion(), epcfg);
-        
-        TRNSYSConfig trcfg = new TRNSYSConfig();
-        TRNSYSList.add(trcfg);
-        TRNSYSConfigs.put("TRNSYS", trcfg);
-        
-        INSELConfig incfg = new INSELConfig();
-        INSELList.add(incfg);
-        INSELConfigs.put("INSEL", incfg);
-        
-        RadianceConfig raycfg = new RadianceConfig();
-        RadianceList.add(raycfg);
-        RadianceConfigs.put("Radiance", raycfg);
+//        EPlusConfig epcfg = new EPlusConfig();
+//        EPlusList.add(epcfg);
+//        EPlusConfigs.put(epcfg.getVersion(), epcfg);
+//        
+//        TRNSYSConfig trcfg = new TRNSYSConfig();
+//        TRNSYSList.add(trcfg);
+//        TRNSYSConfigs.put("TRNSYS", trcfg);
+//        
+//        INSELConfig incfg = new INSELConfig();
+//        INSELList.add(incfg);
+//        INSELConfigs.put("INSEL", incfg);
+//        
+//        RadianceConfig raycfg = new RadianceConfig();
+//        RadianceList.add(raycfg);
+//        RadianceConfigs.put("Radiance", raycfg);
     }
 
     // ========= Getters and Setters =========

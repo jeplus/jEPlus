@@ -85,7 +85,10 @@
     <Component class="javax.swing.JTextField" name="txtBinDir">
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
-        <Property name="text" type="java.lang.String" value="C:/EnergyPlusV2-2-0/"/>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="0" green="0" red="ff" type="rgb"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Select EnergyPlus folder..."/>
         <Property name="toolTipText" type="java.lang.String" value="This is the directory where &apos;Energy+.idd&apos; is located"/>
       </Properties>
     </Component>
