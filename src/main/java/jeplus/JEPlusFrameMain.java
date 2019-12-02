@@ -1427,6 +1427,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jMenuItemResetTree.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/cross.png"))); // NOI18N
         jMenuItemResetTree.setText("Reset parameter tree");
         jMenuItemResetTree.setToolTipText("Clear the parameter tree");
+        jMenuItemResetTree.setEnabled(false);
         jMenuItemResetTree.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemResetTreeActionPerformed(evt);
@@ -2199,7 +2200,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
             }else {
                 JOptionPane.showMessageDialog(
                     this,
-                    "<html>Exported parameters to " + file.getAbsolutePath() + ". Please note only the first branch of the parameter tree is saved.</html>",
+                    "<html>Exported parameters to " + file.getAbsolutePath() + ".</html>",
                     "Information",
                     JOptionPane.CLOSED_OPTION);
             }
@@ -2257,48 +2258,14 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
 
     private void jMenuItemRunPythonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemRunPythonActionPerformed
         // Switch to the right tab
-        this.tpnMain.setSelectedIndex(2);
+        this.tpnMain.setSelectedIndex(3);
         this.TpnUtilities.setSelectedIndex(0);
-        // Open a separate window - the old way
-//        JFrame PyRunner = new JFrame ("Python script");
-//        int frameWidth = 650;  
-//        int frameHeight = 450;  
-//        PyRunner.setSize(frameWidth, frameHeight);
-//        // put the frame in the centre of screen
-//        Toolkit tk = Toolkit.getDefaultToolkit();
-//        Dimension screenSize = tk.getScreenSize();
-//        int screenHeight = screenSize.height;
-//        int screenWidth = screenSize.width;
-//        PyRunner.setLocation((screenWidth-frameWidth)/2,(screenHeight-frameHeight)/2);
-//        JPanelRunPython panel = new JPanelRunPython (this, JEPlusConfig.getDefaultInstance(), getProject() == null ? "./" : getProject().resolveWorkDir());
-//        PyRunner.getContentPane().add(panel);
-//        // panel.startLogThread();
-//        PyRunner.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//        PyRunner.pack();
-//        PyRunner.setVisible(true);
     }//GEN-LAST:event_jMenuItemRunPythonActionPerformed
 
     private void jMenuItemVersionConverterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemVersionConverterActionPerformed
         // Switch to the right tab
-        this.tpnMain.setSelectedIndex(2);
+        this.tpnMain.setSelectedIndex(3);
         this.TpnUtilities.setSelectedIndex(1);
-        // Open a separate window - the old way
-//        JPanel_IDFVersionUpdater panel = new JPanel_IDFVersionUpdater (this, JEPlusConfig.getDefaultInstance(), this.getProject());
-//        JFrame frame = new JFrame ("IDF Version Converter");
-//        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-//        frame.getContentPane().add(panel);
-//        panel.startLogThread();
-//        int frameWidth = 700;  
-//        int frameHeight = 550;  
-//        frame.setSize(frameWidth, frameHeight);
-//        // put the frame in the centre of screen
-//        Toolkit tk = Toolkit.getDefaultToolkit();
-//        Dimension screenSize = tk.getScreenSize();
-//        int screenHeight = screenSize.height;
-//        int screenWidth = screenSize.width;
-//        frame.setLocation((screenWidth-frameWidth)/2,(screenHeight-frameHeight)/2);
-//        frame.pack();
-//        frame.setVisible(true);
     }//GEN-LAST:event_jMenuItemVersionConverterActionPerformed
 
     private void jMenuItemEditorThemeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemEditorThemeActionPerformed
@@ -2354,7 +2321,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
 
     private void jMenuItemRunReadVarsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemRunReadVarsActionPerformed
         // Switch to the right tab
-        this.tpnMain.setSelectedIndex(2);
+        this.tpnMain.setSelectedIndex(3);
         this.TpnUtilities.setSelectedIndex(2);       
     }//GEN-LAST:event_jMenuItemRunReadVarsActionPerformed
 
@@ -2653,8 +2620,8 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
             }
         }
         // Select a file to open
-        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JSON));
-        fc.addChoosableFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JEP));
+        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JEP_OR_JSON));
+        // fc.addChoosableFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JEP));
         fc.setSelectedFile(new File(""));
         fc.setCurrentDirectory(DefaultDir);
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {

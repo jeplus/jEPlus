@@ -124,9 +124,9 @@ public class JEPlusConfig extends ConfigFileNames {
 //        EPlusList.add(epcfg);
 //        EPlusConfigs.put(epcfg.getVersion(), epcfg);
 //        
-//        TRNSYSConfig trcfg = new TRNSYSConfig();
-//        TRNSYSList.add(trcfg);
-//        TRNSYSConfigs.put("TRNSYS", trcfg);
+        TRNSYSConfig trcfg = new TRNSYSConfig();
+        TRNSYSList.add(trcfg);
+        TRNSYSConfigs.put("TRNSYS", trcfg);
 //        
 //        INSELConfig incfg = new INSELConfig();
 //        INSELList.add(incfg);
@@ -291,13 +291,22 @@ public class JEPlusConfig extends ConfigFileNames {
         for (TRNSYSConfig cfg: config.TRNSYSList) {
             config.TRNSYSConfigs.put("TRNSYS", cfg);
         }
+        if (config.TRNSYSConfigs.isEmpty()) {
+            config.TRNSYSConfigs.put("TRNSYS", new TRNSYSConfig());
+        }
         config.INSELConfigs.clear();
         for (INSELConfig cfg: config.INSELList) {
             config.INSELConfigs.put("INSEL", cfg);
         }
+        if (config.INSELConfigs.isEmpty()) {
+            config.INSELConfigs.put("INSEL", new INSELConfig());
+        }
         config.RadianceConfigs.clear();
         for (RadianceConfig cfg: config.RadianceList) {
             config.RadianceConfigs.put("Radiance", cfg);
+        }
+        if (config.RadianceConfigs.isEmpty()) {
+            config.RadianceConfigs.put("Radiance", new RadianceConfig());
         }
         // Return
         return config;

@@ -174,7 +174,6 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         txtPython2Exe = new javax.swing.JTextField();
         rdoPython2 = new javax.swing.JRadioButton();
         chkPassWorkDir = new javax.swing.JCheckBox();
-        rdoJython = new javax.swing.JRadioButton();
         txtWorkDir = new javax.swing.JTextField();
         cmdSelectScriptFile = new javax.swing.JButton();
         txtMoreArguments = new javax.swing.JTextField();
@@ -264,10 +263,6 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
             }
         });
 
-        buttonGroup1.add(rdoJython);
-        rdoJython.setSelected(true);
-        rdoJython.setText("Use integrated Jython (supports Python 2.5, no SciPy libraries)");
-
         txtWorkDir.setText("./");
         txtWorkDir.setToolTipText("The working directory serves as the root to all the sub-directories to be generated during the simulation.");
 
@@ -298,6 +293,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         txtScriptFileName.setText("select a script file ...");
 
         buttonGroup1.add(rdoPython3);
+        rdoPython3.setSelected(true);
         rdoPython3.setText("Use Python3 installed in: ");
 
         txtPython3Exe.setText("Select Python3 executable...");
@@ -441,7 +437,6 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(cmdSelectPython2Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(cmdSelectPython3Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(rdoJython, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addGap(14, 14, 14)
                                 .addComponent(txtScriptFileName)
@@ -504,9 +499,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                 .addComponent(jScrollPane1)
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(1, 1, 1)
-                .addComponent(rdoJython)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdoPython2)
                     .addComponent(txtPython2Exe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -622,9 +615,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         MainFrame.getTpnEditors().setSelectedIndex(0);
         // Set arguments
         String version;
-        if (rdoJython.isSelected()) {
-            version = "jython";
-        }else if (rdoPython2.isSelected()) {
+        if (rdoPython2.isSelected()) {
             version = "python2";
         }else {
             version = "python3";
@@ -750,7 +741,6 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JRadioButton rdoJython;
     private javax.swing.JRadioButton rdoPython2;
     private javax.swing.JRadioButton rdoPython3;
     private javax.swing.JTextArea txaCmdLn;

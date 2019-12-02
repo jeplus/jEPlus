@@ -945,7 +945,7 @@ public class JEPlusProjectV2 implements Serializable {
             fw.println("# Note: this list contains only the first branch of the parameter tree.");
             fw.println("# Parameter definitions in a csv file. Column headings are as below");
             fw.println("# ID, Name, Parameter Type, Description, Search String, Value Type, Value String, Selected Value Index");
-            fw.println("#           {0}                                         {0, 1, 2}                 {0, .... depending on number of values}");
+            fw.println("#   ,     , {PARAMETRICS} ,            ,              , {INTEGER|DOUBLE|DISCRETE}, , {0|the ith of values}");
             fw.println("# ");
             for (ParameterItemV2 item : Parameters) {
                 fw.println(item.toCSVrow());

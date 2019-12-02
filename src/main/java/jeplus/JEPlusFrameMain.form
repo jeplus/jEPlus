@@ -208,6 +208,7 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Reset parameter tree"/>
                 <Property name="toolTipText" type="java.lang.String" value="Clear the parameter tree"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemResetTreeActionPerformed"/>
