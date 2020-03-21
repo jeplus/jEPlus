@@ -94,9 +94,9 @@
                 <version>3.0.2</version>
                 <configuration>
                     <!-- exclude logback.xml -->
-<!--                    <excludes>
+                    <excludes>
                         <exclude>**/logback.xml</exclude>
-                    </excludes>-->
+                    </excludes>
                     <archive>
                         <manifest>
                             <mainClass>jeplus.Main</mainClass>

@@ -335,10 +335,26 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
      * Set the current Project object
      * @param Project Project object
      * @param batch Simulation manager object
+     * @return true if new project is set, or false if cancelled
      */
-    public void setProject(JEPlusProjectV2 Project, EPlusBatch batch) {
+    public boolean setProject(JEPlusProjectV2 Project, EPlusBatch batch) {
         if (Project != null) {
             if ( this.Project!= null) {
+                // Detect project changes
+                if (this.Project.isContentChanged() /*|| ! Objects.equals(Project, SavedProject)*/) {
+                    // Save the project file before exit?
+                    String cfn = this.CurrentProjectFile;
+                    int n = JOptionPane.showConfirmDialog(
+                        this,
+                        "Do you want to save the current project to " + (cfn==null? "file" : cfn) + " before loading the new project?",
+                        "Save project",
+                        JOptionPane.YES_NO_CANCEL_OPTION);
+                    if (n == JOptionPane.CANCEL_OPTION) {
+                        return false;
+                    }else if (n == JOptionPane.YES_OPTION) {
+                        this.jMenuItemSaveActionPerformed(null);
+                    }
+                }
                 this.Project.removeListener(this);
             }
             this.Project = Project;
@@ -350,6 +366,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         if (batch != null) {
             this.BatchManager = batch;
         }
+        return true;
     }
 
     /**
@@ -2820,7 +2837,8 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         }else if (ext.equalsIgnoreCase("jep")) {
             SavedProject = null;
             Project = new JEPlusProjectV2(JEPlusProject.loadAsXML(file));
-            this.setCurrentProjectFile(FilenameUtils.removeExtension(file.getPath()) + ".json");
+            // this.setCurrentProjectFile(FilenameUtils.removeExtension(file.getPath()) + ".json");
+            this.setCurrentProjectFile(file.getPath() + ".json");
             if (Project == null) {
                 // warning message
                 JOptionPane.showMessageDialog(
@@ -3047,7 +3065,11 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
 
             }
         }
-        
+    }
+    
+    @Override
+    public void projectSaved (String filename) {
+        // Does nothing
     }
 
 }

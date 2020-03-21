@@ -24,4 +24,5 @@ import jeplus.JEPlusProjectV2;
  */
 public interface IF_ProjectChangedHandler {
     public abstract void projectChanged (JEPlusProjectV2 new_prj);
+    public abstract void projectSaved (String filename);
 }

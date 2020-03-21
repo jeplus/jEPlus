@@ -271,11 +271,11 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         jLabel1 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jplEpPanelHolder = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        cmdSave = new javax.swing.JButton();
         jplInfo = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         lblInformation = new javax.swing.JLabel();
-        jPanel3 = new javax.swing.JPanel();
-        cmdSave = new javax.swing.JButton();
 
         cmdSelectEPlusDir.setText("...");
         cmdSelectEPlusDir.setToolTipText("Select the folder where EnergyPlus.exe and Energy+.idd are located");
@@ -317,9 +317,12 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
             }
         });
 
+        setMinimumSize(new java.awt.Dimension(550, 450));
+        setPreferredSize(new java.awt.Dimension(550, 500));
         setLayout(new java.awt.BorderLayout());
 
-        jplConfig.setMinimumSize(new java.awt.Dimension(500, 520));
+        jplConfig.setMinimumSize(new java.awt.Dimension(400, 520));
+        jplConfig.setPreferredSize(new java.awt.Dimension(400, 500));
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder("E+ Version Converter"));
 
@@ -348,7 +351,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addContainerGap()
                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtVerConvDir)
+                .addComponent(txtVerConvDir, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdSelectVerConvDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -416,8 +419,8 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtTrnsysBinDir, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtTrnsysEXE, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE))
+                            .addComponent(txtTrnsysBinDir, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                            .addComponent(txtTrnsysEXE, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(cmdSelectTRNexe, 0, 1, Short.MAX_VALUE)
@@ -519,6 +522,14 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         jplEpPanelHolder.setBorder(javax.swing.BorderFactory.createTitledBorder("EnergyPlus"));
         jplEpPanelHolder.setLayout(new java.awt.BorderLayout());
 
+        cmdSave.setText("Save Configuration");
+        cmdSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdSaveActionPerformed(evt);
+            }
+        });
+        jPanel3.add(cmdSave);
+
         javax.swing.GroupLayout jplConfigLayout = new javax.swing.GroupLayout(jplConfig);
         jplConfig.setLayout(jplConfigLayout);
         jplConfigLayout.setHorizontalGroup(
@@ -529,7 +540,8 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                     .addComponent(jplEpPanelHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jplConfigLayout.setVerticalGroup(
@@ -543,26 +555,21 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
         add(jplConfig, java.awt.BorderLayout.CENTER);
 
-        jplInfo.setMinimumSize(new java.awt.Dimension(500, 300));
-        jplInfo.setPreferredSize(new java.awt.Dimension(500, 300));
+        jplInfo.setMinimumSize(new java.awt.Dimension(220, 150));
+        jplInfo.setName(""); // NOI18N
+        jplInfo.setPreferredSize(new java.awt.Dimension(220, 300));
 
         lblInformation.setBackground(new java.awt.Color(204, 204, 204));
         lblInformation.setText("jLabel2");
         lblInformation.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         jScrollPane1.setViewportView(lblInformation);
-
-        cmdSave.setText("Save Configuration");
-        cmdSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSaveActionPerformed(evt);
-            }
-        });
-        jPanel3.add(cmdSave);
 
         javax.swing.GroupLayout jplInfoLayout = new javax.swing.GroupLayout(jplInfo);
         jplInfo.setLayout(jplInfoLayout);
@@ -570,18 +577,14 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
             jplInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jplInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jplInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 480, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jplInfoLayout.setVerticalGroup(
             jplInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jplInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 447, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 433, Short.MAX_VALUE)
                 .addContainerGap())
         );
 

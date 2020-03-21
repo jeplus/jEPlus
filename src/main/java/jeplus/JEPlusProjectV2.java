@@ -100,6 +100,11 @@ public class JEPlusProjectV2 implements Serializable {
             listener.projectChanged(this);
         }
     }
+    public void fireProjectSaved (String filename) {
+        for (IF_ProjectChangedHandler listener : Listeners) {
+            listener.projectSaved(filename);
+        }
+    }
     
     /** This is the working directory of the program */
     protected static String UserBaseDir = System.getProperty("user.dir") + File.separator;
@@ -235,6 +240,7 @@ public class JEPlusProjectV2 implements Serializable {
             mapper.writeValue(fw, this);
             ContentChanged = false;
             fireProjectChanged();
+            fireProjectSaved(file.getAbsolutePath());
             logger.info("Project saved to " + file.getAbsolutePath());
         }catch (Exception ex) {
             logger.error("Error saving project to JSON.", ex);
