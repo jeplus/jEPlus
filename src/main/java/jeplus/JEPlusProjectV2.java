@@ -786,9 +786,51 @@ public class JEPlusProjectV2 implements Serializable {
     }
     
     /**
+     * Check if any of the paths in the project are in the absolute form.
+     * @return a list of absolution path(s) found in the project
+     */
+    public List<String> containAbsolutePaths () {
+        List<String> found = new ArrayList<> ();
+        // Weather file path
+        if (new File(WeatherDir).isAbsolute()) {
+            found.add(WeatherDir);
+        }
+        // idf file path
+        if (ModelType.EPLUS.equals(this.ProjectType) && new File(IDFDir).isAbsolute()) {
+            found.add(IDFDir);
+        }else if (ModelType.TRNSYS.equals(this.ProjectType) && new File(DCKDir).isAbsolute()) {
+            found.add(DCKDir);
+        }
+        // output dir
+
+        // Files referenced in RVX
+        for (RVX_RVIitem item : Rvx.getRVIs()) {
+            if (new File(item.getFileName()).isAbsolute()) {
+                found.add(item.getFileName());
+            }
+        }
+        for (RVX_CSVitem item : Rvx.getCSVs()) {
+            // No test needed
+        }
+        for (RVX_SQLitem item : Rvx.getSQLs()) {
+            // No test needed now. In the future maybe, if sql comes from a file
+        }
+        for (RVX_ScriptItem item : Rvx.getScripts()) {
+            if (new File(item.getFileName()).isAbsolute()) {
+                found.add(item.getFileName());
+            }
+        }
+        for (RVX_UserSuppliedItem item : Rvx.getUserSupplied()) {
+            if (new File(item.getFileName()).isAbsolute()) {
+                found.add(item.getFileName());
+            }
+        }
+        return found;
+    }
+
+    /**
      * Convert all directories to relative paths to where the project base (the
      * location of the project file, for example) is.
-     * @return conversion successful or not
      */
     protected void convertToRelativeDir () {
         // Weather file path
