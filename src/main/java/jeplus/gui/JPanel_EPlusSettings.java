@@ -175,7 +175,7 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
         txtBinDir.setText("Select EnergyPlus folder...");
         txtBinDir.setToolTipText("This is the directory where 'Energy+.idd' is located");
 
-        jLabel6.setText("E+ binary diretory:");
+        jLabel6.setText("E+ binary directory:");
 
         cmdEnergyPlusDetails.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/tool.png"))); // NOI18N
         cmdEnergyPlusDetails.setToolTipText("Check and specify individual E+ tools");
