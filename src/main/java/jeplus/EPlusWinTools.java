@@ -551,31 +551,36 @@ public class EPlusWinTools {
 
             // Run EnergyPlus executable
             CmdLine = config.getResolvedEPlusEXEC();
-            // EP_OMP_NUM_THREADS forced to 1. This may be overridden by the following block if present in the model
-            // ProgramControl,
-            //    1 ; !- Number of Threads Allowed
-            EPProc = Runtime.getRuntime().exec(CmdLine, new String [] {"EP_OMP_NUM_THREADS=1"}, new File(WorkDir));
-            if (process != null) {
-                process.setWrappedProc(EPProc);
-            }
-            // Console logger
-            try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
-                if (outs != null) {
-                    outs.println("# Calling EnergyPlus - " + (new SimpleDateFormat()).format(new Date()));
-                    outs.println("# Command line: " + WorkDir + ">" + CmdLine);
-                    outs.flush();
+            if (new File (CmdLine).exists()) {
+                // EP_OMP_NUM_THREADS forced to 1. This may be overridden by the following block if present in the model
+                // ProgramControl,
+                //    1 ; !- Number of Threads Allowed
+                EPProc = Runtime.getRuntime().exec(CmdLine, new String [] {"EP_OMP_NUM_THREADS=1"}, new File(WorkDir));
+                if (process != null) {
+                    process.setWrappedProc(EPProc);
                 }
-                StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
-                StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
-                p_out.start();
-                p_err.start();
-                ExitValue = EPProc.waitFor();
-                p_out.join();
-                p_err.join();
-                if (outs != null) {
-                    outs.println("# EnergyPlus returns: " + ExitValue);
-                    outs.flush();
+                // Console logger
+                try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
+                    if (outs != null) {
+                        outs.println("# Calling EnergyPlus - " + (new SimpleDateFormat()).format(new Date()));
+                        outs.println("# Command line: " + WorkDir + ">" + CmdLine);
+                        outs.flush();
+                    }
+                    StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
+                    StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
+                    p_out.start();
+                    p_err.start();
+                    ExitValue = EPProc.waitFor();
+                    p_out.join();
+                    p_err.join();
+                    if (outs != null) {
+                        outs.println("# EnergyPlus returns: " + ExitValue);
+                        outs.flush();
+                    }
                 }
+            }else {
+                logger.error("Specified E+ executable (" + CmdLine + ")does not exist! Check config file.");
+                ExitValue = -99;
             }
 
             if (ExitValue == 0) {

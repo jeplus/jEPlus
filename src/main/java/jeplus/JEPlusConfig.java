@@ -68,6 +68,8 @@ public class JEPlusConfig extends ConfigFileNames {
     protected List<INSELConfig> INSELList = new ArrayList<>();
     /** Radiance configurations */
     protected List<RadianceConfig> RadianceList = new ArrayList<>();
+    /** Radiance configurations */
+    protected List<ScriptConfig> ScriptList = new ArrayList<>();
     /** EPlus configurations */
     protected transient TreeMap<VersionInfo, EPlusConfig> EPlusConfigs = new TreeMap<>();
     /** TRNSYS configurations */
@@ -76,6 +78,8 @@ public class JEPlusConfig extends ConfigFileNames {
     protected transient TreeMap<String, INSELConfig> INSELConfigs = new TreeMap<>();
     /** Radiance configurations */
     protected transient TreeMap<String, RadianceConfig> RadianceConfigs = new TreeMap<>();
+    /** Radiance configurations */
+    protected transient TreeMap<String, ScriptConfig> ScripConfigs = new TreeMap<>();
     /** Current selected EPlus Config */
     protected transient EPlusConfig CurrentEPlus = null;
     /** Current selected TRNSYS Config */
@@ -171,6 +175,14 @@ public class JEPlusConfig extends ConfigFileNames {
         this.RadianceList = RadianceList;
     }
 
+    public List<ScriptConfig> getScriptList() {
+        return ScriptList;
+    }
+
+    public void setScriptList(List<ScriptConfig> ScriptList) {
+        this.ScriptList = ScriptList;
+    }
+
     @JsonIgnore
     public TreeMap<VersionInfo, EPlusConfig> getEPlusConfigs() {    
         return EPlusConfigs;
@@ -209,6 +221,16 @@ public class JEPlusConfig extends ConfigFileNames {
     @JsonIgnore
     public void setRadianceConfigs(TreeMap<String, RadianceConfig> RadianceConfigs) {
         this.RadianceConfigs = RadianceConfigs;
+    }
+
+    @JsonIgnore
+    public TreeMap<String, ScriptConfig> getScripConfigs() {
+        return ScripConfigs;
+    }
+
+    @JsonIgnore
+    public void setScripConfigs(TreeMap<String, ScriptConfig> ScripConfigs) {
+        this.ScripConfigs = ScripConfigs;
     }
 
     @JsonIgnore

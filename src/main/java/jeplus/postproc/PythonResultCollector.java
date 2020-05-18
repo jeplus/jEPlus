@@ -19,7 +19,10 @@
 package jeplus.postproc;
 
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,8 +97,20 @@ public class PythonResultCollector extends ResultCollector {
                         } // done with loading
                     }catch (NullPointerException npe) {
                     }
-                    JEPlusConfig config = JEPlusConfig.getDefaultInstance();
                     String workdir = JobOwner.getResolvedEnv().getParentDir();
+                    String id_list = "job_ids.lst";
+                    if (buf.length() > 8000) {
+                        try (PrintWriter fw = new PrintWriter (new FileWriter (workdir + id_list))) {
+                            fw.print(buf);
+                            fw.close();
+                        }catch (IOException ioe) {
+                            logger.error("Error writing the list of job_ids to " + workdir + id_list + "!");
+                            id_list = "NA";
+                        }
+                    }else {
+                        id_list = buf.toString();
+                    }
+                    JEPlusConfig config = JEPlusConfig.getDefaultInstance();
                     try (PrintStream out = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (workdir + "PyConsole.log", true))) {
                         PythonTools.runPython(
                                 config, 
@@ -103,7 +118,7 @@ public class PythonResultCollector extends ResultCollector {
                                 item.getPythonVersion(), 
                                 JobOwner.getProject().getBaseDir(),
                                 workdir, 
-                                buf.toString(), 
+                                id_list, 
                                 fn, 
                                 item.getArguments(), 
                                 out
