@@ -20,11 +20,18 @@ package jeplus;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileAttribute;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static jeplus.JEPlusFrameMain.logger;
@@ -319,6 +326,37 @@ public class EPlusWinTools {
         } else if (!dir.isDirectory()) {
             logger.error(dir.toString() + " is present but not a directory.");
             return false;
+        }
+        return success;
+    }
+
+    /**
+     * Create working directory and prepare input files for simulation
+     * @param config Not used in this function
+     * @param workdir The directory to be created
+     * @param permstr POSIX permissions string, e.g. "rwxrwx---"
+     * @return Preparation successful or not
+     */
+    public static boolean prepareWorkDirWithPermissions(EPlusConfig config, String workdir, String permstr) {
+        boolean success = true;
+        Path wd = Paths.get(workdir);
+        if (Files.notExists(wd)) {
+            Set<PosixFilePermission> perms = PosixFilePermissions.fromString(permstr);
+            FileAttribute<Set<PosixFilePermission>> attr = PosixFilePermissions.asFileAttribute(perms);
+            try {
+                Files.createDirectories(wd, attr);
+            }catch (IOException ioe) {
+                logger.error("Failed to create " + wd.toString(), ioe);
+                success = false;
+            }
+        }else if (Files.exists(wd)) {
+            if (!Files.isDirectory(wd) || !Files.isWritable(wd)) {
+                logger.error(wd.toString() + " is present but not a directory or not writable.");
+                success = false;
+            }
+        }else {
+            logger.error(wd.toString() + " is accessible by the current user!");
+            success = false;
         }
         return success;
     }

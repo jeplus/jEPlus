@@ -251,7 +251,7 @@ public class EPlusTaskGroup implements EPlusJobItem {
             try {
                 ParameterItemV2 item = (ParameterItemV2)tree.getUserObject();
                 String [] vals = item.getAlternativeValues(project);
-                if (item.getSelectedAltValue() > 0) {
+                if (item.getSelectedAltValue() > 0 && item.getSelectedAltValue() <= item.getNAltValues(project) ) {
                     int i = item.getSelectedAltValue() - 1;
                     ArrayList<String> keys = (ArrayList<String>)SearchStringList.clone();
                     ArrayList<String> altvals = (ArrayList<String>)AltValueList.clone();
