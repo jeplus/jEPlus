@@ -64,13 +64,20 @@ public abstract class ConfigFileNames implements Serializable {
     public static final int ZIP = 22;
     public static final int JSON = 23;
     public static final int JEP_OR_JSON = 29;
-    public static final int PYTHON = 24;
     public static final int XML = 25;
     public static final int RVX = 26;
     public static final int CSV = 27;
     public static final int OBJ = 14;
     public static final int EPUSERTXT = 15;
     public static final int ALL = 28;
+
+    public static final int PYTHON = 101;
+    public static final int RUBY = 102;
+    public static final int PHP = 103;
+    public static final int R = 104;
+    public static final int JS = 105;
+    public static final int PERL = 106;
+    public static final int SH = 107;
 
     /** Configuration changed event listener */
     protected ArrayList<IF_ConfigChangedEventHandler> Listeners = new ArrayList<> ();
@@ -162,8 +169,6 @@ public abstract class ConfigFileNames implements Serializable {
                             return (extension.equalsIgnoreCase(".json"));
                         case JEP_OR_JSON:
                             return (extension.equalsIgnoreCase(".json") || extension.equalsIgnoreCase(".jep"));
-                        case PYTHON:
-                            return (extension.equalsIgnoreCase(".py"));
                         case XML:
                             return (extension.equalsIgnoreCase(".xml"));
                         case RVX:
@@ -174,6 +179,20 @@ public abstract class ConfigFileNames implements Serializable {
                             return (extension.equalsIgnoreCase(".obj"));
                         case EPUSERTXT:
                             return (extension.equalsIgnoreCase(".txt"));
+                        case PYTHON:
+                            return (extension.equalsIgnoreCase(".py"));
+                        case RUBY:
+                            return (extension.equalsIgnoreCase(".rb"));
+                        case PHP:
+                            return (extension.equalsIgnoreCase(".php"));
+                        case R:
+                            return (extension.equalsIgnoreCase(".r"));
+                        case JS:
+                            return (extension.equalsIgnoreCase(".js"));
+                        case PERL:
+                            return (extension.equalsIgnoreCase(".pl"));
+                        case SH:
+                            return (extension.equalsIgnoreCase(".sh"));
                         case ALL:
 
                         default:
@@ -201,8 +220,6 @@ public abstract class ConfigFileNames implements Serializable {
                         return "JEPlus JSON project file (.json)";
                     case JEP_OR_JSON:
                         return "JEPlus project file v2.x JSON (.json) or v1.x JEP (.jep)";
-                    case PYTHON:
-                        return "Python script file (.py)";
                     case XML:
                         return "XML document (.xml)";
                     case RVX:
@@ -213,6 +230,20 @@ public abstract class ConfigFileNames implements Serializable {
                         return "JEPlus v0.5 Project object file (.obj)";
                     case EPUSERTXT:
                         return "jE+ user project export file (.txt)";
+                    case PYTHON:
+                        return "Python script file (.py)";
+                    case RUBY:
+                        return "Ruby script file (.rb)";
+                    case PHP:
+                        return "PHP script file (.php)";
+                    case R:
+                        return "R script file (.r)";
+                    case JS:
+                        return "JavaScript file (.js)";
+                    case PERL:
+                        return "Perl script file (.pl)";
+                    case SH:
+                        return "Shell script file (.sh)";
                     case ALL:
                         return "All files (*.*)";
                     default:

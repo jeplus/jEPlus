@@ -59,6 +59,7 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
     protected RVXTreeModel RvxTreeModel = null;
     protected JTree jTreeRvx = null;
 
+    protected JPanel_ScriptItmeEditor ScriptEditor = null;
     
     /** Creates new form JPanel_ParameterTree */
     public JPanel_RVXTree() {
@@ -75,6 +76,7 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         MainGUI = frame;
         Project = project;
         initRVXTree(Project.getRvx());
+        ScriptEditor = new JPanel_ScriptItmeEditor(MainGUI, jTreeRvx, Project);
     }
 
     /**
@@ -156,7 +158,8 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
             }else if (item instanceof RVX_SQLitem) {
                 jplItemEditorHolder.add(new JPanel_SQLitmeEditor(MainGUI, jTreeRvx, Project, (RVX_SQLitem)item));
             }else if (item instanceof RVX_ScriptItem) {
-                jplItemEditorHolder.add(new JPanel_ScriptItmeEditor(MainGUI, jTreeRvx, Project, (RVX_ScriptItem)item));
+                ScriptEditor.setScriptItem((RVX_ScriptItem)item);
+                jplItemEditorHolder.add(ScriptEditor);
             }else if (item instanceof RVX_CSVitem) {
                 jplItemEditorHolder.add(new JPanel_CSVitmeEditor(MainGUI, jTreeRvx, Project, (RVX_CSVitem)item));
             }else if (item instanceof RVX_UserSuppliedItem) {

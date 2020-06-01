@@ -604,7 +604,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
         });
 
         cmdImportParams.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_go.png"))); // NOI18N
-        cmdImportParams.setToolTipText("Import parameter table");
+        cmdImportParams.setToolTipText("Import parameters from CSV and append to the current list");
         cmdImportParams.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdImportParamsActionPerformed(evt);

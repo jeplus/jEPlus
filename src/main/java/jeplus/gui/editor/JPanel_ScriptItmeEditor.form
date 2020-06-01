@@ -52,7 +52,10 @@
                           </Group>
                           <Group type="102" attributes="0">
                               <Component id="cboLanguage" min="-2" pref="168" max="-2" attributes="0"/>
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="cmdConfig" min="-2" pref="28" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="lblWarning" max="32767" attributes="0"/>
                           </Group>
                           <Component id="txtArgs" max="32767" attributes="0"/>
                       </Group>
@@ -80,9 +83,11 @@
                       <EmptySpace min="-2" pref="13" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="cboLanguage" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="cmdConfig" alignment="0" max="32767" attributes="0"/>
+                  <Component id="cboLanguage" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
+                  <Component id="lblWarning" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
@@ -204,6 +209,25 @@
         <Property name="text" type="java.lang.String" value="Run a script to extract results from simulation outputs"/>
         <Property name="opaque" type="boolean" value="true"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="lblWarning">
+      <Properties>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="0" green="0" id="red" palette="1" red="ff" type="palette"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="&lt;-- Check language"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="cmdConfig">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/jeplus/images/hammer_screwdriver.png"/>
+        </Property>
+        <Property name="toolTipText" type="java.lang.String" value="Configure tools"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdConfigActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

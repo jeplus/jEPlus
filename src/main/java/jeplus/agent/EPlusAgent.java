@@ -18,6 +18,8 @@
  ***************************************************************************/
 package jeplus.agent;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -177,7 +179,7 @@ public abstract class EPlusAgent implements Runnable {
         ResultCollectors.add(rc);
         rc = new UserResultCollector ("User supplied result collector");
         ResultCollectors.add(rc);
-        rc = new PythonResultCollector ("Python script result collector");
+        rc = new PythonResultCollector ("Script result collector");
         ResultCollectors.add(rc);
         rc = new TrnsysResultCollector ("TRNSYS result collector");
         ResultCollectors.add(rc);
@@ -400,6 +402,28 @@ public abstract class EPlusAgent implements Runnable {
     public void initializeAgent(JEPlusPrintablePanel panel) {
         GUIPanel = panel;
         Ready = true;
+    }
+    
+    /**
+     * Write the job queue as a jobs list to the specified file
+     * @param filename 
+     */
+    public void writeJobListToFile (String filename) {
+        if (this.JobQueue != null) {
+            try (PrintWriter fw = new PrintWriter (new FileWriter (filename))) {
+                for (EPlusTask job : JobQueue) {
+                    StringBuilder buf = new StringBuilder (job.getJobID());
+                    buf.append(",").append(job.getWorkEnv().IDFDir).append(job.getWorkEnv().IDFTemplate);
+                    buf.append(",").append(job.getWorkEnv().WeatherDir).append(job.getWorkEnv().WeatherFile);
+                    for (String val : job.getAltValueList()) {
+                        buf.append(",").append(val);
+                    }
+                    fw.println(buf.toString());
+                }
+            }catch (IOException ioe) {
+                logger.error("Failed to write jobs list to file " + filename);
+            }
+        }
     }
 
     /**

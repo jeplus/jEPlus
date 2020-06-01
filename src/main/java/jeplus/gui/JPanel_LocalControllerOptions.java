@@ -21,6 +21,7 @@ package jeplus.gui;
 import java.io.File;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
@@ -66,6 +67,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         setThreadOptions();
         this.txtThreadDelay.setText(Integer.toString(Settings.getDelay()));
         this.txtFileDir.setText(Settings.getParentDir());
+        this.chkOverride.setSelected(Settings.isRerunAll());
         this.chkKeepJobDir.setSelected(Settings.isKeepJobDir());
         this.chkKeepJEPlusFiles.setSelected(Settings.isKeepJEPlusFiles());
         this.chkKeepEPlusFiles.setSelected(Settings.isKeepEPlusFiles());
@@ -142,6 +144,8 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         txtEPlusThreads = new javax.swing.JTextField();
         chkDeleteSelected = new javax.swing.JCheckBox();
         txtSelectedFiles = new javax.swing.JTextField();
+        chkOverride = new javax.swing.JCheckBox();
+        jLabel4 = new javax.swing.JLabel();
 
         jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel18.setText("Working dir: ");
@@ -219,17 +223,32 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
             }
         });
 
+        chkOverride.setSelected(true);
+        chkOverride.setText("Override existing results");
+        chkOverride.setToolTipText("If unchecked, jEPlus will skip the cases whose results are already present in the output folder.");
+        chkOverride.setEnabled(false);
+        chkOverride.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkOverrideActionPerformed(evt);
+            }
+        });
+
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel4.setText("Override: ");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(5, 5, 5)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(cboNThreads, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -238,7 +257,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtEPlusThreads, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
+                        .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtThreadDelay, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -253,15 +272,18 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                         .addComponent(txtSelectedFiles))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(chkKeepJobDir)
                             .addComponent(chkKeepJEPlusFiles)
-                            .addComponent(chkKeepEPlusFiles))
+                            .addComponent(chkKeepEPlusFiles)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(chkOverride, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(chkKeepJobDir, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel14)
                     .addComponent(jLabel1)
@@ -270,11 +292,15 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                     .addComponent(cboNThreads, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3)
                     .addComponent(txtEPlusThreads, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel18)
                     .addComponent(txtFileDir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cmdSelectWorkDir))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkOverride)
+                    .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkKeepJobDir)
@@ -323,6 +349,23 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         Settings.setDeleteSelectedFiles(this.chkDeleteSelected.isSelected());
     }//GEN-LAST:event_chkDeleteSelectedActionPerformed
 
+    private void chkOverrideActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkOverrideActionPerformed
+        if (chkOverride.isSelected()) {
+            Settings.setRerunAll(true);
+        }else {
+            int ans = JOptionPane.showConfirmDialog(this,
+                "If the force-override option is unchecked, jEPlus will skip the simulation step if a case folder already contains results.\nAre you certain that you want to do this?",
+                "Confirm skipping existing cases",
+                JOptionPane.YES_NO_OPTION);
+            if (ans == JOptionPane.YES_OPTION) {
+                Settings.setRerunAll(false);
+            }else {
+                Settings.setRerunAll(true);
+                chkOverride.setSelected(true);
+            }
+        }
+    }//GEN-LAST:event_chkOverrideActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboNThreads;
@@ -330,6 +373,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
     private javax.swing.JCheckBox chkKeepEPlusFiles;
     private javax.swing.JCheckBox chkKeepJEPlusFiles;
     private javax.swing.JCheckBox chkKeepJobDir;
+    private javax.swing.JCheckBox chkOverride;
     private javax.swing.JButton cmdSelectWorkDir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel14;
@@ -337,6 +381,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JTextField txtEPlusThreads;
     private javax.swing.JTextField txtFileDir;
     private javax.swing.JTextField txtSelectedFiles;

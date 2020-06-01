@@ -18,12 +18,15 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="jLabel2" alignment="1" max="32767" attributes="1"/>
-                  <Component id="jLabel18" alignment="0" max="32767" attributes="1"/>
-                  <Component id="jLabel14" alignment="0" max="32767" attributes="1"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="jLabel2" alignment="1" max="32767" attributes="1"/>
+                      <Component id="jLabel18" alignment="0" max="32767" attributes="1"/>
+                      <Component id="jLabel14" alignment="0" max="32767" attributes="1"/>
+                  </Group>
+                  <Component id="jLabel4" min="-2" pref="65" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="cboNThreads" min="-2" pref="63" max="-2" attributes="0"/>
@@ -32,7 +35,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="txtEPlusThreads" min="-2" pref="26" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="jLabel15" pref="87" max="32767" attributes="2"/>
+                      <Component id="jLabel15" pref="165" max="32767" attributes="2"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="txtThreadDelay" min="-2" pref="36" max="-2" attributes="1"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -50,9 +53,12 @@
                   </Group>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="chkKeepJobDir" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="chkKeepJEPlusFiles" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="chkKeepEPlusFiles" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                              <Component id="chkOverride" alignment="0" max="32767" attributes="0"/>
+                              <Component id="chkKeepJobDir" alignment="0" max="32767" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
@@ -64,6 +70,7 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel14" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -73,11 +80,16 @@
                   <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="txtEPlusThreads" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel18" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="txtFileDir" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="cmdSelectWorkDir" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="chkOverride" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -214,6 +226,23 @@
       </Events>
     </Component>
     <Component class="javax.swing.JTextField" name="txtSelectedFiles">
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="chkOverride">
+      <Properties>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="Override existing results"/>
+        <Property name="toolTipText" type="java.lang.String" value="If unchecked, jEPlus will skip the cases whose results are already present in the output folder."/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkOverrideActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel4">
+      <Properties>
+        <Property name="horizontalAlignment" type="int" value="4"/>
+        <Property name="text" type="java.lang.String" value="Override: "/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

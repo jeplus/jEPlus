@@ -25,10 +25,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import jeplus.util.PythonTools;
 import jeplus.util.RelativeDirUtil;
+import jeplus.util.ScriptTools;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.internal.StringUtil;
 import org.slf4j.LoggerFactory;
@@ -46,23 +47,23 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
 
     static final long serialVersionUID = 1587629823039332802L;
     
-    public static class PythonFunc implements Serializable {
-        String PyVersion = null;
+    public static class ScriptFunc implements Serializable {
+        String Language = null;
         String ScriptFile = null;
         ArrayList<String> Args = null;
         
-        public PythonFunc (String ver, String script, ArrayList<String> args) {
-            PyVersion = ver;
+        public ScriptFunc (String ver, String script, ArrayList<String> args) {
+            Language = ver;
             ScriptFile = script;
             Args = args;
         }
 
-        public String getPyVersion() {
-            return PyVersion;
+        public String getLanguage() {
+            return Language;
         }
 
-        public void setPyVersion(String PyVersion) {
-            this.PyVersion = PyVersion;
+        public void setLanguage(String Language) {
+            this.Language = Language;
         }
 
         public String getScriptFile() {
@@ -84,15 +85,15 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         /**
          * String that has been trimmed off "call(" and ")"
          * @param entry 
-         * @return A new PythonFunc instance
+         * @return A new ScriptFunc instance
          */
-        public static PythonFunc fromString (String entry) {
+        public static ScriptFunc fromString (String entry) {
             String [] fields = entry.split("\\s*,\\s*");
             ArrayList<String> args = new ArrayList<> ();
             for (int i=2; i<fields.length; i++) {
                 args.add(fields[i]);
             }
-            return new PythonFunc (fields[0], fields[1], args);
+            return new ScriptFunc (fields[0], fields[1], args);
         }
         
         /**
@@ -102,7 +103,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         @Override
         public String toString () {
             StringBuilder buf = new StringBuilder("call(");
-            buf.append(PyVersion);
+            buf.append(Language);
             buf.append(", ").append(ScriptFile);
             for (String Arg : Args) {
                 buf.append(", ").append(Arg);
@@ -121,7 +122,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
     /** Alt values ArrayList */
     protected ArrayList<String> AltValueList;
     /** List of Python scripts to execute before calling E+ binary */
-    protected ArrayList<PythonFunc> Scripts;
+    protected ArrayList<ScriptFunc> Scripts;
     /** Results can be attached to this Task */
     protected ArrayList<String> AttachedResults = new ArrayList<>();
     /** Flag for execution status of this task */
@@ -206,7 +207,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                 // If starts with "call(", create a script record and add "script" to vstrs
                 } else if (formula.startsWith("call(")) {
                     formula = formula.substring(5, formula.length() - 1);
-                    Scripts.add(PythonFunc.fromString(formula));
+                    Scripts.add(ScriptFunc.fromString(formula));
                     vstrs[j] = "script";
                 }
                 // Add the result string to the list
@@ -483,41 +484,44 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         // Get path to job folder
         String job_dir = getWorkingDir();
         // Default config instance contains Python exe info for running Python script
-        JEPlusConfig default_config = JEPlusConfig.getDefaultInstance();
+        Map<String, ScriptConfig> configs = JEPlusConfig.getDefaultInstance().getScripConfigs();
         // Create an inverted index
         HashMap<String, Integer> index = new HashMap<> ();
         for (int i=0; i<SearchStringList.size(); i++) {
             index.put (SearchStringList.get(i), i);
         }
         // Run scripts
-        for (PythonFunc script : Scripts) {
-            // Get args
-            StringBuilder buf = new StringBuilder ();
-            for (int i=0; i<script.getArgs().size(); i++) {
-                if (i > 0) {
-                    buf.append(",");
+        for (ScriptFunc script : Scripts) {
+            if (configs.containsKey(script.getLanguage())) {
+                // Get args
+                StringBuilder buf = new StringBuilder ();
+                for (int i=0; i<script.getArgs().size(); i++) {
+                    if (i > 0) {
+                        buf.append(",");
+                    }
+                    if (index.containsKey(script.getArgs().get(i))) {
+                        buf.append(AltValueList.get(index.get(script.getArgs().get(i))));
+                    }else {
+                        buf.append(script.getArgs().get(i));
+                    }
                 }
-                if (index.containsKey(script.getArgs().get(i))) {
-                    buf.append(AltValueList.get(index.get(script.getArgs().get(i))));
-                }else {
-                    buf.append(script.getArgs().get(i));
+                String args = buf.toString();
+
+                // Call Python
+                try (PrintStream outs = (console_log == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + console_log, true));) {
+                    ScriptTools.runScript(
+                            configs.get(script.getLanguage()), 
+                            RelativeDirUtil.checkAbsolutePath(script.getScriptFile(), WorkEnv.getProjectBaseDir()), 
+                            WorkEnv.getProjectBaseDir(), 
+                            job_dir, 
+                            sim_path,
+                            args,
+                            outs);
+                }catch (IOException ioe) {
+                    logger.error("Error writing to log steam.", ioe);
                 }
-            }
-            String args = buf.toString();
-            
-            // Call Python
-            try (PrintStream outs = (console_log == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + console_log, true));) {
-                PythonTools.runPython(
-                        default_config, 
-                        RelativeDirUtil.checkAbsolutePath(script.getScriptFile(), WorkEnv.getProjectBaseDir()), 
-                        script.getPyVersion(), 
-                        WorkEnv.getProjectBaseDir(), 
-                        job_dir, 
-                        sim_path,
-                        args,
-                        outs);
-            }catch (IOException ioe) {
-                logger.error("Error writing to log steam.", ioe);
+            }else {
+                logger.error(script.toString() + " - Script language " + script.getLanguage() + " is not specified.");
             }
         }
         return ok;
@@ -533,22 +537,27 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
         EPlusConfig config = JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(WorkEnv.getEPlusVersion());
         boolean ok = false;
         if (config != null) {
-            // Prepare work directory
-            ok = EPlusWinTools.prepareWorkDir(config, getWorkingDir());
-            // Copy weather and rvi files
-            ok = ok && EPlusWinTools.copyWorkFiles(getWorkingDir(), WorkEnv.WeatherDir + WorkEnv.WeatherFile, WorkEnv.isRVX() ? null : WorkEnv.RVIDir + WorkEnv.RVIFile);
-            // Write IDF file
-            ok = ok && this.preprocessInputFile(config);
-            // Run Python script 
-            ok = ok && this.runPythonScriptOnModel (config.getEPlusBinDir(), config.getScreenFile());
-            // Ready to run EPlus
-            if (ok) {
-                int code = EPlusWinTools.runEPlus(config, getWorkingDir(), false);
-                ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
+            if (WorkEnv.Steps.isPrepareJobs()) {
+                // Prepare work directory
+                ok = EPlusWinTools.prepareWorkDir(config, getWorkingDir());
+                // Copy weather and rvi files
+                ok = ok && EPlusWinTools.copyWorkFiles(getWorkingDir(), WorkEnv.WeatherDir + WorkEnv.WeatherFile, WorkEnv.isRVX() ? null : WorkEnv.RVIDir + WorkEnv.RVIFile);
+                // Write IDF file
+                ok = ok && this.preprocessInputFile(config);
+                // Run Python script 
+                ok = ok && this.runPythonScriptOnModel (config.getEPlusBinDir(), config.getScreenFile());
             }
-            // Remove temperory files/dir if required
-            if (ok) {
-                ok = EPlusWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles);
+            if (WorkEnv.Steps.isRunSimulations()) {
+                ok = ok || ! WorkEnv.Steps.isPrepareJobs();
+                // Ready to run EPlus
+                if (ok) {
+                    int code = EPlusWinTools.runEPlus(config, getWorkingDir(), false);
+                    ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
+                }
+                // Remove temperory files/dir if required
+                if (ok) {
+                    ok = EPlusWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles);
+                }
             }
         }
         ResultAvailable = ok;

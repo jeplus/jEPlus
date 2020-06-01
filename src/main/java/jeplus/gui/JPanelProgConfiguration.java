@@ -18,9 +18,10 @@ import jeplus.EPlusConfig;
 import jeplus.EPlusWinTools;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusFrameMain;
+import jeplus.ScriptConfig;
 import jeplus.TRNSYSConfig;
 import jeplus.event.IF_ConfigChangedEventHandler;
-import jeplus.util.PythonTools;
+import jeplus.util.ScriptTools;
 
 /**
  *
@@ -32,6 +33,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     protected final JFileChooser fc = new JFileChooser("./");
     protected JEPlusConfig Config = JEPlusConfig.getDefaultInstance();
     protected JPanel_EPlusSettings EpPanel = new JPanel_EPlusSettings ();
+    protected JPanel_ScriptSettings ScriptPanel = new JPanel_ScriptSettings ();
 
     protected Window HostWindow = null;
     
@@ -51,6 +53,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         initComponents();
         HostWindow = host;
         jplEpPanelHolder.add(EpPanel, BorderLayout.CENTER);
+        jplScriptHolder.add(ScriptPanel, BorderLayout.CENTER);
         setConfig (config);
         switch (layout) {
             case TALL:
@@ -113,8 +116,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         }else {
             txtTrnsysBinDir.setText("Select a TRNSYS installation ...");
         }
-        this.txtPython2Exe.setText(Config.getPython2EXE() == null ? "Select Python 2 exe..." : Config.getPython2EXE());
-        this.txtPython3Exe.setText(Config.getPython3EXE() == null ? "Select Python 3 exe..." : Config.getPython3EXE());
+        ScriptPanel.setConfig(Config);
         this.txtVerConvDir.setText(Config.getEPlusVerConvDir() == null ? "Select Version Converter dir ..." : Config.getEPlusVerConvDir());
     }
 
@@ -160,39 +162,16 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         }
         buf.append("<p></p>");
         
-        // Python 2 executable 
-        buf.append("<p><em>Python2:</em></p>");
-        f = new File(txtPython2Exe.getText());
-        if (! f.exists()) {
-            txtPython2Exe.setForeground(Color.red);
-            buf.append("<p>Python 2 Executable ").append(f.getAbsolutePath()).append(" is missing!</p>");
-        } else {
-            // Get python version with "python -V"
-            String ver = PythonTools.getPythonVersion(Config, "python2");
+        // Scripts
+        buf.append("<p><em>Script Interpreters:</em></p>");
+        for (String name : Config.getScripConfigs().keySet()) {
+            ScriptConfig cfg = Config.getScripConfigs().get(name);
+            buf.append("<p><em>").append(name).append(":</em></p>");
+            // Get script version
+            String ver = ScriptTools.getVersion(cfg);
             if (ver.startsWith("Error:")) {
-                txtPython2Exe.setForeground(Color.red);
                 buf.append("<p>").append(ver).append("</p>");
             }else {
-                txtPython2Exe.setForeground(Color.black);
-                buf.append("<p>Found ").append(ver).append("</p>");
-            }
-        }
-        buf.append("<p></p>");
-
-        // Python 3 executable 
-        buf.append("<p><em>Python3:</em></p>");
-        f = new File(txtPython3Exe.getText());
-        if (! f.exists()) {
-            txtPython3Exe.setForeground(Color.red);
-            buf.append("<p>Python 3 Executable ").append(f.getAbsolutePath()).append(" is missing!</p>");
-        } else {
-            // Get python version with "python -V"
-            String ver = PythonTools.getPythonVersion(Config, "python3");
-            if (ver.startsWith("Error:")) {
-                txtPython3Exe.setForeground(Color.red);
-                buf.append("<p>").append(ver).append("</p>");
-            }else {
-                txtPython3Exe.setForeground(Color.black);
                 buf.append("<p>Found ").append(ver).append("</p>");
             }
         }
@@ -263,16 +242,10 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         txtTrnsysEXE = new javax.swing.JTextField();
         cboTrnVersion = new javax.swing.JComboBox();
         jLabel9 = new javax.swing.JLabel();
-        jPanel4 = new javax.swing.JPanel();
-        txtPython3Exe = new javax.swing.JTextField();
-        cmdSelectPython3Exe = new javax.swing.JButton();
-        cmdSelectPython2Exe = new javax.swing.JButton();
-        txtPython2Exe = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
         jplEpPanelHolder = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         cmdSave = new javax.swing.JButton();
+        jplScriptHolder = new javax.swing.JPanel();
         jplInfo = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         lblInformation = new javax.swing.JLabel();
@@ -351,7 +324,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addContainerGap()
                 .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtVerConvDir, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                .addComponent(txtVerConvDir, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdSelectVerConvDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -419,8 +392,8 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtTrnsysBinDir, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
-                            .addComponent(txtTrnsysEXE, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE))
+                            .addComponent(txtTrnsysBinDir, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                            .addComponent(txtTrnsysEXE, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(cmdSelectTRNexe, 0, 1, Short.MAX_VALUE)
@@ -450,75 +423,6 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Python"));
-
-        txtPython3Exe.setText("Select Python3 executable...");
-
-        cmdSelectPython3Exe.setText("...");
-        cmdSelectPython3Exe.setToolTipText("Select the root working directory");
-        cmdSelectPython3Exe.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectPython3ExeActionPerformed(evt);
-            }
-        });
-
-        cmdSelectPython2Exe.setText("...");
-        cmdSelectPython2Exe.setToolTipText("Select the root working directory");
-        cmdSelectPython2Exe.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectPython2ExeActionPerformed(evt);
-            }
-        });
-
-        txtPython2Exe.setText("Select Python2 executable...");
-
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel1.setText("Python 2 Executable: ");
-        jLabel1.setMaximumSize(new java.awt.Dimension(116, 14));
-        jLabel1.setMinimumSize(new java.awt.Dimension(116, 14));
-        jLabel1.setPreferredSize(new java.awt.Dimension(116, 14));
-
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel3.setText("Python 3 Executable:");
-        jLabel3.setMaximumSize(new java.awt.Dimension(116, 14));
-        jLabel3.setMinimumSize(new java.awt.Dimension(116, 14));
-        jLabel3.setPreferredSize(new java.awt.Dimension(116, 14));
-
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtPython2Exe)
-                    .addComponent(txtPython3Exe))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmdSelectPython2Exe, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectPython3Exe, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtPython2Exe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectPython2Exe)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtPython3Exe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectPython3Exe)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
         jplEpPanelHolder.setBorder(javax.swing.BorderFactory.createTitledBorder("EnergyPlus"));
         jplEpPanelHolder.setLayout(new java.awt.BorderLayout());
 
@@ -530,6 +434,9 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         });
         jPanel3.add(cmdSave);
 
+        jplScriptHolder.setBorder(javax.swing.BorderFactory.createTitledBorder("Scripts"));
+        jplScriptHolder.setLayout(new java.awt.BorderLayout());
+
         javax.swing.GroupLayout jplConfigLayout = new javax.swing.GroupLayout(jplConfig);
         jplConfig.setLayout(jplConfigLayout);
         jplConfigLayout.setHorizontalGroup(
@@ -539,9 +446,9 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addGroup(jplConfigLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jplEpPanelHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+                    .addComponent(jplScriptHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jplConfigLayout.setVerticalGroup(
@@ -552,10 +459,10 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 .addGap(18, 18, 18)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jplScriptHolder, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 140, Short.MAX_VALUE)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -564,7 +471,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
 
         jplInfo.setMinimumSize(new java.awt.Dimension(220, 150));
         jplInfo.setName(""); // NOI18N
-        jplInfo.setPreferredSize(new java.awt.Dimension(220, 300));
+        jplInfo.setPreferredSize(new java.awt.Dimension(300, 300));
 
         lblInformation.setBackground(new java.awt.Color(204, 204, 204));
         lblInformation.setText("jLabel2");
@@ -577,14 +484,14 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
             jplInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jplInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jplInfoLayout.setVerticalGroup(
             jplInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jplInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 433, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -666,40 +573,6 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         checkSettings ();
     }//GEN-LAST:event_cmdSelectTRNexeActionPerformed
 
-    private void cmdSelectPython3ExeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectPython3ExeActionPerformed
-        // Select a file to open
-        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.ALL));
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fc.setMultiSelectionEnabled(false);
-        fc.setSelectedFile(new File(""));
-        fc.setCurrentDirectory(new File("./"));
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            txtPython3Exe.setText(file.getAbsolutePath());
-            Config.setPython3EXE(file.getAbsolutePath());
-        }
-        fc.resetChoosableFileFilters();
-        fc.setSelectedFiles(null);
-        checkSettings ();
-    }//GEN-LAST:event_cmdSelectPython3ExeActionPerformed
-
-    private void cmdSelectPython2ExeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectPython2ExeActionPerformed
-        // Select a file to open
-        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.ALL));
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fc.setMultiSelectionEnabled(false);
-        fc.setSelectedFile(new File(""));
-        fc.setCurrentDirectory(new File("./"));
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            txtPython2Exe.setText(file.getAbsolutePath());
-            Config.setPython2EXE(file.getAbsolutePath());
-        }
-        fc.resetChoosableFileFilters();
-        fc.setSelectedFiles(null);
-        checkSettings ();
-    }//GEN-LAST:event_cmdSelectPython2ExeActionPerformed
-
     private void cmdSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSaveActionPerformed
         Config.saveAsJSON(new File(getConfigFile()));
         if (HostWindow != null) {
@@ -746,14 +619,10 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     private javax.swing.JButton cmdEnergyPlusDetails1;
     private javax.swing.JButton cmdSave;
     private javax.swing.JButton cmdSelectEPlusDir;
-    private javax.swing.JButton cmdSelectPython2Exe;
-    private javax.swing.JButton cmdSelectPython3Exe;
     private javax.swing.JButton cmdSelectTRNexe;
     private javax.swing.JButton cmdSelectTrnsysDir;
     private javax.swing.JButton cmdSelectVerConvDir;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
@@ -761,16 +630,14 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPanel jplConfig;
     private javax.swing.JPanel jplEpPanelHolder;
     private javax.swing.JPanel jplInfo;
+    private javax.swing.JPanel jplScriptHolder;
     private javax.swing.JLabel lblInformation;
     private javax.swing.JTextField txtEPlusBinDir;
-    private javax.swing.JTextField txtPython2Exe;
-    private javax.swing.JTextField txtPython3Exe;
     private javax.swing.JTextField txtTrnsysBinDir;
     private javax.swing.JTextField txtTrnsysEXE;
     private javax.swing.JTextField txtVerConvDir;

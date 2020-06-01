@@ -28,6 +28,7 @@ import java.util.*;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.swing.tree.DefaultMutableTreeNode;
+import jeplus.data.BatchRunOptions;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItem;
 import jeplus.data.ParameterItemV2;
@@ -232,12 +233,8 @@ public class JEPlusProjectV2 implements Serializable {
      */
     public boolean saveAsJSON (File file) {
         boolean success = true;
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setDateFormat(format);
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
         try (FileOutputStream fw = new FileOutputStream(file); ) {
-            mapper.writeValue(fw, this);
+            JEPlusConfig.JsonMapper.writeValue(fw, this);
             ContentChanged = false;
             fireProjectChanged();
             fireProjectSaved(file.getAbsolutePath());
@@ -258,8 +255,7 @@ public class JEPlusProjectV2 implements Serializable {
      */
     public static JEPlusProjectV2 loadFromJSON (File file) throws IOException {
         // Read JSON
-        ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
-        JEPlusProjectV2 project = mapper.readValue(file, JEPlusProjectV2.class);
+        JEPlusProjectV2 project = JEPlusConfig.JsonMapper.readValue(file, JEPlusProjectV2.class);
         // Set base dir
         String dir = file.getAbsoluteFile().getParent();
         dir = dir.concat(dir.endsWith(File.separator)?"":File.separator);
@@ -617,12 +613,14 @@ public class JEPlusProjectV2 implements Serializable {
                 versions.add("python2");
             }else if (item.getValuesString().toLowerCase().startsWith("@python3")) {
                 versions.add("python3");
+            }else if (item.getValuesString().toLowerCase().startsWith("@script")) {
+                versions.add(item.getScriptLanguage(item.getValuesString()));
             }
         }
         // Output scripts
         if (this.Rvx.getScripts() != null) {
             for (RVX_ScriptItem item : Rvx.getScripts()) {
-                versions.add(item.getPythonVersion().toLowerCase());
+                versions.add(item.getLanguage());
             }
         }
         // Return
@@ -687,6 +685,7 @@ public class JEPlusProjectV2 implements Serializable {
         ExecSettings.setDeleteSelectedFiles(env.SelectedFiles != null);
         ExecSettings.setSelectedFiles(env.SelectedFiles);
         ExecSettings.setRerunAll(env.ForceRerun);
+        ExecSettings.setSteps(new BatchRunOptions(env.Steps));
         // Mark content changed
         setContentChanged(true);
     }
@@ -716,6 +715,7 @@ public class JEPlusProjectV2 implements Serializable {
         env.KeepJobDir = ExecSettings.isKeepJobDir();
         env.SelectedFiles = ExecSettings.isDeleteSelectedFiles() ? ExecSettings.getSelectedFiles() : null;
         env.ForceRerun = ExecSettings.isRerunAll();
+        env.Steps = ExecSettings.getSteps(); // ?? reference, not clone?
     }
 
     /**

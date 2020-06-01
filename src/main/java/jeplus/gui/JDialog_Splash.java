@@ -19,14 +19,12 @@
 package jeplus.gui;
 
 import java.awt.Desktop;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.swing.JOptionPane;
 import jeplus.JEPlusFrameMain;
-import static jeplus.JEPlusFrameMain.version;
-import static jeplus.JEPlusFrameMain.version_ps;
+import jeplus.JEPlusVersion;
 
 /**
  * jEPlus splash window
@@ -41,7 +39,7 @@ public class JDialog_Splash extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         super.setLocationRelativeTo(parent);
-        lblCopyright.setText("<html>Version " + JEPlusFrameMain.version + "<p>© " + JEPlusFrameMain.year + ", Dr Yi Zhang <p> United Kingdom <p> All rights reserved");
+        lblCopyright.setText("<html>Version " + JEPlusVersion.getVersion() + "<p>© " + JEPlusVersion.Year + ", Dr Yi Zhang <p> United Kingdom <p> All rights reserved");
     }
 
     /** This method is called from within the constructor to

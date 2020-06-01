@@ -94,20 +94,26 @@ public class TRNSYSTask extends EPlusTask {
         Executed = true;
          // EPlus config
         TRNSYSConfig config = JEPlusConfig.getDefaultInstance().getTRNSYSConfigs().get("TRNSYS");
-       // Prepare work directory
-        boolean ok = TRNSYSWinTools.prepareWorkDir(getWorkingDir());
-        // Write DCK file
-        ok = ok && this.preprocessInputFile();
-        // Run Python script 
-        ok = ok && this.runPythonScriptOnModel (config.getResolvedTRNSYSBinDir(), config.getScreenFile());
-        // Ready to run TRNSYS
-        if (ok) {
-            int code = TRNSYSWinTools.runTRNSYS(config, getWorkingDir(), TRNSYSConfig.getTRNSYSDefDCK());
-            ok = (code >= 0) && TRNSYSWinTools.isAnyFileAvailable(getOutputPrinter(), getWorkingDir());
-        }      
-        // Remove temperory files/dir if required
-        if (ok) {
-            ok = TRNSYSWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles, getOutputPrinter());
+        boolean ok = false;
+        if (WorkEnv.Steps.isPrepareJobs()) {
+            // Prepare work directory
+             ok = TRNSYSWinTools.prepareWorkDir(getWorkingDir());
+             // Write DCK file
+             ok = ok && this.preprocessInputFile();
+             // Run Python script 
+             ok = ok && this.runPythonScriptOnModel (config.getResolvedTRNSYSBinDir(), config.getScreenFile());
+        }
+        if (WorkEnv.Steps.isRunSimulations()) {
+            ok = ok || ! WorkEnv.Steps.isPrepareJobs();
+            // Ready to run TRNSYS
+            if (ok) {
+                int code = TRNSYSWinTools.runTRNSYS(config, getWorkingDir(), TRNSYSConfig.getTRNSYSDefDCK());
+                ok = (code >= 0) && TRNSYSWinTools.isAnyFileAvailable(getOutputPrinter(), getWorkingDir());
+            }      
+            // Remove temperory files/dir if required
+            if (ok) {
+                ok = TRNSYSWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles, getOutputPrinter());
+            }
         }
         ResultAvailable = ok;
     }

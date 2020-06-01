@@ -111,6 +111,9 @@ public class ExecutionOptions implements Serializable {
     /** job list file */
     protected String JobListFile = null;
     
+    // Batch run options
+    BatchRunOptions Steps = new BatchRunOptions ();
+    
     /** Default constructor */
     public ExecutionOptions () {
         ExecutionType = INTERNAL_CONTROLLER;
@@ -192,6 +195,8 @@ public class ExecutionOptions implements Serializable {
         SampleOpt = obj.SampleOpt;
         RandomSeed = obj.RandomSeed;
         JobListFile = obj.JobListFile;
+        
+        Steps = new BatchRunOptions (obj.Steps);
     }
 
     public String getWorkDir() {
@@ -378,6 +383,14 @@ public class ExecutionOptions implements Serializable {
 
     public void setSampleOpt(EPlusBatch.SampleType SampleOpt) {
         this.SampleOpt = SampleOpt;
+    }
+
+    public BatchRunOptions getSteps() {
+        return Steps;
+    }
+
+    public void setSteps(BatchRunOptions Steps) {
+        this.Steps = Steps;
     }
 
     @Override

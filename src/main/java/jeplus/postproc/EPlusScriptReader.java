@@ -31,7 +31,7 @@ import javax.swing.JPanel;
 import jeplus.EPlusBatch;
 import jeplus.EPlusTask;
 import jeplus.JEPlusConfig;
-import jeplus.util.PythonTools;
+import jeplus.util.ScriptTools;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -44,7 +44,7 @@ public class EPlusScriptReader implements IFResultReader {
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusScriptReader.class);
     
     protected String ScriptFile = null;
-    protected String Version = "2";
+    protected String Language = "NA";
     protected String RefDir = "./";
     protected String Args = "";
     protected String CSVFile = null;
@@ -52,14 +52,14 @@ public class EPlusScriptReader implements IFResultReader {
     /**
      * Default constructor, does nothing
      * @param script
-     * @param ver
+     * @param lang
      * @param refdir
      * @param args
      * @param csv
      */
-    public EPlusScriptReader (String script, String ver, String refdir, String args, String csv) {
+    public EPlusScriptReader (String script, String lang, String refdir, String args, String csv) {
         ScriptFile = script;
-        Version = ver;
+        Language = lang;
         RefDir = refdir;
         Args = args;
         CSVFile = csv;
@@ -94,52 +94,65 @@ public class EPlusScriptReader implements IFResultReader {
         String job_dir = dir + (dir.endsWith(File.separator)?"":"/") + job_id + "/";
         // Run Python script
         JEPlusConfig config = JEPlusConfig.getDefaultInstance();
-        // Console logger
-        try (PrintStream outs = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + config.getScreenFile(), true));) {
-            PythonTools.runPython(config, ScriptFile, Version, RefDir, job_dir, null, CSVFile, Args, outs);
-            // Read job result file
-            File csv = new File(job_dir + CSVFile);
-            if (csv.exists()) {
-                try (BufferedReader fr = new BufferedReader(new FileReader(csv))) {
-                    String line = fr.readLine();
-                    if (line != null) {
-                        // process first line, the column header
-                        String [] headings = line.split("\\s*,\\s*");
-                        int [] index = new int [headings.length];
-                        for (int j=0; j<headings.length; j++) {
-                            headings[j] = headings[j].trim();
-                            if (! header.containsKey(headings[j])) {
-                                index[j] = header.size();
-                                header.put(headings[j], index[j]);
-                                for (int k=0; k<table.size(); k++) table.get(k).add("-");
-                            }else {
-                                index[j] = header.get(headings[j]);
+        if (config.getScripConfigs().containsKey(Language)) {
+            // Console logger
+            try (PrintStream outs = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (job_dir + config.getScreenFile(), true));) {
+                ScriptTools.runScript(
+                        config.getScripConfigs().get(Language), 
+                        ScriptFile, 
+                        RefDir, 
+                        job_dir, 
+                        null, 
+                        CSVFile, 
+                        Args, 
+                        outs
+                );
+                // Read job result file
+                File csv = new File(job_dir + CSVFile);
+                if (csv.exists()) {
+                    try (BufferedReader fr = new BufferedReader(new FileReader(csv))) {
+                        String line = fr.readLine();
+                        if (line != null) {
+                            // process first line, the column header
+                            String [] headings = line.split("\\s*,\\s*");
+                            int [] index = new int [headings.length];
+                            for (int j=0; j<headings.length; j++) {
+                                headings[j] = headings[j].trim();
+                                if (! header.containsKey(headings[j])) {
+                                    index[j] = header.size();
+                                    header.put(headings[j], index[j]);
+                                    for (int k=0; k<table.size(); k++) table.get(k).add("-");
+                                }else {
+                                    index[j] = header.get(headings[j]);
+                                }
                             }
-                        }
-                        // the rest is data
-                        line = fr.readLine();
-                        while (line != null && line.trim().length() > 0) {
-                            ArrayList<String> row = new ArrayList<> ();
-                            row.add(Integer.toString(table.size()));
-                            row.add(job_id);
-                            // add a new row in the data table
-                            for (int j=2; j<header.size(); j++) row.add("-");
-                            // fill in data from the result file
-                            String [] data = line.split(",");
-                            for (int j=0; j<data.length; j++) {
-                                row.set(index[j], data[j]);
-                            }
-                            nResCollected ++;
-                            table.add(row);
+                            // the rest is data
                             line = fr.readLine();
+                            while (line != null && line.trim().length() > 0) {
+                                ArrayList<String> row = new ArrayList<> ();
+                                row.add(Integer.toString(table.size()));
+                                row.add(job_id);
+                                // add a new row in the data table
+                                for (int j=2; j<header.size(); j++) row.add("-");
+                                // fill in data from the result file
+                                String [] data = line.split(",");
+                                for (int j=0; j<data.length; j++) {
+                                    row.set(index[j], data[j]);
+                                }
+                                nResCollected ++;
+                                table.add(row);
+                                line = fr.readLine();
+                            }
                         }
+                    }catch (Exception ex) {
+                        logger.error("Error reading or parsing E+ result for " + job_id, ex);
                     }
-                }catch (Exception ex) {
-                    logger.error("Error reading or parsing E+ result for " + job_id, ex);
                 }
+            }catch (IOException ioe) {
+                logger.error("Error writing to log steam.", ioe);
             }
-        }catch (IOException ioe) {
-            logger.error("Error writing to log steam.", ioe);
+        }else {
+            logger.error("Script language " + Language + " is not found in program configuration!");
         }
         return nResCollected;
     }

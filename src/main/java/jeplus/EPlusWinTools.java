@@ -543,7 +543,7 @@ public class EPlusWinTools {
     public static int runEPlus(EPlusConfig config, String WorkDir, boolean useReadVars, ProcessWrapper process) {
         
         // Copy IDD, or better, create an INI pointing to the correct IDD. INI will work only on Windows systems
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             EPlusWinTools.writeMinimumEPlusINI(WorkDir, config.getResolvedEPlusBinDir());
         }else {
             fileCopy(config.getResolvedEPlusBinDir() + EPlusConfig.getEPDefIDD(), WorkDir + EPlusConfig.getEPDefIDD());

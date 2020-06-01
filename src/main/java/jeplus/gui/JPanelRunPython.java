@@ -22,6 +22,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
@@ -32,8 +33,10 @@ import jeplus.EPlusConfig;
 import jeplus.EPlusTask;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusFrameMain;
+import jeplus.ScriptConfig;
+import jeplus.JEPlusVersion;
 import jeplus.event.IF_ConfigChangedEventHandler;
-import jeplus.util.PythonTools;
+import jeplus.util.ScriptTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +49,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
     /** Logger */
     final static Logger logger = LoggerFactory.getLogger(JPanelRunPython.class);
     
-    protected JEPlusFrameMain MainFrame = null;
+    protected JEPlusFrameMain MainGUI = null;
     protected JFileChooser fc = new JFileChooser("./");
     protected EPlusTextPanelOld OutputViewer = null;
     protected String CurrentWorkDir = "./";
@@ -63,8 +66,8 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
     public JPanelRunPython(JEPlusFrameMain hostframe, JEPlusConfig config, String workdir) {
         initComponents();
         initDL();
-        MainFrame = hostframe;
-        OutputViewer = MainFrame.getOutputPanel();
+        MainGUI = hostframe;
+        OutputViewer = MainGUI.getOutputPanel();
         Config = config;
         Config.addListener(this);
         CurrentWorkDir = workdir;
@@ -125,7 +128,9 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
     }
     
     private String updateSampleCommandLine () {
-        StringBuilder buf = new StringBuilder ("python \"");
+        ScriptConfig cfg = Config.getScripConfigs().get(cboLang.getSelectedItem().toString());
+        StringBuilder buf = new StringBuilder (cfg.getExec());
+        buf.append(" ").append(cfg.getArgs()).append(" \"");
         buf.append(txtScriptFileName.getText().trim()).append("\" ");
         if (chkPassProjectBase.isSelected()) {
             buf.append("\"").append(txtProjectBase.getText().trim()).append("\" ");
@@ -146,13 +151,13 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
     } 
     
     public final void updateDisplay () {
+        this.cboLang.setModel(new DefaultComboBoxModel (JEPlusConfig.getDefaultInstance().getScripConfigs().keySet().toArray()));
         this.txtWorkDir.setText(CurrentWorkDir);
-        this.txtProjectBase.setText(MainFrame.getProject().getBaseDir());
+        this.txtProjectBase.setText(MainGUI.getProject().getBaseDir());
         this.cmdSyncJobListActionPerformed(null);
         this.txtMoreArguments.setText(Config.getPythonArgv() == null ? "" : Config.getPythonArgv());
         this.txtScriptFileName.setText(Config.getPythonScript() == null ? "" : Config.getPythonScript());
-        this.txtPython2Exe.setText(Config.getPython2EXE() == null ? "Select Python exe..." : Config.getPython2EXE());
-        this.txtPython3Exe.setText(Config.getPython3EXE() == null ? "Select Python exe..." : Config.getPython3EXE());
+        this.repaint();
     }
     
     /**
@@ -170,18 +175,12 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         cmdEditScript = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         cmdSelectWorkDir = new javax.swing.JButton();
-        cmdSelectPython2Exe = new javax.swing.JButton();
-        txtPython2Exe = new javax.swing.JTextField();
-        rdoPython2 = new javax.swing.JRadioButton();
         chkPassWorkDir = new javax.swing.JCheckBox();
         txtWorkDir = new javax.swing.JTextField();
         cmdSelectScriptFile = new javax.swing.JButton();
         txtMoreArguments = new javax.swing.JTextField();
         chkMoreArguments = new javax.swing.JCheckBox();
         txtScriptFileName = new javax.swing.JTextField();
-        rdoPython3 = new javax.swing.JRadioButton();
-        txtPython3Exe = new javax.swing.JTextField();
-        cmdSelectPython3Exe = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         chkPassJobList = new javax.swing.JCheckBox();
         txtJobList = new javax.swing.JTextField();
@@ -196,6 +195,9 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         chkPassProjectBase = new javax.swing.JCheckBox();
         txtProjectBase = new javax.swing.JTextField();
         cmdSelectProjectBase = new javax.swing.JButton();
+        cboLang = new javax.swing.JComboBox<>();
+        jLabel3 = new javax.swing.JLabel();
+        cmdConfig = new javax.swing.JButton();
 
         cmdOpenConsole.setText("Open a Console");
         cmdOpenConsole.addActionListener(new java.awt.event.ActionListener() {
@@ -220,7 +222,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         });
 
         jLabel1.setBackground(new java.awt.Color(204, 204, 204));
-        jLabel1.setText("Python script file: ");
+        jLabel1.setText("Script file: ");
         jLabel1.setOpaque(true);
 
         cmdSelectWorkDir.setText("...");
@@ -234,26 +236,6 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                 cmdSelectWorkDirActionPerformed(evt);
             }
         });
-
-        cmdSelectPython2Exe.setText("...");
-        cmdSelectPython2Exe.setToolTipText("Select the root working directory");
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, rdoPython2, org.jdesktop.beansbinding.ELProperty.create("${selected}"), cmdSelectPython2Exe, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        cmdSelectPython2Exe.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectPython2ExeActionPerformed(evt);
-            }
-        });
-
-        txtPython2Exe.setText("Select Python2 executable...");
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, rdoPython2, org.jdesktop.beansbinding.ELProperty.create("${selected}"), txtPython2Exe, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        buttonGroup1.add(rdoPython2);
-        rdoPython2.setText("Use Python2 installed in: ");
 
         chkPassWorkDir.setSelected(true);
         chkPassWorkDir.setText("Pass Work dir:");
@@ -291,27 +273,6 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         });
 
         txtScriptFileName.setText("select a script file ...");
-
-        buttonGroup1.add(rdoPython3);
-        rdoPython3.setSelected(true);
-        rdoPython3.setText("Use Python3 installed in: ");
-
-        txtPython3Exe.setText("Select Python3 executable...");
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, rdoPython3, org.jdesktop.beansbinding.ELProperty.create("${selected}"), txtPython3Exe, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        cmdSelectPython3Exe.setText("...");
-        cmdSelectPython3Exe.setToolTipText("Select the root working directory");
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, rdoPython3, org.jdesktop.beansbinding.ELProperty.create("${selected}"), cmdSelectPython3Exe, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        cmdSelectPython3Exe.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdSelectPython3ExeActionPerformed(evt);
-            }
-        });
 
         chkPassJobList.setText("Pass the list of jobs (job ids separated by ';' ):");
         chkPassJobList.addActionListener(new java.awt.event.ActionListener() {
@@ -366,10 +327,9 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         jLabel4.setText("Example command-line:");
         jLabel4.setOpaque(true);
 
-        txaCmdLn.setEditable(false);
         txaCmdLn.setColumns(20);
         txaCmdLn.setLineWrap(true);
-        txaCmdLn.setRows(3);
+        txaCmdLn.setRows(4);
         jScrollPane1.setViewportView(txaCmdLn);
 
         chkPassProjectBase.setSelected(true);
@@ -385,6 +345,20 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
             }
         });
 
+        cboLang.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        jLabel3.setBackground(new java.awt.Color(204, 204, 204));
+        jLabel3.setText("Script Language: ");
+        jLabel3.setOpaque(true);
+
+        cmdConfig.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/hammer_screwdriver.png"))); // NOI18N
+        cmdConfig.setToolTipText("Configure tools");
+        cmdConfig.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdConfigActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -393,11 +367,12 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkMoreArguments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jSeparator1)
-                            .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(chkPassProjectBase, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(chkPassWorkDir, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -409,57 +384,63 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(cmdSelectProjectBase, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
                                 .addGap(21, 21, 21)
                                 .addComponent(txtJobList)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(cmdSyncJobList, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
+                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addComponent(chkPassOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(txtOutputFile)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(cmdViewOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(chkPassJobList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkPassJobList, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(rdoPython2)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(txtPython2Exe, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(rdoPython3)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(txtPython3Exe)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(cmdSelectPython2Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(cmdSelectPython3Exe, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addGap(14, 14, 14)
                                 .addComponent(txtScriptFileName)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmdSelectScriptFile, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmdEditScript, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addGap(10, 10, 10)
                                 .addComponent(jScrollPane1))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(cmdRunScript, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmdOpenConsole))
-                            .addGroup(layout.createSequentialGroup()
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addGap(21, 21, 21)
                                 .addComponent(txtMoreArguments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addContainerGap())))
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addComponent(cboLang, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmdConfig, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cmdConfig, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cboLang, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(cmdEditScript, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cmdSelectScriptFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtScriptFileName, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(16, 16, 16)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -470,7 +451,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkPassWorkDir, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtWorkDir))
+                    .addComponent(txtWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkPassJobList)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -487,28 +468,11 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtMoreArguments, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(cmdEditScript, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(cmdSelectScriptFile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtScriptFileName, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1)
                 .addGap(18, 18, 18)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(rdoPython2)
-                    .addComponent(txtPython2Exe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectPython2Exe))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(rdoPython3)
-                    .addComponent(txtPython3Exe, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmdSelectPython3Exe))
+                .addComponent(jScrollPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmdOpenConsole)
@@ -552,22 +516,22 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
                 templfn = txtScriptFileName.getText();
             }
         }
-        int idx = MainFrame.getTpnEditors().indexOfTab(fn);
+        int idx = MainGUI.getTpnEditors().indexOfTab(fn);
         if (idx >= 0) {
-            MainFrame.getTpnEditors().setSelectedIndex(idx);
+            MainGUI.getTpnEditors().setSelectedIndex(idx);
         } else {
             EPlusEditorPanel WthrFilePanel = new EPlusEditorPanel(
-                    MainFrame.getTpnEditors(),
+                    MainGUI.getTpnEditors(),
                     fn,
                     templfn,
                     EPlusEditorPanel.FileType.PYTHON,
                     null);
-            int ti = MainFrame.getTpnEditors().getTabCount();
+            int ti = MainGUI.getTpnEditors().getTabCount();
             WthrFilePanel.setTabId(ti);
-            MainFrame.getTpnEditors().addTab(fn, WthrFilePanel);
-            MainFrame.getTpnEditors().setSelectedIndex(ti);
-            MainFrame.getTpnEditors().setTabComponentAt(ti, new ButtonTabComponent(MainFrame.getTpnEditors(), WthrFilePanel));
-            MainFrame.getTpnEditors().setToolTipTextAt(ti, templfn);
+            MainGUI.getTpnEditors().addTab(fn, WthrFilePanel);
+            MainGUI.getTpnEditors().setSelectedIndex(ti);
+            MainGUI.getTpnEditors().setTabComponentAt(ti, new ButtonTabComponent(MainGUI.getTpnEditors(), WthrFilePanel));
+            MainGUI.getTpnEditors().setToolTipTextAt(ti, templfn);
         }
 //        // Open it in associated application
 //        try {
@@ -596,7 +560,7 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
 
     private void cmdOpenConsoleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOpenConsoleActionPerformed
         String path = CurrentWorkDir;
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             try {
                 Runtime.getRuntime().exec(new String[] { "cmd.exe", "/C", "\"start; cd "+path+"\"" });
             } catch (IOException ex) {
@@ -612,61 +576,31 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
             Config.setPythonArgv(txtMoreArguments.getText());
         }
         // Switch to output tab
-        MainFrame.getTpnEditors().setSelectedIndex(0);
+        MainGUI.getTpnEditors().setSelectedIndex(0);
         // Set arguments
-        String version;
-        if (rdoPython2.isSelected()) {
-            version = "python2";
-        }else {
-            version = "python3";
-        }
         String arg0 = chkPassProjectBase.isSelected()? txtProjectBase.getText().trim(): null;
         String arg1 = chkPassWorkDir.isSelected()? txtWorkDir.getText().trim(): null;
         String arg2 = chkPassJobList.isSelected()? txtJobList.getText().trim(): null;
         String arg3 = chkPassOutputFile.isSelected()? txtOutputFile.getText().trim(): null;
         String moreargs = chkMoreArguments.isSelected()? txtMoreArguments.getText().trim(): null;
         // Start running
-        PythonTools.runPython(Config, txtScriptFileName.getText().trim(), version, arg0, arg1, arg2, arg3, moreargs, OutputViewer.getPrintStream());
+        ScriptTools.runScript(
+                Config.getScripConfigs().get(cboLang.getSelectedItem().toString()), 
+                txtScriptFileName.getText().trim(), 
+                arg0, 
+                arg1, 
+                arg2, 
+                arg3, 
+                moreargs, 
+                OutputViewer.getPrintStream()
+        );
     }//GEN-LAST:event_cmdRunScriptActionPerformed
-
-    private void cmdSelectPython2ExeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectPython2ExeActionPerformed
-        // Select a file to open
-        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.ALL));
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fc.setMultiSelectionEnabled(false);
-        fc.setSelectedFile(new File(""));
-        fc.setCurrentDirectory(new File("./"));
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            txtPython2Exe.setText(file.getAbsolutePath());
-            Config.setPython2EXE(file.getAbsolutePath());
-        }
-        fc.resetChoosableFileFilters();
-        fc.setSelectedFiles(null);
-    }//GEN-LAST:event_cmdSelectPython2ExeActionPerformed
-
-    private void cmdSelectPython3ExeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectPython3ExeActionPerformed
-        // Select a file to open
-        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.ALL));
-        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fc.setMultiSelectionEnabled(false);
-        fc.setSelectedFile(new File(""));
-        fc.setCurrentDirectory(new File("./"));
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            txtPython3Exe.setText(file.getAbsolutePath());
-            Config.setPython3EXE(file.getAbsolutePath());
-        }
-        fc.resetChoosableFileFilters();
-        fc.setSelectedFiles(null);
-
-    }//GEN-LAST:event_cmdSelectPython3ExeActionPerformed
 
     private void cmdSyncJobListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSyncJobListActionPerformed
         
         try {
             // Get finished jobs
-            List <EPlusTask> JobQueue = MainFrame.getBatchManager().getAgent().getFinishedJobs();
+            List <EPlusTask> JobQueue = MainGUI.getBatchManager().getAgent().getFinishedJobs();
             // Collect Job List
             StringBuilder buf = new StringBuilder ();
             for (EPlusTask job : JobQueue) {
@@ -719,37 +653,38 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
         }
     }//GEN-LAST:event_cmdSelectProjectBaseActionPerformed
 
+    private void cmdConfigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdConfigActionPerformed
+        MainGUI.showConfigDialog();
+    }//GEN-LAST:event_cmdConfigActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JComboBox<String> cboLang;
     private javax.swing.JCheckBox chkMoreArguments;
     private javax.swing.JCheckBox chkPassJobList;
     private javax.swing.JCheckBox chkPassOutputFile;
     private javax.swing.JCheckBox chkPassProjectBase;
     private javax.swing.JCheckBox chkPassWorkDir;
+    private javax.swing.JButton cmdConfig;
     private javax.swing.JButton cmdEditScript;
     private javax.swing.JButton cmdOpenConsole;
     private javax.swing.JButton cmdRunScript;
     private javax.swing.JButton cmdSelectProjectBase;
-    private javax.swing.JButton cmdSelectPython2Exe;
-    private javax.swing.JButton cmdSelectPython3Exe;
     private javax.swing.JButton cmdSelectScriptFile;
     private javax.swing.JButton cmdSelectWorkDir;
     private javax.swing.JButton cmdSyncJobList;
     private javax.swing.JButton cmdViewOutputFile;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JRadioButton rdoPython2;
-    private javax.swing.JRadioButton rdoPython3;
     private javax.swing.JTextArea txaCmdLn;
     private javax.swing.JTextField txtJobList;
     private javax.swing.JTextField txtMoreArguments;
     private javax.swing.JTextField txtOutputFile;
     private javax.swing.JTextField txtProjectBase;
-    private javax.swing.JTextField txtPython2Exe;
-    private javax.swing.JTextField txtPython3Exe;
     private javax.swing.JTextField txtScriptFileName;
     private javax.swing.JTextField txtWorkDir;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;

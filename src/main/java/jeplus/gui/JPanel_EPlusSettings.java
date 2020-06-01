@@ -20,6 +20,7 @@ package jeplus.gui; //
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
@@ -29,6 +30,7 @@ import jeplus.EPlusConfig;
 import jeplus.JEPlusConfig;
 import jeplus.JEPlusFrameMain;
 import jeplus.event.IF_ConfigChangedEventHandler;
+import org.slf4j.LoggerFactory;
 
 /**
  * JPanel_EPlusSettings.java - This is the view of EPlusConfig record
@@ -37,6 +39,9 @@ import jeplus.event.IF_ConfigChangedEventHandler;
  * @since 0.5b
  */
 public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJPanel, IF_ConfigChangedEventHandler {
+
+    /** Logger */
+    private final static org.slf4j.Logger logger = LoggerFactory.getLogger(JPanel_EPlusSettings.class);
 
     protected String title = "E+ Executables";
     protected final JFileChooser fc = new JFileChooser("./");
@@ -161,6 +166,7 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
         jLabel1 = new javax.swing.JLabel();
         cboEPlusVersions = new javax.swing.JComboBox();
         cmdDelete = new javax.swing.JButton();
+        cmdScan = new javax.swing.JButton();
 
         cmdSelectEPlusDir.setText("...");
         cmdSelectEPlusDir.setToolTipText("Select the folder where EnergyPlus.exe and Energy+.idd are located");
@@ -211,6 +217,15 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
             }
         });
 
+        cmdScan.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/folder_explore.png"))); // NOI18N
+        cmdScan.setText("Scan");
+        cmdScan.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        cmdScan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdScanActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -229,7 +244,8 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
                                 .addComponent(cboEPlusVersions, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmdDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cmdScan))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(txtBinDir, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -242,11 +258,13 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(cboEPlusVersions, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmdDelete, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 15, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(cboEPlusVersions, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(cmdDelete, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(cmdScan))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cmdSelectEPlusDir, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtBinDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -341,11 +359,61 @@ public class JPanel_EPlusSettings extends javax.swing.JPanel implements TitledJP
         }
     }//GEN-LAST:event_cboEPlusVersionsItemStateChanged
 
+    private void cmdScanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdScanActionPerformed
+        
+        // Select a directory to open
+        fc.resetChoosableFileFilters();
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        if (getSelectedConfig() != null) {
+            fc.setCurrentDirectory(new File(getSelectedConfig().getEPlusBinDir()).getParentFile());
+        }else {
+            fc.setCurrentDirectory(new File("/"));
+        }
+        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            String base = file.getAbsolutePath();
+            logger.info("Scanning E+ installations in " + base);
+            // List sub-directories
+            String[] sub_dirs = file.list(new FilenameFilter() {
+              @Override
+              public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+              }
+            });            
+            // Detect E+ folders
+            boolean found = false;
+            for (String sub : sub_dirs) {
+                String dir = base + File.separator + sub + File.separator;
+                if (EPlusConfig.detectEPlusDir(dir)) {
+                    EPlusConfig cfg = new EPlusConfig();
+                    cfg.setNewEPlusBinDir(dir);
+                    Config.getEPlusConfigs().put(cfg.getVersion(), cfg);
+                    Config.setCurrentEPlus(cfg);
+                    found = true;
+                }
+            }
+            // Check seletect folder as well
+            if (EPlusConfig.detectEPlusDir(base + File.separator)) {
+                EPlusConfig cfg = new EPlusConfig();
+                cfg.setNewEPlusBinDir(base + File.separator);
+                Config.getEPlusConfigs().put(cfg.getVersion(), cfg);
+                Config.setCurrentEPlus(cfg);
+                found = true;
+            }
+            // fire config changed event if found new bin folders
+            if (found) {
+                Config.fireConfigChangedEvent ();
+            }
+        }
+        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    }//GEN-LAST:event_cmdScanActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboEPlusVersions;
     private javax.swing.JButton cmdDelete;
     private javax.swing.JButton cmdEnergyPlusDetails;
+    private javax.swing.JButton cmdScan;
     private javax.swing.JButton cmdSelectEPlusDir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel6;

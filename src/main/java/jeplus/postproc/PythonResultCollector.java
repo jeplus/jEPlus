@@ -31,8 +31,8 @@ import jeplus.EPlusTask;
 import jeplus.JEPlusConfig;
 import jeplus.data.RVX_ScriptItem;
 import jeplus.data.RVX;
-import jeplus.util.PythonTools;
 import jeplus.util.RelativeDirUtil;
+import jeplus.util.ScriptTools;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -71,7 +71,7 @@ public class PythonResultCollector extends ResultCollector {
                     ResWriter = new DefaultCSVWriter(null, fn);
                     ResReader = new EPlusScriptReader(
                             RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
-                            item.getPythonVersion(), 
+                            item.getLanguage(), 
                             JobOwner.getProject().getBaseDir(), 
                             item.getArguments(), 
                             fn);
@@ -111,21 +111,24 @@ public class PythonResultCollector extends ResultCollector {
                         id_list = buf.toString();
                     }
                     JEPlusConfig config = JEPlusConfig.getDefaultInstance();
-                    try (PrintStream out = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (workdir + "PyConsole.log", true))) {
-                        PythonTools.runPython(
-                                config, 
-                                RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
-                                item.getPythonVersion(), 
-                                JobOwner.getProject().getBaseDir(),
-                                workdir, 
-                                id_list, 
-                                fn, 
-                                item.getArguments(), 
-                                out
-                        );
-                        ResCollected ++;
-                    }catch (Exception ex) {
-                        logger.error("Error when calling Python script " + item.getFileName(), ex);
+                    if (config.getScripConfigs().containsKey(item.getLanguage())) {
+                        try (PrintStream out = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (workdir + "PyConsole.log", true))) {
+                            ScriptTools.runScript(
+                                    config.getScripConfigs().get(item.getLanguage()), 
+                                    RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
+                                    JobOwner.getProject().getBaseDir(),
+                                    workdir, 
+                                    id_list, 
+                                    fn, 
+                                    item.getArguments(), 
+                                    out
+                            );
+                            ResCollected ++;
+                        }catch (Exception ex) {
+                            logger.error("Error when calling Python script " + item.getFileName(), ex);
+                        }
+                    }else {
+                        logger.error(item.toString() + " - Script language " + item.getLanguage() + " is not found in program configuration!");
                     }
                 }
             }

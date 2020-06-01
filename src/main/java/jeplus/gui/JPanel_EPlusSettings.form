@@ -31,7 +31,8 @@
                               <Component id="cboEPlusVersions" min="-2" pref="149" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="cmdDelete" min="-2" pref="27" max="-2" attributes="0"/>
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="cmdScan" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
                               <Component id="txtBinDir" pref="216" max="32767" attributes="0"/>
@@ -51,12 +52,15 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                  <Component id="cboEPlusVersions" alignment="0" max="32767" attributes="0"/>
-                  <Component id="cmdDelete" alignment="0" max="32767" attributes="0"/>
-                  <Component id="jLabel1" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                      <Component id="cboEPlusVersions" alignment="0" max="32767" attributes="0"/>
+                      <Component id="cmdDelete" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jLabel1" max="32767" attributes="0"/>
+                  </Group>
+                  <Component id="cmdScan" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="unrelated" pref="15" max="32767" attributes="0"/>
+              <EmptySpace pref="15" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="cmdSelectEPlusDir" alignment="1" min="-2" pref="25" max="-2" attributes="0"/>
                   <Component id="txtBinDir" alignment="0" min="-2" pref="25" max="-2" attributes="0"/>
@@ -145,6 +149,18 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdDeleteActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="cmdScan">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/jeplus/images/folder_explore.png"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Scan"/>
+        <Property name="horizontalTextPosition" type="int" value="10"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdScanActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

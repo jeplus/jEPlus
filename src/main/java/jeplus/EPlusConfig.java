@@ -172,6 +172,19 @@ public class EPlusConfig extends ConfigFileNames {
         }
         return cfg;
     }
+    
+    /**
+     * Detect if the given path is an E+ binary installation by checking the presence of 
+     * the E+ exec and Energy+.idd
+     * @param paths
+     * @return 
+     */
+    public static boolean detectEPlusDir (String paths) {
+        return (
+            new File (paths + EPlusConfig.getDefEPlusEXEC()).exists() &&
+            new File (paths + EPlusConfig.getEPDefIDD()).exists()
+        );
+    }
 
     public List<String> validate () {
         String bindir = getResolvedEPlusBinDir();
@@ -215,7 +228,7 @@ public class EPlusConfig extends ConfigFileNames {
      * @return Default E+ binary directory depending on Winows or Linux distributions
      */
     public static String getDefEPlusBinDir() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusBinDir_WIN;
         } else {
             return EPlusBinDir_LIN;
@@ -258,7 +271,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** Get Default EnergyPlus executable */
     public static String getDefEPlusEXEC() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusEXEC_WIN;
         } else {
             return EPlusEXEC_LIN;
@@ -285,7 +298,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** Get Default EnergyPlus ReadVarsESO executable */
     public static String getDefEPlusReadVars() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusReadVars_WIN;
         } else {
             return EPlusReadVars_LIN;
@@ -312,7 +325,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** Get Default EnergyPlus EPMacro executable */
     public static String getDefEPlusEPMacro() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusEPMacro_WIN;
         } else {
             return EPlusEPMacro_LIN;
@@ -339,7 +352,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** Get Default EnergyPlus ExpandObjects executable */
     public static String getDefEPlusExpandObjects() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusExpandObjects_WIN;
         } else {
             return EPlusExpandObjects_LIN;
@@ -386,7 +399,7 @@ public class EPlusConfig extends ConfigFileNames {
     
     /** */
     public static String getEPDefINI() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefINI;
         } else {
             return EPDefINI;
@@ -395,7 +408,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPDefIDD() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefIDD;
         } else {
             return EPDefIDD;
@@ -404,7 +417,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPDefIDF() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefIDF;
         } else {
             return EPDefIDF;
@@ -413,7 +426,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPDefIMF() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefIMF;
         } else {
             return EPDefIMF;
@@ -422,7 +435,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPDefIDFOUT() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefIDFOUT;
         } else {
             return EPDefIDFOUT;
@@ -431,7 +444,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPDefExpandedIDF() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefExpandedIDF;
         } else {
             return EPDefExpandedIDF;
@@ -440,7 +453,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPDefEPW() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefEPW;
         } else {
             return EPDefEPW;
@@ -451,7 +464,7 @@ public class EPlusConfig extends ConfigFileNames {
      * @return  
      */
     public static String getEPDefSTAT() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefSTAT;
         } else {
             return EPDefSTAT;
@@ -462,7 +475,7 @@ public class EPlusConfig extends ConfigFileNames {
      * @return  
      */
     public static String getEPDefOutESO() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefOutESO;
         } else {
             return EPDefOutESO;
@@ -473,7 +486,7 @@ public class EPlusConfig extends ConfigFileNames {
      * @return  
      */
     public static String getEPDefOutCSV() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefOutCSV;
         } else {
             return EPDefOutCSV;
@@ -484,7 +497,7 @@ public class EPlusConfig extends ConfigFileNames {
      * @return
      */
     public static String getEPDefOutEND() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefOutEND;
         } else {
             return EPDefOutEND;
@@ -493,7 +506,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPDefOutSQL() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefOutSql;
         } else {
             return EPDefOutSql;
@@ -502,7 +515,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPDefRvi() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefRvi;
         } else {
             return EPDefRvi;
@@ -511,7 +524,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPDefMvi() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefMvi;
         } else {
             return EPDefMvi;
@@ -519,7 +532,7 @@ public class EPlusConfig extends ConfigFileNames {
     }
 
     public static String getEPDefDELightIn() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return "eplusout.delightin";
         } else {
             return "eplusout.delightin";
@@ -527,7 +540,7 @@ public class EPlusConfig extends ConfigFileNames {
     }
 
     public static String getEPDefDELightOut() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return "eplusout.delightout";
         } else {
             return "eplusout.delightout";
@@ -536,7 +549,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** Get default file extensions */
     public static String getEPlusWeatherExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusWeatherExt;
         } else {
             return EPlusWeatherExt;
@@ -545,7 +558,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusWeatherStatExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusWeatherStatExt;
         } else {
             return EPlusWeatherStatExt;
@@ -554,7 +567,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusIDFExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusIDFExt;
         } else {
             return EPlusIDFExt;
@@ -563,7 +576,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusIMFExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusIMFExt;
         } else {
             return EPlusIMFExt;
@@ -572,7 +585,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusMtrExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusMtrExt;
         } else {
             return EPlusMtrExt;
@@ -581,7 +594,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusCsvExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusCsvExt;
         } else {
             return EPlusCsvExt;
@@ -590,7 +603,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusEsoExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusEsoExt;
         } else {
             return EPlusEsoExt;
@@ -599,7 +612,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusRviExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusRviExt;
         } else {
             return EPlusRviExt;
@@ -608,7 +621,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusMviExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusMviExt;
         } else {
             return EPlusMviExt;
@@ -617,7 +630,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusUserObjExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusUserObjExt;
         } else {
             return EPlusUserObjExt;
@@ -626,7 +639,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getEPlusUserTxtExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPlusUserTxtExt;
         } else {
             return EPlusUserTxtExt;
@@ -635,7 +648,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getJEPlusRvxExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return JEPlusRvxExt;
         } else {
             return JEPlusRvxExt;
@@ -644,7 +657,7 @@ public class EPlusConfig extends ConfigFileNames {
 
     /** */
     public static String getJEPlusJepExt() {
-        if (JEPlusFrameMain.osName.toLowerCase().startsWith("windows")) {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return JEPlusJepExt;
         } else {
             return JEPlusJepExt;

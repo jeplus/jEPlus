@@ -45,6 +45,7 @@ import jeplus.agent.EPlusAgent;
 import jeplus.agent.EPlusAgentLocal;
 import jeplus.agent.InselAgentLocal;
 import jeplus.agent.TrnsysAgentLocal;
+import jeplus.data.BatchRunOptions;
 import jeplus.data.ExecutionOptions;
 import jeplus.data.ParameterItemV2;
 import jeplus.data.RVX;
@@ -77,11 +78,11 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
     
     protected NumberFormat LargeIntFormatter = new DecimalFormat("###,###,###,###,###,###");
 
-    public final static String version = "2.0.0 Beta";
-    public final static String version_ps = "_2_0";
-    public final static String year = "2018,2019";
-    public final static String osName = System.getProperty( "os.name" );
-    protected static String VersionInfo = "jEPlus (version " + version + ")";
+//    public final static String version = "2.0.0 Beta";
+//    public final static String version_ps = "_2_0";
+//    public final static String year = "2018,2019";
+//    public final static String osName = System.getProperty( "os.name" );
+//    protected static String JEPlusVersion = "jEPlus (version " + version + ")";
     
     protected static JEPlusFrameMain CurrentMainWindow = null;
     public static JEPlusFrameMain getCurrentMainGUI () { return CurrentMainWindow; }
@@ -135,7 +136,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         
         initComponents();
 
-        this.setTitle(getVersionInfo() + " - New Project");
+        this.setTitle(JEPlusVersion.getVersion() + " - New Project");
         
         this.cboProjectType.setModel(new DefaultComboBoxModel<>(JEPlusProjectV2.ModelType.values()));
         // Diable INSEL
@@ -191,14 +192,6 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
 
     // =============== Getters and setters =====================
     
-    public static String getVersionInfo() {
-        return VersionInfo;
-    }
-
-    public static void setVersionInfo(String VersionInfo) {
-        JEPlusFrameMain.VersionInfo = VersionInfo;
-    }
-
     public JFileChooser getFileChooser() {
         return fc;
     }
@@ -307,7 +300,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         this.CurrentProjectFile = CurrentProjectFile;
         if (! JEPlusConfig.getDefaultInstance().getRecentProjects().contains(CurrentProjectFile))
             JEPlusConfig.getDefaultInstance().getRecentProjects().add(0, CurrentProjectFile);
-        this.setTitle(getVersionInfo() + " - " + CurrentProjectFile + (Project.isContentChanged()?"*":""));
+        this.setTitle(JEPlusVersion.getVersion() + " - " + CurrentProjectFile + (Project.isContentChanged()?"*":""));
     }
 
     // =============== End getters and setters ===============
@@ -321,6 +314,22 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         splash.setLocationByPlatform(true);
         splash.setLocationRelativeTo(parent);
         splash.setVisible(true);
+    }
+    
+    public void showConfigDialog () {
+        JDialog ConfigDialog = new JDialog (this, "Configuration file: ", true);
+        if (jplProgConfPanel == null) {
+            jplProgConfPanel = new JPanelProgConfiguration(ConfigDialog, JEPlusConfig.getDefaultInstance(), JPanelProgConfiguration.Layout.WIDE);
+        }else {
+            jplProgConfPanel.setHostWindow(ConfigDialog);
+        }
+        ConfigDialog.getContentPane().add(jplProgConfPanel);
+        ConfigDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        ConfigDialog.setTitle(ConfigDialog.getTitle() + jplProgConfPanel.getConfigFile());
+        ConfigDialog.pack();
+        ConfigDialog.setSize(960, 750);
+        ConfigDialog.setLocationRelativeTo(this);
+        ConfigDialog.setVisible(true);        
     }
 
     /**
@@ -459,12 +468,19 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                 this.rdoAllJobs.setSelected(true);
                 this.rdoAllJobsActionPerformed(null);
         }
+        BatchRunOptions steps = Project.getExecSettings().getSteps();
+        this.chkCreateList.setSelected(steps.isWriteJobList());
+        this.txtSaveList.setText(steps.getJobListFile());
+        this.chkPrepare.setSelected(steps.isPrepareJobs());
+        this.chkRun.setSelected(steps.isRunSimulations());
+        this.chkCollect.setSelected(steps.isCollectResults());
 
         // Set listeners to text fields
         DL = new DocumentListener () {
             Document DocJobListFile = txtJobListFile.getDocument();
             Document DocTestRandomN = txtTestRandomN.getDocument();
             Document DocRandomSeed = txtRandomSeed.getDocument();
+            Document DocSaveList = txtSaveList.getDocument();
 
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -495,6 +511,8 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                         txtRandomSeed.setForeground(Color.red);
                     }
                     Project.getExecSettings().setRandomSeed(seed);
+                }else if(src == DocSaveList) {
+                    Project.getExecSettings().getSteps().setJobListFile(txtSaveList.getText());
                 }
             }
             @Override
@@ -510,6 +528,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         txtJobListFile.getDocument().addDocumentListener(DL);
         txtTestRandomN.getDocument().addDocumentListener(DL);
         txtRandomSeed.getDocument().addDocumentListener(DL);
+        txtSaveList.getDocument().addDocumentListener(DL);
     }
     
     /**
@@ -770,6 +789,8 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jMenuItemJESSClient = new javax.swing.JMenuItem();
         jMenuItemJEPlusEA = new javax.swing.JMenuItem();
         jplParamTreeHolder = new javax.swing.JPanel();
+        jplSettings = new javax.swing.JPanel();
+        jplEPlusSettings = new jeplus.gui.JPanel_EPlusSettings();
         jSplitPane1 = new javax.swing.JSplitPane();
         tpnMain = new javax.swing.JTabbedPane();
         pnlProject = new javax.swing.JPanel();
@@ -791,8 +812,6 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         pnlExecution = new javax.swing.JPanel();
         cboExecutionType = new javax.swing.JComboBox();
         jLabel27 = new javax.swing.JLabel();
-        jplSettings = new javax.swing.JPanel();
-        jplEPlusSettings = new jeplus.gui.JPanel_EPlusSettings();
         jplOptions = new javax.swing.JPanel();
         jplLocalControllerSettings = new jeplus.gui.JPanel_LocalControllerOptions();
         jPanel3 = new javax.swing.JPanel();
@@ -803,14 +822,20 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jLabel5 = new javax.swing.JLabel();
         txtRandomSeed = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        cmdStart = new javax.swing.JButton();
         rdoJobListFile = new javax.swing.JRadioButton();
         rdoAllJobs = new javax.swing.JRadioButton();
         txtJobListFile = new javax.swing.JTextField();
         cmdSelectJobListFile = new javax.swing.JButton();
         cmdEditJobListFile = new javax.swing.JButton();
-        chkOverride = new javax.swing.JCheckBox();
         cboSampleOpt = new javax.swing.JComboBox();
+        jPanel2 = new javax.swing.JPanel();
+        cmdStart = new javax.swing.JButton();
+        jPanel5 = new javax.swing.JPanel();
+        chkPrepare = new javax.swing.JCheckBox();
+        chkCollect = new javax.swing.JCheckBox();
+        chkCreateList = new javax.swing.JCheckBox();
+        chkRun = new javax.swing.JCheckBox();
+        txtSaveList = new javax.swing.JTextField();
         pnlUtilities = new javax.swing.JPanel();
         TpnUtilities = new javax.swing.JTabbedPane();
         TpnEditors = new javax.swing.JTabbedPane();
@@ -933,6 +958,10 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         });
 
         jplParamTreeHolder.setLayout(new java.awt.BorderLayout());
+
+        jplSettings.setBorder(javax.swing.BorderFactory.createTitledBorder("Executables"));
+        jplSettings.setLayout(new java.awt.BorderLayout());
+        jplSettings.add(jplEPlusSettings, java.awt.BorderLayout.CENTER);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1000, 740));
@@ -1106,7 +1135,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                 .addContainerGap()
                 .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 571, Short.MAX_VALUE)
+                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1124,15 +1153,11 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
 
         jLabel27.setText("Select execution controller: ");
 
-        jplSettings.setBorder(javax.swing.BorderFactory.createTitledBorder("Executables"));
-        jplSettings.setLayout(new java.awt.BorderLayout());
-        jplSettings.add(jplEPlusSettings, java.awt.BorderLayout.CENTER);
-
         jplOptions.setBorder(javax.swing.BorderFactory.createTitledBorder("Options"));
         jplOptions.setLayout(new java.awt.BorderLayout());
         jplOptions.add(jplLocalControllerSettings, java.awt.BorderLayout.CENTER);
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Actions"));
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Run"));
 
         btg.add(rdoTestChains);
         rdoTestChains.setSelected(true);
@@ -1166,17 +1191,8 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel4.setText("Random Seed:");
 
-        cmdStart.setText("Run Batch");
-        cmdStart.setToolTipText("Start batch simulation");
-        cmdStart.setActionCommand("start");
-        cmdStart.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdStartActionPerformed(evt);
-            }
-        });
-
         btg.add(rdoJobListFile);
-        rdoJobListFile.setText("Job list in file: ");
+        rdoJobListFile.setText("List of cases in: ");
         rdoJobListFile.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 rdoJobListFileActionPerformed(evt);
@@ -1184,7 +1200,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         });
 
         btg.add(rdoAllJobs);
-        rdoAllJobs.setText("All jobs");
+        rdoAllJobs.setText("All cases of the project");
         rdoAllJobs.setToolTipText("This option will start ALL jobs in the project.");
         rdoAllJobs.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1214,11 +1230,6 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             }
         });
 
-        chkOverride.setSelected(true);
-        chkOverride.setText("Override existing results");
-        chkOverride.setToolTipText("If unchecked, jEPlus will skip the cases whose results are already present in the output folder.");
-        chkOverride.setEnabled(false);
-
         cboSampleOpt.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cboSampleOpt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1234,36 +1245,35 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rdoTestChains, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(rdoTestRandomN)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtTestRandomN, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cboSampleOpt, 0, 1, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtRandomSeed, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(rdoJobListFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtJobListFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdSelectJobListFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdEditJobListFile, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(rdoAllJobs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                        .addComponent(chkOverride, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(cmdStart, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(rdoTestRandomN)
+                            .addComponent(rdoJobListFile))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(txtJobListFile)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cmdSelectJobListFile, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cmdEditJobListFile, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(txtTestRandomN, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(cboSampleOpt, 0, 85, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtRandomSeed, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addGap(6, 6, 6))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(rdoTestChains)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1282,10 +1292,6 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                     .addComponent(cmdEditJobListFile))
                 .addGap(7, 7, 7)
                 .addComponent(rdoAllJobs)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cmdStart)
-                    .addComponent(chkOverride))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1300,25 +1306,122 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Execution"));
+
+        cmdStart.setText("Run Batch");
+        cmdStart.setToolTipText("Start batch simulation");
+        cmdStart.setActionCommand("start");
+        cmdStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdStartActionPerformed(evt);
+            }
+        });
+
+        chkPrepare.setSelected(true);
+        chkPrepare.setText("Prepare case folders and write simulation input files");
+        chkPrepare.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkPrepareActionPerformed(evt);
+            }
+        });
+
+        chkCollect.setSelected(true);
+        chkCollect.setText("Collect simulation results and run post-processing scripts");
+        chkCollect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkCollectActionPerformed(evt);
+            }
+        });
+
+        chkCreateList.setSelected(true);
+        chkCreateList.setText("Create case indexes and save the list to: ");
+        chkCreateList.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkCreateListActionPerformed(evt);
+            }
+        });
+
+        chkRun.setSelected(true);
+        chkRun.setText("Run simulations");
+        chkRun.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkRunActionPerformed(evt);
+            }
+        });
+
+        txtSaveList.setText("joblist.csv");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(chkCreateList)
+                        .addGap(18, 18, 18)
+                        .addComponent(txtSaveList, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(chkPrepare)
+                    .addComponent(chkRun)
+                    .addComponent(chkCollect))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkCreateList)
+                    .addComponent(txtSaveList, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkPrepare)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkRun)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkCollect)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(cmdStart, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(cmdStart)
+                .addContainerGap(110, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout pnlExecutionLayout = new javax.swing.GroupLayout(pnlExecution);
         pnlExecution.setLayout(pnlExecutionLayout);
         pnlExecutionLayout.setHorizontalGroup(
             pnlExecutionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlExecutionLayout.createSequentialGroup()
+            .addGroup(pnlExecutionLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlExecutionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlExecutionLayout.createSequentialGroup()
+                .addGroup(pnlExecutionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlExecutionLayout.createSequentialGroup()
                         .addComponent(jLabel27)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cboExecutionType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jplSettings, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jplOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jplOptions, javax.swing.GroupLayout.DEFAULT_SIZE, 554, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlExecutionLayout.setVerticalGroup(
@@ -1329,11 +1432,11 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                     .addComponent(cboExecutionType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel27))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jplSettings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(jplOptions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1352,7 +1455,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             pnlUtilitiesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlUtilitiesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 684, Short.MAX_VALUE)
+                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 698, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1490,6 +1593,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jMenuItemSimulate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/lightening2.png"))); // NOI18N
         jMenuItemSimulate.setText("Simulate ");
         jMenuItemSimulate.setToolTipText("Start simulation.");
+        jMenuItemSimulate.setEnabled(false);
         jMenuItemSimulate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemSimulateActionPerformed(evt);
@@ -1500,6 +1604,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jMenuItemPostprocess.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/chart.png"))); // NOI18N
         jMenuItemPostprocess.setText("Post-process");
         jMenuItemPostprocess.setToolTipText("Go to the post process / utilities tab");
+        jMenuItemPostprocess.setEnabled(false);
         jMenuItemPostprocess.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemPostprocessActionPerformed1(evt);
@@ -1710,7 +1815,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 736, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 750, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1908,34 +2013,16 @@ private void rdoExportIndividualActionPerformed(java.awt.event.ActionEvent evt) 
 }//GEN-LAST:event_rdoExportIndividualActionPerformed
 
 private void jMenuItemUserGuideActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemUserGuideActionPerformed
-    Desktop desktop = null;
     if (Desktop.isDesktopSupported()) {
-        File file = new File("docs/Users Manual ver" + version + ".html");
-        try {
-            desktop = Desktop.getDesktop();
-            if (desktop.isSupported(Desktop.Action.OPEN)) {
-                    desktop.open(file);
+        Desktop desktop = Desktop.getDesktop();
+        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+            try {
+                desktop.browse(new URI(JEPlusVersion.UsersGuide));
+            } catch (URISyntaxException | IOException ex1) {
+                JOptionPane.showMessageDialog(this, JEPlusVersion.UsersGuide + " is not accessible. Please try locate the page manually on the jEPlus website.");
             }
-        } catch (Exception ex) {
-            if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
-                int res = JOptionPane.showConfirmDialog(
-                        this, 
-                        "<html><p>Online user's guide requires internet access.</p><p>Please click 'Yes' to open it in a browser. </p></html>", 
-                        "Cannot find User Guide", 
-                        JOptionPane.YES_NO_OPTION);
-                if (res == JOptionPane.YES_OPTION) {
-                    URI uri;
-                    try {
-                        uri = new URI("http://www.jeplus.org/wiki/doku.php?id=docs:manual" + version_ps);
-                        //uri = new URI("http://www.jeplus.org/docs_html/Users%20Manual%20ver" + version + ".html");
-                        desktop.browse(uri);
-                    } catch (URISyntaxException | IOException ex1) {
-                        JOptionPane.showMessageDialog(this, "http://www.jeplus.org/wiki/doku.php?id=docs:manual" + version_ps + " is not accessible. Please try locate the page manually on the jEPlus website.");
-                    }
-                }
-            }else {
-                JOptionPane.showMessageDialog(this, "Cannot find or open " + file.getPath() + ". Please locate the User Guide manually on the jEPlus website.");
-            }
+        }else {
+            JOptionPane.showMessageDialog(this, "Cannot open browser. Please locate the User Guide manually on the jEPlus website.");
         }
     }
 }//GEN-LAST:event_jMenuItemUserGuideActionPerformed
@@ -2478,19 +2565,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     }//GEN-LAST:event_jMenuItemJEPlusEAActionPerformed
 
     private void jMenuItemConfigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemConfigActionPerformed
-        JDialog ConfigDialog = new JDialog (this, "Configuration file: ", true);
-        if (jplProgConfPanel == null) {
-            jplProgConfPanel = new JPanelProgConfiguration(ConfigDialog, JEPlusConfig.getDefaultInstance(), JPanelProgConfiguration.Layout.WIDE);
-        }else {
-            jplProgConfPanel.setHostWindow(ConfigDialog);
-        }
-        ConfigDialog.getContentPane().add(jplProgConfPanel);
-        ConfigDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        ConfigDialog.setTitle(ConfigDialog.getTitle() + jplProgConfPanel.getConfigFile());
-        ConfigDialog.pack();
-        ConfigDialog.setSize(1000, 600);
-        ConfigDialog.setLocationRelativeTo(this);
-        ConfigDialog.setVisible(true);
+        showConfigDialog();
     }//GEN-LAST:event_jMenuItemConfigActionPerformed
 
     private void cboSampleOptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboSampleOptActionPerformed
@@ -2685,7 +2760,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         this.initProjectSection();
         this.cboExecutionTypeActionPerformed(null);
         CurrentProjectFile = null;
-        this.setTitle(getVersionInfo() + " - New Project");
+        this.setTitle(JEPlusVersion.getVersion() + " - New Project");
         Project.addListener(this);
     }//GEN-LAST:event_jMenuItemNewActionPerformed
 
@@ -2709,6 +2784,22 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         }
     }//GEN-LAST:event_jMenuItemCreateIndexActionPerformed
 
+    private void chkCreateListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkCreateListActionPerformed
+        Project.getExecSettings().getSteps().setWriteJobList(chkCreateList.isSelected());
+    }//GEN-LAST:event_chkCreateListActionPerformed
+
+    private void chkPrepareActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPrepareActionPerformed
+        Project.getExecSettings().getSteps().setPrepareJobs(chkPrepare.isSelected());
+    }//GEN-LAST:event_chkPrepareActionPerformed
+
+    private void chkRunActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkRunActionPerformed
+        Project.getExecSettings().getSteps().setRunSimulations(chkRun.isSelected());
+    }//GEN-LAST:event_chkRunActionPerformed
+
+    private void chkCollectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkCollectActionPerformed
+        Project.getExecSettings().getSteps().setCollectResults(chkCollect.isSelected());
+    }//GEN-LAST:event_chkCollectActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane TpnEditors;
     private javax.swing.JTabbedPane TpnUtilities;
@@ -2716,7 +2807,10 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JComboBox cboExecutionType;
     private javax.swing.JComboBox cboProjectType;
     private javax.swing.JComboBox cboSampleOpt;
-    private javax.swing.JCheckBox chkOverride;
+    private javax.swing.JCheckBox chkCollect;
+    private javax.swing.JCheckBox chkCreateList;
+    private javax.swing.JCheckBox chkPrepare;
+    private javax.swing.JCheckBox chkRun;
     private javax.swing.JButton cmdEditJobListFile;
     private javax.swing.JButton cmdSelectJobListFile;
     private javax.swing.JButton cmdSelectTestFolder;
@@ -2773,8 +2867,10 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JMenu jMenuTools;
     private javax.swing.JMenu jMenuViewResult;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private jeplus.gui.JPanel_EPlusProjectFiles jPanel_EPlusProjectFiles2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator3;
@@ -2809,6 +2905,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JTabbedPane tpnMain;
     private javax.swing.JTextField txtJobListFile;
     private javax.swing.JTextField txtRandomSeed;
+    private javax.swing.JTextField txtSaveList;
     private javax.swing.JTextField txtTestFirstN;
     private javax.swing.JTextField txtTestRandomN;
     private javax.swing.JTextField txtTestResultFolder;
@@ -3050,7 +3147,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
 
     @Override
     public void projectChanged(JEPlusProjectV2 new_prj) {
-        this.setTitle(getVersionInfo() + " - " + (CurrentProjectFile==null?"New Project":CurrentProjectFile) + (Project.isContentChanged()?"*":""));
+        this.setTitle(JEPlusVersion.getVersion() + " - " + (CurrentProjectFile==null?"New Project":CurrentProjectFile) + (Project.isContentChanged()?"*":""));
         for (int i=1; i<TpnEditors.getTabCount(); i++) {
             try {
                 EPlusEditorPanel etp = (EPlusEditorPanel)TpnEditors.getComponentAt(i);

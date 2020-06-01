@@ -19,6 +19,7 @@
 package jeplus;
 
 import java.io.Serializable;
+import jeplus.data.BatchRunOptions;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -77,6 +78,9 @@ public class EPlusWorkEnv implements Serializable {
     public String SelectedFiles = "";
     /** Force re-run this job even if results are available */
     public boolean ForceRerun = true;
+    
+    /** Processing steps to run */
+    public BatchRunOptions Steps = new BatchRunOptions();
 
     /** Required E+ version */
     public String EPlusVersion = "4.0";
@@ -105,6 +109,7 @@ public class EPlusWorkEnv implements Serializable {
         KeepEPlusFiles = env.KeepEPlusFiles;
         SelectedFiles = env.SelectedFiles;
         ForceRerun = env.ForceRerun;
+        Steps = new BatchRunOptions (env.Steps);
         EPlusVersion = env.EPlusVersion;
         Platform = env.Platform;
     }
@@ -275,6 +280,14 @@ public class EPlusWorkEnv implements Serializable {
 
     public void setEPlusVersion(String EPlusVersion) {
         this.EPlusVersion = EPlusVersion;
+    }
+
+    public BatchRunOptions getSteps() {
+        return Steps;
+    }
+
+    public void setSteps(BatchRunOptions Steps) {
+        this.Steps = Steps;
     }
 
     /**

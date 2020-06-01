@@ -439,6 +439,11 @@ public class ParameterItemV2 implements Serializable, Cloneable {
                             int start = sections[i].indexOf("(") + 1;
                             int end = sections[i].lastIndexOf(")");
                             vals = mergeLists(vals, createFormula (project, sections[i].substring(start, end).trim()), COMBINE, true);
+                        }else if (sections[i].toLowerCase().startsWith("@script")) {
+                            // Exclusive type. If present, other vals are ignored
+                            int start = sections[i].indexOf("(") + 1;
+                            int end = sections[i].lastIndexOf(")");
+                            vals = createScript (project, sections[i].substring(start, end).trim());
                         }else if (sections[i].toLowerCase().startsWith("@jython")) {
                             // Exclusive type. If present, other vals are ignored
                             int start = sections[i].indexOf("(") + 1;
@@ -841,6 +846,13 @@ public class ParameterItemV2 implements Serializable, Cloneable {
         return new String [] {"?=" + newstr};
     }
 
+    /**
+     * pre-v2.1 form of creating script parameter, where 'type' is defined in the '@...' keyword
+     * @param project
+     * @param type
+     * @param funcstr
+     * @return 
+     */
     private String [] createScript (JEPlusProjectV2 project, String type, String funcstr) {
         // scan for parameter ids in the given string, and replace them with the corresponding search tag
         // Note: since the removal of parameter tree, circlic dependency need to be checked by the user
@@ -866,6 +878,52 @@ public class ParameterItemV2 implements Serializable, Cloneable {
         return new String [] {buf.toString()};
     }
 
+    /**
+     * New form of creating script parameter, where 'type' is the first element in the 'funcstr'
+     * @param project
+     * @param funcstr
+     * @return 
+     */
+    private String [] createScript (JEPlusProjectV2 project, String funcstr) {
+        // scan for parameter ids in the given string, and replace them with the corresponding search tag
+        // Note: since the removal of parameter tree, circlic dependency need to be checked by the user
+        // 1. get a map from parameter id to search tags
+        HashMap<String, String> tagmap = new HashMap<> ();
+        for (ParameterItemV2 item: project.getParameters()) {
+            tagmap.put(item.getID(), item.getSearchString());
+        }
+        // 2. split function string into func name and args
+        String [] args = funcstr.split("\\s*,\\s*");
+        // 3. create script def string
+        StringBuilder buf = new StringBuilder ("call(");
+        buf.append(args[0]); // type
+        for (int i=1; i<args.length; i++) {
+            buf.append(", "); 
+            if (tagmap.containsKey(args[i])) {
+                buf.append(tagmap.get(args[i]));
+            }else {
+                buf.append(args[i]);
+            }
+        }
+        buf.append(")");
+        return new String [] {buf.toString()};
+    }
+
+    
+    /**
+     * Extract the language of the script parameter in the v2.1+ form, where 'type' is the first element in the 'funcstr'
+     * @param valstr
+     * @return 
+     */
+    public String getScriptLanguage (String valstr) {
+        // 1. strip out brackets
+        int start = valstr.indexOf("(") + 1;
+        int end = valstr.lastIndexOf(")");
+        // 2. split function string into func name and args
+        String [] args = valstr.substring(start, end).trim().split("\\s*,\\s*");
+        return args[0]; // type
+    }
+    
     /**
      * ToString function
      * @return String presentation of the contents of this item

@@ -18,6 +18,7 @@
  ***************************************************************************/
 package jeplus.data;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
@@ -46,7 +47,7 @@ public class RVX_ScriptItem implements Serializable, IF_RVXItem {
     };
     
     private String FileName = "script.py";
-    private String PythonVersion = "python3";
+    private String Language = "python3";
     private boolean OnEachJob = false;
     private String Arguments = "";
     private String TableName = "script_table";
@@ -67,12 +68,14 @@ public class RVX_ScriptItem implements Serializable, IF_RVXItem {
         this.OnEachJob = OnEachJob;
     }
 
-    public String getPythonVersion() {
-        return PythonVersion;
+    @JsonAlias({"pythonVersion"})
+    public String getLanguage() {
+        return Language;
     }
 
-    public void setPythonVersion(String PythonVersion) {
-        this.PythonVersion = PythonVersion.equalsIgnoreCase("jython") ? "python2" : PythonVersion;
+    @JsonAlias({"pythonVersion"})
+    public void setLanguage(String Language) {
+        this.Language = Language;
     }
 
     public String getArguments() {
@@ -93,14 +96,14 @@ public class RVX_ScriptItem implements Serializable, IF_RVXItem {
     
     @Override
     public String toString () {
-        return TableName + ":" + FileName + "(" + PythonVersion + ")" + (OnEachJob ? "+" : "");
+        return TableName + ":" + FileName + "(" + Language + ")" + (OnEachJob ? "+" : "");
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
         hash = 43 * hash + Objects.hashCode(this.FileName);
-        hash = 43 * hash + Objects.hashCode(this.PythonVersion);
+        hash = 43 * hash + Objects.hashCode(this.Language);
         hash = 43 * hash + (this.OnEachJob ? 1 : 0);
         hash = 43 * hash + Objects.hashCode(this.Arguments);
         hash = 43 * hash + Objects.hashCode(this.TableName);
@@ -125,7 +128,7 @@ public class RVX_ScriptItem implements Serializable, IF_RVXItem {
         if (!Objects.equals(this.FileName, other.FileName)) {
             return false;
         }
-        if (!Objects.equals(this.PythonVersion, other.PythonVersion)) {
+        if (!Objects.equals(this.Language, other.Language)) {
             return false;
         }
         if (!Objects.equals(this.Arguments, other.Arguments)) {
@@ -142,7 +145,7 @@ public class RVX_ScriptItem implements Serializable, IF_RVXItem {
         try {
             RVX_ScriptItem src = (RVX_ScriptItem)item;
             FileName      = src.FileName     ;
-            PythonVersion = src.PythonVersion;
+            Language = src.Language;
             OnEachJob     = src.OnEachJob    ;
             Arguments     = src.Arguments    ;
             TableName     = src.TableName    ;

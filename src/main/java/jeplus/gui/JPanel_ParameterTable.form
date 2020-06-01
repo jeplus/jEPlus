@@ -374,7 +374,7 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/jeplus/images/page_go.png"/>
             </Property>
-            <Property name="toolTipText" type="java.lang.String" value="Import parameter table"/>
+            <Property name="toolTipText" type="java.lang.String" value="Import parameters from CSV and append to the current list"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdImportParamsActionPerformed"/>

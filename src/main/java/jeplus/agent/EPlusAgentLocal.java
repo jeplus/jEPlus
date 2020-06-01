@@ -101,85 +101,50 @@ public class EPlusAgentLocal extends EPlusAgent {
         // Notify Owner
         this.getJobOwner().setSimulationRunning(true);
         
-        // show monitor GUI
-        this.State = AgentState.RUNNING;
-        if (this.getJobOwner().getGUI() != null || (MonitorGUI != null && MonitorGUI.isVisible())) {
-            showAgentMonitorGUI(true, true);
-        }
-
-        if (Processors == null) {
-            Processors = new ArrayList<> ();
-        }
-        // Clear all lists before run
-        //if (FinishedJobs.size() > 0) FinishedJobs.removeAllElements();
-        purgeAllLists();
-        // Timing
-        StartTime = new Date();
-        StopAgent = false;
-
-        while ((! StopAgent) && JobQueue.size() > 0)  {
-            // Fill processor threads
-            while ((! StopAgent) && (State != AgentState.PAUSED) && Processors.size() < Settings.getNumThreads() && JobQueue.size() > 0) {
-                EPlusTask job = JobQueue.remove(0);
-                if (job != null) {
-                    this.RunningJobs.add(job);
-                    Processors.add(job);
-                    job.start();
-                    // GUI update
-                    writeLog("Job " + job.getJobID() + " started. " + JobQueue.size() + " more to go!");
-                    job.setExecuted(true);
-                }else {
-                    break;
-                }
-                try { Thread.sleep(Settings.getDelay()); } catch (Exception ex) {}
-            }
-            // Check if any of the processors have finished
-            for (int i=0; i<RunningJobs.size(); i++) {
-                Thread proc = RunningJobs.get(i);
-                if (! proc.isAlive()) {
-                    Processors.remove(proc);
-                    RunningJobs.remove((EPlusTask)proc);
-                    FinishedJobs.add((EPlusTask)proc);
-                    i --;
-                }
-            }
-            try { Thread.sleep(Settings.getDelay()); } catch (Exception ex) {}
-        }
-        // if manually stopped
-        if (StopAgent) {
-            writeLog("Local agent received a STOP signal. ");
-            if (Processors.size() > 0) {
-                int n = JOptionPane.showConfirmDialog(
-                    this.getGUIPanel(),
-                    "There are still " + Processors.size() + " E+ simulations running. Do you want to wait till they finish?",
-                    "Stop signal received",
-                    JOptionPane.YES_NO_OPTION);
-                if (n == JOptionPane.YES_OPTION) {
-                    // Wait for the last few jobs to finish
-                    while (Processors.size() > 0) {
-                        // Check if any of the processors have finished
-                        for (int i=0; i<RunningJobs.size(); i++) {
-                            Thread proc = RunningJobs.get(i);
-                            if (! proc.isAlive()) {
-                                Processors.remove(proc);
-                                RunningJobs.remove((EPlusTask)proc);
-                                FinishedJobs.add((EPlusTask)proc);
-                                i --;
-                            }
-                        }
-                        try { Thread.sleep(Settings.getDelay()); } catch (Exception ex) {}
-                    }
-                }else {
-                    Processors.clear();
-                }
-            }
-            State = AgentState.CANCELLED;
-            StopAgent = false;
+        // Write job list
+        if (Settings.getSteps().isWriteJobList()) {
+            String listfile = Settings.getSteps().getJobListFile();
+            writeLog("Writing job lists to " + listfile);
+            writeJobListToFile (listfile);
         }else {
-            // GUI update
-            writeLog("Nearly there ...");
-            // Wait for the last few jobs to finish
-            while (Processors.size() > 0) {
+            writeLog("Job list file is not requested.");
+        }
+        
+        // Prepare jobs and run simulations
+        if (Settings.getSteps().isPrepareJobs() || Settings.getSteps().isRunSimulations()) {
+            
+            // show monitor GUI
+            this.State = AgentState.RUNNING;
+            if (this.getJobOwner().getGUI() != null || (MonitorGUI != null && MonitorGUI.isVisible())) {
+                showAgentMonitorGUI(true, true);
+            }
+
+            if (Processors == null) {
+                Processors = new ArrayList<> ();
+            }
+            // Clear all lists before run
+            //if (FinishedJobs.size() > 0) FinishedJobs.removeAllElements();
+            purgeAllLists();
+            // Timing
+            StartTime = new Date();
+            StopAgent = false;
+
+            while ((! StopAgent) && JobQueue.size() > 0)  {
+                // Fill processor threads
+                while ((! StopAgent) && (State != AgentState.PAUSED) && Processors.size() < Settings.getNumThreads() && JobQueue.size() > 0) {
+                    EPlusTask job = JobQueue.remove(0);
+                    if (job != null) {
+                        this.RunningJobs.add(job);
+                        Processors.add(job);
+                        job.start();
+                        // GUI update
+                        writeLog("Job " + job.getJobID() + " started. " + JobQueue.size() + " more to go!");
+                        job.setExecuted(true);
+                    }else {
+                        break;
+                    }
+                    try { Thread.sleep(Settings.getDelay()); } catch (Exception ex) {}
+                }
                 // Check if any of the processors have finished
                 for (int i=0; i<RunningJobs.size(); i++) {
                     Thread proc = RunningJobs.get(i);
@@ -192,15 +157,70 @@ public class EPlusAgentLocal extends EPlusAgent {
                 }
                 try { Thread.sleep(Settings.getDelay()); } catch (Exception ex) {}
             }
-            State = AgentState.FINISHED;
+            // if manually stopped
+            if (StopAgent) {
+                writeLog("Local agent received a STOP signal. ");
+                if (Processors.size() > 0) {
+                    int n = JOptionPane.showConfirmDialog(
+                        this.getGUIPanel(),
+                        "There are still " + Processors.size() + " E+ simulations running. Do you want to wait till they finish?",
+                        "Stop signal received",
+                        JOptionPane.YES_NO_OPTION);
+                    if (n == JOptionPane.YES_OPTION) {
+                        // Wait for the last few jobs to finish
+                        while (Processors.size() > 0) {
+                            // Check if any of the processors have finished
+                            for (int i=0; i<RunningJobs.size(); i++) {
+                                Thread proc = RunningJobs.get(i);
+                                if (! proc.isAlive()) {
+                                    Processors.remove(proc);
+                                    RunningJobs.remove((EPlusTask)proc);
+                                    FinishedJobs.add((EPlusTask)proc);
+                                    i --;
+                                }
+                            }
+                            try { Thread.sleep(Settings.getDelay()); } catch (Exception ex) {}
+                        }
+                    }else {
+                        Processors.clear();
+                    }
+                }
+                State = AgentState.CANCELLED;
+                StopAgent = false;
+            }else {
+                // GUI update
+                writeLog("Nearly there ...");
+                // Wait for the last few jobs to finish
+                while (Processors.size() > 0) {
+                    // Check if any of the processors have finished
+                    for (int i=0; i<RunningJobs.size(); i++) {
+                        Thread proc = RunningJobs.get(i);
+                        if (! proc.isAlive()) {
+                            Processors.remove(proc);
+                            RunningJobs.remove((EPlusTask)proc);
+                            FinishedJobs.add((EPlusTask)proc);
+                            i --;
+                        }
+                    }
+                    try { Thread.sleep(Settings.getDelay()); } catch (Exception ex) {}
+                }
+                State = AgentState.FINISHED;
+            }
+            writeLog(this.getStatus());
+            writeLog("Local agent stopped. ");
+
+        }else {
+            writeLog("Job preparation and simuation are not requested.");
         }
-        writeLog(this.getStatus());
-        writeLog("Local agent stopped. ");
-
+        
         // Start collecting results
-        writeLog("Collecting results ...");
-        runResultCollection (true);
-
+        if (Settings.getSteps().isCollectResults()) {
+            writeLog("Collecting results ...");
+            runResultCollection (true);
+        }else {
+            writeLog("collecting results is not requested.");
+        }
+        
         // Done
         writeLog("All done!");
         // write start time
@@ -245,27 +265,18 @@ public class EPlusAgentLocal extends EPlusAgent {
                 System.err.println("[" + this.AgentID + "]: Version checking error. ");
             }
         }
-        Set<String> PyVersions = this.getJobOwner().getProject().getPythonDependency();
-        if (PyVersions.contains("python2")) {
-            if (Config.getPython2EXE() == null || ! new File (Config.getPython2EXE()).exists()) {
+        Set<String> languages = this.getJobOwner().getProject().getPythonDependency();
+        for (String lang : languages) {
+            ScriptConfig cfg = Config.getScripConfigs().get(lang);
+            if ( cfg == null || ! new File (cfg.getExec()).exists()) {
                 success = false;
                 try {
-                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python2 executable to handle the scripts in the project!");
+                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find " + lang + "'s executable to handle the scripts in the project!");
                     this.JobOwner.getBatchInfo().setValidationSuccessful(false);
                 }catch (Exception ex) {
-                    logger.error("[" + this.AgentID + "]: Version checking error.", ex);
+                    logger.error("[" + this.AgentID + "]: Script interpreter checking error.", ex);
                 }
             }            
-        }else if (PyVersions.contains("python3")) {
-            if (Config.getPython3EXE() == null || ! new File (Config.getPython3EXE()).exists()) {
-                success = false;
-                try {
-                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python3 executable to handle the scripts in the project!");
-                    this.JobOwner.getBatchInfo().setValidationSuccessful(false);
-                }catch (Exception ex) {
-                    logger.error("[" + this.AgentID + "]: Version checking error. ", ex);
-                }
-            }
         }
         return success;
     }

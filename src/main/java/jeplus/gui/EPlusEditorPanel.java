@@ -35,6 +35,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
+import jeplus.ConfigFileNames;
 import jeplus.EPlusConfig;
 import jeplus.JEPlusProjectV2;
 import jeplus.TRNSYSConfig;
@@ -70,7 +71,13 @@ public class EPlusEditorPanel extends JPanel implements DocumentListener, Action
         RVI("text/EPlusRVI", EPlusConfig.getFileFilter(EPlusConfig.RVI)),
         RVX(SyntaxConstants.SYNTAX_STYLE_JSON, EPlusConfig.getFileFilter(EPlusConfig.RVX)),
         JSON(SyntaxConstants.SYNTAX_STYLE_JSON, EPlusConfig.getFileFilter(EPlusConfig.JSON)),
-        PYTHON(SyntaxConstants.SYNTAX_STYLE_PYTHON, EPlusConfig.getFileFilter(EPlusConfig.PYTHON)),
+        PYTHON(SyntaxConstants.SYNTAX_STYLE_PYTHON, EPlusConfig.getFileFilter(ConfigFileNames.PYTHON)),
+        RUBY(SyntaxConstants.SYNTAX_STYLE_RUBY, EPlusConfig.getFileFilter(ConfigFileNames.RUBY)),
+        PHP(SyntaxConstants.SYNTAX_STYLE_PHP, EPlusConfig.getFileFilter(ConfigFileNames.PHP)),
+        PERL(SyntaxConstants.SYNTAX_STYLE_PERL, EPlusConfig.getFileFilter(ConfigFileNames.PERL)),
+        JS(SyntaxConstants.SYNTAX_STYLE_JAVASCRIPT, EPlusConfig.getFileFilter(EPlusConfig.JS)),
+        SH(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, EPlusConfig.getFileFilter(EPlusConfig.SH)),
+        R(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, EPlusConfig.getFileFilter(EPlusConfig.R)),
         CSV(SyntaxConstants.SYNTAX_STYLE_UNIX_SHELL, EPlusConfig.getFileFilter(EPlusConfig.CSV)),
         PLAIN(SyntaxConstants.SYNTAX_STYLE_NONE, EPlusConfig.getFileFilter(EPlusConfig.ALL)),
         TRNSYS(SyntaxConstants.SYNTAX_STYLE_NONE, TRNSYSConfig.getFileFilter(TRNSYSConfig.TRNINPUT)),

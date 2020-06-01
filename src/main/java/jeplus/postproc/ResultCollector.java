@@ -261,7 +261,7 @@ public class ResultCollector {
         ResultCollectors.add(rc);
         rc = new UserResultCollector ("User supplied result collector");
         ResultCollectors.add(rc);
-        rc = new PythonResultCollector ("Python script result collector");
+        rc = new PythonResultCollector ("Script result collector");
         ResultCollectors.add(rc);
         rc = new TrnsysResultCollector ("TRNSYS result collector");
         ResultCollectors.add(rc);

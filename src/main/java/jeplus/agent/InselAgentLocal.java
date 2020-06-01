@@ -279,27 +279,18 @@ public class InselAgentLocal extends EPlusAgent {
                 System.err.println("[" + this.AgentID + "]: Settings error: " + exe + " is not accessible.");
             }
         }
-        Set<String> PyVersions = this.getJobOwner().getProject().getPythonDependency();
-        if (PyVersions.contains("python2")) {
-            if (Config.getPython2EXE() == null || ! new File (Config.getPython2EXE()).exists()) {
+        Set<String> languages = this.getJobOwner().getProject().getPythonDependency();
+        for (String lang : languages) {
+            ScriptConfig cfg = Config.getScripConfigs().get(lang);
+            if ( cfg == null || ! new File (cfg.getExec()).exists()) {
                 success = false;
                 try {
-                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python2 executable to handle the scripts in the project!");
+                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find " + lang + "'s executable to handle the scripts in the project!");
                     this.JobOwner.getBatchInfo().setValidationSuccessful(false);
                 }catch (Exception ex) {
-                    logger.error("[" + this.AgentID + "]: Version checking error.", ex);
+                    logger.error("[" + this.AgentID + "]: Script interpreter checking error.", ex);
                 }
             }            
-        }else if (PyVersions.contains("python3")) {
-            if (Config.getPython3EXE() == null || ! new File (Config.getPython3EXE()).exists()) {
-                success = false;
-                try {
-                    this.JobOwner.getBatchInfo().addValidationError("[" + this.AgentID + "]: Cannot find Python3 executable to handle the scripts in the project!");
-                    this.JobOwner.getBatchInfo().setValidationSuccessful(false);
-                }catch (Exception ex) {
-                    logger.error("[" + this.AgentID + "]: Version checking error. ", ex);
-                }
-            }
         }
         return success;
     }    

@@ -20,13 +20,14 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="chkMoreArguments" alignment="0" max="32767" attributes="0"/>
-                  <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="jLabel2" max="32767" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Group type="103" groupAlignment="1" attributes="0">
+                          <Component id="jLabel3" alignment="0" max="32767" attributes="0"/>
+                          <Component id="jLabel2" alignment="0" max="32767" attributes="0"/>
                           <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
                           <Group type="102" alignment="0" attributes="0">
                               <Group type="103" groupAlignment="1" max="-2" attributes="0">
@@ -59,26 +60,7 @@
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="cmdViewOutputFile" min="-2" pref="25" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="chkPassJobList" alignment="0" max="32767" attributes="0"/>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="rdoPython2" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                      <Component id="txtPython2Exe" pref="257" max="32767" attributes="0"/>
-                                  </Group>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="rdoPython3" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                      <Component id="txtPython3Exe" max="32767" attributes="0"/>
-                                  </Group>
-                              </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="cmdSelectPython2Exe" alignment="0" min="-2" pref="25" max="-2" attributes="1"/>
-                                  <Component id="cmdSelectPython3Exe" alignment="0" min="-2" pref="25" max="-2" attributes="1"/>
-                              </Group>
-                          </Group>
+                          <Component id="chkPassJobList" alignment="0" pref="453" max="32767" attributes="0"/>
                           <Group type="102" alignment="1" attributes="0">
                               <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
                               <Component id="txtScriptFileName" max="32767" attributes="0"/>
@@ -92,6 +74,7 @@
                               <Component id="jScrollPane1" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="1" attributes="0">
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               <Component id="cmdRunScript" min="-2" pref="76" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="cmdOpenConsole" min="-2" max="-2" attributes="0"/>
@@ -103,14 +86,36 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                      <Component id="cboLang" min="-2" pref="198" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="cmdConfig" min="-2" pref="28" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                  </Group>
               </Group>
           </Group>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
+              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="cmdConfig" min="-2" pref="28" max="-2" attributes="0"/>
+                  <Component id="cboLang" min="-2" pref="28" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                  <Component id="cmdEditScript" alignment="1" max="32767" attributes="0"/>
+                  <Component id="cmdSelectScriptFile" alignment="1" max="32767" attributes="0"/>
+                  <Component id="txtScriptFileName" alignment="1" min="-2" pref="25" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" pref="16" max="-2" attributes="0"/>
               <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -122,7 +127,7 @@
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="cmdSelectWorkDir" alignment="0" max="32767" attributes="0"/>
                   <Component id="chkPassWorkDir" alignment="1" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtWorkDir" alignment="0" max="32767" attributes="0"/>
+                  <Component id="txtWorkDir" alignment="0" min="-2" pref="23" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="chkPassJobList" min="-2" max="-2" attributes="0"/>
@@ -142,37 +147,17 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="txtMoreArguments" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                  <Component id="cmdEditScript" alignment="1" max="32767" attributes="0"/>
-                  <Component id="cmdSelectScriptFile" alignment="1" max="32767" attributes="0"/>
-                  <Component id="txtScriptFileName" alignment="1" min="-2" pref="25" max="-2" attributes="0"/>
-              </Group>
+              <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" max="32767" attributes="0"/>
               <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="rdoPython2" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtPython2Exe" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="cmdSelectPython2Exe" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="rdoPython3" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtPython3Exe" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="cmdSelectPython3Exe" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
+              <Component id="jScrollPane1" max="32767" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="cmdOpenConsole" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="cmdRunScript" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -213,7 +198,7 @@
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="cc" green="cc" red="cc" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Python script file: "/>
+        <Property name="text" type="java.lang.String" value="Script file: "/>
         <Property name="opaque" type="boolean" value="true"/>
       </Properties>
     </Component>
@@ -228,34 +213,6 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSelectWorkDirActionPerformed"/>
       </Events>
-    </Component>
-    <Component class="javax.swing.JButton" name="cmdSelectPython2Exe">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="..."/>
-        <Property name="toolTipText" type="java.lang.String" value="Select the root working directory"/>
-      </Properties>
-      <BindingProperties>
-        <BindingProperty name="enabled" source="rdoPython2" sourcePath="${selected}" target="cmdSelectPython2Exe" targetPath="enabled" updateStrategy="0" immediately="false"/>
-      </BindingProperties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSelectPython2ExeActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JTextField" name="txtPython2Exe">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Select Python2 executable..."/>
-      </Properties>
-      <BindingProperties>
-        <BindingProperty name="enabled" source="rdoPython2" sourcePath="${selected}" target="txtPython2Exe" targetPath="enabled" updateStrategy="0" immediately="false"/>
-      </BindingProperties>
-    </Component>
-    <Component class="javax.swing.JRadioButton" name="rdoPython2">
-      <Properties>
-        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-          <ComponentRef name="buttonGroup1"/>
-        </Property>
-        <Property name="text" type="java.lang.String" value="Use Python2 installed in: "/>
-      </Properties>
     </Component>
     <Component class="javax.swing.JCheckBox" name="chkPassWorkDir">
       <Properties>
@@ -307,35 +264,6 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="select a script file ..."/>
       </Properties>
-    </Component>
-    <Component class="javax.swing.JRadioButton" name="rdoPython3">
-      <Properties>
-        <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-          <ComponentRef name="buttonGroup1"/>
-        </Property>
-        <Property name="selected" type="boolean" value="true"/>
-        <Property name="text" type="java.lang.String" value="Use Python3 installed in: "/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="txtPython3Exe">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Select Python3 executable..."/>
-      </Properties>
-      <BindingProperties>
-        <BindingProperty name="enabled" source="rdoPython3" sourcePath="${selected}" target="txtPython3Exe" targetPath="enabled" updateStrategy="0" immediately="false"/>
-      </BindingProperties>
-    </Component>
-    <Component class="javax.swing.JButton" name="cmdSelectPython3Exe">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="..."/>
-        <Property name="toolTipText" type="java.lang.String" value="Select the root working directory"/>
-      </Properties>
-      <BindingProperties>
-        <BindingProperty name="enabled" source="rdoPython3" sourcePath="${selected}" target="cmdSelectPython3Exe" targetPath="enabled" updateStrategy="0" immediately="false"/>
-      </BindingProperties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSelectPython3ExeActionPerformed"/>
-      </Events>
     </Component>
     <Component class="javax.swing.JSeparator" name="jSeparator1">
     </Component>
@@ -421,10 +349,9 @@
       <SubComponents>
         <Component class="javax.swing.JTextArea" name="txaCmdLn">
           <Properties>
-            <Property name="editable" type="boolean" value="false"/>
             <Property name="columns" type="int" value="20"/>
             <Property name="lineWrap" type="boolean" value="true"/>
-            <Property name="rows" type="int" value="3"/>
+            <Property name="rows" type="int" value="4"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -447,6 +374,41 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdSelectProjectBaseActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="cboLang">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="4">
+            <StringItem index="0" value="Item 1"/>
+            <StringItem index="1" value="Item 2"/>
+            <StringItem index="2" value="Item 3"/>
+            <StringItem index="3" value="Item 4"/>
+          </StringArray>
+        </Property>
+      </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="cc" green="cc" red="cc" type="rgb"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Script Language: "/>
+        <Property name="opaque" type="boolean" value="true"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="cmdConfig">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/jeplus/images/hammer_screwdriver.png"/>
+        </Property>
+        <Property name="toolTipText" type="java.lang.String" value="Configure tools"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdConfigActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

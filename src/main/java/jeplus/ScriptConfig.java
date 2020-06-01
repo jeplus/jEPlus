@@ -18,6 +18,8 @@
  ***************************************************************************/
 package jeplus;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.File;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.slf4j.LoggerFactory;
@@ -35,14 +37,12 @@ public class ScriptConfig extends ConfigFileNames {
      * Script settings
      */
     protected String ScriptExt = "";
-    protected String ScriptHome = "";
-    protected String ScriptExec = "";
+    protected String Args = "";
+    protected String Exec = "Select the executable...";
+    protected String VerCmd = "";
 
     public ScriptConfig() {
         super ();
-        ScriptExt = "";
-        ScriptHome = "";
-        ScriptExec = "";
         ScreenFile = "console.log";
     }
 
@@ -54,22 +54,35 @@ public class ScriptConfig extends ConfigFileNames {
         this.ScriptExt = ScriptExt;
     }
 
-    public String getScriptHome() {
-        return ScriptHome;
+    public String getArgs() {
+        return Args;
     }
 
-    public void setScriptHome(String ScriptHome) {
-        this.ScriptHome = ScriptHome;
+    public void setArgs(String Args) {
+        this.Args = Args;
     }
 
-    public String getScriptExec() {
-        return ScriptExec;
+    public String getExec() {
+        return Exec;
     }
 
-    public void setScriptExec(String ScriptExec) {
-        this.ScriptExec = ScriptExec;
+    public void setExec(String Exec) {
+        this.Exec = Exec;
     }
 
+    public String getVerCmd() {
+        return VerCmd;
+    }
+
+    public void setVerCmd(String VerCmd) {
+        this.VerCmd = VerCmd;
+    }
+
+    @JsonIgnore
+    public boolean isValid () {
+        File exec = new File (Exec);
+        return exec.exists() && exec.canExecute();
+    }
     
     /**
      * Get a
@@ -77,8 +90,14 @@ public class ScriptConfig extends ConfigFileNames {
      *
      * @return Swing FileFilter of the specific type
      */
+    @JsonIgnore
     public FileFilter getFileFilter() {
         FileFilter ff = new FileNameExtensionFilter("Script file (." + getScriptExt() + ")", getScriptExt());
         return ff;
+    }
+    
+    @Override
+    public String toString () {
+        return "" + Exec + " " + Args + " ...";
     }
 }
