@@ -16,11 +16,13 @@
  */
 package jeplus.data;
 
+import java.io.Serializable;
+
 /**
  *
  * @author yi
  */
-public class BatchRunOptions {
+public class BatchRunOptions implements Serializable {
     boolean WriteJobList = true;
     String JobListFile = "joblist_out.csv";
     boolean PrepareJobs = true;

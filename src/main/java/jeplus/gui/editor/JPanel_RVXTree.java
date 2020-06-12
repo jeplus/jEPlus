@@ -18,11 +18,7 @@
  ***************************************************************************/
 package jeplus.gui.editor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.io.IOException;
 import jeplus.gui.*;
-import javax.swing.JFrame;
 import javax.swing.JTree;
 import javax.swing.tree.*;
 import jeplus.JEPlusFrameMain;
@@ -280,7 +276,6 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jplItemEditorHolder = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         jScroll = new javax.swing.JScrollPane();
         cmdAdd = new javax.swing.JButton();
@@ -290,10 +285,8 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         cmdUndo = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         cmdDuplicate = new javax.swing.JButton();
-
-        jplItemEditorHolder.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "RVX Item", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11), new java.awt.Color(102, 102, 102))); // NOI18N
-        jplItemEditorHolder.setMinimumSize(new java.awt.Dimension(12, 250));
-        jplItemEditorHolder.setLayout(new java.awt.BorderLayout());
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jplItemEditorHolder = new javax.swing.JPanel();
 
         jScroll.setToolTipText("Drag&Drop to edit the parameter tree. Hold 'Ctrl' key to copy a branch.");
 
@@ -353,7 +346,7 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                .addComponent(jScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 330, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -376,15 +369,19 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdAdd)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdDuplicate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdRemove)
-                .addGap(16, 16, 16))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jScroll)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jScroll, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
+
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "RVX Item", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+
+        jplItemEditorHolder.setMinimumSize(new java.awt.Dimension(12, 250));
+        jplItemEditorHolder.setLayout(new java.awt.BorderLayout());
+        jScrollPane1.setViewportView(jplItemEditorHolder);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -394,16 +391,16 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jplItemEditorHolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jplItemEditorHolder, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1)
                 .addContainerGap())
         );
 
@@ -450,6 +447,7 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
     private javax.swing.JButton cmdUndo;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScroll;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JPanel jplItemEditorHolder;
     // End of variables declaration//GEN-END:variables

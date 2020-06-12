@@ -128,26 +128,29 @@ public class JPanelRunPython extends javax.swing.JPanel implements IF_ConfigChan
     }
     
     private String updateSampleCommandLine () {
-        ScriptConfig cfg = Config.getScripConfigs().get(cboLang.getSelectedItem().toString());
-        StringBuilder buf = new StringBuilder (cfg.getExec());
-        buf.append(" ").append(cfg.getArgs()).append(" \"");
-        buf.append(txtScriptFileName.getText().trim()).append("\" ");
-        if (chkPassProjectBase.isSelected()) {
-            buf.append("\"").append(txtProjectBase.getText().trim()).append("\" ");
+        if (cboLang.getSelectedItem() != null) {
+            ScriptConfig cfg = Config.getScripConfigs().get(cboLang.getSelectedItem().toString());
+            StringBuilder buf = new StringBuilder (cfg.getExec());
+            buf.append(" ").append(cfg.getArgs()).append(" \"");
+            buf.append(txtScriptFileName.getText().trim()).append("\" ");
+            if (chkPassProjectBase.isSelected()) {
+                buf.append("\"").append(txtProjectBase.getText().trim()).append("\" ");
+            }
+            if (chkPassWorkDir.isSelected()) {
+                buf.append("\"").append(txtWorkDir.getText().trim()).append("\" ");
+            }
+            if (chkPassJobList.isSelected()) {
+                buf.append("\"").append(txtJobList.getText().trim()).append("\" ");
+            }
+            if (chkPassOutputFile.isSelected()) {
+                buf.append("\"").append(txtOutputFile.getText().trim()).append("\" ");
+            }
+            if (chkMoreArguments.isSelected()) {
+                buf.append("\"").append(txtMoreArguments.getText().trim()).append("\" ");
+            }
+            return buf.toString();
         }
-        if (chkPassWorkDir.isSelected()) {
-            buf.append("\"").append(txtWorkDir.getText().trim()).append("\" ");
-        }
-        if (chkPassJobList.isSelected()) {
-            buf.append("\"").append(txtJobList.getText().trim()).append("\" ");
-        }
-        if (chkPassOutputFile.isSelected()) {
-            buf.append("\"").append(txtOutputFile.getText().trim()).append("\" ");
-        }
-        if (chkMoreArguments.isSelected()) {
-            buf.append("\"").append(txtMoreArguments.getText().trim()).append("\" ");
-        }
-        return buf.toString();
+        return "";
     } 
     
     public final void updateDisplay () {

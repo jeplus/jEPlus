@@ -103,13 +103,16 @@ public class EPlusAgentLocal extends EPlusAgent {
         
         // Write job list
         if (Settings.getSteps().isWriteJobList()) {
-            String listfile = Settings.getSteps().getJobListFile();
+            String listfile = JobOwner.getProject().getBaseDir() + Settings.getSteps().getJobListFile();
             writeLog("Writing job lists to " + listfile);
             writeJobListToFile (listfile);
         }else {
             writeLog("Job list file is not requested.");
         }
         
+        // Clear all lists before run
+        purgeAllLists();
+
         // Prepare jobs and run simulations
         if (Settings.getSteps().isPrepareJobs() || Settings.getSteps().isRunSimulations()) {
             
@@ -122,9 +125,7 @@ public class EPlusAgentLocal extends EPlusAgent {
             if (Processors == null) {
                 Processors = new ArrayList<> ();
             }
-            // Clear all lists before run
-            //if (FinishedJobs.size() > 0) FinishedJobs.removeAllElements();
-            purgeAllLists();
+
             // Timing
             StartTime = new Date();
             StopAgent = false;
@@ -211,6 +212,7 @@ public class EPlusAgentLocal extends EPlusAgent {
 
         }else {
             writeLog("Job preparation and simuation are not requested.");
+            FinishedJobs.addAll(JobQueue);
         }
         
         // Start collecting results

@@ -76,7 +76,7 @@ public class EPlusConfig extends ConfigFileNames {
     private static final String EPlusEXEC_WIN = "EnergyPlus.exe"; // Eplus windows exec
     private static final String EPlusEXEC_LIN = "energyplus"; // Eplus Linux kernel
     private static final String EPlusReadVars_WIN = "PostProcess/ReadVarsEso.exe"; // Eplus windows ReadVarEso.exe
-    private static final String EPlusReadVars_LIN = "PostProcess/ReadVarsEso"; // Eplus Linux rvEsoKernel
+    private static final String EPlusReadVars_LIN = "PostProcess/ReadVarsESO"; // Eplus Linux rvEsoKernel
     private static final String EPDefINI = "Energy+.ini";
     private static final String EPDefIDD = "Energy+.idd";
     private static final String EPDefIDF = "in.idf";

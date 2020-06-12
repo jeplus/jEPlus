@@ -25,7 +25,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import jeplus.JEPlusConfig;
+import java.util.concurrent.TimeUnit;
 import jeplus.ScriptConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,16 +55,21 @@ public class ScriptTools {
         String CurrentWorkDir = (arg1 != null && arg1.trim().length()>0) ? arg1 : "./";
         try {
             StringBuilder buf = new StringBuilder (config.getExec());
-            buf.append(" ").append(config.getArgs()).append(" ");
-            buf.append(" \"").append(scriptfile).append("\" ");
-            buf.append(" \"").append(arg0).append("\" ");
-            buf.append("\"").append(CurrentWorkDir).append("\" ");
-            buf.append(arg2).append(" ").append(arg3).append(" ");
-            buf.append("\"").append(moreargs).append("\" ");
+            if (config.getArgs() != null && config.getArgs().trim().length() > 0) {
+                buf.append(" ").append(config.getArgs());
+            }
+            buf.append(" \"").append(scriptfile).append("\"");
+            if (arg0 != null && arg0.trim().length()>0) buf.append(" \"").append(arg0).append("\"");
+            buf.append(" \"").append(CurrentWorkDir).append("\"");
+            if (arg2 != null && arg2.trim().length()>0) buf.append(" ").append(arg2).append(" ").append(arg3);
+            if (arg3 != null && arg3.trim().length()>0) buf.append(" ").append(arg3).append(" ").append(arg3);
+            if (moreargs != null && moreargs.trim().length()>0) buf.append(" \"").append(moreargs).append("\" ");
 
             List<String> command = new ArrayList<> ();
             command.add(config.getExec());
-            command.add(config.getArgs());
+            if (config.getArgs() != null && config.getArgs().trim().length() > 0) {
+                command.add(config.getArgs());
+            }
             command.add(scriptfile);
             if (arg0 != null && arg0.trim().length()>0) command.add(arg0);
             command.add(CurrentWorkDir);
@@ -76,8 +81,8 @@ public class ScriptTools {
             builder.redirectErrorStream(true);
             Process proc = builder.start();
             // int ExitValue = proc.waitFor();
+            PrintStream logstream = stream;
             try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-                PrintStream logstream = stream;
                 if (logstream != null) {
                     logstream.println();
                     logstream.println(buf.toString());
@@ -87,17 +92,26 @@ public class ScriptTools {
                         logstream.println(res);
                         res = ins.readLine();
                     }
-                    logstream.println("-==-");
-                    // logstream.println("Python exit value = " + ExitValue);
                 }else {
                     int res = ins.read();
                     while (res != -1) {
                         res = ins.read();
                     }
                 }
+            }catch (IOException ioe) {
+                logger.error("Error occured during console logging for " + scriptfile, ioe);
             }
-        } catch (IOException ex) {
-            logger.error("Cannot open command window.", ex);
+            if (! proc.waitFor(5, TimeUnit.SECONDS)) {
+                proc.destroyForcibly();
+                if (logstream != null) { 
+                    logstream.println("Warning: process closed after timing-out.");
+                }
+            }
+            if (logstream != null) { 
+                logstream.println("-==-");
+            }
+        } catch (IOException | InterruptedException ex) {
+            logger.error("Error occured during execution of script " + scriptfile, ex);
         }
     }
     
@@ -118,16 +132,20 @@ public class ScriptTools {
         String AdditionalDir = (arg2 != null && arg2.trim().length()>0) ? arg2 : "./";
         try {
             StringBuilder buf = new StringBuilder (config.getExec());
-            buf.append(" ").append(config.getArgs()).append(" ");
-            buf.append("\"").append(scriptfile).append("\" ");
-            buf.append("\"").append(arg0).append("\" ");
-            buf.append("\"").append(CurrentWorkDir).append("\" ");
-            buf.append("\"").append(param_args).append("\" ");
-            buf.append("\"").append(AdditionalDir).append("\" ");
+            if (config.getArgs() != null && config.getArgs().trim().length() > 0) {
+                buf.append(" ").append(config.getArgs());
+            }
+            buf.append(" \"").append(scriptfile).append("\"");
+            if (arg0 != null && arg0.trim().length()>0) buf.append(" \"").append(arg0).append("\"");
+            buf.append(" \"").append(CurrentWorkDir).append("\"");
+            if (param_args != null && param_args.trim().length()>0) buf.append(" \"").append(param_args).append("\"");
+            buf.append(" \"").append(AdditionalDir).append("\"");
 
             List<String> command = new ArrayList<> ();
             command.add(config.getExec());
-            command.add(config.getArgs());
+            if (config.getArgs() != null && config.getArgs().trim().length() > 0) {
+                command.add(config.getArgs());
+            }
             command.add(scriptfile);
             if (arg0 != null && arg0.trim().length()>0) command.add(arg0);
             command.add(CurrentWorkDir);
@@ -138,8 +156,8 @@ public class ScriptTools {
             builder.redirectErrorStream(true);
             Process proc = builder.start();
             // int ExitValue = proc.waitFor();
+            PrintStream logstream = stream;
             try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-                PrintStream logstream = stream;
                 if (logstream != null) {
                     logstream.println();
                     logstream.println(buf.toString());
@@ -149,7 +167,6 @@ public class ScriptTools {
                         logstream.println(res);
                         res = ins.readLine();
                     }
-                    logstream.println("-==-");
                     // logstream.println("Python exit value = " + ExitValue);
                 }else {
                     int res = ins.read();
@@ -157,9 +174,20 @@ public class ScriptTools {
                         res = ins.read();
                     }
                 }
+            }catch (IOException ioe) {
+                logger.error("Error occured during console logging for " + scriptfile, ioe);
             }
-        } catch (IOException ex) {
-            logger.error("Cannot open command window.", ex);
+            if (! proc.waitFor(5, TimeUnit.SECONDS)) {
+                proc.destroyForcibly();
+                if (logstream != null) { 
+                    logstream.println("Warning: process closed after timing-out.");
+                }
+            }
+            if (logstream != null) { 
+                logstream.println("-==-");
+            }
+        } catch (IOException | InterruptedException ex) {
+            logger.error("Error occured during execution of script " + scriptfile, ex);
         }
     }
     
@@ -174,7 +202,9 @@ public class ScriptTools {
             try {
                 List<String> command = new ArrayList<> ();
                 command.add(exec);
-                command.add(config.getVerCmd());
+                if (config.getVerCmd() != null && config.getVerCmd().trim().length() > 0) {
+                    command.add(config.getVerCmd());
+                }
                 ProcessBuilder builder = new ProcessBuilder(command);
                 builder.directory(new File ("./"));
                 builder.redirectErrorStream(true);
@@ -182,6 +212,7 @@ public class ScriptTools {
                 // int ExitValue = proc.waitFor();
                 StringBuilder buf = new StringBuilder();
                 try (BufferedReader ins = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
+                    proc.getOutputStream().close();
                     String res = ins.readLine();
                     // Read just the first line
                     buf.append(res);
@@ -190,15 +221,16 @@ public class ScriptTools {
                         res = ins.readLine();
                     }
                 }
-                if (proc.exitValue() != 0) {
-                    return "Error: " + buf.toString();
+                if (! proc.waitFor(100, TimeUnit.MILLISECONDS)) {
+                    proc.destroyForcibly();
+                    return "Error: failed to run version command: " + buf.toString();
                 }
                 return buf.toString();
-            } catch (IOException ex) {
-                logger.error("Cannot open command window.", ex);
+            } catch (IOException | InterruptedException ex) {
+                logger.warn("Error: cannot run version command: " + exec + " " + config.getVerCmd(), ex);
             }
         }else {
-            return "Cannot run version command with " + config.getExec();
+            return "Error: cannot run version command with " + config.getExec();
         }
         return "Error: unknown";
     }

@@ -226,7 +226,6 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         chkOverride.setSelected(true);
         chkOverride.setText("Override existing results");
         chkOverride.setToolTipText("If unchecked, jEPlus will skip the cases whose results are already present in the output folder.");
-        chkOverride.setEnabled(false);
         chkOverride.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkOverrideActionPerformed(evt);
@@ -265,7 +264,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFileDir)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(cmdSelectWorkDir, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(chkDeleteSelected)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

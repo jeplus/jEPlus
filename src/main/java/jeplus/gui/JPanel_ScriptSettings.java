@@ -57,6 +57,7 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
         // Add listener
         DL = new DocumentListener () {
             Document DocExt = txtExt.getDocument();
+            Document DocExec = txtExec.getDocument();
             Document DocArgs = txtArgs.getDocument();
             Document DocVerCmd = txtVerCmd.getDocument();
 
@@ -66,12 +67,14 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
                     Document src = e.getDocument();
                     if(src == DocExt) {
                         CurrentObj.setScriptExt(txtExt.getText().trim());
+                    }else if (src == DocExec) {
+                        CurrentObj.setExec(txtExec.getText().trim());
                     }else if (src == DocArgs) {
                         CurrentObj.setArgs(txtArgs.getText().trim());
                     }else if (src == DocVerCmd) {
                         CurrentObj.setVerCmd(txtVerCmd.getText().trim());
                     }
-                    
+                    lblCmdLn.setText(CurrentObj.toString());
                 }
             }
             @Override
@@ -84,6 +87,7 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
             }
         };
         txtExt.getDocument().addDocumentListener(DL);
+        // txtExec.getDocument().addDocumentListener(DL);
         txtArgs.getDocument().addDocumentListener(DL);
         txtVerCmd.getDocument().addDocumentListener(DL);
         DLActive = true;
@@ -136,9 +140,11 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
      * initialise display from data records
      */
     public final void initSettings () {
+        DLActive = false;
         cboScript.setModel(new DefaultComboBoxModel (Config.getScripConfigs().keySet().toArray(new String [0])));
         cboScript.setEditable(false);
         if (CurrentKey != null && Config.getScripConfigs().containsKey(CurrentKey)) {
+            cboScript.setSelectedItem(CurrentKey);
             CurrentObj = Config.getScripConfigs().get(CurrentKey);
             this.setScriptConfig(CurrentObj);
         }else if (cboScript.getModel().getSize() > 0) {
@@ -148,6 +154,7 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
             CurrentObj = Config.getScripConfigs().get(name);
             this.setScriptConfig(CurrentObj);
         }
+        DLActive = true;
     }
     
     private void setScriptConfig (ScriptConfig script) {
@@ -193,6 +200,7 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
         txtExt = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         txtVerCmd = new javax.swing.JTextField();
+        cmdCheck = new javax.swing.JButton();
 
         cmdSelect.setText("...");
         cmdSelect.setToolTipText("Select the executable of the script interpreter");
@@ -260,6 +268,14 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
         txtVerCmd.setColumns(12);
         txtVerCmd.setToolTipText("Command-line args for version info.");
 
+        cmdCheck.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/check.png"))); // NOI18N
+        cmdCheck.setToolTipText("Remove the selected script interpreter");
+        cmdCheck.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdCheckActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -275,10 +291,6 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(txtExec)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cmdSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(cboScript, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -289,12 +301,19 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
                                 .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(txtExt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(txtArgs)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                        .addComponent(txtArgs)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(txtVerCmd, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(txtExec))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtVerCmd, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(cmdSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(cmdCheck, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -311,17 +330,18 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtExec)
-                        .addComponent(cmdSelect, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(txtExec, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cmdSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel2)
-                        .addComponent(txtArgs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtArgs, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtVerCmd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel4)))
+                        .addComponent(txtVerCmd, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel4))
+                    .addComponent(cmdCheck, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblCmdLn)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -338,6 +358,7 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             String fn = file.getAbsolutePath();
+            this.txtExec.setText(fn);
             CurrentObj.setExec(fn);
             Config.fireConfigChangedEvent();
             // this.setScriptConfig(CurrentObj);
@@ -387,10 +408,15 @@ public class JPanel_ScriptSettings extends javax.swing.JPanel implements TitledJ
         }
     }//GEN-LAST:event_cboScriptItemStateChanged
 
+    private void cmdCheckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCheckActionPerformed
+        Config.fireConfigChangedEvent();
+    }//GEN-LAST:event_cmdCheckActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboScript;
     private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdCheck;
     private javax.swing.JButton cmdDelete;
     private javax.swing.JButton cmdSelect;
     private javax.swing.JLabel jLabel1;

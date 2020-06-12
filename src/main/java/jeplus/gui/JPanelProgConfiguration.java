@@ -13,6 +13,7 @@ import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.SwingWorker;
 import jeplus.ConfigFileNames;
 import jeplus.EPlusConfig;
 import jeplus.EPlusWinTools;
@@ -36,6 +37,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
     protected JPanel_ScriptSettings ScriptPanel = new JPanel_ScriptSettings ();
 
     protected Window HostWindow = null;
+    private boolean DLActive = false;
     
     public enum Layout { 
         TALL,
@@ -106,6 +108,7 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
 //        }else {
 //            txtEPlusBinDir.setText("Select an EnergyPlus installation ...");
 //        }
+        DLActive = false;
         EpPanel.setConfig(Config);
         if (! Config.getTRNSYSConfigs().isEmpty()) {
             cboTrnVersion.setModel(new DefaultComboBoxModel (Config.getTRNSYSConfigs().keySet().toArray(new String [0])));
@@ -118,90 +121,113 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         }
         ScriptPanel.setConfig(Config);
         this.txtVerConvDir.setText(Config.getEPlusVerConvDir() == null ? "Select Version Converter dir ..." : Config.getEPlusVerConvDir());
+        DLActive = true;
     }
 
     /**
      * check validity of directory and command/file names
      */
     public final void checkSettings () {
-        boolean errors = false;
-        StringBuilder buf = new StringBuilder ("<html>");
-        
-        // EnergyPlus binary
-        buf.append("<p><em>EnergyPlus:</em></p>");
-        for (EPlusConfig cfg : Config.getEPlusConfigs().values()) {
-            buf.append("<p>V").append(cfg.toString());
-            List<String> unfound = cfg.validate();
-            if (cfg.isValid()) {
-                buf.append(" is available</p>");
-            }else {
-                buf.append(" contains errors: </p>");
-                for (String item : unfound) {
-                    buf.append("<p> - ").append(item).append(" is not found </p>");
-                }
-            }
-        }
-        buf.append("<p></p>");
-        
-        // TRNSYS binary
-        File dir = new File (txtTrnsysBinDir.getText());
-        buf.append("<p><em>TRNSYS:</em></p>");
-        if (! (dir.exists() && dir.isDirectory())) {
-            txtTrnsysBinDir.setForeground(Color.red);
-            buf.append("<p>TRNSYS folder ").append(dir.getAbsolutePath()).append(" does not exist!</p>");
-        } else {
-            txtTrnsysBinDir.setForeground(Color.black);
-        }
-        File f = new File(txtTrnsysEXE.getText());
-        if (! f.exists()) {
-            txtTrnsysEXE.setForeground(Color.red);
-            buf.append("<p>TRNSYS Executable ").append(f.getAbsolutePath()).append(" is missing!</p>");
-        } else {
-            txtTrnsysEXE.setForeground(Color.black);
-            buf.append("<p>Found TRNSYS ").append("</p>");
-        }
-        buf.append("<p></p>");
-        
-        // Scripts
-        buf.append("<p><em>Script Interpreters:</em></p>");
-        for (String name : Config.getScripConfigs().keySet()) {
-            ScriptConfig cfg = Config.getScripConfigs().get(name);
-            buf.append("<p><em>").append(name).append(":</em></p>");
-            // Get script version
-            String ver = ScriptTools.getVersion(cfg);
-            if (ver.startsWith("Error:")) {
-                buf.append("<p>").append(ver).append("</p>");
-            }else {
-                buf.append("<p>Found ").append(ver).append("</p>");
-            }
-        }
-        buf.append("<p></p>");
+        SwingWorker worker = new SwingWorker<Boolean, Void>() {
+            @Override
+            public Boolean doInBackground() {
+                boolean errors = false;
+                StringBuilder buf = new StringBuilder ("<html>");
 
-        // E+ version converter folder
-        dir = new File (txtVerConvDir.getText());
-        buf.append("<p><em>E+ Version Converter:</em></p>");
-        if (! (dir.exists() && dir.isDirectory())) {
-            txtVerConvDir.setForeground(Color.red);
-            buf.append("<p>E+ Version Converter dir ").append(dir.getAbsolutePath()).append(" does not exist!</p>");
-        }else {
-            List<String> versions = EPlusWinTools.getInstalledTransitionVersions(dir.getAbsolutePath());
-            buf.append("<p>");
-            if (versions.size() >= 2) {
-                txtVerConvDir.setForeground(Color.black);
-                buf.append("Converters found for versions ");
-                for (String item : versions) {
-                    buf.append("<br>").append(item);
+                // EnergyPlus binary
+                buf.append("<p><em>Found EnergyPlus installations:</em></p>");
+                for (EPlusConfig cfg : Config.getEPlusConfigs().values()) {
+                    buf.append("<p>V").append(cfg.toString());
+                    List<String> unfound = cfg.validate();
+                    if (cfg.isValid()) {
+                        buf.append(" => OK</p>");
+                    }else {
+                        buf.append(" contains errors: </p>");
+                        for (String item : unfound) {
+                            buf.append("<p> - ").append(item).append(" is not found </p>");
+                        }
+                    }
                 }
-            }else {
-                txtVerConvDir.setForeground(Color.red);
-                buf.append("Failed to find valid IDDs for converters");
+                buf.append("<p></p>");
+
+                // TRNSYS binary
+                TRNSYSConfig trn = Config.getTRNSYSConfigs().get("TRNSYS");
+                if (trn != null) {
+                    File dir = new File (trn.getTRNSYSBinDir());
+                    buf.append("<p><em>Found TRNSYS installation:</em></p>");
+                    if (! (dir.exists() && dir.isDirectory())) {
+                        txtTrnsysBinDir.setForeground(Color.red);
+                        buf.append("<p>TRNSYS folder ").append(dir.getAbsolutePath()).append(" does not exist!</p>");
+                    } else {
+                        txtTrnsysBinDir.setForeground(Color.black);
+                    }
+                    File f = new File(trn.getTRNSYSEXE());
+                    if (! f.exists()) {
+                        txtTrnsysEXE.setForeground(Color.red);
+                        buf.append("<p>TRNSYS Executable ").append(f.getAbsolutePath()).append(" is missing!</p>");
+                    } else {
+                        txtTrnsysEXE.setForeground(Color.black);
+                        buf.append("<p>TRNSYS => ").append(trn.getTRNSYSEXE()).append("</p>");
+                    }
+                    buf.append("<p></p>");
+                }
+
+                // Scripts
+                buf.append("<p><em>Available Script Interpreters:</em></p>");
+                for (String name : Config.getScripConfigs().keySet()) {
+                    ScriptConfig cfg = Config.getScripConfigs().get(name);
+                    buf.append("<p>").append(name).append(" => ");
+                    // Get script version
+                    String ver = ScriptTools.getVersion(cfg);
+                    if (ver.startsWith("Error:")) {
+                        buf.append(ver);
+                    }else {
+                        buf.append("Found ").append(ver);
+                    }
+                    buf.append("</p>");
+                }
+                buf.append("<p></p>");
+
+                // E+ version converter folder
+                File dir = new File (Config.getEPlusVerConvDir());
+                buf.append("<p><em>E+ Version Converter:</em></p>");
+                if (! (dir.exists() && dir.isDirectory())) {
+                    txtVerConvDir.setForeground(Color.red);
+                    buf.append("<p>E+ Version Converter dir ").append(dir.getAbsolutePath()).append(" does not exist!</p>");
+                }else {
+                    List<String> versions = EPlusWinTools.getInstalledTransitionVersions(dir.getAbsolutePath());
+                    buf.append("<p>");
+                    if (versions.size() >= 2) {
+                        txtVerConvDir.setForeground(Color.black);
+                        buf.append("Converters found => ");
+                        int cnt = 0;
+                        for (String item : versions) {
+                            if (cnt % 4 == 0) {
+                                buf.append("<br>");
+                            }
+                            buf.append(item).append(", ");
+                            cnt ++;
+                        }
+                    }else {
+                        txtVerConvDir.setForeground(Color.red);
+                        buf.append("Failed to find valid IDDs for converters");
+                    }
+                    buf.append("</p>");
+                }
+                buf.append("<p></p>");
+
+                buf.append("<p></p></html>");
+                lblInformation.setText(buf.toString());
+                
+                return errors;
             }
-            buf.append("</p>");
-        }
-        buf.append("<p></p>");
+
+            @Override
+            public void done() {
+            }
+        };
         
-        buf.append("<p></p></html>");
-        lblInformation.setText(buf.toString());
+        worker.execute();
     }
     
     private EPlusConfig getSelectedEPlusConfig () {
@@ -604,7 +630,9 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
         Config.setCurrentTRNSYS(Config.getTRNSYSConfigs().get(cboTrnVersion.getSelectedItem().toString()));
         txtTrnsysBinDir.setText(Config.getCurrentTRNSYS().getTRNSYSBinDir());
         txtTrnsysEXE.setText(Config.getCurrentTRNSYS().getTRNSYSEXE());
-        checkSettings();
+        if (DLActive) {
+            Config.fireConfigChangedEvent();
+        }
     }//GEN-LAST:event_cboTrnVersionActionPerformed
 
     private void cmdEnergyPlusDetails1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdEnergyPlusDetails1ActionPerformed

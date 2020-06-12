@@ -44,7 +44,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="txtFileDir" max="32767" attributes="2"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="cmdSelectWorkDir" min="-2" pref="25" max="-2" attributes="1"/>
+                      <Component id="cmdSelectWorkDir" min="-2" pref="28" max="-2" attributes="1"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="chkDeleteSelected" min="-2" max="-2" attributes="0"/>
@@ -232,7 +232,6 @@
         <Property name="selected" type="boolean" value="true"/>
         <Property name="text" type="java.lang.String" value="Override existing results"/>
         <Property name="toolTipText" type="java.lang.String" value="If unchecked, jEPlus will skip the cases whose results are already present in the output folder."/>
-        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkOverrideActionPerformed"/>

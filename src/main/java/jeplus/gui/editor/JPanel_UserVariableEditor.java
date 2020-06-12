@@ -191,7 +191,7 @@ public class JPanel_UserVariableEditor extends javax.swing.JPanel {
 
         jLabel3.setText("Include in Summary Tables: ");
 
-        chkReport.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        chkReport.setText(" ");
         chkReport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkReportActionPerformed(evt);
@@ -221,7 +221,7 @@ public class JPanel_UserVariableEditor extends javax.swing.JPanel {
                                 .addGap(4, 4, 4))
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(chkReport)
                                 .addGap(0, 0, Short.MAX_VALUE)))
@@ -272,9 +272,9 @@ public class JPanel_UserVariableEditor extends javax.swing.JPanel {
                         .addComponent(jLabel9))
                     .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(chkReport)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel3))
                         .addGap(16, 16, 16)
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

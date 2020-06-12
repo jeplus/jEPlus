@@ -182,10 +182,11 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         // put the frame in the centre of screen
         Toolkit tk = Toolkit.getDefaultToolkit();
         Dimension screenSize = tk.getScreenSize();
-        int frameWidth = 1000;  
+        int frameWidth = 1300;  
         int frameHeight = 740;  
         int screenHeight = screenSize.height;
         int screenWidth = screenSize.width;
+        setMinimumSize (new Dimension (frameWidth, frameHeight));
         setSize(frameWidth, frameHeight);
         setLocation((screenWidth-frameWidth)/2,(screenHeight-frameHeight)/2);
     }
@@ -836,6 +837,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         chkCreateList = new javax.swing.JCheckBox();
         chkRun = new javax.swing.JCheckBox();
         txtSaveList = new javax.swing.JTextField();
+        cmdValidate1 = new javax.swing.JButton();
         pnlUtilities = new javax.swing.JPanel();
         TpnUtilities = new javax.swing.JTabbedPane();
         TpnEditors = new javax.swing.JTabbedPane();
@@ -964,20 +966,19 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jplSettings.add(jplEPlusSettings, java.awt.BorderLayout.CENTER);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(1000, 740));
+        setMinimumSize(new java.awt.Dimension(1200, 740));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
             }
         });
 
-        jSplitPane1.setDividerLocation(580);
+        jSplitPane1.setDividerLocation(700);
         jSplitPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jSplitPane1.setLastDividerLocation(700);
         jSplitPane1.setOpaque(false);
-        jSplitPane1.setPreferredSize(new java.awt.Dimension(1024, 719));
 
         tpnMain.setToolTipText("Project specifications / Execution settings / optional Post process");
-        tpnMain.setPreferredSize(new java.awt.Dimension(450, 708));
         tpnMain.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 tpnMainStateChanged(evt);
@@ -990,7 +991,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jplProjectFilesPanelHolder.setLayout(jplProjectFilesPanelHolderLayout);
         jplProjectFilesPanelHolderLayout.setHorizontalGroup(
             jplProjectFilesPanelHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel_EPlusProjectFiles2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel_EPlusProjectFiles2, javax.swing.GroupLayout.DEFAULT_SIZE, 694, Short.MAX_VALUE)
         );
         jplProjectFilesPanelHolderLayout.setVerticalGroup(
             jplProjectFilesPanelHolderLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1067,7 +1068,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jplModelTest.setBorder(javax.swing.BorderFactory.createTitledBorder("Test Simulation Model"));
         jplModelTest.setEnabled(false);
 
-        jLabel1.setText("<html>Please go to the next tab (<b>Execution</b>) to perform a test run of one or more jobs. Then select below the result folder of one of the jobs.These information may be useful for defining RVX items.</html>");
+        jLabel1.setText("<html>Please go to the next tab (<b>Execution</b>) to perform a test run of one or more jobs. Then select below the result folder of one of the jobs.These information may be useful for defining RVX items.(<b>to be implemented</b>)</html>");
         jLabel1.setEnabled(false);
 
         txtTestResultFolder.setText("N/A");
@@ -1097,7 +1098,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                     .addGroup(jplModelTestLayout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtTestResultFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 371, Short.MAX_VALUE)
+                        .addComponent(txtTestResultFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 491, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmdSelectTestFolder, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -1133,9 +1134,9 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             pnlRvxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlRvxLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 585, Short.MAX_VALUE)
+                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 529, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1178,18 +1179,20 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             }
         });
 
+        txtTestRandomN.setColumns(4);
         txtTestRandomN.setText("1000");
         txtTestRandomN.setToolTipText("Sample size");
         txtTestRandomN.setEnabled(false);
 
-        jLabel5.setText(" jobs, using: ");
+        jLabel5.setText("cases using:");
 
+        txtRandomSeed.setColumns(4);
         txtRandomSeed.setText("12345");
         txtRandomSeed.setToolTipText("Set a random seed to fix the job sequence. If a negative value is specified, the current time is used as the seed.");
         txtRandomSeed.setEnabled(false);
 
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel4.setText("Random Seed:");
+        jLabel4.setText(" with Seed:");
 
         btg.add(rdoJobListFile);
         rdoJobListFile.setText("List of cases in: ");
@@ -1244,7 +1247,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdoTestChains, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rdoTestChains, javax.swing.GroupLayout.DEFAULT_SIZE, 630, Short.MAX_VALUE)
                     .addComponent(rdoAllJobs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1259,15 +1262,16 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(cmdEditJobListFile, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addComponent(txtTestRandomN, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtTestRandomN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(cboSampleOpt, 0, 85, Short.MAX_VALUE)
-                                .addGap(18, 18, 18)
+                                .addComponent(cboSampleOpt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel4)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtRandomSeed, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                .addComponent(txtRandomSeed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addGap(6, 6, 6))
         );
         jPanel4Layout.setVerticalGroup(
@@ -1368,7 +1372,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                     .addComponent(chkPrepare)
                     .addComponent(chkRun)
                     .addComponent(chkCollect))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(218, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1386,6 +1390,14 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        cmdValidate1.setText("Validate project");
+        cmdValidate1.setToolTipText("Validate the configuration");
+        cmdValidate1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdValidate1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1396,7 +1408,9 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                     .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(cmdStart, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(cmdValidate1)
+                        .addGap(18, 18, 18)
+                        .addComponent(cmdStart)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -1404,8 +1418,10 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(cmdStart)
-                .addContainerGap(110, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmdStart)
+                    .addComponent(cmdValidate1))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout pnlExecutionLayout = new javax.swing.GroupLayout(pnlExecution);
@@ -1420,7 +1436,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cboExecutionType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jplOptions, javax.swing.GroupLayout.DEFAULT_SIZE, 554, Short.MAX_VALUE)
+                    .addComponent(jplOptions, javax.swing.GroupLayout.DEFAULT_SIZE, 674, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1448,14 +1464,14 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             pnlUtilitiesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlUtilitiesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 554, Short.MAX_VALUE)
+                .addComponent(TpnUtilities)
                 .addContainerGap())
         );
         pnlUtilitiesLayout.setVerticalGroup(
             pnlUtilitiesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlUtilitiesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 698, Short.MAX_VALUE)
+                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 656, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1808,14 +1824,14 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1176, Short.MAX_VALUE)
+                .addComponent(jSplitPane1)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 750, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 708, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -2800,6 +2816,10 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         Project.getExecSettings().getSteps().setCollectResults(chkCollect.isSelected());
     }//GEN-LAST:event_chkCollectActionPerformed
 
+    private void cmdValidate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdValidate1ActionPerformed
+        cmdValidateActionPerformed(null);
+    }//GEN-LAST:event_cmdValidate1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane TpnEditors;
     private javax.swing.JTabbedPane TpnUtilities;
@@ -2816,6 +2836,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JButton cmdSelectTestFolder;
     private javax.swing.JButton cmdStart;
     private javax.swing.JButton cmdValidate;
+    private javax.swing.JButton cmdValidate1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel27;

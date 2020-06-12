@@ -540,29 +540,46 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
             if (WorkEnv.Steps.isPrepareJobs()) {
                 // Prepare work directory
                 ok = EPlusWinTools.prepareWorkDir(config, getWorkingDir());
-                // Copy weather and rvi files
-                ok = ok && EPlusWinTools.copyWorkFiles(getWorkingDir(), WorkEnv.WeatherDir + WorkEnv.WeatherFile, WorkEnv.isRVX() ? null : WorkEnv.RVIDir + WorkEnv.RVIFile);
-                // Write IDF file
-                ok = ok && this.preprocessInputFile(config);
-                // Run Python script 
-                ok = ok && this.runPythonScriptOnModel (config.getEPlusBinDir(), config.getScreenFile());
+                // Check if force-rerun
+                if (ok) {
+                    if (! WorkEnv.isForceRerun() && isFilePresent (getWorkingDir(), "in.idf") && isFilePresent (getWorkingDir(), "in.epw")) {
+                        // Skip input file preparation
+                    }else {
+                        // Copy weather and rvi files
+                        ok = ok && EPlusWinTools.copyWorkFiles(getWorkingDir(), WorkEnv.WeatherDir + WorkEnv.WeatherFile, WorkEnv.isRVX() ? null : WorkEnv.RVIDir + WorkEnv.RVIFile);
+                        // Write IDF file
+                        ok = ok && this.preprocessInputFile(config);
+                        // Run Python script 
+                        ok = ok && this.runPythonScriptOnModel (config.getResolvedEPlusBinDir(), config.getScreenFile());
+                    }
+                }
             }
             if (WorkEnv.Steps.isRunSimulations()) {
                 ok = ok || ! WorkEnv.Steps.isPrepareJobs();
-                // Ready to run EPlus
                 if (ok) {
-                    int code = EPlusWinTools.runEPlus(config, getWorkingDir(), false);
-                    ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
-                }
-                // Remove temperory files/dir if required
-                if (ok) {
-                    ok = EPlusWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles);
+                    if (! WorkEnv.isForceRerun() && isFilePresent (getWorkingDir(), "eplusout.end")) {
+                        // Skip simulation and clean-up
+                    }else {
+                        // Ready to run EPlus
+                        if (ok) {
+                            int code = EPlusWinTools.runEPlus(config, getWorkingDir(), false);
+                            ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
+                        }
+                        // Remove temperory files/dir if required
+                        if (ok) {
+                            ok = EPlusWinTools.cleanupWorkDir(getWorkingDir(), WorkEnv.KeepEPlusFiles, WorkEnv.KeepJEPlusFiles, WorkEnv.KeepJobDir, WorkEnv.SelectedFiles);
+                        }
+                    }
                 }
             }
         }
         ResultAvailable = ok;
     }
 
+    private boolean isFilePresent (String folder, String fn) {
+        return new File (folder + fn).exists();
+    }
+    
     /**
      * Execute this task in specific dir rather than the one specify in the WorkEnv.
      * A new instance of WorkEnv is created and associated with this job.

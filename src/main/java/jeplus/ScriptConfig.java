@@ -39,7 +39,7 @@ public class ScriptConfig extends ConfigFileNames {
     protected String ScriptExt = "";
     protected String Args = "";
     protected String Exec = "Select the executable...";
-    protected String VerCmd = "";
+    protected String VerCmd = "-v";
 
     public ScriptConfig() {
         super ();
@@ -98,6 +98,6 @@ public class ScriptConfig extends ConfigFileNames {
     
     @Override
     public String toString () {
-        return "" + Exec + " " + Args + " ...";
+        return "" + Exec + " " + Args + " script." + ScriptExt;
     }
 }
