@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author zyyz
  */
-public class TextPanel extends javax.swing.JPanel implements JEPlusPrintableGUI, Runnable, DocumentListener {
+public class TextPanel extends javax.swing.JPanel implements IF_JEPlusPrintableGUI, Runnable, DocumentListener {
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(TextPanel.class);

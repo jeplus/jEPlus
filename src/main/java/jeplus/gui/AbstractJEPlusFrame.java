@@ -18,41 +18,23 @@
  ***************************************************************************/
 package jeplus.gui;
 
+import javax.swing.JFrame;
+import jeplus.EPlusBatch;
+import jeplus.JEPlusProjectV2;
+
 /**
- *
- * @author Yi
+ * Wrapper class adds an <code>JEPlusProjectV2</code> instance to the <code>JFrame
+ * </code> class
+ * @author yzhang
  */
-public interface IFJEPlusEditorPanel {
+public abstract class AbstractJEPlusFrame extends JFrame {
 
-    /**
-     * Confirm closing the current file. User will be prompted to save if the
-     * content of the file has been changed.
-     * @return cancel flag
-     */
-    boolean closeTextPanel();
+    protected JEPlusProjectV2 Project = new JEPlusProjectV2 ();
 
-    /**
-     * Get tab id of this panel in the host tabbed pane
-     * @return Tab id
-     */
-    int getTabId();
+    public JEPlusProjectV2 getProject() {
+        return Project;
+    }
 
-    /** 
-     * Get the title of this panel. The title will appear on the tabbed pane
-     * @return  
-     */
-    String getTitle();
+    public abstract void setProject(JEPlusProjectV2 Project, EPlusBatch batch);
 
-    /**
-     * Set the tab id according to the host tabbed pane
-     * @param TabId 
-     */
-    void setTabId(int TabId);
-
-    /** 
-     * Set title of this panel to the given string
-     * @param title 
-     */
-    void setTitle(String title);
-    
 }

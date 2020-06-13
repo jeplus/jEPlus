@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @version 0.5b
  * @since 0.1
  */
-public class EPlusTextPanel extends javax.swing.JPanel implements DocumentListener, ActionListener, IFJEPlusEditorPanel {
+public class EPlusTextPanel extends javax.swing.JPanel implements DocumentListener, ActionListener, IF_JEPlusEditorPanel {
 
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(EPlusTextPanel.class);

@@ -24,6 +24,6 @@ import java.io.PrintStream;
  *
  * @author yzhang
  */
-public interface JEPlusPrintableGUI {
+public interface IF_JEPlusPrintableGUI {
     public abstract PrintStream getPrintStream ();
 }

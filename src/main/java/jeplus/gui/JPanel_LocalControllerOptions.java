@@ -18,6 +18,7 @@
  ***************************************************************************/
 package jeplus.gui;
 
+import java.awt.Color;
 import java.io.File;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
@@ -68,6 +69,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         this.txtThreadDelay.setText(Integer.toString(Settings.getDelay()));
         this.txtFileDir.setText(Settings.getParentDir());
         this.chkOverride.setSelected(Settings.isRerunAll());
+        this.chkOverride.setForeground(chkOverride.isSelected() ? Color.black : Color.red);
         this.chkKeepJobDir.setSelected(Settings.isKeepJobDir());
         this.chkKeepJEPlusFiles.setSelected(Settings.isKeepJEPlusFiles());
         this.chkKeepEPlusFiles.setSelected(Settings.isKeepEPlusFiles());
@@ -241,22 +243,21 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(cboNThreads, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 91, Short.MAX_VALUE)
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtEPlusThreads, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
+                        .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtThreadDelay, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -351,16 +352,22 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
     private void chkOverrideActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkOverrideActionPerformed
         if (chkOverride.isSelected()) {
             Settings.setRerunAll(true);
+            chkOverride.setForeground(Color.black);
         }else {
             int ans = JOptionPane.showConfirmDialog(this,
-                "If the force-override option is unchecked, jEPlus will skip the simulation step if a case folder already contains results.\nAre you certain that you want to do this?",
+                "<html><p>If force-override option is unchecked, jEPlus will skip the model preparation<br>"
+                    + "step of a case if the output folder already contains both in.idf and in.epw files,<br>"
+                    + "and the simulation step if eplusout.end is present in the same folder.</p>"
+                    + "<p>Are you certain that this is what you want to do?</p></html>",
                 "Confirm skipping existing cases",
                 JOptionPane.YES_NO_OPTION);
             if (ans == JOptionPane.YES_OPTION) {
                 Settings.setRerunAll(false);
+                chkOverride.setForeground(Color.red);
             }else {
                 Settings.setRerunAll(true);
                 chkOverride.setSelected(true);
+                chkOverride.setForeground(Color.black);
             }
         }
     }//GEN-LAST:event_chkOverrideActionPerformed

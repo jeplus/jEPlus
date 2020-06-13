@@ -484,6 +484,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
 
         jScrollPane2.setBorder(null);
         jScrollPane2.setHorizontalScrollBar(null);
+        jScrollPane2.setMaximumSize(new java.awt.Dimension(32767, 200));
 
         txpPreview.setEditable(false);
         txpPreview.setContentType("text/html"); // NOI18N
@@ -541,7 +542,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
                         .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, 99, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cboParamType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane2)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtAltValues, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtDescript)
                     .addGroup(jPanel4Layout.createSequentialGroup()
@@ -587,7 +588,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel26)
                         .addGap(0, 34, Short.MAX_VALUE))
-                    .addComponent(jScrollPane2))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -595,6 +596,10 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
                     .addComponent(jLabel3))
                 .addContainerGap())
         );
+
+        jPanel1.setMinimumSize(new java.awt.Dimension(0, 150));
+        jPanel1.setName(""); // NOI18N
+        jPanel1.setRequestFocusEnabled(false);
 
         jScroll.setToolTipText("Drag&Drop to edit the parameter tree. Hold 'Ctrl' key to copy a branch.");
 

@@ -107,11 +107,11 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
     // Utility panel - External program configuration
     protected JPanelProgConfiguration jplProgConfPanel;
     // Utility panel - IDF converter
-    protected JPanel_IDFVersionUpdater jplIDFConvPanel;
+    protected JPanel_UtilIdfUpdater jplIDFConvPanel;
     // Utility panel - Run Python
-    protected JPanel_RunReadVars jplReadVarsPanel;
+    protected JPanel_UtilRunReadVars jplReadVarsPanel;
     // Utility panel - Run ReadVars
-    protected JPanelRunPython jplPythonPanel;
+    protected JPanel_UtilRunScript jplPythonPanel;
     // Program config panel
     protected JPanelProgConfiguration ConfigPanel;
 
@@ -169,9 +169,9 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         TpnEditors.setSelectedComponent(OutputPanel);
         
         jplProgConfPanel = new JPanelProgConfiguration (null, JEPlusConfig.getDefaultInstance(), JPanelProgConfiguration.Layout.WIDE);
-        jplIDFConvPanel = new JPanel_IDFVersionUpdater (this, JEPlusConfig.getDefaultInstance(), this.getProject());
-        jplPythonPanel = new JPanelRunPython (this, JEPlusConfig.getDefaultInstance(), getProject() == null ? "./" : getProject().resolveWorkDir());
-        jplReadVarsPanel = new JPanel_RunReadVars(this, JEPlusConfig.getDefaultInstance());
+        jplIDFConvPanel = new JPanel_UtilIdfUpdater (this, JEPlusConfig.getDefaultInstance(), this.getProject());
+        jplPythonPanel = new JPanel_UtilRunScript (this, JEPlusConfig.getDefaultInstance(), getProject() == null ? "./" : getProject().resolveWorkDir());
+        jplReadVarsPanel = new JPanel_UtilRunReadVars(this, JEPlusConfig.getDefaultInstance());
 //        TpnUtilities.add("Configure Programs", jplProgConfPanel);
         TpnUtilities.add("Run Python", jplPythonPanel);
         TpnUtilities.add("IDF Converter", jplIDFConvPanel);
@@ -2614,7 +2614,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         // Check opened files
         for (int i=TpnEditors.getTabCount()-1; i>=0; i--) {
             try {
-                boolean cancel = ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+                boolean cancel = ((IF_JEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
                 if (cancel) return;
             }catch (ClassCastException | NullPointerException cce) {
             }
@@ -2722,7 +2722,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         // Check opened files
         for (int i=TpnEditors.getTabCount()-1; i>=1; i--) {
             try {
-                boolean cancel = ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+                boolean cancel = ((IF_JEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
                 if (cancel) return;
             }catch (ClassCastException | NullPointerException cce) {
             }
@@ -2763,7 +2763,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         // Check opened files
         for (int i=TpnEditors.getTabCount()-1; i>=1; i--) {
             try {
-                boolean cancel = ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+                boolean cancel = ((IF_JEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
                 if (cancel) return;
             }catch (ClassCastException | NullPointerException cce) {
             }
@@ -3049,7 +3049,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
                 // Check opened files
                 for (int i=TpnEditors.getTabCount()-1; i>=1; i--) {
                     try {
-                        boolean cancel = ((IFJEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
+                        boolean cancel = ((IF_JEPlusEditorPanel)TpnEditors.getComponentAt(i)).closeTextPanel();
                         if (cancel) return;
                     }catch (ClassCastException | NullPointerException cce) {
                     }

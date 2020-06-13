@@ -387,7 +387,7 @@ public class EPlusBatch extends Thread {
                     }
                     // Add warning if no collector is defined
                     if (! hasCollector) {
-                        Info.addValidationError("Warning: no RVX collector is defined. JEPlus will only collect simulation stats.");
+                        Info.addWarning("no RVX collector is defined. JEPlus will only collect simulation stats.");
                     }
                     // Check if userVars are defined and for any duplicate variable names
                     boolean varsDefined = false;
@@ -415,7 +415,7 @@ public class EPlusBatch extends Thread {
                     }
                     // Add warning if no report variables is defined
                     if (! varsDefined) {
-                        Info.addValidationError("Warning: no report variable is defined. This project may not work with jEPlus+EA.");
+                        Info.addWarning("no report variable is defined. This project may not work with jEPlus+EA.");
                     }
                 }
                 break;

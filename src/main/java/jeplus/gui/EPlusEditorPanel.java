@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.5
  * @since 1.5
  */
-public class EPlusEditorPanel extends JPanel implements DocumentListener, ActionListener, IFJEPlusEditorPanel {
+public class EPlusEditorPanel extends JPanel implements DocumentListener, ActionListener, IF_JEPlusEditorPanel {
 
     /**
      * Logger

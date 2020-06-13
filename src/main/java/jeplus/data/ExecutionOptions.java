@@ -69,7 +69,7 @@ public class ExecutionOptions implements Serializable {
     /** Maximum number of jobs can be submitted to an external job queue */
     protected int JobSubmissionCap = 0;
     /** Option to force rerun all simulations even if previous results are present */
-    protected boolean RerunAll = false;
+    protected boolean RerunAll = true;
     /** Delay between the launch of each thread */
     protected int Delay = 0;
     /** The local parent directory to the jobs */

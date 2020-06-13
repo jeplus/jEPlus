@@ -42,6 +42,7 @@ public class EPlusBatchInfo {
     protected ArrayList<String> SearchStrings = null;
     protected ArrayList<String> ShortNames = null;
     protected ArrayList<String> ValidationErrors = null;
+    protected ArrayList<String> Warnings = null;
 
     /** 
      * Default constructor
@@ -52,6 +53,7 @@ public class EPlusBatchInfo {
         SearchStrings = new ArrayList<> ();
         ShortNames = new ArrayList<> ();
         ValidationErrors = new ArrayList<>();
+        Warnings = new ArrayList<>();
     }
 
     // =========== Getters and Setters ============
@@ -116,6 +118,14 @@ public class EPlusBatchInfo {
         this.ValidationErrors = ValidationErrors;
     }
 
+    public ArrayList<String> getWarnings() {
+        return Warnings;
+    }
+
+    public void setWarnings(ArrayList<String> Warnings) {
+        this.Warnings = Warnings;
+    }
+
     public boolean isValidationSuccessful() {
         return ValidationSuccessful;
     }
@@ -139,13 +149,22 @@ public class EPlusBatchInfo {
     public void addValidationError (String desc) { ValidationErrors.add(desc); }
     
     /**
+     * Append validation error message to the errors list
+     * @param desc The description of "error" to be added to the list
+     */
+    public void addWarning (String desc) { Warnings.add(desc); }
+    
+    /**
      * Get the error message list as a text string
      * @return Text of all error messages recorded
      */
     public String getValidationErrorsText() {
         StringBuilder buf = new StringBuilder ("Validation result: " + (ValidationSuccessful? "pass" : "fail") + "\n");
         for (String ValidationError : ValidationErrors) {
-            buf.append(ValidationError).append("\n");
+            buf.append("Error: ").append(ValidationError).append("\n");
+        }
+        for (String warning : Warnings) {
+            buf.append("Warning: ").append(warning).append("\n");
         }
         return buf.toString(); 
     }

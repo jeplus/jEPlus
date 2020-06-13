@@ -24,7 +24,7 @@ import javax.swing.JPanel;
  *
  * @author yzhang
  */
-public abstract class JEPlusPrintablePanel extends JPanel implements JEPlusPrintableGUI {
+public abstract class JEPlusPrintablePanel extends JPanel implements IF_JEPlusPrintableGUI {
 
     public abstract void appendContent(String text);
 

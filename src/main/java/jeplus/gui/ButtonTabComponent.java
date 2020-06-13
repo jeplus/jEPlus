@@ -96,7 +96,7 @@ public class ButtonTabComponent extends JPanel {
             int i = pane.indexOfTabComponent(ButtonTabComponent.this);
             if (i != -1) {
                 try {
-                    ((IFJEPlusEditorPanel) pane.getComponentAt(i)).closeTextPanel();
+                    ((IF_JEPlusEditorPanel) pane.getComponentAt(i)).closeTextPanel();
                 }catch (Exception ex) {
                     pane.remove(i);
                 }
