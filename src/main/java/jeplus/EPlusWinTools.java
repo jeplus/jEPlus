@@ -348,6 +348,9 @@ public class EPlusWinTools {
             }catch (IOException ioe) {
                 logger.error("Failed to create " + wd.toString(), ioe);
                 success = false;
+            }catch (UnsupportedOperationException uoe) {
+                logger.debug("File attributes " + permstr + " not supported. Reverting to std io.", uoe);
+                success = prepareWorkDir(config, workdir);
             }
         }else if (Files.exists(wd)) {
             if (!Files.isDirectory(wd) || !Files.isWritable(wd)) {

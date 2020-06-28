@@ -147,6 +147,8 @@ public class Main {
         String prjfile = null;
         if (commandline.hasOption("job")) {
             prjfile = commandline.getOptionValue("job");
+        }else if (commandline.getArgs().length > 0) {
+            prjfile = commandline.getArgs()[0];
         }
         // Get output folder
         String output = null;

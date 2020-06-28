@@ -26,6 +26,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import jeplus.JEPlusConfig;
 import jeplus.ScriptConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class ScriptTools {
     final static Logger logger = LoggerFactory.getLogger(ScriptTools.class);
     
     /**
-     * Run Python script
+     * Run Python script (for result collection and utils tab)
      * @param config Config file of the executables
      * @param scriptfile Name of the Python file
      * @param arg0 This must be the path of the project base. If null or empty is supplied, the current dir is assumed.
@@ -52,26 +53,28 @@ public class ScriptTools {
      */
     public static void runScript (ScriptConfig config, String scriptfile, String arg0, String arg1, String arg2, String arg3, String moreargs, PrintStream stream) {
 
-        String CurrentWorkDir = (arg1 != null && arg1.trim().length()>0) ? arg1 : "./";
+        String ProjectDir = (arg0 != null && arg0.trim().length()>0) ? arg0.replaceAll("\\\\", "/") : "./";
+        String CurrentWorkDir = (arg1 != null && arg1.trim().length()>0) ? arg1.replaceAll("\\\\", "/") : "./";
         try {
-            StringBuilder buf = new StringBuilder (config.getExec());
+            String resolvedExec = RelativeDirUtil.checkAbsolutePath(config.getExec(), JEPlusConfig.getDefaultInstance().getJEPlusBaseDir());
+            StringBuilder buf = new StringBuilder (resolvedExec);
             if (config.getArgs() != null && config.getArgs().trim().length() > 0) {
                 buf.append(" ").append(config.getArgs());
             }
             buf.append(" \"").append(scriptfile).append("\"");
-            if (arg0 != null && arg0.trim().length()>0) buf.append(" \"").append(arg0).append("\"");
+            buf.append(" \"").append(ProjectDir).append("\"");
             buf.append(" \"").append(CurrentWorkDir).append("\"");
             if (arg2 != null && arg2.trim().length()>0) buf.append(" ").append(arg2).append(" ").append(arg3);
             if (arg3 != null && arg3.trim().length()>0) buf.append(" ").append(arg3).append(" ").append(arg3);
             if (moreargs != null && moreargs.trim().length()>0) buf.append(" \"").append(moreargs).append("\" ");
 
             List<String> command = new ArrayList<> ();
-            command.add(config.getExec());
+            command.add(resolvedExec);
             if (config.getArgs() != null && config.getArgs().trim().length() > 0) {
                 command.add(config.getArgs());
             }
             command.add(scriptfile);
-            if (arg0 != null && arg0.trim().length()>0) command.add(arg0);
+            command.add(ProjectDir);
             command.add(CurrentWorkDir);
             if (arg2 != null && arg2.trim().length()>0) command.add(arg2);
             if (arg3 != null && arg3.trim().length()>0) command.add(arg3);
@@ -128,26 +131,28 @@ public class ScriptTools {
      */
     public static void runScript (ScriptConfig config, String scriptfile, String arg0, String arg1, String arg2, String param_args, PrintStream stream) {
 
-        String CurrentWorkDir = (arg1 != null && arg1.trim().length()>0) ? arg1 : "./";
-        String AdditionalDir = (arg2 != null && arg2.trim().length()>0) ? arg2 : "./";
+        String ProjectDir = (arg0 != null && arg0.trim().length()>0) ? arg0.replaceAll("\\\\", "/") : "./";
+        String CurrentWorkDir = (arg1 != null && arg1.trim().length()>0) ? arg1.replaceAll("\\\\", "/") : "./";
+        String AdditionalDir = (arg2 != null && arg2.trim().length()>0) ? arg2.replaceAll("\\\\", "/") : "./";
         try {
-            StringBuilder buf = new StringBuilder (config.getExec());
+            String resolvedExec = RelativeDirUtil.checkAbsolutePath(config.getExec(), JEPlusConfig.getDefaultInstance().getJEPlusBaseDir());
+            StringBuilder buf = new StringBuilder (resolvedExec);
             if (config.getArgs() != null && config.getArgs().trim().length() > 0) {
                 buf.append(" ").append(config.getArgs());
             }
             buf.append(" \"").append(scriptfile).append("\"");
-            if (arg0 != null && arg0.trim().length()>0) buf.append(" \"").append(arg0).append("\"");
+            buf.append(" \"").append(ProjectDir).append("\"");
             buf.append(" \"").append(CurrentWorkDir).append("\"");
             if (param_args != null && param_args.trim().length()>0) buf.append(" \"").append(param_args).append("\"");
             buf.append(" \"").append(AdditionalDir).append("\"");
 
             List<String> command = new ArrayList<> ();
-            command.add(config.getExec());
+            command.add(resolvedExec);
             if (config.getArgs() != null && config.getArgs().trim().length() > 0) {
                 command.add(config.getArgs());
             }
             command.add(scriptfile);
-            if (arg0 != null && arg0.trim().length()>0) command.add(arg0);
+            command.add(ProjectDir);
             command.add(CurrentWorkDir);
             if (param_args != null && param_args.trim().length()>0) command.add(param_args);
             command.add(AdditionalDir);

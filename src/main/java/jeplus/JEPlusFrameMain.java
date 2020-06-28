@@ -157,7 +157,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         InselExecAgents.add(new InselAgentLocal (Project.getExecSettings()));
         String [] options = {ExecAgents.get(0).getAgentID()};
         this.cboExecutionType.setModel(new DefaultComboBoxModel (options));
-        this.cboExecutionTypeActionPerformed(null);
+        // this.setExecType(0);
         
         this.cboSampleOpt.setModel(new DefaultComboBoxModel (EPlusBatch.SampleType.values()));
 
@@ -182,10 +182,10 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         // put the frame in the centre of screen
         Toolkit tk = Toolkit.getDefaultToolkit();
         Dimension screenSize = tk.getScreenSize();
-        int frameWidth = 1300;  
-        int frameHeight = 740;  
         int screenHeight = screenSize.height;
         int screenWidth = screenSize.width;
+        int frameWidth = Math.min(1366, screenWidth);  
+        int frameHeight = Math.min(900, screenHeight);  
         setMinimumSize (new Dimension (frameWidth, frameHeight));
         setSize(frameWidth, frameHeight);
         setLocation((screenWidth-frameWidth)/2,(screenHeight-frameHeight)/2);
@@ -370,7 +370,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             this.Project = Project;
             this.SavedProject = null;
             this.initProjectSection();
-            this.cboExecutionTypeActionPerformed(null);
+            this.setExecType(0);
             this.Project.addListener(this);
         }
         if (batch != null) {
@@ -409,7 +409,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             default:
                 break;
         }
-        this.cboExecutionTypeActionPerformed(null);
+        this.setExecType(ExecutionOptions.INTERNAL_CONTROLLER);
         // Disable post-process tab if TRNSYS
         if (type != JEPlusProjectV2.ModelType.EPLUS) { // not EPlus
             this.tpnMain.setEnabledAt(3, false);
@@ -440,6 +440,8 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             default:
                 break;
         }
+        this.jplProjectFilesPanelHolder.validate();
+        this.jplProjectFilesPanelHolder.repaint();
         jplParameterTable.setProject(Project);
         jplRvxTree.setContents(this, Project);
     }
@@ -554,12 +556,24 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
      * @param type ...
      */
     public void setExecType (int type) {
-        try {
-            this.cboExecutionType.setSelectedIndex(type);
-        }catch (Exception ex) {}
-        this.cboExecutionTypeActionPerformed(null);
+        EPlusAgent agent = ExecAgents.get(type);
+        if (agent != null) {
+            Project.getExecSettings().setExecutionType(agent.getExecutionType());
+            // agent.setSettings(Project.getExecSettings());
+            this.updateAgentOptionPanel(agent);
+        }else {
+            logger.error("Requested execution type (" + type + ") is not supported!");
+        }
     }
 
+    protected void updateAgentOptionPanel (EPlusAgent agent) {
+        this.jplOptions.removeAll();
+        this.jplOptions.add(agent.getOptionsPanel());
+        this.jplOptions.validate();
+        this.jplOptions.repaint();
+        this.cmdStart.setText(agent.getStartButtonText());
+    }
+    
     /**
      * Construct and validate the batch jobs according to the information
      * provided on the UI
@@ -784,7 +798,6 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         rdoTestFirstN = new javax.swing.JRadioButton();
         txtTestFirstN = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
-        jMenuItemImportJson = new javax.swing.JMenuItem();
         jMenuItemExportJson = new javax.swing.JMenuItem();
         jMenuItemCreateIndex = new javax.swing.JMenuItem();
         jMenuItemJESSClient = new javax.swing.JMenuItem();
@@ -917,14 +930,6 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
 
         jLabel9.setText("jobs");
 
-        jMenuItemImportJson.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/view_as_json.png"))); // NOI18N
-        jMenuItemImportJson.setText("Import JSON project ...");
-        jMenuItemImportJson.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemImportJsonActionPerformed(evt);
-            }
-        });
-
         jMenuItemExportJson.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/view_as_json.png"))); // NOI18N
         jMenuItemExportJson.setText("Export JSON project ...");
         jMenuItemExportJson.addActionListener(new java.awt.event.ActionListener() {
@@ -967,6 +972,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1200, 740));
+        setPreferredSize(new java.awt.Dimension(1366, 768));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -1134,9 +1140,9 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             pnlRvxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlRvxLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 529, Short.MAX_VALUE)
+                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 532, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1421,7 +1427,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmdStart)
                     .addComponent(cmdValidate1))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout pnlExecutionLayout = new javax.swing.GroupLayout(pnlExecution);
@@ -1471,7 +1477,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             pnlUtilitiesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlUtilitiesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 656, Short.MAX_VALUE)
+                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 645, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1831,7 +1837,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 708, Short.MAX_VALUE)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 697, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1993,16 +1999,7 @@ private void cmdValidateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
 private void cboExecutionTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboExecutionTypeActionPerformed
     int opt = this.cboExecutionType.getSelectedIndex();
-    EPlusAgent agent = ExecAgents.get(opt);
-    agent.setSettings(Project.getExecSettings());
-    Project.getExecSettings().setExecutionType(agent.getExecutionType());
-    this.jplSettings.removeAll();
-    this.jplSettings.add(agent.getSettingsPanel());
-    this.jplOptions.removeAll();
-    this.jplOptions.add(agent.getOptionsPanel());
-    this.cmdStart.setText(agent.getStartButtonText());
-    this.pack();
-    //this.update(this.getGraphics());
+    this.setExecType(opt);
 }//GEN-LAST:event_cboExecutionTypeActionPerformed
 
 private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
@@ -2292,7 +2289,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
             Project.convertToRelativeDir();
             // update screen
             this.initProjectSection();
-            this.cboExecutionTypeActionPerformed(null);
+            this.setExecType(0);
         }
     }//GEN-LAST:event_jMenuItemToRelativeActionPerformed
 
@@ -2300,7 +2297,8 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         Project.convertToAbsoluteDir();
         // update screen
         this.initProjectSection();
-        this.cboExecutionTypeActionPerformed(null);
+        this.setExecType(0);
+
     }//GEN-LAST:event_jMenuItemToAbsoluteActionPerformed
 
     private void jMenuItemExportTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportTableActionPerformed
@@ -2444,22 +2442,6 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         this.tpnMain.setSelectedIndex(3);
         this.TpnUtilities.setSelectedIndex(2);       
     }//GEN-LAST:event_jMenuItemRunReadVarsActionPerformed
-
-    private void jMenuItemImportJsonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemImportJsonActionPerformed
-        // Select a file to open
-        fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.JSON));
-        fc.setSelectedFile(new File(""));
-        fc.setCurrentDirectory(DefaultDir);
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            // load object
-            this.importProjectFromJson(this, file);
-        } else {
-
-        }
-        fc.resetChoosableFileFilters();
-        fc.setSelectedFile(new File(""));
-    }//GEN-LAST:event_jMenuItemImportJsonActionPerformed
 
     private void jMenuItemExportJsonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExportJsonActionPerformed
         // Select a file to save
@@ -2667,7 +2649,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
                 this.setCurrentProjectFile(file.getPath());
                 // update screen
                 this.initProjectSection();
-                this.cboExecutionTypeActionPerformed(null);
+                this.setExecType(0);
             }
         } else {
 
@@ -2774,7 +2756,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         Project = new JEPlusProjectV2 ();
         Project.setProjectType((JEPlusProjectV2.ModelType)cboProjectType.getSelectedItem());
         this.initProjectSection();
-        this.cboExecutionTypeActionPerformed(null);
+        this.setExecType(0);
         CurrentProjectFile = null;
         this.setTitle(JEPlusVersion.getVersion() + " - New Project");
         Project.addListener(this);
@@ -2858,7 +2840,6 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JMenuItem jMenuItemExit;
     private javax.swing.JMenuItem jMenuItemExportJson;
     private javax.swing.JMenuItem jMenuItemExportTable;
-    private javax.swing.JMenuItem jMenuItemImportJson;
     private javax.swing.JMenuItem jMenuItemImportTable;
     private javax.swing.JMenuItem jMenuItemJEPlusEA;
     private javax.swing.JMenuItem jMenuItemJESSClient;
@@ -2972,55 +2953,20 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         // this.initProjectSection();
         // Update project type (E+ or TRNSYS) and gui
         this.cboProjectType.setSelectedItem(Project.getProjectType());
-        this.setProjectType(Project.getProjectType());
         // update Exec Agent's reference to the Execution options
         for (EPlusAgent agent: ExecAgents) {
             agent.setSettings(Project.getExecSettings());
         }
+        this.setProjectType(Project.getProjectType());
         // select again Exec agent and update gui
-        this.setExecType(Project.getExecSettings().getExecutionType());
-        this.cboExecutionTypeActionPerformed(null);
+        // this.setExecType(Project.getExecSettings().getExecutionType());
+        // this.cboExecutionTypeActionPerformed(null);
         // Base directory update
         DefaultDir = new File (Project.getBaseDir());
         // Batch options gui
         this.initBatchOptions();
         // Attach listener
         Project.addListener(this);
-    }
-
-    public void importProjectFromJson (Component parent, File file) {
-        JEPlusProjectV2 proj = null;
-        try {
-            proj = JEPlusProjectV2.loadFromJSON(file);
-        }catch (IOException ioe) {
-            logger.error("Error opening JSON file " + file.getAbsolutePath(), ioe);
-        }
-        if (proj == null) {
-            // warning message
-            JOptionPane.showMessageDialog(
-                parent,
-                "Failed to import project from file: " + file.getPath() + ". Please check if the file is accessible.",
-                "Error",
-                JOptionPane.CLOSED_OPTION);
-        }else {
-            Project = proj;
-            // GUI update
-            // this.initProjectSection();
-            // Update project type (E+ or TRNSYS) and gui
-            this.cboProjectType.setSelectedItem(Project.getProjectType());
-            this.setProjectType(Project.getProjectType());
-            // update Exec Agent's reference to the Execution options
-            for (EPlusAgent agent: ExecAgents) {
-                agent.setSettings(Project.getExecSettings());
-            }
-            // select again Exec agent and update gui
-            this.setExecType(Project.getExecSettings().getExecutionType());
-            this.cboExecutionTypeActionPerformed(null);
-            // Base directory update
-            DefaultDir = new File (Project.getBaseDir());
-            // Batch options gui
-            this.initBatchOptions();
-        }
     }
 
     private void addMenuItemRecentFile (String fn) {
@@ -3114,10 +3060,11 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
                         }
                     }
                     // Update local e+ configurations
-                    frame.cboExecutionTypeActionPerformed(null);
+                    frame.setExecType(0);
                     if (prjfile != null) {
                         frame.openProject(frame, new File (prjfile));
                     }
+                    frame.pack();
                     frame.setVisible(true);
 //                    // Start a new thread for output panel
 //                    new Thread (frame.OutputPanel).start();
@@ -3168,7 +3115,12 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
 
     @Override
     public void projectChanged(JEPlusProjectV2 new_prj) {
+        // Update title to show project name
         this.setTitle(JEPlusVersion.getVersion() + " - " + (CurrentProjectFile==null?"New Project":CurrentProjectFile) + (Project.isContentChanged()?"*":""));
+        // Update display
+        //initProjectSection ();
+        //setExecType (0); // Has only local agent
+        // Update search tags if model editor is open
         for (int i=1; i<TpnEditors.getTabCount(); i++) {
             try {
                 EPlusEditorPanel etp = (EPlusEditorPanel)TpnEditors.getComponentAt(i);

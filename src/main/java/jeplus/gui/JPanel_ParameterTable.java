@@ -433,6 +433,8 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
         jLabel1.setText("Version requirement");
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Parameter item", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11), new java.awt.Color(102, 102, 102))); // NOI18N
+        jPanel4.setMinimumSize(new java.awt.Dimension(0, 240));
+        jPanel4.setPreferredSize(new java.awt.Dimension(460, 300));
 
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         jLabel5.setText("Name: ");
@@ -587,7 +589,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel26)
-                        .addGap(0, 34, Short.MAX_VALUE))
+                        .addGap(0, 54, Short.MAX_VALUE))
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -597,8 +599,9 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
                 .addContainerGap())
         );
 
-        jPanel1.setMinimumSize(new java.awt.Dimension(0, 150));
+        jPanel1.setMinimumSize(new java.awt.Dimension(0, 130));
         jPanel1.setName(""); // NOI18N
+        jPanel1.setPreferredSize(new java.awt.Dimension(0, 130));
         jPanel1.setRequestFocusEnabled(false);
 
         jScroll.setToolTipText("Drag&Drop to edit the parameter tree. Hold 'Ctrl' key to copy a branch.");
@@ -659,7 +662,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
                 .addComponent(cmdDuplicate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cmdRemove)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 12, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -669,7 +672,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -679,7 +682,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents

@@ -39,6 +39,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
     protected int MaxThreads = Runtime.getRuntime().availableProcessors();
     
     protected DocumentListener DL = null;
+    private boolean DL_Enabled = false;
 
     /** Creates new form JPanel_LocalControllerOptions */
     public JPanel_LocalControllerOptions() {
@@ -65,18 +66,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
     }
 
     protected final void initSettings () {
-        setThreadOptions();
-        this.txtThreadDelay.setText(Integer.toString(Settings.getDelay()));
-        this.txtFileDir.setText(Settings.getParentDir());
-        this.chkOverride.setSelected(Settings.isRerunAll());
-        this.chkOverride.setForeground(chkOverride.isSelected() ? Color.black : Color.red);
-        this.chkKeepJobDir.setSelected(Settings.isKeepJobDir());
-        this.chkKeepJEPlusFiles.setSelected(Settings.isKeepJEPlusFiles());
-        this.chkKeepEPlusFiles.setSelected(Settings.isKeepEPlusFiles());
-        this.chkDeleteSelected.setSelected(Settings.isDeleteSelectedFiles());
-        this.txtSelectedFiles.setText(Settings.getSelectedFiles());
-        this.txtEPlusThreads.setText(Integer.toString(Settings.getOMPThreads()));
-
+        updateDisplay ();
         // Set listeners to text fields
         DL = new DocumentListener () {
             Document DocFileDir = txtFileDir.getDocument();
@@ -86,15 +76,17 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                Document src = e.getDocument();
-                if(src == DocFileDir) {
-                    Settings.setWorkDir(txtFileDir.getText());
-                }else if (src == DocThreadDelay) {
-                    Settings.setDelay(Integer.parseInt(txtThreadDelay.getText()));
-                }else if(src == DocEPlusThreads) {
-                    Settings.setOMPThreads(Integer.parseInt(txtEPlusThreads.getText()));
-                }else if(src == DocSelectedFiles) {
-                    Settings.setSelectedFiles(txtSelectedFiles.getText());
+                if (DL_Enabled) {
+                    Document src = e.getDocument();
+                    if(src == DocFileDir) {
+                        Settings.setWorkDir(txtFileDir.getText());
+                    }else if (src == DocThreadDelay) {
+                        Settings.setDelay(Integer.parseInt(txtThreadDelay.getText()));
+                    }else if(src == DocEPlusThreads) {
+                        Settings.setOMPThreads(Integer.parseInt(txtEPlusThreads.getText()));
+                    }else if(src == DocSelectedFiles) {
+                        Settings.setSelectedFiles(txtSelectedFiles.getText());
+                    }
                 }
             }
             @Override
@@ -111,6 +103,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         txtThreadDelay.getDocument().addDocumentListener(DL);
         txtEPlusThreads.getDocument().addDocumentListener(DL);
         txtSelectedFiles.getDocument().addDocumentListener(DL);
+        DL_Enabled = true;
     }
 
     protected final void setThreadOptions () {
@@ -121,6 +114,22 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         this.cboNThreads.setSelectedIndex(Math.min(Settings.getNumThreads(), MaxThreads) - 1);
     }
 
+    public void updateDisplay () {
+        DL_Enabled = false;
+        setThreadOptions();
+        this.txtThreadDelay.setText(Integer.toString(Settings.getDelay()));
+        this.txtFileDir.setText(Settings.getParentDir());
+        this.chkOverride.setSelected(Settings.isRerunAll());
+        this.chkOverride.setForeground(chkOverride.isSelected() ? Color.black : Color.red);
+        this.chkKeepJobDir.setSelected(Settings.isKeepJobDir());
+        this.chkKeepJEPlusFiles.setSelected(Settings.isKeepJEPlusFiles());
+        this.chkKeepEPlusFiles.setSelected(Settings.isKeepEPlusFiles());
+        this.chkDeleteSelected.setSelected(Settings.isDeleteSelectedFiles());
+        this.txtSelectedFiles.setText(Settings.getSelectedFiles());
+        this.txtEPlusThreads.setText(Integer.toString(Settings.getOMPThreads()));
+        DL_Enabled = true;
+    }
+    
     /** This method is called from within the constructor to
      * initialise the form.
      * WARNING: Do NOT modify this code. The content of this method is

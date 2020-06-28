@@ -11,7 +11,7 @@ package jeplus;
  */
 public class JEPlusVersion {
     public final static String Version = "2.1.0";
-    public final static String Release = "Beta 01";
+    public final static String Release = "Beta 03";
     public final static String Version_PS = "_2_0";
     public final static String OsName = System.getProperty( "os.name" );
     public final static String Year = "2020";

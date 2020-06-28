@@ -189,30 +189,34 @@ public class JPanelProgConfiguration extends javax.swing.JPanel implements IF_Co
                 buf.append("<p></p>");
 
                 // E+ version converter folder
-                File dir = new File (Config.getEPlusVerConvDir());
                 buf.append("<p><em>E+ Version Converter:</em></p>");
-                if (! (dir.exists() && dir.isDirectory())) {
-                    txtVerConvDir.setForeground(Color.red);
-                    buf.append("<p>E+ Version Converter dir ").append(dir.getAbsolutePath()).append(" does not exist!</p>");
-                }else {
-                    List<String> versions = EPlusWinTools.getInstalledTransitionVersions(dir.getAbsolutePath());
-                    buf.append("<p>");
-                    if (versions.size() >= 2) {
-                        txtVerConvDir.setForeground(Color.black);
-                        buf.append("Converters found => ");
-                        int cnt = 0;
-                        for (String item : versions) {
-                            if (cnt % 4 == 0) {
-                                buf.append("<br>");
-                            }
-                            buf.append(item).append(", ");
-                            cnt ++;
-                        }
-                    }else {
+                if (Config.getEPlusVerConvDir() != null) {
+                    File dir = new File (Config.getEPlusVerConvDir());
+                    if (! (dir.exists() && dir.isDirectory())) {
                         txtVerConvDir.setForeground(Color.red);
-                        buf.append("Failed to find valid IDDs for converters");
+                        buf.append("<p>E+ Version Converter dir ").append(dir.getAbsolutePath()).append(" does not exist!</p>");
+                    }else {
+                        List<String> versions = EPlusWinTools.getInstalledTransitionVersions(dir.getAbsolutePath());
+                        buf.append("<p>");
+                        if (versions.size() >= 2) {
+                            txtVerConvDir.setForeground(Color.black);
+                            buf.append("Converters found => ");
+                            int cnt = 0;
+                            for (String item : versions) {
+                                if (cnt % 4 == 0) {
+                                    buf.append("<br>");
+                                }
+                                buf.append(item).append(", ");
+                                cnt ++;
+                            }
+                        }else {
+                            txtVerConvDir.setForeground(Color.red);
+                            buf.append("Failed to find valid IDDs for converters");
+                        }
+                        buf.append("</p>");
                     }
-                    buf.append("</p>");
+                }else {
+                    buf.append("<p>Not specified</p>");
                 }
                 buf.append("<p></p>");
 

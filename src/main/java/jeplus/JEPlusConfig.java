@@ -70,6 +70,8 @@ public class JEPlusConfig extends ConfigFileNames {
     public static String getDefaultConfigFile () { return DefaultConfigFile; }
     public static void setDefaultConfigFile (String fn) { DefaultConfigFile = fn; }
 
+    protected String JEPlusBaseDir = null;
+    
 //    /** EPlus configurations */
 //    protected List<EPlusConfig> EPlusList = new ArrayList<>();
 //    /** TRNSYS configurations */
@@ -152,8 +154,7 @@ public class JEPlusConfig extends ConfigFileNames {
     }
 
     // ========= Getters and Setters =========
-
-//    public List<EPlusConfig> getEPlusList() {    
+//    public List<EPlusConfig> getEPlusList() {
 //        return EPlusList;
 //    }
 //
@@ -193,6 +194,16 @@ public class JEPlusConfig extends ConfigFileNames {
 //        this.ScriptList = ScriptList;
 //    }
 //
+
+    @JsonIgnore
+    public String getJEPlusBaseDir() {    
+        return JEPlusBaseDir;
+    }
+
+    @JsonIgnore
+    public void setJEPlusBaseDir(String JEPlusBaseDir) {
+        this.JEPlusBaseDir = JEPlusBaseDir;
+    }
 
     public TreeMap<VersionInfo, EPlusConfig> getEPlusConfigs() {    
         return EPlusConfigs;
@@ -304,6 +315,7 @@ public class JEPlusConfig extends ConfigFileNames {
     public static JEPlusConfig loadFromJSON (File file) throws IOException {
         // Read JSON
         JEPlusConfig config = JsonMapper.readValue(file, JEPlusConfig.class);
+        config.setJEPlusBaseDir(file.getCanonicalFile().getParent());
 //        // Construct maps
 //        config.EPlusConfigs.clear();
 //        for (EPlusConfig cfg: config.EPlusList) {
