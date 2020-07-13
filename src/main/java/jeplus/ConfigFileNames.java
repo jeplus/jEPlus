@@ -193,6 +193,12 @@ public abstract class ConfigFileNames implements Serializable {
                             return (extension.equalsIgnoreCase(".pl"));
                         case SH:
                             return (extension.equalsIgnoreCase(".sh"));
+                        case LIST:
+                            return (
+                                    extension.equalsIgnoreCase(".lst")
+                                    || extension.equalsIgnoreCase(".csv")
+                                    || extension.equalsIgnoreCase(".txt")
+                            );
                         case ALL:
 
                         default:
@@ -244,6 +250,8 @@ public abstract class ConfigFileNames implements Serializable {
                         return "Perl script file (.pl)";
                     case SH:
                         return "Shell script file (.sh)";
+                    case LIST:
+                        return "Text file containing a list (*.lst *.csv *.txt)";
                     case ALL:
                         return "All files (*.*)";
                     default:

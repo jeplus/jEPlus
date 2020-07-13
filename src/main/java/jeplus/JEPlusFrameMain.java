@@ -299,9 +299,17 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
 
     public void setCurrentProjectFile(String CurrentProjectFile) {
         this.CurrentProjectFile = CurrentProjectFile;
-        if (! JEPlusConfig.getDefaultInstance().getRecentProjects().contains(CurrentProjectFile))
-            JEPlusConfig.getDefaultInstance().getRecentProjects().add(0, CurrentProjectFile);
         this.setTitle(JEPlusVersion.getVersion() + " - " + CurrentProjectFile + (Project.isContentChanged()?"*":""));
+        // Update recent projects list
+        List<String> recent = JEPlusConfig.getDefaultInstance().getRecentProjects();
+        if (recent.contains(CurrentProjectFile)) {
+            recent.remove(CurrentProjectFile);
+        }
+        recent.add(0, CurrentProjectFile);
+        while (recent.size() > 20) {
+            recent.remove(recent.size()-1);
+        }
+        this.updateRecentFilesMenu();
     }
 
     // =============== End getters and setters ===============
@@ -802,6 +810,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jMenuItemCreateIndex = new javax.swing.JMenuItem();
         jMenuItemJESSClient = new javax.swing.JMenuItem();
         jMenuItemJEPlusEA = new javax.swing.JMenuItem();
+        jMenuItemCreateJobList = new javax.swing.JMenuItem();
         jplParamTreeHolder = new javax.swing.JPanel();
         jplSettings = new javax.swing.JPanel();
         jplEPlusSettings = new jeplus.gui.JPanel_EPlusSettings();
@@ -882,7 +891,6 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jMenuItemViewIndex = new javax.swing.JMenuItem();
         jMenuItemViewReports = new javax.swing.JMenuItem();
         jSeparator9 = new javax.swing.JPopupMenu.Separator();
-        jMenuItemCreateJobList = new javax.swing.JMenuItem();
         jMenuTools = new javax.swing.JMenu();
         jMenuItemConfig = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JSeparator();
@@ -964,6 +972,15 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             }
         });
 
+        jMenuItemCreateJobList.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_key.png"))); // NOI18N
+        jMenuItemCreateJobList.setText("Create the full job list...");
+        jMenuItemCreateJobList.setToolTipText("Create the list of jobs in the current project and save it in a CSV file. This list or part of it can be used as a job list file in the future.");
+        jMenuItemCreateJobList.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemCreateJobListActionPerformed(evt);
+            }
+        });
+
         jplParamTreeHolder.setLayout(new java.awt.BorderLayout());
 
         jplSettings.setBorder(javax.swing.BorderFactory.createTitledBorder("Executables"));
@@ -972,7 +989,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1200, 740));
-        setPreferredSize(new java.awt.Dimension(1366, 768));
+        setPreferredSize(new java.awt.Dimension(1366, 855));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -1104,7 +1121,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                     .addGroup(jplModelTestLayout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtTestResultFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 491, Short.MAX_VALUE)
+                        .addComponent(txtTestResultFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 458, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cmdSelectTestFolder, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -1140,9 +1157,9 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             pnlRvxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlRvxLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 532, Short.MAX_VALUE)
+                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1378,7 +1395,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                     .addComponent(chkPrepare)
                     .addComponent(chkRun)
                     .addComponent(chkCollect))
-                .addContainerGap(218, Short.MAX_VALUE))
+                .addContainerGap(168, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1423,7 +1440,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmdStart)
                     .addComponent(cmdValidate1))
@@ -1477,7 +1494,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             pnlUtilitiesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlUtilitiesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 645, Short.MAX_VALUE)
+                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 700, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1691,16 +1708,6 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jMenuAction.add(jMenuViewResult);
         jMenuAction.add(jSeparator9);
 
-        jMenuItemCreateJobList.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/page_key.png"))); // NOI18N
-        jMenuItemCreateJobList.setText("Create the full job list...");
-        jMenuItemCreateJobList.setToolTipText("Create the list of jobs in the current project and save it in a CSV file. This list or part of it can be used as a job list file in the future.");
-        jMenuItemCreateJobList.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItemCreateJobListActionPerformed(evt);
-            }
-        });
-        jMenuAction.add(jMenuItemCreateJobList);
-
         jMenuBarMain.add(jMenuAction);
 
         jMenuTools.setText("Tools ");
@@ -1837,7 +1844,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 697, Short.MAX_VALUE)
+                .addComponent(jSplitPane1)
                 .addContainerGap())
         );
 
@@ -2137,10 +2144,11 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private void cmdSelectJobListFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdSelectJobListFileActionPerformed
         // Select a file to open
         fc.setFileFilter(EPlusConfig.getFileFilter(EPlusConfig.LIST));
+        // fc.setCurrentDirectory(new File(Project.getBaseDir()));
         fc.setSelectedFile(new File(""));
         fc.setMultiSelectionEnabled(false);
         String listfile = RelativeDirUtil.checkAbsolutePath(txtJobListFile.getText(), Project.getBaseDir());
-        fc.setCurrentDirectory(new File (listfile));
+        fc.setCurrentDirectory(new File (listfile).getParentFile());
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             txtJobListFile.setText(fc.getSelectedFile().getPath());
         }
@@ -2571,13 +2579,13 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     }//GEN-LAST:event_cboSampleOptActionPerformed
 
     private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
-        // Assign the first branch to the Parameters list
-        DefaultMutableTreeNode thisleaf = Project.getParamTree().getFirstLeaf();
-        Object [] path = thisleaf.getUserObjectPath();
-        Project.getParameters().clear();
-        for (Object item : path) {
-            Project.getParameters().add((ParameterItemV2)item);
-        }
+//        // Assign the first branch to the Parameters list
+//        DefaultMutableTreeNode thisleaf = Project.getParamTree().getFirstLeaf();
+//        Object [] path = thisleaf.getUserObjectPath();
+//        Project.getParameters().clear();
+//        for (Object item : path) {
+//            Project.getParameters().add((ParameterItemV2)item);
+//        }
         // Detect project changes
         if (Project.isContentChanged() /*|| ! Objects.equals(Project, SavedProject)*/) {
             // Save the project file before exit?
@@ -3007,6 +3015,21 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
         this.jMenuRecent.add(item);
     }
 
+    private void updateRecentFilesMenu () {
+        this.jMenuRecent.removeAll();
+        List<String> recent = JEPlusConfig.getDefaultInstance().getRecentProjects();
+        if (recent != null) {
+            int idx = 0;
+            for (int i=0; i<recent.size(); i++) {
+                String prj = recent.get(i);
+                if (prj != null && prj.trim().length() > 0) {
+                    this.addMenuItemRecentFile (prj);
+                    idx ++;
+                }
+            }
+        }
+    }
+    
     private void addMenuItemResultFile (String fn) {
         final File file = new File (BatchManager.getResolvedEnv().getParentDir() + fn);
         JMenuItem item = new JMenuItem (file.getName());
@@ -3048,17 +3071,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
                     // Clear console log file content
                     JEPlusConfig.getDefaultInstance().purgeScreenLogFile();
                     // Set recent projects in menu
-                    List<String> recent = JEPlusConfig.getDefaultInstance().getRecentProjects();
-                    if (recent != null) {
-                        int idx = 0;
-                        for (int i=0; i<recent.size(); i++) {
-                            String prj = recent.get(i);
-                            if (prj != null && prj.trim().length() > 0) {
-                                frame.addMenuItemRecentFile (prj);
-                                idx ++;
-                            }
-                        }
-                    }
+                    frame.updateRecentFilesMenu();
                     // Update local e+ configurations
                     frame.setExecType(0);
                     if (prjfile != null) {

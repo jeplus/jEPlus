@@ -28,7 +28,7 @@ import jeplus.data.ParameterItemV2;
 public class ParamTableModel extends AbstractTableModel {
     
     String [] ColumnNames = {
-        "#", "Type", "PID", "Search Tag", "Value Type", "Values", "N"
+        "#", "PID", "Name", "Search Tag", "Value Type", "Values", "N"
     };
             
     ArrayList<ParameterItemV2> Parameters = null;
@@ -62,9 +62,9 @@ public class ParamTableModel extends AbstractTableModel {
             case 0:
                 return row;
             case 1:
-                return item.getParamType();
-            case 2:
                 return item.getID();
+            case 2:
+                return item.getName();
             case 3:
                 return item.getSearchString();
             case 4:
@@ -72,14 +72,15 @@ public class ParamTableModel extends AbstractTableModel {
             case 5:
                 return item.getValuesString();
             case 6:
-                return item.getNAltValues(Project);
+                return item.getNAltValues(Project) + (item.getSelectedAltValue() > 0 ? "*" : "");
         }
         return null;
     }
     
     @Override
     public boolean isCellEditable(int row, int col){ 
-        return col != 0 && col != 6; 
+        // return col != 0 && col != 6; 
+        return false;
     }
     
     @Override
@@ -90,11 +91,11 @@ public class ParamTableModel extends AbstractTableModel {
             case 0:
                 break;
             case 1:
-                item.setParamType((ParameterItemV2.PType)value);
+                item.setID(value.toString());
                 changed = true;
                 break;
             case 2:
-                item.setID(value.toString());
+                item.setName(value.toString());
                 changed = true;
                 break;
             case 3:
@@ -110,6 +111,7 @@ public class ParamTableModel extends AbstractTableModel {
                 changed = true;
                 break;
             case 6:
+                changed = true;
                 break;
         }
         if (changed) {

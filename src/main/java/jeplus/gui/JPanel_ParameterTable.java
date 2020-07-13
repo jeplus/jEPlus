@@ -65,6 +65,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
     
     protected String Title = "Parameter Table";
     protected ParameterItemV2 CurrentItem = null;
+    protected int CurrentRow = 0;
     protected ParamTableModel ParamTableModel = null;
     protected JTable jTableParams = null;
     private DocumentListener DL = null;
@@ -131,30 +132,54 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
         JComboBox comboBox = null;
         for (int i = 0; i < 7; i++) {
             column = jTableParams.getColumnModel().getColumn(i);
-            if (i == 0) { //#
-                column.setMinWidth(30);
-                column.setPreferredWidth(20);
-                column.setMaxWidth(50);
-            } else if (i == 1) { // P-Type
-                column.setPreferredWidth(70); 
-                comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.PType.values()));
-                column.setCellEditor(new DefaultCellEditor(comboBox));
-            } else if (i == 2) { // P-ID
-                column.setPreferredWidth(30); //# column is small
-            } else if (i == 3) { // Search Tag
-                column.setPreferredWidth(100); //# column is small
-            } else if (i == 4) { // V-Type
-                column.setPreferredWidth(60); //# column is small
-                comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.VType.values()));
-                column.setCellEditor(new DefaultCellEditor(comboBox));
-            } else if (i == 5) { // Values string
-                column.setPreferredWidth(200); //# column is small
-            } else if (i == 6) { // N
-                column.setMinWidth(30);
-                column.setPreferredWidth(25);
-                column.setMaxWidth(50);
-            } else {
-                column.setPreferredWidth(120);
+            switch (i) {
+                case 0:
+                    //#
+                    column.setMinWidth(20);
+                    column.setPreferredWidth(20);
+                    column.setMaxWidth(50);
+                    break;
+//                case 1:
+//                    // P-Type
+//                    column.setPreferredWidth(70);
+//                    comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.PType.values()));
+//                    column.setCellEditor(new DefaultCellEditor(comboBox));
+//                    break;
+//                case 2:
+//                    // P-ID
+//                    column.setPreferredWidth(30); //# column is small
+//                    break;
+                case 1:
+                    // P-ID
+                    column.setPreferredWidth(30); //# column is small
+                    break;
+                case 2:
+                    // P-Name
+                    column.setPreferredWidth(70);
+                    break;
+                case 3:
+                    // Search Tag
+                    column.setPreferredWidth(100); //# column is small
+                    break;
+                case 4:
+                    // V-Type
+                    column.setPreferredWidth(60); //# column is small
+                    comboBox = new JComboBox(new DefaultComboBoxModel(ParameterItemV2.VType.values()));
+                    column.setCellEditor(new DefaultCellEditor(comboBox));
+                    break;
+                case 5:
+                    // Values string
+                    column.setPreferredWidth(200); //# column is small
+                    break;
+                case 6:
+                    // N
+                    column.setMinWidth(20);
+                    column.setPreferredWidth(25);
+                    column.setMaxWidth(50);
+                    break;
+                default:
+                    column.setPreferredWidth(120);
+                    break;
             }
         }
         // Selection listener
@@ -183,19 +208,28 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
                     Document src = e.getDocument();
                     if(src == DocShortName) {
                         CurrentItem.setID(txtShortName.getText());
+                        ParamTableModel.setValueAt(CurrentItem.getID(), jTableParams.getSelectedRow(), 1);
                     }else if (src == DocName) {
                         CurrentItem.setName(txtName.getText());
+                        ParamTableModel.setValueAt(CurrentItem.getName(), jTableParams.getSelectedRow(), 2);
                     }else if (src == DocDescript) {
                         CurrentItem.setDescription(txtDescript.getText());
                     }else if (src == DocSearchString) {
                         CurrentItem.setSearchString(txtSearchString.getText());
+                        ParamTableModel.setValueAt(CurrentItem.getSearchString(), jTableParams.getSelectedRow(), 3);
                     }else if (src == DocAltValues) {
                         CurrentItem.setValuesString(txtAltValues.getText());
                         txpPreview.setText(getAltValuesPreview());
                         resetAltValueNumbers();
+                        ParamTableModel.setValueAt(CurrentItem.getValuesString(), jTableParams.getSelectedRow(), 5);
+                        ParamTableModel.setValueAt(
+                                CurrentItem.getNAltValues(Project) + (CurrentItem.getSelectedAltValue() > 0 ? "*" : ""),
+                                jTableParams.getSelectedRow(), 
+                                6
+                        );
                     }
                     Project.setContentChanged(true);
-                    ParamTableModel.fireTableDataChanged();
+                    // ParamTableModel.fireTableDataChanged();
                 }
             }
             @Override
@@ -347,24 +381,38 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
      * @return the root node of the branch being removed
      */
     public ParameterItemV2 removeParameterItem () {
-        int n = JOptionPane.showConfirmDialog(
-            this,
-            "Are you sure that you want to delete the selected parameter?",
-            "Deleting parameter",
-            JOptionPane.YES_NO_OPTION);
-        if (n == JOptionPane.NO_OPTION) {
-            return null;
-        }
-        
         int idx = this.Project.getParameters().indexOf(CurrentItem);
-        ParameterItemV2 deleted = null;
         if (idx >= 0) {
-            deleted = this.Project.getParameters().remove(idx);
+            int n = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure that you want to delete the selected parameter?",
+                "Deleting parameter",
+                JOptionPane.YES_NO_OPTION);
+            if (n == JOptionPane.NO_OPTION) {
+                return null;
+            }
+
+            ParameterItemV2 deleted = this.Project.getParameters().remove(idx);
             Project.setContentChanged(true);
-            CurrentItem = this.Project.getParameters().get(Math.max(0, idx-1));
-            ParamTableModel.fireTableDataChanged();
+            ParamTableModel.fireTableRowsDeleted(idx, idx);
+            if (idx > 0) {
+                CurrentItem = Project.getParameters().get(Math.max(0, idx-1));
+                jTableParams.setRowSelectionInterval(idx-1, idx-1);
+//                jTableParams.setEditingRow(idx-1);
+            }else {
+                if (Project.getParameters().isEmpty()) {
+                    CurrentItem =  null;
+                }else {
+                    CurrentItem =  Project.getParameters().get(0);
+                    jTableParams.setRowSelectionInterval(0, 0);
+//                    jTableParams.setEditingRow(0);
+                }
+            }
+            //displayParamDetails();
+            //ParamTableModel.fireTableDataChanged();
+            return deleted;
         }
-        return deleted;
+        return null;
     }
 
     /**
@@ -373,7 +421,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
     public void copyParameterItem() {
         if (CurrentItem != null) {
             ParameterItemV2 child = new ParameterItemV2 (CurrentItem);
-            child.setID("P" + this.Project.getParameters().size());
+            // child.setID("P" + this.Project.getParameters().size());
             addParameterItem(child);
         }
     }
@@ -387,9 +435,10 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
         Project.setContentChanged(true);
         this.CurrentItem = child;
         int last = this.Project.getParameters().size() - 1;
+        ParamTableModel.fireTableRowsInserted(last, last);
         this.jTableParams.setRowSelectionInterval(last, last);
-        this.displayParamDetails();    
-        ParamTableModel.fireTableDataChanged();
+        // this.displayParamDetails();    
+        // ParamTableModel.fireTableDataChanged();
     }
 
     /** This method is called from within the constructor to
@@ -700,12 +749,18 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
 }//GEN-LAST:event_cmdDuplicateActionPerformed
 
     private void cboTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboTypeActionPerformed
-        CurrentItem.setType((ParameterItemV2.VType)cboType.getSelectedItem());
-        // Trigger ValueStringChanged
-        CurrentItem.setValuesString(CurrentItem.getValuesString());
-        txpPreview.setText(getAltValuesPreview());
-        this.resetAltValueNumbers();
-        if (DLactive) Project.setContentChanged(true);
+        if (CurrentItem != null) {
+            CurrentItem.setType((ParameterItemV2.VType)cboType.getSelectedItem());
+            // Trigger ValueStringChanged
+            CurrentItem.setValuesString(CurrentItem.getValuesString());
+            txpPreview.setText(getAltValuesPreview());
+            this.resetAltValueNumbers();
+            if (DLactive) {
+                Project.setContentChanged(true);
+                // ParamTableModel.fireTableDataChanged();
+                ParamTableModel.setValueAt(CurrentItem.getType(), jTableParams.getSelectedRow(), 4);
+            }
+        }
 }//GEN-LAST:event_cboTypeActionPerformed
 
     private void cmdImportParamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdImportParamsActionPerformed
@@ -713,13 +768,29 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
     }//GEN-LAST:event_cmdImportParamsActionPerformed
 
     private void cboFixValueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFixValueActionPerformed
-        CurrentItem.setSelectedAltValue(cboFixValue.getSelectedIndex());
-        if (DLactive) Project.setContentChanged(true);
+        if (CurrentItem != null) {
+            CurrentItem.setSelectedAltValue(cboFixValue.getSelectedIndex());
+            if (DLactive) {
+                Project.setContentChanged(true);
+//                ParamTableModel.fireTableDataChanged();
+                ParamTableModel.setValueAt(
+                        CurrentItem.getNAltValues(Project) + (CurrentItem.getSelectedAltValue() > 0 ? "*" : ""),
+                        jTableParams.getSelectedRow(), 
+                        6
+                );
+            }
+        }
     }//GEN-LAST:event_cboFixValueActionPerformed
 
     private void cboParamTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboParamTypeActionPerformed
-        CurrentItem.setParamType((ParameterItemV2.PType)cboParamType.getSelectedItem());
-        if (DLactive) Project.setContentChanged(true);
+        if (CurrentItem != null) {
+            CurrentItem.setParamType((ParameterItemV2.PType)cboParamType.getSelectedItem());
+            if (DLactive) {
+                Project.setContentChanged(true);
+//                ParamTableModel.fireTableDataChanged();
+                // ParamTableModel.setValueAt(CurrentItem.getParamType(), jTableParams.getSelectedRow(), 1);
+            }
+        }
     }//GEN-LAST:event_cboParamTypeActionPerformed
 
 
@@ -762,8 +833,7 @@ public class JPanel_ParameterTable extends javax.swing.JPanel implements TitledJ
 //        String columnName = model.getColumnName(column);
 //        CurrentItem = this.Project.getParameters().get(row);
         if (column >= 0) {
-            displayParamDetails();
+            // displayParamDetails();
         }
     }
-
 }

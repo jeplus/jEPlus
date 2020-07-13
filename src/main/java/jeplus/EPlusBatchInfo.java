@@ -20,6 +20,7 @@ package jeplus;
 
 import jeplus.data.ParameterItemV2;
 import java.util.ArrayList;
+import java.util.Arrays;
 import jeplus.data.FileList;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +80,7 @@ public class EPlusBatchInfo {
     }
     
     public int getParamTreeDepth () {
-        return SearchStrings == null ? -1 : SearchStrings.size();
+        return ParamList == null ? -1 : ParamList.size();
     }
 
     public void setParamChains(ArrayList<ArrayList> ParamChains) {
@@ -170,15 +171,19 @@ public class EPlusBatchInfo {
     }
     
     /**
-     * Get a list of search strings in an array form
+     * Get the list of individual search strings in an array form. The combi search strings
+     * will be parsed and included as separate items.
      * @return The array of search strings
      */
     public String [] getSearchStringsArray () {
-        String [] strs = null;
+        ArrayList<String> tags = new ArrayList<>();
         if (SearchStrings != null) {
-            strs = SearchStrings.toArray(new String[0]);
+            for (String tag : SearchStrings) {
+                String [] substrs = tag.split("\\s*\\|\\s*");
+                tags.addAll(Arrays.asList(substrs));
+            }
         }
-        return strs;
+        return tags.toArray(new String[0]);
     }
 
     /**

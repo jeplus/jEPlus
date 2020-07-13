@@ -411,14 +411,26 @@ public abstract class EPlusAgent implements Runnable {
     public void writeJobListToFile (String filename) {
         if (this.JobQueue != null) {
             try (PrintWriter fw = new PrintWriter (new FileWriter (filename))) {
-                for (EPlusTask job : JobQueue) {
-                    StringBuilder buf = new StringBuilder (job.getJobID());
-                    buf.append(",").append(job.getWorkEnv().IDFDir).append(job.getWorkEnv().IDFTemplate);
-                    buf.append(",").append(job.getWorkEnv().WeatherDir).append(job.getWorkEnv().WeatherFile);
-                    for (String val : job.getAltValueList()) {
-                        buf.append(",").append(val);
+                // Write a header
+                if (! JobQueue.isEmpty()) {
+                    StringBuilder buf = new StringBuilder ("#Job_ID,Weather File, Model File");
+                    for (String tag : JobQueue.get(0).getSearchStringList()) {
+                        buf.append(",").append(tag);
                     }
                     fw.println(buf.toString());
+                    // Write jobs
+                    for (EPlusTask job : JobQueue) {
+                        buf = new StringBuilder (job.getJobID());
+                        buf.append(",").append(job.getWorkEnv().WeatherDir).append(job.getWorkEnv().WeatherFile);
+                        buf.append(",").append(job.getWorkEnv().IDFDir).append(job.getWorkEnv().IDFTemplate);
+                        for (String val : job.getAltValueList()) {
+                            buf.append(",").append(val);
+                        }
+                        fw.println(buf.toString());
+                    }
+                }else {
+                    logger.warn("Job queue is empty!");
+                    fw.println("#Job queue is empty!");
                 }
             }catch (IOException ioe) {
                 logger.error("Failed to write jobs list to file " + filename);

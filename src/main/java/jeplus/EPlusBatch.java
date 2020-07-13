@@ -1060,9 +1060,10 @@ public class EPlusBatch extends Thread {
             return -5;
         }
         String [] searchstr = Info.getSearchStringsArray();
-        if (searchstr.length != jobArray[0].length - (Project.getProjectType()==JEPlusProjectV2.ModelType.EPLUS ? 3 : 2)) {
+        int availVals = jobArray[0].length - (Project.getProjectType()==JEPlusProjectV2.ModelType.EPLUS ? 3 : 2);
+        if (searchstr.length != availVals) {
             logger.error("EPlusBatch.buildJobs(): Supplied job array does not comply with project definition. "
-                    + (searchstr.length+(Project.getProjectType()==JEPlusProjectV2.ModelType.EPLUS ? 2 : 1)) + " variables are present, whereas " + (jobArray[0].length-1) + " values are given.");
+                    + searchstr.length + " search tags are present, whereas " + availVals + " values are given.");
             return -6;
         }
         // env is needed to carry individual job settings
@@ -1084,7 +1085,9 @@ public class EPlusBatch extends Thread {
                             try {
                                 env.DCKTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][1]));
                             }catch (NumberFormatException nfe) {
-                                env.DCKTemplate = jobArray[i][1];
+                                File mf = new File (RelativeDirUtil.checkAbsolutePath(jobArray[i][1], Project.getBaseDir()));
+                                env.DCKDir = mf.getAbsoluteFile().getParent().concat(File.separator);;
+                                env.DCKTemplate = mf.getName();
                             }
                             // Collect search strings
                             for (int j=0; j<searchstr.length; j++) {
@@ -1099,7 +1102,9 @@ public class EPlusBatch extends Thread {
                             try {
                                 env.INSELTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][1]));
                             }catch (NumberFormatException nfe) {
-                                env.INSELTemplate = jobArray[i][1];
+                                File mf = new File (RelativeDirUtil.checkAbsolutePath(jobArray[i][1], Project.getBaseDir()));
+                                env.INSELDir = mf.getAbsoluteFile().getParent().concat(File.separator);;
+                                env.INSELTemplate = mf.getName();
                             }
                             // Collect search strings
                             for (int j=0; j<searchstr.length; j++) {
@@ -1115,12 +1120,16 @@ public class EPlusBatch extends Thread {
                             try {
                                 env.WeatherFile = WthrFiles.get(Integer.valueOf(jobArray[i][1]));
                             }catch (NumberFormatException nfe) {
-                                env.WeatherFile = jobArray[i][1];
+                                File wf = new File (RelativeDirUtil.checkAbsolutePath(jobArray[i][1], Project.getBaseDir()));
+                                env.WeatherDir = wf.getAbsoluteFile().getParent().concat(File.separator);
+                                env.WeatherFile = wf.getName();
                             }
                             try {
                                 env.IDFTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
                             }catch (NumberFormatException nfe) {
-                                env.IDFTemplate = jobArray[i][2];
+                                File mf = new File (RelativeDirUtil.checkAbsolutePath(jobArray[i][2], Project.getBaseDir()));
+                                env.IDFDir = mf.getAbsoluteFile().getParent().concat(File.separator);;
+                                env.IDFTemplate = mf.getName();
                             }
                             env.EPlusVersion = IDFmodel.getEPlusVersionInIDF (env.IDFDir + env.IDFTemplate);
                             // Collect search strings

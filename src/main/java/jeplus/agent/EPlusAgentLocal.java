@@ -101,6 +101,9 @@ public class EPlusAgentLocal extends EPlusAgent {
         // Notify Owner
         this.getJobOwner().setSimulationRunning(true);
         
+        // Timing
+        StartTime = new Date();
+
         // Write job list
         if (Settings.getSteps().isWriteJobList()) {
             String listfile = JobOwner.getProject().getBaseDir() + Settings.getSteps().getJobListFile();
@@ -126,8 +129,6 @@ public class EPlusAgentLocal extends EPlusAgent {
                 Processors = new ArrayList<> ();
             }
 
-            // Timing
-            StartTime = new Date();
             StopAgent = false;
 
             while ((! StopAgent) && JobQueue.size() > 0)  {
@@ -183,6 +184,11 @@ public class EPlusAgentLocal extends EPlusAgent {
                             try { Thread.sleep(Settings.getDelay()); } catch (Exception ex) {}
                         }
                     }else {
+                        // Force processes to stop
+                        for (EPlusTask job : RunningJobs) {
+                            job.interrupt();
+                        }
+                        RunningJobs.clear();
                         Processors.clear();
                     }
                 }
