@@ -20,6 +20,7 @@ package jeplus;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Locale;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -105,7 +106,7 @@ public class Main {
             commandline = parser.parse( options, args );
             if (commandline.hasOption("help")) {
                 // automatically generate the help statement
-                formatter.printHelp( "java -Xmx1000m -jar jEPlus.jar [OPTIONS]", options );    
+                formatter.printHelp( "java -jar jEPlus.jar [OPTIONS] {project file (.jep or .json)}", options );    
                 System.exit(-1);
             }
         }
@@ -128,18 +129,28 @@ public class Main {
     public void mainFunction (CommandLine commandline) {
         // jE+ Configuration file
         String cfgfile = JEPlusConfig.getDefaultConfigFile();
+        String base = new File ("./").getAbsolutePath();
+        try {
+            base = new File(JEPlusConfig.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
+        }catch (URISyntaxException ex) {}
         // load E+ configuration
         boolean showSplash = false;
-        if (! new File (cfgfile).exists()) { 
-            showSplash = true; 
-        }else {
+        if (new File (cfgfile).exists()) {
             JEPlusConfig.setDefaultInstance(JEPlusConfig.getNewInstance(cfgfile));
+            logger.info("Configuration loaded from " + new File (cfgfile).getAbsolutePath());
+        }else if (new File (base + File.separator + cfgfile).exists()) { 
+            JEPlusConfig.setDefaultInstance(JEPlusConfig.getNewInstance(base + File.separator + cfgfile));
+            logger.info("Configuration loaded from " + new File (base + File.separator + cfgfile).getAbsolutePath());
+        }else {
+            logger.info(cfgfile + " not found.");
+            showSplash = true; 
         }
         // Set local threads
         int nthread = Runtime.getRuntime().availableProcessors();
-        if (commandline.hasOption("local")) {
+        if (commandline.hasOption("parallel")) {
             try {
-                nthread = Integer.parseInt(commandline.getOptionValue("local"));
+                int nt = Integer.parseInt(commandline.getOptionValue("parallel"));
+                if (nt > 0) nthread = Math.min (nt, nthread);
             }catch (Exception ex) {
             }
         }
@@ -183,7 +194,7 @@ public class Main {
                 batch.setAgent(DefaultAgent);
 
                 // The following are batch mode options. Only one is effective at a time...
-                if (commandline.hasOption("all") || commandline.hasOption("sample") || commandline.hasOption("lhs") || 
+                if (commandline.hasOption("all") || commandline.hasOption("shuffle") || commandline.hasOption("lhs") || 
                     commandline.hasOption("index") || commandline.hasOption("value") || commandline.hasOption("id") || 
                     commandline.hasOption("sobol") || commandline.hasOption("file")) {
                         showGUI = false;
@@ -194,7 +205,7 @@ public class Main {
                             if (commandline.hasOption("all")) {
                                     batch.buildJobs();
                                     batch.start();
-                            }else if (commandline.hasOption("sample")) {
+                            }else if (commandline.hasOption("shuffle")) {
                                     long randomseed;
                                     if (commandline.hasOption("seed")) {
                                         try {
@@ -207,7 +218,7 @@ public class Main {
                                     }else {
                                         randomseed = project.getExecSettings().getRandomSeed();
                                     }
-                                    int njobs = Integer.parseInt(commandline.getOptionValue("sample"));
+                                    int njobs = Integer.parseInt(commandline.getOptionValue("shuffle"));
                                     batch.runSample(EPlusBatch.SampleType.SHUFFLE, njobs, RandomSource.getRandomGenerator(randomseed));
                             }else if (commandline.hasOption("lhs")) {
                                     long randomseed;
@@ -278,11 +289,6 @@ public class Main {
     protected Options getCommandLineOptions (Options opts) {
         Option help = new Option( "help", "Show this message" );
         
-        Option log = Option.builder("log").argName( "log config file" )
-                                        .hasArg()
-                                        .desc(  "This option has been disused!" )
-                                        .build();
-
         Option job = Option.builder("job").argName( "project file" )
                                         .hasArg()
                                         .desc(  "Open project file in either XML (.jep) or JSON (.json) format" )
@@ -290,51 +296,50 @@ public class Main {
         
         Option run_all = new Option( "all", "Execute all jobs in project" );
         
-        Option run_sample   = Option.builder("sample").argName( "sample size" )
+        Option run_sample   = Option.builder("shuffle").argName( "sample size" )
                                         .hasArg()
-                                        .desc(  "Execute a random sample in project. Project size limit applies. Effective with -job" )
+                                        .desc(  "Execute a random sample in project. Project size limit applies. Effective only if a project is specified" )
                                         .build();
         Option run_lhs   = Option.builder("lhs").argName( "sample size" )
                                         .hasArg()
-                                        .desc(  "Execute a Latin Hypercube sample in project. Effective with -job" )
+                                        .desc(  "Execute a Latin Hypercube sample in project. Effective only if a project is specified" )
                                         .build();
         Option run_sobol   = Option.builder("sobol").argName( "sample size" )
                                         .hasArg()
-                                        .desc(  "Execute a Sobol sample in project. Effective with -job" )
+                                        .desc(  "Execute a Sobol sample in project. Effective only if a project is specified" )
                                         .build();
         Option random_seed   = Option.builder("seed").argName( "random seed" )
                                         .hasArg()
-                                        .desc(  "Use the given random seed for sampling. If seed is not specified, jEPlus uses the seed saved in the project. This option is effective only with -sample, -lhs and -sobol" )
+                                        .desc(  "Use the given random seed for sampling. If seed is not specified, jEPlus uses the seed saved in the project. This option is effective only with -shuffle, -lhs and -sobol" )
                                         .build();
         Option run_index   = Option.builder("index").argName( "job indexes" )
                                         .hasArg()
-                                        .desc(  "Execute selected jobs in project using specified parameter value indexes. Effective with -job" )
+                                        .desc(  "Execute selected jobs in project using specified parameter value indexes. Effective only if a project is specified" )
                                         .build();
         Option run_value   = Option.builder("value").argName( "job values" )
                                         .hasArg()
-                                        .desc(  "Execute selected jobs in project using specified parameter values. Effective with -job" )
+                                        .desc(  "Execute selected jobs in project using specified parameter values. Effective only if a project is specified" )
                                         .build();
         Option run_id   = Option.builder("id").argName( "job ids" )
                                         .hasArg()
-                                        .desc(  "Execute selected jobs in project using specified job id strings. Effective with -job" )
+                                        .desc(  "Execute selected jobs in project using specified job id strings. Effective only if a project is specified" )
                                         .build();
         Option run_file   = Option.builder("file").argName( "job list file" )
                                         .hasArg()
-                                        .desc(  "Execute selected jobs in project using a job list file. Effective with -job" )
+                                        .desc(  "Execute selected jobs in project using a job list file. Effective only if a project is specified" )
                                         .build();
-        Option output_folder   = Option.builder("output").argName( "output folder" )
+        Option output_folder   = Option.builder("out").argName( "output folder" )
                                         .hasArg()
-                                        .desc(  "Use the specified folder for outputs." )
+                                        .desc(  "Use the specified folder for outputs. If relative form is used, it is relative to the location of the project file" )
                                         .build();
-        Option local   = Option.builder("local").argName( "number of threads" )
+        Option local   = Option.builder("parallel").argName( "number of threads" )
                                         .hasArg()
-                                        .desc(  "Use specified number of local threads for parallel execution." )
+                                        .desc(  "Use specified number of local threads for parallel simulations. If a non-possitive number is supplied, all available processor threads will be used." )
                                         .build();
 
         Options options = (opts == null) ? new Options() : opts;
 
         options.addOption( help );
-        options.addOption(log);
         options.addOption( job );
         options.addOption( run_all );
         options.addOption( run_sample );
