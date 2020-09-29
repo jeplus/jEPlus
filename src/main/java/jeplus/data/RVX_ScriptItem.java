@@ -19,6 +19,7 @@
 package jeplus.data;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
 import java.util.Objects;
@@ -75,6 +76,11 @@ public class RVX_ScriptItem implements Serializable, IF_RVXItem {
 
     @JsonAlias({"pythonVersion"})
     public void setLanguage(String Language) {
+        this.Language = Language;
+    }
+
+    @JsonIgnore
+    public void setPythonVersion(String Language) {
         this.Language = Language;
     }
 

@@ -563,7 +563,8 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                         // Ready to run EPlus
                         if (ok) {
                             int code = EPlusWinTools.runEPlus(config, getWorkingDir(), false);
-                            ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
+                            // ok = (code >= 0) && EPlusWinTools.isEsoAvailable(getWorkingDir());
+                            ok = code == 0;
                         }
                         // Remove temperory files/dir if required
                         if (ok) {

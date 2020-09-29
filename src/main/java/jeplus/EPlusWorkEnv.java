@@ -81,6 +81,8 @@ public class EPlusWorkEnv implements Serializable {
     
     /** Processing steps to run */
     public BatchRunOptions Steps = new BatchRunOptions();
+    /** Timeout setting (for TRNSYS) from ExecSettings */
+    public int Timeout = 0;
 
     /** Required E+ version */
     public String EPlusVersion = "4.0";
@@ -110,6 +112,7 @@ public class EPlusWorkEnv implements Serializable {
         SelectedFiles = env.SelectedFiles;
         ForceRerun = env.ForceRerun;
         Steps = new BatchRunOptions (env.Steps);
+        Timeout = env.Timeout;
         EPlusVersion = env.EPlusVersion;
         Platform = env.Platform;
     }
@@ -288,6 +291,14 @@ public class EPlusWorkEnv implements Serializable {
 
     public void setSteps(BatchRunOptions Steps) {
         this.Steps = Steps;
+    }
+
+    public int getTimeout() {
+        return Timeout;
+    }
+
+    public void setTimeout(int Timeout) {
+        this.Timeout = Timeout;
     }
 
     /**

@@ -21,6 +21,7 @@ package jeplus;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import jeplus.util.RelativeDirUtil;
 import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -719,6 +720,62 @@ public class TRNSYSWinTools {
                 p_err.join();
                 if (outs != null) {
                     outs.println("# TRNSYS executable returns: " + ExitValue);
+                    outs.flush();
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error executing TRNSYS executable.", e);
+        }
+
+        // Return Radiance exit value
+        return ExitValue;
+    }
+
+    /**
+     * Call TRNSYS executable file to run the simulation
+     *
+     * @param config TRNSYS configuration instance
+     * @param WorkDir The working directory where the input files are stored and the output files to be generated
+     * @param dckfile The dck file to execute
+     * @param timeout Simulation timeout (seconds). Do not apply if a non-positive value is given
+     * @return the result code represents the state of execution steps. >=0 means successful
+     */
+    public static int runTRNSYS_with_timeout(TRNSYSConfig config, String WorkDir, String dckfile, int timeout) {
+
+        int ExitValue = -99;
+
+        Process EPProc = null;
+        try {
+            // Run TRNSYS executable
+            String CmdLine = "\"" + config.getResolvedTRNSYSEXEC() + "\" " + dckfile + " /n /h";
+            EPProc = Runtime.getRuntime().exec(CmdLine, null, new File(WorkDir));
+            // Console logger
+            try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
+                if (outs != null) {
+                    outs.println();
+                    outs.println("# Calling TRNexe - " + (new SimpleDateFormat()).format(new Date()));
+                    outs.println("# Command line: " + WorkDir + ">" + CmdLine);
+                    outs.flush();
+                }
+                StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
+                StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
+                p_out.start();
+                p_err.start();
+                if (timeout > 0) {
+                    if (EPProc.waitFor(timeout, TimeUnit.SECONDS)) {
+                        ExitValue = EPProc.exitValue();
+                    }else {
+                        EPProc.destroyForcibly();
+                        logger.warn("TRNSYS execution in " + WorkDir + " has timed out!");
+                        ExitValue = -99;
+                    }
+                }else {
+                    ExitValue = EPProc.waitFor();
+                }
+                p_out.join();
+                p_err.join();
+                if (outs != null) {
+                    outs.println("# TRNSYS executable returns: " + (ExitValue == -99 ? "Timed out" : ExitValue));
                     outs.flush();
                 }
             }

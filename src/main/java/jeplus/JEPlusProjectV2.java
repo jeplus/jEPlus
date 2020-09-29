@@ -684,6 +684,7 @@ public class JEPlusProjectV2 implements Serializable {
         ExecSettings.setSelectedFiles(env.SelectedFiles);
         ExecSettings.setRerunAll(env.ForceRerun);
         ExecSettings.setSteps(new BatchRunOptions(env.Steps));
+        ExecSettings.setTimeout(env.Timeout);
         // Mark content changed
         setContentChanged(true);
     }
@@ -714,6 +715,7 @@ public class JEPlusProjectV2 implements Serializable {
         env.SelectedFiles = ExecSettings.isDeleteSelectedFiles() ? ExecSettings.getSelectedFiles() : null;
         env.ForceRerun = ExecSettings.isRerunAll();
         env.Steps = ExecSettings.getSteps(); // ?? reference, not clone?
+        env.Timeout = ExecSettings.getTimeout();
     }
 
     /**
@@ -1070,28 +1072,40 @@ public class JEPlusProjectV2 implements Serializable {
      */
     private String [][] getSampleInEqualProbSegments (int sampleSize, Random randomsrc) {
         Object[] path = Parameters.toArray();
-        int length = path.length + 3; // tree depth plus JobID (reserved space), IDF and Weather
+        int extra = this.ProjectType == ProjectType.EPLUS ? 3 : 2;
+        int length = path.length + extra; // tree depth plus JobID (reserved space), IDF and Weather, or DCK
         String [][] SampledValues = new String [length][];
         int n_alt;
+        int [] SampledIndex;
         // First element is reserved for job id
-        // Weather
-        n_alt = this.parseFileListString(this.resolveWeatherDir(), this.getWeatherFile()).size();
-        int [] SampledIndex = this.defaultLHSdiscreteSample(sampleSize, n_alt, randomsrc);
-        SampledValues [1] = new String [sampleSize];
-        for (int j=0; j<sampleSize; j++) {
-            SampledValues[1][j] = Integer.toString(SampledIndex[j]);
-        }
-        // IDF
-        n_alt = this.parseFileListString(this.resolveIDFDir(), this.getIDFTemplate()).size();
-        SampledIndex = this.defaultLHSdiscreteSample(sampleSize, n_alt, randomsrc);
-        SampledValues [2] = new String [sampleSize];
-        for (int j=0; j<sampleSize; j++) {
-            SampledValues[2][j] = Integer.toString(SampledIndex[j]);
+        if (this.ProjectType == ProjectType.EPLUS) {
+            // Weather
+            n_alt = this.parseFileListString(this.resolveWeatherDir(), this.getWeatherFile()).size();
+            SampledIndex = this.defaultLHSdiscreteSample(sampleSize, n_alt, randomsrc);
+            SampledValues [1] = new String [sampleSize];
+            for (int j=0; j<sampleSize; j++) {
+                SampledValues[1][j] = Integer.toString(SampledIndex[j]);
+            }
+            // IDF
+            n_alt = this.parseFileListString(this.resolveIDFDir(), this.getIDFTemplate()).size();
+            SampledIndex = this.defaultLHSdiscreteSample(sampleSize, n_alt, randomsrc);
+            SampledValues [2] = new String [sampleSize];
+            for (int j=0; j<sampleSize; j++) {
+                SampledValues[2][j] = Integer.toString(SampledIndex[j]);
+            }
+        }else {
+            // DCK
+            n_alt = this.parseFileListString(this.resolveIDFDir(), this.getDCKTemplate()).size();
+            SampledIndex = this.defaultLHSdiscreteSample(sampleSize, n_alt, randomsrc);
+            SampledValues [1] = new String [sampleSize];
+            for (int j=0; j<sampleSize; j++) {
+                SampledValues[1][j] = Integer.toString(SampledIndex[j]);
+            }
         }
 
         // Parameters
-        for (int i=3; i<length; i++) {
-            ParameterItemV2 Param = ((ParameterItemV2) path[i-3]);
+        for (int i=extra; i<length; i++) {
+            ParameterItemV2 Param = ((ParameterItemV2) path[i-extra]);
             if (Param.getValuesString().startsWith("@sample")) {
                 // A distribution definition
                 SampledValues [i] = this.defaultLHSdistributionSample(sampleSize, Param.getValuesString(), Param.getType(), randomsrc);

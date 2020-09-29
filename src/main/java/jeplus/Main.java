@@ -163,8 +163,8 @@ public class Main {
         }
         // Get output folder
         String output = null;
-        if (commandline.hasOption("output")) {
-            output = commandline.getOptionValue("output");
+        if (commandline.hasOption("out")) {
+            output = commandline.getOptionValue("out");
         }
         
         boolean showGUI = true;
@@ -187,6 +187,14 @@ public class Main {
                     project.getExecSettings().setParentDir(output);
                 }
                 project.getExecSettings().setNumThreads(nthread);
+                if (commandline.hasOption("timeout")) {
+                    try {
+                        int to = Integer.parseInt(commandline.getOptionValue("timeout"));
+                        project.getExecSettings().setTimeout(to);
+                    }catch (NumberFormatException ex) {
+                        logger.warn("Timeout option is not a number: " + commandline.getOptionValue("timeout"));
+                    }
+                }
                 if (DefaultAgent == null) { // Default agent may have been set by external code
                     // set execution agent
                     DefaultAgent = new EPlusAgentLocal (JEPlusConfig.getDefaultInstance(), project.getExecSettings());
@@ -337,6 +345,11 @@ public class Main {
                                         .desc(  "Use specified number of local threads for parallel simulations. If a non-possitive number is supplied, all available processor threads will be used." )
                                         .build();
 
+        Option timeout   = Option.builder("timeout").argName( "TRNSYS timeout seconds" )
+                                        .hasArg()
+                                        .desc(  "Timeout setting for TRNSYS only. In case of simulation error, the the job will be terminated after the set amount of time." )
+                                        .build();
+
         Options options = (opts == null) ? new Options() : opts;
 
         options.addOption( help );
@@ -352,6 +365,7 @@ public class Main {
         options.addOption( run_file );
         options.addOption( output_folder );
         options.addOption( local );
+        options.addOption( timeout );
         
         return options;
     }

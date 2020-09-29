@@ -107,7 +107,7 @@ public class TRNSYSTask extends EPlusTask {
             ok = ok || ! WorkEnv.Steps.isPrepareJobs();
             // Ready to run TRNSYS
             if (ok) {
-                int code = TRNSYSWinTools.runTRNSYS(config, getWorkingDir(), TRNSYSConfig.getTRNSYSDefDCK());
+                int code = TRNSYSWinTools.runTRNSYS_with_timeout(config, getWorkingDir(), TRNSYSConfig.getTRNSYSDefDCK(), WorkEnv.Timeout);
                 ok = (code >= 0) && TRNSYSWinTools.isAnyFileAvailable(getOutputPrinter(), getWorkingDir());
             }      
             // Remove temperory files/dir if required

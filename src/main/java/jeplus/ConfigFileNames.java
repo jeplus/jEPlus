@@ -18,9 +18,6 @@
  ***************************************************************************/
 package jeplus;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;

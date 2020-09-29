@@ -20,6 +20,7 @@ package jeplus.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,6 +28,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -63,38 +65,40 @@ public class RVX implements Serializable {
     
     private ArrayList<RVX_RVIitem> RVIs = new ArrayList<>();
     public ArrayList<RVX_RVIitem> getRVIs() { return RVIs; }
-    public void setRVIs(ArrayList<RVX_RVIitem> RVIs) { this.RVIs = RVIs; }
+    @JsonSetter("rvis") public void setRVIs(ArrayList<RVX_RVIitem> RVIs) { this.RVIs = RVIs; }
+    public void setRVIs(RVX_RVIitem[] RVIs) { this.RVIs.addAll(Arrays.asList(RVIs)); }
 
     
     private ArrayList<RVX_SQLitem> SQLs = new ArrayList<>();
     public ArrayList<RVX_SQLitem> getSQLs() { return SQLs; }
-    public void setSQLs(ArrayList<RVX_SQLitem> SQLs) { this.SQLs = SQLs; }
-
+    @JsonSetter("sqls") public void setSQLs(ArrayList<RVX_SQLitem> SQLs) { this.SQLs = SQLs; }
+    public void setSQLs(RVX_SQLitem[] SQLs) { this.SQLs.addAll(Arrays.asList(SQLs)); }
     
     private ArrayList<RVX_ScriptItem> Scripts = new ArrayList<>();
     public ArrayList<RVX_ScriptItem> getScripts() { return Scripts; }
-    public void setScripts(ArrayList<RVX_ScriptItem> Scripts) { this.Scripts = Scripts; }
-
+    @JsonSetter("scripts") public void setScripts(ArrayList<RVX_ScriptItem> Scripts) { this.Scripts = Scripts; }
+    public void setScripts(RVX_ScriptItem[] Scripts) { this.Scripts.addAll(Arrays.asList(Scripts)); }
     
     private ArrayList<RVX_CSVitem> CSVs = new ArrayList<>();
     public ArrayList<RVX_CSVitem> getCSVs() { return CSVs; }
-    public void setCSVs(ArrayList<RVX_CSVitem> csvs) { this.CSVs = csvs; }
-
+    @JsonSetter("csvs") public void setCSVs(ArrayList<RVX_CSVitem> csvs) { this.CSVs = csvs; }
+    public void setCSVs(RVX_CSVitem[] csvs) { this.CSVs.addAll(Arrays.asList(csvs)); }
     
     private ArrayList<RVX_UserSuppliedItem> UserSupplied = new ArrayList<>();
     public ArrayList<RVX_UserSuppliedItem> getUserSupplied() { return UserSupplied; }
-    public void setUserSupplied(ArrayList<RVX_UserSuppliedItem> usersupplied) { this.UserSupplied = usersupplied; }
-
+    @JsonSetter("userSupplied") public void setUserSupplied(ArrayList<RVX_UserSuppliedItem> usersupplied) { this.UserSupplied = usersupplied; }
+    public void setUserSupplied(RVX_UserSuppliedItem[] usersupplied) { this.UserSupplied.addAll(Arrays.asList(usersupplied)); }
     
     private ArrayList<RVX_TRNSYSitem> TRNs = new ArrayList<>();
     public ArrayList<RVX_TRNSYSitem> getTRNs() { return TRNs; }
-    public void setTRNs(ArrayList<RVX_TRNSYSitem> TRNs) { this.TRNs = TRNs; }
-
+    @JsonSetter("trns") public void setTRNs(ArrayList<RVX_TRNSYSitem> TRNs) { this.TRNs = TRNs; }
+    public void setTRNs(RVX_TRNSYSitem[] TRNs) { this.TRNs.addAll(Arrays.asList(TRNs)); }
     
     
     private ArrayList<RVX_UserVar> UserVars = new ArrayList<>();
     public ArrayList<RVX_UserVar> getUserVars() { return UserVars; }
-    public void setUserVars(ArrayList<RVX_UserVar> UserVars) { this.UserVars = UserVars; }
+    @JsonSetter("userVars") public void setUserVars(ArrayList<RVX_UserVar> UserVars) { this.UserVars = UserVars; }
+    public void setUserVars(RVX_UserVar[] UserVars) { this.UserVars.addAll(Arrays.asList(UserVars)); }
     @JsonIgnore 
     public ArrayList<RVX_UserVar> getReportedUserVars () {
         ArrayList<RVX_UserVar> list = new ArrayList<> ();
@@ -109,7 +113,8 @@ public class RVX implements Serializable {
 	
     private ArrayList<RVX_Constraint> Constraints = new ArrayList<>();
     public ArrayList<RVX_Constraint> getConstraints() { return Constraints; }
-    public void setConstraints(ArrayList<RVX_Constraint> Constraints) { this.Constraints = Constraints; }
+    @JsonSetter("constraints") public void setConstraints(ArrayList<RVX_Constraint> Constraints) { this.Constraints = Constraints; }
+    public void setConstraints(RVX_Constraint[] Constraints) { this.Constraints.addAll(Arrays.asList(Constraints)); }
     @JsonIgnore 
     public ArrayList<RVX_Constraint> getEnabledConstraints () {
         ArrayList<RVX_Constraint> list = new ArrayList<> ();
@@ -124,7 +129,8 @@ public class RVX implements Serializable {
 	
     private ArrayList<RVX_Objective> Objectives = new ArrayList<>();
     public ArrayList<RVX_Objective> getObjectives() { return Objectives; }
-    public void setObjectives(ArrayList<RVX_Objective> Objectives) { this.Objectives = Objectives; }
+    @JsonSetter("objectives") public void setObjectives(ArrayList<RVX_Objective> Objectives) { this.Objectives = Objectives; }
+    public void setObjectives(RVX_Objective[] Objectives) { this.Objectives.addAll(Arrays.asList(Objectives)); }
     @JsonIgnore 
     public ArrayList<RVX_Objective> getEnabledObjectives () {
         ArrayList<RVX_Objective> list = new ArrayList<> ();

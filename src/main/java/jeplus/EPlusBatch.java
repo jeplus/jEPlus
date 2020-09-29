@@ -602,7 +602,7 @@ public class EPlusBatch extends Thread {
                     case TRNSYS:
                         if (i==0) {
                             // Print table header
-                            buf.delete(11,24);
+                            buf.delete(9,21);
                             fw.println(buf.toString());                        
                         }
                         buf = new StringBuffer();
@@ -613,7 +613,7 @@ public class EPlusBatch extends Thread {
                     case INSEL:
                         if (i==0) {
                             // Print table header
-                            buf.delete(11,24);
+                            buf.delete(9,21);
                             fw.println(buf.toString());                        
                         }
                         buf = new StringBuffer();
@@ -1060,11 +1060,16 @@ public class EPlusBatch extends Thread {
             return -5;
         }
         String [] searchstr = Info.getSearchStringsArray();
+        String [] searchstr_parsed = Info.getSearchStringsArrayParsed();
         int availVals = jobArray[0].length - (Project.getProjectType()==JEPlusProjectV2.ModelType.EPLUS ? 3 : 2);
         if (searchstr.length != availVals) {
-            logger.error("EPlusBatch.buildJobs(): Supplied job array does not comply with project definition. "
-                    + searchstr.length + " search tags are present, whereas " + availVals + " values are given.");
-            return -6;
+            if (searchstr_parsed.length == availVals) {
+                searchstr = searchstr_parsed;
+            }else {
+                logger.error("EPlusBatch.buildJobs(): Supplied job array does not comply with project definition. "
+                        + searchstr.length + " parameters (" + searchstr_parsed.length + " search tags) are present, whereas " + availVals + " values are given.");
+                return -6;
+            }
         }
         // env is needed to carry individual job settings
         EPlusWorkEnv env = new EPlusWorkEnv();
@@ -1086,6 +1091,9 @@ public class EPlusBatch extends Thread {
                                 env.DCKTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][1]));
                             }catch (NumberFormatException nfe) {
                                 File mf = new File (RelativeDirUtil.checkAbsolutePath(jobArray[i][1], Project.getBaseDir()));
+                                if (! mf.exists()) {
+                                    mf = new File (RelativeDirUtil.checkAbsolutePath(Project.getDCKDir() + jobArray[i][1], Project.getBaseDir()));
+                                }
                                 env.DCKDir = mf.getAbsoluteFile().getParent().concat(File.separator);;
                                 env.DCKTemplate = mf.getName();
                             }
@@ -1103,6 +1111,9 @@ public class EPlusBatch extends Thread {
                                 env.INSELTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][1]));
                             }catch (NumberFormatException nfe) {
                                 File mf = new File (RelativeDirUtil.checkAbsolutePath(jobArray[i][1], Project.getBaseDir()));
+                                if (! mf.exists()) {
+                                    mf = new File (RelativeDirUtil.checkAbsolutePath(Project.getINSELDir() + jobArray[i][1], Project.getBaseDir()));
+                                }
                                 env.INSELDir = mf.getAbsoluteFile().getParent().concat(File.separator);;
                                 env.INSELTemplate = mf.getName();
                             }
@@ -1121,6 +1132,9 @@ public class EPlusBatch extends Thread {
                                 env.WeatherFile = WthrFiles.get(Integer.valueOf(jobArray[i][1]));
                             }catch (NumberFormatException nfe) {
                                 File wf = new File (RelativeDirUtil.checkAbsolutePath(jobArray[i][1], Project.getBaseDir()));
+                                if (! wf.exists()) {
+                                    wf = new File (RelativeDirUtil.checkAbsolutePath(Project.getWeatherDir() + jobArray[i][1], Project.getBaseDir()));
+                                }
                                 env.WeatherDir = wf.getAbsoluteFile().getParent().concat(File.separator);
                                 env.WeatherFile = wf.getName();
                             }
@@ -1128,6 +1142,9 @@ public class EPlusBatch extends Thread {
                                 env.IDFTemplate = IdfFiles.get(Integer.valueOf(jobArray[i][2]));
                             }catch (NumberFormatException nfe) {
                                 File mf = new File (RelativeDirUtil.checkAbsolutePath(jobArray[i][2], Project.getBaseDir()));
+                                if (! mf.exists()) {
+                                    mf = new File (RelativeDirUtil.checkAbsolutePath(Project.getIDFDir() + jobArray[i][2], Project.getBaseDir()));
+                                }
                                 env.IDFDir = mf.getAbsoluteFile().getParent().concat(File.separator);;
                                 env.IDFTemplate = mf.getName();
                             }

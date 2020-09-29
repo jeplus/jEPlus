@@ -108,7 +108,6 @@ public class TRNSYSConfig extends ConfigFileNames {
         super ();
         TRNSYSBinDir = getDefTRNSYSBinDir();
         TRNSYSEXE = TRNSYSBinDir + getDefTRNSYSEXEC();
-        ScreenFile = "jeplus.log";
     }
 
     public boolean loadFromFile(String fn) {
@@ -117,7 +116,7 @@ public class TRNSYSConfig extends ConfigFileNames {
             prop.load(new FileReader(fn));
             TRNSYSBinDir = prop.getProperty("TRNSYSBinDir", getDefTRNSYSBinDir());
             TRNSYSEXE = prop.getProperty("TRNSYSEXE", TRNSYSBinDir + getDefTRNSYSEXEC());
-            ScreenFile = prop.getProperty("ScreenFile", "jeplus.log");
+            ScreenFile = prop.getProperty("ScreenFile", "console.log");
         } catch (FileNotFoundException fnfe) {
             // do nothing and reture false;
             logger.warn("TRNSYS config file " + fn + " does not exist.");

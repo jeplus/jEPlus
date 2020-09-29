@@ -172,7 +172,7 @@ public class TRNSYSOutputReader implements IFReportReader, IFResultReader {
             String [] vals = new String [header.size()];
             vals[0] = table.size() + "";
             vals[1] = job_id;
-            vals[2] = message.trim();
+            vals[2] = "\"" + message.trim() + "\"";
             vals[3] = conterror + "";
             vals[4] = contwarning + "";
             vals[5] = timesim.trim();

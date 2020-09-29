@@ -175,7 +175,7 @@ public class EPlusBatchInfo {
      * will be parsed and included as separate items.
      * @return The array of search strings
      */
-    public String [] getSearchStringsArray () {
+    public String [] getSearchStringsArrayParsed () {
         ArrayList<String> tags = new ArrayList<>();
         if (SearchStrings != null) {
             for (String tag : SearchStrings) {
@@ -184,6 +184,18 @@ public class EPlusBatchInfo {
             }
         }
         return tags.toArray(new String[0]);
+    }
+
+    /**
+     * Get the list of search strings, including combi search strings, in an array form. 
+     * @return The array of search strings
+     */
+    public String [] getSearchStringsArray () {
+        String [] strs = null;
+        if (SearchStrings != null) {
+            strs = SearchStrings.toArray(new String[0]);
+        }
+        return strs;
     }
 
     /**

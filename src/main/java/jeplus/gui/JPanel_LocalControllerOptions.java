@@ -73,6 +73,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
             Document DocThreadDelay = txtThreadDelay.getDocument();
             Document DocEPlusThreads = txtEPlusThreads.getDocument();
             Document DocSelectedFiles = txtSelectedFiles.getDocument();
+            Document DocTimeout = txtTimeout.getDocument();
 
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -86,6 +87,8 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                         Settings.setOMPThreads(Integer.parseInt(txtEPlusThreads.getText()));
                     }else if(src == DocSelectedFiles) {
                         Settings.setSelectedFiles(txtSelectedFiles.getText());
+                    }else if(src == DocTimeout) {
+                        Settings.setTimeout(Integer.parseInt(txtTimeout.getText()));
                     }
                 }
             }
@@ -103,6 +106,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         txtThreadDelay.getDocument().addDocumentListener(DL);
         txtEPlusThreads.getDocument().addDocumentListener(DL);
         txtSelectedFiles.getDocument().addDocumentListener(DL);
+        txtTimeout.getDocument().addDocumentListener(DL);
         DL_Enabled = true;
     }
 
@@ -121,6 +125,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         this.txtFileDir.setText(Settings.getParentDir());
         this.chkOverride.setSelected(Settings.isRerunAll());
         this.chkOverride.setForeground(chkOverride.isSelected() ? Color.black : Color.red);
+        this.txtTimeout.setText(Integer.toString(Settings.getTimeout()));
         this.chkKeepJobDir.setSelected(Settings.isKeepJobDir());
         this.chkKeepJEPlusFiles.setSelected(Settings.isKeepJEPlusFiles());
         this.chkKeepEPlusFiles.setSelected(Settings.isKeepEPlusFiles());
@@ -157,6 +162,9 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         txtSelectedFiles = new javax.swing.JTextField();
         chkOverride = new javax.swing.JCheckBox();
         jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        txtTimeout = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
 
         jLabel18.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel18.setText("Working dir: ");
@@ -246,6 +254,15 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel4.setText("Override: ");
 
+        jLabel5.setText("TRNSYS Timeout: ");
+
+        txtTimeout.setColumns(3);
+        txtTimeout.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
+        txtTimeout.setText("0");
+        txtTimeout.setToolTipText("Terminate TRNSYS simulation if the given amount of time has elapsed.");
+
+        jLabel6.setText("s");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -261,7 +278,7 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(cboNThreads, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 91, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtEPlusThreads, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -282,11 +299,20 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkKeepJEPlusFiles)
-                            .addComponent(chkKeepEPlusFiles)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(chkOverride, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(chkKeepJobDir, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                            .addComponent(chkKeepEPlusFiles))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                                .addComponent(chkOverride, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(chkKeepJobDir, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtTimeout, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel6)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -309,7 +335,10 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkOverride)
-                    .addComponent(jLabel4))
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5)
+                    .addComponent(txtTimeout, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkKeepJobDir)
@@ -397,10 +426,13 @@ public class JPanel_LocalControllerOptions extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JTextField txtEPlusThreads;
     private javax.swing.JTextField txtFileDir;
     private javax.swing.JTextField txtSelectedFiles;
     private javax.swing.JTextField txtThreadDelay;
+    private javax.swing.JTextField txtTimeout;
     // End of variables declaration//GEN-END:variables
 
 }

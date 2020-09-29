@@ -112,7 +112,7 @@ public class PythonResultCollector extends ResultCollector {
                     }
                     JEPlusConfig config = JEPlusConfig.getDefaultInstance();
                     if (config.getScripConfigs().containsKey(item.getLanguage())) {
-                        try (PrintStream out = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (workdir + "PyConsole.log", true))) {
+                        try (PrintStream out = (config.getScreenFile() == null) ? System.err : new PrintStream (new FileOutputStream (workdir + config.getScreenFile(), true))) {
                             ScriptTools.runScript(
                                     config.getScripConfigs().get(item.getLanguage()), 
                                     RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 

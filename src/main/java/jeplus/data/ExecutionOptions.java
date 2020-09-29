@@ -111,8 +111,10 @@ public class ExecutionOptions implements Serializable {
     /** job list file */
     protected String JobListFile = null;
     
-    // Batch run options
+    /**  Batch run options */
     BatchRunOptions Steps = new BatchRunOptions ();
+    /** Simulation timeout setting (for TRNSYS), in seconds */
+    int Timeout = 0;
     
     /** Default constructor */
     public ExecutionOptions () {
@@ -197,6 +199,7 @@ public class ExecutionOptions implements Serializable {
         JobListFile = obj.JobListFile;
         
         Steps = new BatchRunOptions (obj.Steps);
+        Timeout = obj.Timeout;
     }
 
     public String getWorkDir() {
@@ -393,30 +396,144 @@ public class ExecutionOptions implements Serializable {
         this.Steps = Steps;
     }
 
+    public int getTimeout() {
+        return Timeout;
+    }
+
+    public void setTimeout(int Timeout) {
+        this.Timeout = Timeout;
+    }
+
+//    @Override
+//    public int hashCode() {
+//        int hash = 3;
+//        hash = 67 * hash + this.ExecutionType;
+//        hash = 67 * hash + this.NumThreads;
+//        hash = 67 * hash + this.OMPThreads;
+//        hash = 67 * hash + this.JobSubmissionCap;
+//        hash = 67 * hash + (this.RerunAll ? 1 : 0);
+//        hash = 67 * hash + this.Delay;
+//        hash = 67 * hash + Objects.hashCode(this.WorkDir);
+//        hash = 67 * hash + (this.KeepJobDir ? 1 : 0);
+//        hash = 67 * hash + (this.KeepJEPlusFiles ? 1 : 0);
+//        hash = 67 * hash + (this.KeepEPlusFiles ? 1 : 0);
+//        hash = 67 * hash + (this.DeleteSelectedFiles ? 1 : 0);
+//        hash = 67 * hash + Objects.hashCode(this.SelectedFiles);
+//        hash = 67 * hash + Objects.hashCode(this.PBSscriptFile);
+//        hash = 67 * hash + Objects.hashCode(this.ServerConfigFile);
+//        hash = 67 * hash + Objects.hashCode(this.ClientConfigFile);
+//        hash = 67 * hash + this.SubSet;
+//        hash = 67 * hash + this.NumberOfJobs;
+//        hash = 67 * hash + (this.UseLHS ? 1 : 0);
+//        hash = 67 * hash + Objects.hashCode(this.SampleOpt);
+//        hash = 67 * hash + (int) (this.RandomSeed ^ (this.RandomSeed >>> 32));
+//        hash = 67 * hash + Objects.hashCode(this.JobListFile);
+//        return hash;
+//    }
+//
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (this == obj) {
+//            return true;
+//        }
+//        if (obj == null) {
+//            return false;
+//        }
+//        if (getClass() != obj.getClass()) {
+//            return false;
+//        }
+//        final ExecutionOptions other = (ExecutionOptions) obj;
+//        if (this.ExecutionType != other.ExecutionType) {
+//            return false;
+//        }
+//        if (this.NumThreads != other.NumThreads) {
+//            return false;
+//        }
+//        if (this.OMPThreads != other.OMPThreads) {
+//            return false;
+//        }
+//        if (this.JobSubmissionCap != other.JobSubmissionCap) {
+//            return false;
+//        }
+//        if (this.RerunAll != other.RerunAll) {
+//            return false;
+//        }
+//        if (this.Delay != other.Delay) {
+//            return false;
+//        }
+//        if (this.KeepJobDir != other.KeepJobDir) {
+//            return false;
+//        }
+//        if (this.KeepJEPlusFiles != other.KeepJEPlusFiles) {
+//            return false;
+//        }
+//        if (this.KeepEPlusFiles != other.KeepEPlusFiles) {
+//            return false;
+//        }
+//        if (this.DeleteSelectedFiles != other.DeleteSelectedFiles) {
+//            return false;
+//        }
+//        if (this.SubSet != other.SubSet) {
+//            return false;
+//        }
+//        if (this.NumberOfJobs != other.NumberOfJobs) {
+//            return false;
+//        }
+//        if (this.UseLHS != other.UseLHS) {
+//            return false;
+//        }
+//        if (this.RandomSeed != other.RandomSeed) {
+//            return false;
+//        }
+//        if (!Objects.equals(this.WorkDir, other.WorkDir)) {
+//            return false;
+//        }
+//        if (!Objects.equals(this.SelectedFiles, other.SelectedFiles)) {
+//            return false;
+//        }
+//        if (!Objects.equals(this.PBSscriptFile, other.PBSscriptFile)) {
+//            return false;
+//        }
+//        if (!Objects.equals(this.ServerConfigFile, other.ServerConfigFile)) {
+//            return false;
+//        }
+//        if (!Objects.equals(this.ClientConfigFile, other.ClientConfigFile)) {
+//            return false;
+//        }
+//        if (!Objects.equals(this.JobListFile, other.JobListFile)) {
+//            return false;
+//        }
+//        if (this.SampleOpt != other.SampleOpt) {
+//            return false;
+//        }
+//        return true;
+//    }
+
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 67 * hash + this.ExecutionType;
-        hash = 67 * hash + this.NumThreads;
-        hash = 67 * hash + this.OMPThreads;
-        hash = 67 * hash + this.JobSubmissionCap;
-        hash = 67 * hash + (this.RerunAll ? 1 : 0);
-        hash = 67 * hash + this.Delay;
-        hash = 67 * hash + Objects.hashCode(this.WorkDir);
-        hash = 67 * hash + (this.KeepJobDir ? 1 : 0);
-        hash = 67 * hash + (this.KeepJEPlusFiles ? 1 : 0);
-        hash = 67 * hash + (this.KeepEPlusFiles ? 1 : 0);
-        hash = 67 * hash + (this.DeleteSelectedFiles ? 1 : 0);
-        hash = 67 * hash + Objects.hashCode(this.SelectedFiles);
-        hash = 67 * hash + Objects.hashCode(this.PBSscriptFile);
-        hash = 67 * hash + Objects.hashCode(this.ServerConfigFile);
-        hash = 67 * hash + Objects.hashCode(this.ClientConfigFile);
-        hash = 67 * hash + this.SubSet;
-        hash = 67 * hash + this.NumberOfJobs;
-        hash = 67 * hash + (this.UseLHS ? 1 : 0);
-        hash = 67 * hash + Objects.hashCode(this.SampleOpt);
-        hash = 67 * hash + (int) (this.RandomSeed ^ (this.RandomSeed >>> 32));
-        hash = 67 * hash + Objects.hashCode(this.JobListFile);
+        int hash = 7;
+        hash = 61 * hash + this.ExecutionType;
+        hash = 61 * hash + this.NumThreads;
+        hash = 61 * hash + this.OMPThreads;
+        hash = 61 * hash + this.JobSubmissionCap;
+        hash = 61 * hash + (this.RerunAll ? 1 : 0);
+        hash = 61 * hash + this.Delay;
+        hash = 61 * hash + Objects.hashCode(this.WorkDir);
+        hash = 61 * hash + (this.KeepJobDir ? 1 : 0);
+        hash = 61 * hash + (this.KeepJEPlusFiles ? 1 : 0);
+        hash = 61 * hash + (this.KeepEPlusFiles ? 1 : 0);
+        hash = 61 * hash + (this.DeleteSelectedFiles ? 1 : 0);
+        hash = 61 * hash + Objects.hashCode(this.SelectedFiles);
+        hash = 61 * hash + Objects.hashCode(this.PBSscriptFile);
+        hash = 61 * hash + Objects.hashCode(this.ServerConfigFile);
+        hash = 61 * hash + Objects.hashCode(this.ClientConfigFile);
+        hash = 61 * hash + this.SubSet;
+        hash = 61 * hash + this.NumberOfJobs;
+        hash = 61 * hash + (this.UseLHS ? 1 : 0);
+        hash = 61 * hash + Objects.hashCode(this.SampleOpt);
+        hash = 61 * hash + (int) (this.RandomSeed ^ (this.RandomSeed >>> 32));
+        hash = 61 * hash + Objects.hashCode(this.JobListFile);
+        hash = 61 * hash + this.Timeout;
         return hash;
     }
 
@@ -472,6 +589,9 @@ public class ExecutionOptions implements Serializable {
             return false;
         }
         if (this.RandomSeed != other.RandomSeed) {
+            return false;
+        }
+        if (this.Timeout != other.Timeout) {
             return false;
         }
         if (!Objects.equals(this.WorkDir, other.WorkDir)) {
