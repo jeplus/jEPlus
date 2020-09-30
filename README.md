@@ -1,5 +1,5 @@
 # jEPlus
-jEPlus source code, maven and NetBeans projects. More information about jEPlus including users manual can be found on http://www.jeplus.org/. Binary distributions are available at https://sourceforge.net/projects/jeplus/
+jEPlus source code, maven and NetBeans projects. More information about jEPlus including users manual can be found on https://www.jeplus.org/. Binary distributions are available at https://sourceforge.net/projects/jeplus/
 
 ## How to build the project
 
