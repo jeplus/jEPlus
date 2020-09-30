@@ -94,6 +94,8 @@ public class EPlusPostProcessor implements Runnable {
      */
     public void postProcess() {
 
+        FileWriter cfw = null;
+
         if (Batch != null) {
 
             StringBuilder buf = new StringBuilder();
@@ -156,6 +158,15 @@ public class EPlusPostProcessor implements Runnable {
             }
             writeLog("Result tables will be written to " + dir.getAbsolutePath());
 
+            if (this.CombineResult) {
+                writeLog("Opening combined result file " + BaseExportDir + CombinedFileName + ".csv");
+                try {
+                    cfw = new FileWriter(BaseExportDir + CombinedFileName + ".csv");
+                } catch (IOException ex) {
+                    logger.error("", ex);
+                }
+            }
+
             // Go to each job directory
             for (int i = 0; i < Jobs.size(); i++) {
 
@@ -201,8 +212,12 @@ public class EPlusPostProcessor implements Runnable {
                         }
                     }
                     // Save combined results
-                    if (this.CombineResult) {
-                        buf.append(PostResult);
+                    if (this.CombineResult && cfw != null) {
+                        try {
+                            cfw.write(PostResult);
+                        } catch (IOException ex) {
+                            writeLog("Error appending data to combined file: "+ex);
+                        }
                     }
 
                     // Calculate stats
@@ -217,14 +232,6 @@ public class EPlusPostProcessor implements Runnable {
                 }
             }
 
-            if (this.CombineResult) {
-                writeLog("Writing results to " + BaseExportDir + CombinedFileName + ".csv");
-                try (FileWriter fw = new FileWriter(BaseExportDir + CombinedFileName + ".csv")) {
-                    fw.write(buf.toString());
-                } catch (IOException ex) {
-                    logger.error("", ex);
-                }
-            }
             if (this.Stats) {
                 writeLog("Writing stats to " + BaseExportDir + this.StatsFilePrefix + "-mean.csv");
                 try (FileWriter fw = new FileWriter(BaseExportDir + StatsFilePrefix + "-mean.csv")) {
@@ -259,6 +266,13 @@ public class EPlusPostProcessor implements Runnable {
                         RelativeDirUtil.checkAbsolutePath(ResultDir, this.Batch.getProject().getBaseDir()) + "/", false);
             }
 
+            if( cfw != null ) {
+                try {
+                   cfw.close();
+                } catch (IOException ex) {
+                   logger.error("",ex);
+                }
+            }
             writeLog("Done!");
         }
     }
