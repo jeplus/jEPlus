@@ -10,7 +10,7 @@ package jeplus;
  * @author Yi
  */
 public class JEPlusVersion {
-    public final static String Version = "2.1.0";
+    public final static String Version = "2.1.1";
     public final static String Release = "";
     public final static String Version_PS = "_2_1";
     public final static String OsName = System.getProperty( "os.name" );

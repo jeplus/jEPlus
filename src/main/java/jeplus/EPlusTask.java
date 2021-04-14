@@ -31,7 +31,7 @@ import javax.script.ScriptException;
 import jeplus.util.RelativeDirUtil;
 import jeplus.util.ScriptTools;
 import org.apache.commons.io.FileUtils;
-import org.jsoup.internal.StringUtil;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -187,7 +187,7 @@ public class EPlusTask extends Thread implements EPlusJobItem, Serializable {
                     for (int k=0; k<SearchStringList.size()-sstrs.length; k++) {
                         String var = "p" + k;
                         map.put(SearchStringList.get(k), var);
-                        String statement = var + " = " + (StringUtil.isNumeric(AltValueList.get(k)) ? AltValueList.get(k) : ("\"" + AltValueList.get(k) + "\""));
+                        String statement = var + " = " + (NumberUtils.isCreatable(AltValueList.get(k)) ? AltValueList.get(k) : ("\"" + AltValueList.get(k) + "\""));
                         try {
                             engine.eval(statement);
                         }catch (ScriptException spe) {
