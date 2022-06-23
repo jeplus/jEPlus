@@ -552,8 +552,7 @@ public class EPlusBatch extends Thread {
                 logger.error("", cce);
             }
         } else {
-            info.addValidationError("Parameter tree doesn't exist.");
-            ok = false;
+            info.addWarning("Parameter tree does not exist. Please chech if this is intended.");
         }
         info.ValidationSuccessful = info.ValidationSuccessful && ok;
         return ok;
