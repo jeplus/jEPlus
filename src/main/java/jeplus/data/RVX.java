@@ -213,6 +213,10 @@ public class RVX implements Serializable {
         return this.UserVars.size() > 0;
     }
     
+    public boolean hasDerivedVars () {
+        return ! (UserVars.isEmpty() && Constraints.isEmpty() && Objectives.isEmpty());
+    }
+    
     public void autoGenerateUserVars () {
         // Get existing user vars in a map
         Map<String, RVX_UserVar> UVarsMap = new HashMap<> ();

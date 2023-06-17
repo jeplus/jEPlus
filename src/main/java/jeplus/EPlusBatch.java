@@ -1693,6 +1693,8 @@ public class EPlusBatch extends Thread {
                                 }
                                 line = fr.readLine();
                             }
+                        }else {
+                            logger.warn(fn + " is ignored due to not containing any data columns (total number of columns <= 3)");
                         }
                     }
                 }catch (Exception ex) {

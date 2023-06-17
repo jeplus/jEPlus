@@ -98,7 +98,7 @@ public class EPlusUserSpreadsheetReader implements IFResultReader {
             // Read in the rest of the spreadsheet
             ArrayList <String []> spreadsheet = new ArrayList <> ();
             line = fr.readLine();
-            while (line != null) {
+            while (line != null && line.trim().length() > 0) {
                 spreadsheet.add (line.split("\\s*,\\s*"));
                 line = fr.readLine();
             }
