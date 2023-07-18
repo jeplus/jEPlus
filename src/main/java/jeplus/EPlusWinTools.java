@@ -29,11 +29,14 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import jeplus.data.VersionInfo;
 import jeplus.util.ProcessWrapper;
 import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -856,13 +859,23 @@ public class EPlusWinTools {
         if (binfolder != null) {
             File dir = new File (binfolder);
             if (dir.exists() && dir.isDirectory()) {
-                String pattern = "V?-?-?-Energy+.idd";
                 OrFileFilter filter = new OrFileFilter ();
-                filter.addFileFilter(new WildcardFileFilter (pattern));
+                filter.addFileFilter(new WildcardFileFilter (new String [] {"V?-?-?-Energy+.idd", "V??-?-?-Energy+.idd"}));
+//                filter.addFileFilter(new WildcardFileFilter ());
                 File [] files = dir.listFiles((FileFilter)filter);
                 for (File file : files) {
-                    list.add(file.getName().substring(0, 6));
+                    list.add(file.getName().substring(0, file.getName().indexOf("-Energy+.idd")));
                 }
+                Collections.sort(list, new Comparator <String> () {
+                    @Override
+                    public int compare(String vs1, String vs2) {
+                        return toVerInfo(vs1).compareTo(toVerInfo (vs2));
+                    }
+                    protected VersionInfo toVerInfo (String vs) {
+                        String vs_new = vs.substring(1).replaceAll("-", ".");
+                        return new VersionInfo(vs_new);
+                    }
+                });
             }
         }
         return list;
