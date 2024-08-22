@@ -20,6 +20,7 @@ package jeplus.postproc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
 import jeplus.EPlusBatch;
 import jeplus.EPlusConfig;
 import jeplus.JEPlusConfig;
@@ -42,9 +43,12 @@ public class EsoResultCollector extends ResultCollector {
     /**
      * Empty constructor. Actual assignment of readers and writers are done in the <code>collectResutls()</code> function
      * @param Desc Description of this collector
+     * @param execsvc
      */
-    public EsoResultCollector (String Desc) {
+    public EsoResultCollector (String Desc, ExecutorService execsvc) {
         super (Desc);
+        ExecService = execsvc;
+
         this.RepReader = null;
         this.RepWriter = null;
         this.ResReader = null;
@@ -56,10 +60,12 @@ public class EsoResultCollector extends ResultCollector {
      * Empty constructor with assigned EPlusConfig object. Actual assignment of readers and writers are done in the <code>collectResutls()</code> function
      * @param Desc Description of this collector
      * @param config Assigned EPlusConfig object to be used by this collector
+     * @param execsvc ExecutorService instance to run parallel processing
      */
-    public EsoResultCollector (String Desc, EPlusConfig config) {
+    public EsoResultCollector (String Desc, EPlusConfig config, ExecutorService execsvc) {
         super (Desc);
         Config = config;
+        ExecService = execsvc;
         this.RepReader = null;
         this.RepWriter = null;
         this.ResReader = null;
@@ -81,13 +87,25 @@ public class EsoResultCollector extends ResultCollector {
                 String fn = item.getTableName() + ".csv";
                 ResultFiles.add(fn);
                 ResWriter = new DefaultCSVWriter(null, fn);
-                ResReader = new EPlusRVIReader(
-                        Config == null ? JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(JobOwner.getProject().getEPlusModelVersion()) : Config,
-                        RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
-                        item.getFrequency(), 
-                        fn, 
-                        item.isUsedInCalc()
-                );
+                if (ExecService != null) {
+                    ResReader = new EPlusRVIReader2(
+                            Config == null ? JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(JobOwner.getProject().getEPlusModelVersion()) : Config,
+                            RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
+                            item.getFrequency(), 
+                            fn, 
+                            item.isUsedInCalc(),
+                            ExecService
+                    );
+                    
+                }else {
+                    ResReader = new EPlusRVIReader(
+                            Config == null ? JEPlusConfig.getDefaultInstance().findMatchingEPlusConfig(JobOwner.getProject().getEPlusModelVersion()) : Config,
+                            RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
+                            item.getFrequency(), 
+                            fn, 
+                            item.isUsedInCalc()
+                    );
+                }
                 ResultHeader = new HashMap <>();
                 ResultTable = new ArrayList <> ();
                 try {

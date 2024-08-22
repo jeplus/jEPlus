@@ -38,6 +38,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import jeplus.data.VersionInfo;
 import jeplus.util.ProcessWrapper;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.slf4j.LoggerFactory;
@@ -351,7 +352,7 @@ public class EPlusWinTools {
                 logger.error("Failed to create " + wd.toString(), ioe);
                 success = false;
             }catch (UnsupportedOperationException uoe) {
-                logger.debug("File attributes " + permstr + " not supported. Reverting to std io.", uoe);
+                logger.debug("File attributes " + permstr + " not supported. Reverting to std io.");
                 success = prepareWorkDir(config, workdir);
             }
         }else if (Files.exists(wd)) {
@@ -582,13 +583,76 @@ public class EPlusWinTools {
                 }
             }
 
+            // Run EnergyPlus Basement or Slab if required
+            File ght_file = null;
+            if (new File (WorkDir + EPlusConfig.getEPDefBasementIDF()).exists()) {
+                fileCopy(config.getResolvedEPlusBinDir() + "PreProcess/GrndTempCalc/" + EPlusConfig.getEPBasementIDD(), WorkDir + EPlusConfig.getEPBasementIDD());
+                CmdLine = config.getResolvedBasement();
+                EPProc = Runtime.getRuntime().exec(CmdLine, null, new File(WorkDir));
+                // Console logger
+                try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
+                    if (outs != null) {
+                        outs.println("# Calling Basement - " + (new SimpleDateFormat()).format(new Date()));
+                        outs.println("# Command line: " + WorkDir + ">" + CmdLine);
+                        outs.flush();
+                    }
+                    StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
+                    StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
+                    p_out.start();
+                    p_err.start();
+                    ExitValue = EPProc.waitFor();
+                    p_out.join();
+                    p_err.join();
+                    if (outs != null) {
+                        outs.println("# Basement returns: " + ExitValue);
+                        outs.flush();
+                    }
+                }
+                ght_file = new File (WorkDir + "EPObjects.TXT");
+            }else if (new File (WorkDir + EPlusConfig.getEPDefSlabIDF()).exists()) {
+                fileCopy(config.getResolvedEPlusBinDir() + "PreProcess/GrndTempCalc/" + EPlusConfig.getEPSlabIDD(), WorkDir + EPlusConfig.getEPSlabIDD());
+                CmdLine = config.getResolvedSlab();
+                EPProc = Runtime.getRuntime().exec(CmdLine, null, new File(WorkDir));
+                // Console logger
+                try (PrintWriter outs = (config.getScreenFile() == null) ? null : new PrintWriter (new FileWriter (WorkDir + "/" + config.getScreenFile(), true));) {
+                    if (outs != null) {
+                        outs.println("# Calling Slab - " + (new SimpleDateFormat()).format(new Date()));
+                        outs.println("# Command line: " + WorkDir + ">" + CmdLine);
+                        outs.flush();
+                    }
+                    StreamPrinter p_out = new StreamPrinter (EPProc.getInputStream(), "OUTPUT", outs);
+                    StreamPrinter p_err = new StreamPrinter (EPProc.getErrorStream(), "ERROR", outs);
+                    p_out.start();
+                    p_err.start();
+                    ExitValue = EPProc.waitFor();
+                    p_out.join();
+                    p_err.join();
+                    if (outs != null) {
+                        outs.println("# Slab returns: " + ExitValue);
+                        outs.flush();
+                    }
+                }
+                ght_file = new File (WorkDir + "SLABSurfaceTemps.TXT");
+            }
+
             // Copy expanded.idf to in.idf
             if (new File (WorkDir + EPlusConfig.getEPDefExpandedIDF()).exists()) {
                 if (! fileCopy (WorkDir + EPlusConfig.getEPDefExpandedIDF(), WorkDir + EPlusConfig.getEPDefIDF())) {
                     // File copy failed
-                    logger.warn("Failed to copy " + WorkDir + EPlusConfig.getEPDefExpandedIDF() +
+                    logger.error("Failed to copy " + WorkDir + EPlusConfig.getEPDefExpandedIDF() +
                             " to " + WorkDir + EPlusConfig.getEPDefIDF() + ". Simulation is aborted.");
                     return(ExitValue);
+                }
+                if (ght_file != null && ght_file.exists()) {
+                    try {
+                        byte [] ght_objs = FileUtils.readFileToByteArray(ght_file);
+                        FileUtils.writeByteArrayToFile(new File (WorkDir + EPlusConfig.getEPDefIDF()), ght_objs, true);
+                    }catch (IOException ioe) {
+                        // File copy failed
+                        logger.error("Failed to append " + ght_file.getAbsolutePath() +
+                                " to " + WorkDir + EPlusConfig.getEPDefIDF() + ". Simulation is aborted.");
+                        return(ExitValue);
+                    }
                 }
             }
 

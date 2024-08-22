@@ -6,14 +6,14 @@
 package jeplus.data;
 
 import java.util.Objects;
-import javax.xml.bind.annotation.XmlRootElement;
+//import javax.xml.bind.annotation.XmlRootElement;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Yi
  */
-@XmlRootElement
+//@XmlRootElement
 public class VersionInfo implements Comparable {
 
     /** Logger */
@@ -29,15 +29,15 @@ public class VersionInfo implements Comparable {
         if (verstr != null && verstr.trim().length() > 0) {
             String [] parts = verstr.split("\\.");
             try {
-                Major = new Integer (parts[0]);
+                Major = Integer.valueOf(parts[0]);
                 if (parts.length > 1) {
-                    Minor = new Integer (parts[1]);
+                    Minor = Integer.valueOf(parts[1]);
                 }
                 if (parts.length > 2) {
-                    Revision = new Integer (parts[2]);
+                    Revision = Integer.valueOf(parts[2]);
                 }
                 if (parts.length > 3) {
-                    Update = new Integer (parts[3]);
+                    Update = Integer.valueOf(parts[3]);
                 }
             }catch (NumberFormatException nfe) {
                 logger.error ("Version string is not recognized: " + verstr);
@@ -65,10 +65,7 @@ public class VersionInfo implements Comparable {
         if (!Objects.equals(this.Major, other.Major)) {
             return false;
         }
-        if (!Objects.equals(this.Minor, other.Minor)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.Minor, other.Minor);
     }
     
     

@@ -20,7 +20,7 @@ package jeplus.postproc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.concurrent.ExecutorService;
 import jeplus.EPlusBatch;
 import jeplus.JEPlusProjectV2;
 import jeplus.data.RVX;
@@ -37,6 +37,9 @@ public class ResultCollector {
     
     /** Result collector description */
     String Description = "";
+    
+    /** Result collector executor service instance */
+    ExecutorService ExecService = null;
     
     ArrayList<String> ResultFiles = new ArrayList<> ();
     
@@ -253,7 +256,7 @@ public class ResultCollector {
         // attach default result collector
         ResultCollector rc = new DefaultReportCollector ("Standard report collector");
         ResultCollectors.add(rc);
-        rc = new EsoResultCollector ("ESO result collector");
+        rc = new EsoResultCollector ("ESO result collector", null);
         ResultCollectors.add(rc);
         rc = new SQLiteResultCollector ("SQLite result collector");
         ResultCollectors.add(rc);
@@ -261,7 +264,7 @@ public class ResultCollector {
         ResultCollectors.add(rc);
         rc = new UserResultCollector ("User supplied result collector");
         ResultCollectors.add(rc);
-        rc = new PythonResultCollector ("Script result collector");
+        rc = new PythonResultCollector ("Script result collector", null);
         ResultCollectors.add(rc);
         rc = new TrnsysResultCollector ("TRNSYS result collector");
         ResultCollectors.add(rc);

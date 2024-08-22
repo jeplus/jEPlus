@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.JPanel;
 import jeplus.EPlusBatch;
 import jeplus.EPlusTask;
@@ -35,14 +37,7 @@ import jeplus.data.RVX;
 import jeplus.gui.EPlusTextPanelOld;
 import jeplus.gui.JEPlusPrintablePanel;
 import jeplus.gui.JFrameAgentMonitor;
-import jeplus.postproc.CsvResultCollector;
-import jeplus.postproc.DefaultReportCollector;
-import jeplus.postproc.EsoResultCollector;
-import jeplus.postproc.PythonResultCollector;
 import jeplus.postproc.ResultCollector;
-import jeplus.postproc.SQLiteResultCollector;
-import jeplus.postproc.TrnsysResultCollector;
-import jeplus.postproc.UserResultCollector;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -69,6 +64,10 @@ public abstract class EPlusAgent implements Runnable {
     public static final int LINUX = 2;
     public static final int LINUX_PBS = 3;
 
+    /** Thread pool for certain post-processes */
+    public static ExecutorService PostExecService = null;
+
+    
     // Agent information and settings
 
     /** AgentID */
@@ -168,21 +167,9 @@ public abstract class EPlusAgent implements Runnable {
     protected void attachDefaultCollector () {
         // clear existing collectors
         ResultCollectors.clear();
+        
         // attach default result collector
-        ResultCollector rc = new DefaultReportCollector ("Standard report collector");
-        ResultCollectors.add(rc);
-        rc = new EsoResultCollector ("ESO result collector");
-        ResultCollectors.add(rc);
-        rc = new SQLiteResultCollector ("SQLite result collector");
-        ResultCollectors.add(rc);
-        rc = new CsvResultCollector ("E+ CSV tables result collector");
-        ResultCollectors.add(rc);
-        rc = new UserResultCollector ("User supplied result collector");
-        ResultCollectors.add(rc);
-        rc = new PythonResultCollector ("Script result collector");
-        ResultCollectors.add(rc);
-        rc = new TrnsysResultCollector ("TRNSYS result collector");
-        ResultCollectors.add(rc);
+        ResultCollectors.addAll(ResultCollector.getDefaultCollectors());
     }
 
     // Setter and getters
@@ -383,16 +370,16 @@ public abstract class EPlusAgent implements Runnable {
      * Clear job queue
      */
     public void purgeJobQueue () {
-        if (JobQueue.size() > 0) JobQueue.clear();
+        if (!JobQueue.isEmpty()) JobQueue.clear();
     }
     
     /**
      * Clear all lists
      */
     public void purgeAllLists () {
-        if (FinishedJobs.size() > 0) FinishedJobs.clear();
-        if (RunningJobs.size() > 0) RunningJobs.clear();
-        if (RejectedJobs.size() > 0) RejectedJobs.clear();
+        if (!FinishedJobs.isEmpty()) FinishedJobs.clear();
+        if (!RunningJobs.isEmpty()) RunningJobs.clear();
+        if (!RejectedJobs.isEmpty()) RejectedJobs.clear();
     }
 
     /**

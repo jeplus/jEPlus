@@ -1659,37 +1659,39 @@ public class EPlusBatch extends Thread {
                         if (NDataCols > 0) {
                             // continue reading
                             line = fr.readLine();
-                            while (line != null && line.trim().length() > 0) {
-                                items = line.split("\\s*,\\s*");
-                                if (items.length > 3) {
-                                    String job_id = items[1];
-                                    ArrayList<ArrayList<double []>> JobResult;
-                                    if (Results.containsKey(job_id)) {
-                                        JobResult = Results.get(job_id);
-                                    }else {
-                                        JobResult = new ArrayList<>();
-                                        Results.put(job_id, JobResult);
-                                    }
-                                    ArrayList<double []> rec;
-                                    if (JobResult.size() > tabidx) {
-                                        rec = JobResult.get(tabidx);
-                                        if (rec == null) {
+                            while (line != null) {
+                                if (line.trim().length() > 0) {
+                                    items = line.split("\\s*,\\s*");
+                                    if (items.length > 3) {
+                                        String job_id = items[1];
+                                        ArrayList<ArrayList<double []>> JobResult;
+                                        if (Results.containsKey(job_id)) {
+                                            JobResult = Results.get(job_id);
+                                        }else {
+                                            JobResult = new ArrayList<>();
+                                            Results.put(job_id, JobResult);
+                                        }
+                                        ArrayList<double []> rec;
+                                        if (JobResult.size() > tabidx) {
+                                            rec = JobResult.get(tabidx);
+                                            if (rec == null) {
+                                                rec = new ArrayList<> ();
+                                                JobResult.set(tabidx, rec);
+                                            }
+                                        }else {
                                             rec = new ArrayList<> ();
-                                            JobResult.set(tabidx, rec);
+                                            JobResult.add(rec);
                                         }
-                                    }else {
-                                        rec = new ArrayList<> ();
-                                        JobResult.add(rec);
-                                    }
-                                    double [] data = new double [NDataCols];
-                                    for (int k=0; k<NDataCols; k++) {
-                                        try {
-                                            data[k] = Double.parseDouble(items[k + 3]);
-                                        }catch (NumberFormatException | ArrayIndexOutOfBoundsException nfe) {
-                                            data[k] = 0;
+                                        double [] data = new double [NDataCols];
+                                        for (int k=0; k<NDataCols; k++) {
+                                            try {
+                                                data[k] = Double.parseDouble(items[k + 3]);
+                                            }catch (NumberFormatException | ArrayIndexOutOfBoundsException nfe) {
+                                                data[k] = 0;
+                                            }
                                         }
+                                        rec.add(data);
                                     }
-                                    rec.add(data);
                                 }
                                 line = fr.readLine();
                             }

@@ -77,7 +77,7 @@ public class JEPlusProjectV2 implements Serializable {
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(JEPlusProjectV2.class);
     
     /** ScriptEngine used by all evaluators */
-    protected static final ScriptEngine Script_Engine = new ScriptEngineManager().getEngineByName("javascript");
+    protected static final ScriptEngine Script_Engine = new ScriptEngineManager().getEngineByName("js");
     static {
         // Set up script engine
     }

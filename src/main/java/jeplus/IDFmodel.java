@@ -259,6 +259,112 @@ public class IDFmodel {
     }
 
     /**
+     * !! Copied from Schedule file - Not implemented yet !!
+     * @param idfin
+     * @param fmufiles
+     * @return 
+     */
+    public static boolean replaceFmuFiles (String idfin, ArrayList<String> fmufiles) {
+        boolean ok = true;
+        File ori = new File (idfin);
+        File temp = new File (idfin + ".temp");
+        int counter = 0;
+        try (PrintWriter fw = new PrintWriter (new FileWriter (temp));
+            BufferedReader ins = new BufferedReader(new FileReader(ori))) {
+
+            String line = ins.readLine();
+            while (line != null) {
+                if (counter < fmufiles.size()) {
+                    String thisline = (line.contains("!")) ? line.substring(0, line.indexOf("!")).trim() : line.trim();
+                    if (thisline.contains(fmufiles.get(counter))) {
+                        String fn = new File (fmufiles.get(counter)).getName();
+                        line = line.replace(fmufiles.get(counter), fn);
+                        counter ++;
+                    }
+                }
+                fw.println(line);
+                line = ins.readLine();
+            }
+            ori.delete();
+            temp.renameTo(ori);
+        } catch (Exception e) {
+            logger.error("", e);
+            ok = false;
+        }
+        return ok && counter == fmufiles.size();
+    }
+    
+    /**
+     * !! Copied from Schedule file - Not implemented yet !!
+     * Get a list of schedule files (as in Schedule:file objects) in this idf model
+     * @param idfin
+     * @return A list of schedule files
+     */
+    public static ArrayList<String> getFmuFiles(String idfin) {
+        ArrayList<String> list = new ArrayList<> ();
+        try (BufferedReader ins = new BufferedReader(new FileReader(idfin))) {
+            String line = ins.readLine();
+            while (line != null) {
+                line = (line.contains("!")) ? line.substring(0, line.indexOf("!")).trim() : line.trim();
+                if (line.toLowerCase().startsWith("schedule:file,")) {
+                    String verline = line;
+                    while (! line.contains(";")) {
+                        line = ins.readLine();
+                        if (line != null) {
+                            verline = verline.concat((line.contains("!")) ? line.substring(0, line.indexOf("!")).trim() : line.trim());
+                        }else {
+                            break;
+                        }
+                    }
+                    if (verline.contains(";")) { // a complete Schedule:File object
+                        String [] parts = verline.split("\\s*,\\s*");
+                        //Definition in V7.2 IDD
+                        //Schedule:File,
+                        // \min-fields 5
+                        //       \memo A Schedule:File points to a text computer file that has 8760-8784 hours of data.
+                        //  A1 , \field Name
+                        //       \required-field
+                        //       \type alpha
+                        //       \reference ScheduleNames
+                        //  A2 , \field Schedule Type Limits Name
+                        //       \type object-list
+                        //       \object-list ScheduleTypeLimitsNames
+                        //  A3 , \field File Name
+                        //       \required-field
+                        //       \retaincase
+                        //  N1 , \field Column Number
+                        //       \required-field
+                        //       \type integer
+                        //       \minimum 1
+                        //  N2 , \field Rows to Skip at Top
+                        //       \required-field
+                        //       \type integer
+                        //       \minimum 0
+                        //  N3 , \field Number of Hours of Data
+                        //       \note 8760 hours does not account for leap years, 8784 does.
+                        //       \note should be either 8760 or 8784
+                        //       \default 8760
+                        //       \minimum 8760
+                        //       \maximum 8784
+                        //  A4 ; \field Column Separator
+                        //       \type choice
+                        //       \key Comma
+                        //       \key Tab
+                        //       \key Fixed
+                        //       \key Semicolon
+                        //       \default Comma
+                        list.add(parts[3]);
+                    }
+                }
+                line = ins.readLine();
+            }
+        } catch (Exception e) {
+            logger.error("", e);
+        }
+        return list;
+    }
+
+    /**
      * Collect search strings in the idf file
      * @param idf the idf file
      * @return A list of search strings

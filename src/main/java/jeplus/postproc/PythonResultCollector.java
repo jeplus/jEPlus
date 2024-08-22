@@ -26,6 +26,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import jeplus.EPlusBatch;
 import jeplus.EPlusTask;
 import jeplus.JEPlusConfig;
@@ -44,8 +45,9 @@ public class PythonResultCollector extends ResultCollector {
     /** Logger */
     final static org.slf4j.Logger logger = LoggerFactory.getLogger(PythonResultCollector.class);
     
-    public PythonResultCollector (String Desc) {
+    public PythonResultCollector (String Desc, ExecutorService execsvc) {
         super (Desc);
+        ExecService = execsvc;
         this.RepReader = null;
         this.RepWriter = null;
         this.ResReader = null;
@@ -69,12 +71,23 @@ public class PythonResultCollector extends ResultCollector {
                 ResultFiles.add(fn);
                 if (item.isOnEachJob()) {
                     ResWriter = new DefaultCSVWriter(null, fn);
-                    ResReader = new EPlusScriptReader(
-                            RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
-                            item.getLanguage(), 
-                            JobOwner.getProject().getBaseDir(), 
-                            item.getArguments(), 
-                            fn);
+                    if (ExecService != null) {
+                        ResReader = new EPlusScriptReader2(
+                                RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
+                                item.getLanguage(), 
+                                JobOwner.getProject().getBaseDir(), 
+                                item.getArguments(), 
+                                fn,
+                                ExecService
+                        );
+                    }else {
+                        ResReader = new EPlusScriptReader(
+                                RelativeDirUtil.checkAbsolutePath(item.getFileName(), JobOwner.getProject().getBaseDir()), 
+                                item.getLanguage(), 
+                                JobOwner.getProject().getBaseDir(), 
+                                item.getArguments(), 
+                                fn);
+                    }
                     ResultHeader = new HashMap <>();
                     ResultTable = new ArrayList <> ();
                     try {

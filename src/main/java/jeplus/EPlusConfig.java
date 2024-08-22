@@ -73,12 +73,18 @@ public class EPlusConfig extends ConfigFileNames {
     private static final String EPlusEPMacro_LIN = "EPMacro"; // Eplus Linux EPMacro
     private static final String EPlusExpandObjects_WIN = "ExpandObjects.exe"; // Eplus windows ExpandObjects
     private static final String EPlusExpandObjects_LIN = "ExpandObjects"; // Eplus Linux ExpandObjects
+    private static final String EPlusBasement_WIN = "Basement.exe"; // Eplus windows Basement
+    private static final String EPlusBasement_LIN = "Basement"; // Eplus Linux Basement
+    private static final String EPlusSlab_WIN = "Slab.exe"; // Eplus windows Slab
+    private static final String EPlusSlab_LIN = "Slab"; // Eplus Linux Slab
     private static final String EPlusEXEC_WIN = "EnergyPlus.exe"; // Eplus windows exec
     private static final String EPlusEXEC_LIN = "energyplus"; // Eplus Linux kernel
     private static final String EPlusReadVars_WIN = "PostProcess/ReadVarsEso.exe"; // Eplus windows ReadVarEso.exe
     private static final String EPlusReadVars_LIN = "PostProcess/ReadVarsESO"; // Eplus Linux rvEsoKernel
     private static final String EPDefINI = "Energy+.ini";
     private static final String EPDefIDD = "Energy+.idd";
+    private static final String EPBasementIDD = "BasementGHT.idd";
+    private static final String EPSlabIDD = "SlabGHT.idd";
     private static final String EPDefIDF = "in.idf";
     private static final String EPDefIMF = "in.imf";
     private static final String EPDefIDFOUT = "out.idf";
@@ -127,6 +133,8 @@ public class EPlusConfig extends ConfigFileNames {
     protected String EPlusEXE = null;
     protected String EPlusReadVars = null;
     protected String EPlusExpandObjects = null;
+    protected String EPlusBasement = null;
+    protected String EPlusSlab = null;
     protected VersionInfo Version = null;
     
     /** This config is valid or not */
@@ -138,6 +146,8 @@ public class EPlusConfig extends ConfigFileNames {
         EPlusEXE = EPlusBinDir + getDefEPlusEXEC();
         EPlusReadVars = EPlusBinDir + getDefEPlusReadVars();
         EPlusExpandObjects = EPlusBinDir + getDefEPlusExpandObjects();
+        EPlusBasement = EPlusBinDir + "PreProcess/GrndTempCalc/" + getDefEPlusBasement();
+        EPlusSlab = EPlusBinDir + "PreProcess/GrndTempCalc/" + getDefEPlusSlab();
         ScreenFile = "console.log"; // no screen log file if set to null
         Version = new VersionInfo ("8.7");
         Valid = false;
@@ -153,6 +163,8 @@ public class EPlusConfig extends ConfigFileNames {
             cfg.EPlusExpandObjects = prop.getProperty("EPlusExpandObjectsEXE", cfg.EPlusBinDir + getDefEPlusExpandObjects());
             cfg.EPlusEXE = prop.getProperty("EPlusEXE", cfg.EPlusBinDir + getDefEPlusEXEC());
             cfg.EPlusReadVars = prop.getProperty("EPlusReadVarsEXE", cfg.EPlusBinDir + getDefEPlusReadVars());
+            cfg.EPlusBasement = cfg.EPlusBinDir + "PreProcess/GrndTempCalc/" + getDefEPlusBasement();
+            cfg.EPlusSlab = cfg.EPlusBinDir + "PreProcess/GrndTempCalc/" + getDefEPlusSlab();
             cfg.ScreenFile = prop.getProperty("ScreenFile", "console.log");
             cfg.getEPlusVersion();
             List<String> issues = cfg.validate();
@@ -377,6 +389,50 @@ public class EPlusConfig extends ConfigFileNames {
         fireConfigChangedEvent ();
     }
 
+    /** Get Default EnergyPlus Basement executable */
+    public static String getDefEPlusBasement() {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
+            return EPlusBasement_WIN;
+        } else {
+            return EPlusBasement_LIN;
+        }
+    }
+
+    /** Get full EPlus Basement command path */
+    @JsonIgnore
+    public String getResolvedBasement() {
+        String cmd = RelativeDirUtil.checkAbsolutePath(EPlusBinDir + "PreProcess/GrndTempCalc/" + getDefEPlusBasement(), UserBaseDir);
+        return cmd;
+    }
+
+    /** Get EnergyPlus Basement executable */
+    @JsonIgnore
+    public String getEPlusBasement() {
+        return EPlusBasement;
+    }
+
+    /** Get Default EnergyPlus Slab executable */
+    public static String getDefEPlusSlab() {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
+            return EPlusSlab_WIN;
+        } else {
+            return EPlusSlab_LIN;
+        }
+    }
+
+    /** Get full EPlus Slab command path */
+    @JsonIgnore
+    public String getResolvedSlab() {
+        String cmd = RelativeDirUtil.checkAbsolutePath(EPlusBinDir + "PreProcess/GrndTempCalc/" + getDefEPlusSlab(), UserBaseDir);
+        return cmd;
+    }
+
+    /** Get EnergyPlus Basement executable */
+    @JsonIgnore
+    public String getEPlusSlab() {
+        return EPlusSlab;
+    }
+
     @JsonIgnore
     public VersionInfo getVersion() {
         return Version;
@@ -416,6 +472,24 @@ public class EPlusConfig extends ConfigFileNames {
     }
 
     /** */
+    public static String getEPBasementIDD() {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
+            return EPBasementIDD;
+        } else {
+            return EPBasementIDD;
+        }
+    }
+
+    /** */
+    public static String getEPSlabIDD() {
+        if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
+            return EPSlabIDD;
+        } else {
+            return EPSlabIDD;
+        }
+    }
+
+    /** */
     public static String getEPDefIDF() {
         if (JEPlusVersion.OsName.toLowerCase().startsWith("windows")) {
             return EPDefIDF;
@@ -449,6 +523,16 @@ public class EPlusConfig extends ConfigFileNames {
         } else {
             return EPDefExpandedIDF;
         }
+    }
+
+    /** */
+    public static String getEPDefBasementIDF() {
+        return "BasementGHTIn.idf";
+    }
+
+    /** */
+    public static String getEPDefSlabIDF() {
+        return "GHTIn.idf";
     }
 
     /** */
@@ -793,6 +877,8 @@ public class EPlusConfig extends ConfigFileNames {
                                     filename.equals("audit.out"));
                         case JEPLUS_INTERM: // JEPlus intermediate files. Used for deleting
                             return (filename.equals(getEPDefIDD()) ||
+                                    filename.equals(getEPBasementIDD()) ||
+                                    filename.equals(getEPSlabIDD()) ||
                                     filename.equals(getEPDefINI()) ||
                                     filename.equals(getEPDefIDF()) ||
                                     filename.equals(getEPDefIMF()) ||
