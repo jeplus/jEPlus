@@ -27,6 +27,8 @@ import jeplus.data.IF_RVXItem;
 import jeplus.data.RVX;
 import jeplus.data.RVX_CSVitem;
 import jeplus.data.RVX_Constraint;
+import jeplus.data.RVX_ESOitem;
+import jeplus.data.RVX_MTRitem;
 import jeplus.data.RVX_Objective;
 import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX_SQLitem;
@@ -151,6 +153,10 @@ public class JPanel_RVXTree extends javax.swing.JPanel implements TitledJPanel {
         if (item != null) {
             if (item instanceof RVX_RVIitem) {
                 jplItemEditorHolder.add(new JPanel_RVIitmeEditor(MainGUI, jTreeRvx, Project, (RVX_RVIitem)item));
+            }else if (item instanceof RVX_ESOitem) {
+                jplItemEditorHolder.add(new JPanel_ESOitmeEditor(MainGUI, jTreeRvx, Project, (RVX_ESOitem)item));
+            }else if (item instanceof RVX_MTRitem) {
+                jplItemEditorHolder.add(new JPanel_MTRitmeEditor(MainGUI, jTreeRvx, Project, (RVX_MTRitem)item));
             }else if (item instanceof RVX_SQLitem) {
                 jplItemEditorHolder.add(new JPanel_SQLitmeEditor(MainGUI, jTreeRvx, Project, (RVX_SQLitem)item));
             }else if (item instanceof RVX_ScriptItem) {

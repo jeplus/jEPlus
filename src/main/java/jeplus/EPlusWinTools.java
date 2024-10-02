@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import jeplus.data.VersionInfo;
 import jeplus.util.ProcessWrapper;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.slf4j.LoggerFactory;
@@ -392,6 +393,44 @@ public class EPlusWinTools {
         }
         if (! success)
             logger.error("EPlusWinTools.prepareWorkDir(): cannot copy all neccessray files to the working directory.");
+        return success;
+    }
+    
+    public static boolean writeRVI (String path, String name, List<String> vars) {
+        boolean success = true;
+        switch(FilenameUtils.getExtension(name)) {
+            case "rvi":
+                try (PrintWriter fw = new PrintWriter (new FileWriter (path + name))) {
+                    fw.println("eplusout.eso");
+                    fw.println("eplusout.csv");
+                    for (String var : vars) {
+                        fw.println(var);
+                    }
+                    fw.println("0");
+                    fw.close();
+                }catch (Exception ex) {
+                    logger.error("Failed to write " + path + name, ex);
+                    success = false;
+                }
+                break;
+            case "mvi":
+                try (PrintWriter fw = new PrintWriter (new FileWriter (path + name))) {
+                    fw.println("eplusout.mtr");
+                    fw.println("eplusout.csv");
+                    for (String var : vars) {
+                        fw.println(var);
+                    }
+                    fw.println("0");
+                    fw.close();
+                }catch (Exception ex) {
+                    logger.error("Failed to write " + path + name, ex);
+                    success = false;
+                }
+                break;
+            default:
+                logger.error("Output file must either be a rvi or a mvi");
+                success = false;
+        }
         return success;
     }
 

@@ -863,6 +863,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         pnlUtilities = new javax.swing.JPanel();
         TpnUtilities = new javax.swing.JTabbedPane();
         TpnEditors = new javax.swing.JTabbedPane();
+        jSeparator2 = new javax.swing.JSeparator();
         jMenuBarMain = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemNew = new javax.swing.JMenuItem();
@@ -996,6 +997,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             }
         });
 
+        jSplitPane1.setBorder(null);
         jSplitPane1.setDividerLocation(700);
         jSplitPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jSplitPane1.setLastDividerLocation(700);
@@ -1136,7 +1138,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
                     .addComponent(cmdSelectTestFolder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtTestResultFolder)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         jplRVX.setBorder(javax.swing.BorderFactory.createTitledBorder("Result Extraction (RVX)"));
@@ -1157,9 +1159,9 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             pnlRvxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlRvxLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jplModelTest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
+                .addComponent(jplRVX, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1494,7 +1496,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             pnlUtilitiesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlUtilitiesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 700, Short.MAX_VALUE)
+                .addComponent(TpnUtilities, javax.swing.GroupLayout.DEFAULT_SIZE, 723, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1507,6 +1509,8 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         TpnEditors.setPreferredSize(null);
         jSplitPane1.setRightComponent(TpnEditors);
         TpnEditors.getAccessibleContext().setAccessibleName("Information");
+
+        jMenuBarMain.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 4, 1, 0));
 
         jMenuFile.setText("File");
 
@@ -1806,7 +1810,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
 
         jMenuHelp.setText("Help");
 
-        jMenuItemUserGuide.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItemUserGuide.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         jMenuItemUserGuide.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/bulb.png"))); // NOI18N
         jMenuItemUserGuide.setText("User's Guide Online");
         jMenuItemUserGuide.addActionListener(new java.awt.event.ActionListener() {
@@ -1817,7 +1821,7 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
         jMenuHelp.add(jMenuItemUserGuide);
         jMenuHelp.add(jSeparator1);
 
-        jMenuItemAbout.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItemAbout.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         jMenuItemAbout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jeplus/images/mail.png"))); // NOI18N
         jMenuItemAbout.setText("About");
         jMenuItemAbout.addActionListener(new java.awt.event.ActionListener() {
@@ -1837,13 +1841,15 @@ public class JEPlusFrameMain extends JFrame implements IF_ProjectChangedHandler 
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 883, Short.MAX_VALUE)
                 .addContainerGap())
+            .addComponent(jSeparator2)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(3, 3, 3)
                 .addComponent(jSplitPane1)
                 .addContainerGap())
         );
@@ -2883,6 +2889,7 @@ private void jMenuItemViewReportsActionPerformed(java.awt.event.ActionEvent evt)
     private javax.swing.JPanel jPanel5;
     private jeplus.gui.JPanel_EPlusProjectFiles jPanel_EPlusProjectFiles2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JPopupMenu.Separator jSeparator5;

@@ -49,6 +49,8 @@ import jeplus.data.FileList;
 import jeplus.data.RVX;
 import jeplus.data.RVX_CSVitem;
 import jeplus.data.RVX_Constraint;
+import jeplus.data.RVX_ESOitem;
+import jeplus.data.RVX_MTRitem;
 import jeplus.data.RVX_Objective;
 import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX_SQLitem;
@@ -349,6 +351,24 @@ public class EPlusBatch extends Thread {
                             Info.addValidationError("RVI item output table name is already in use: " + item.getFileName() + " --> " + item.getTableName() + ".csv");
                             Info.ValidationSuccessful = false;
                         }
+                    }
+                    for (RVX_ESOitem item : Project.getRvx().getESOs()) {
+                        hasCollector = true;
+                        if (! tables.add(item.getTableName())) {
+                            Info.addValidationError("RVI item output table name is already in use: ESOs --> " + item.getTableName() + ".csv");
+                            Info.ValidationSuccessful = false;
+                        }
+                        // Write rvi in the project's folder
+                        EPlusWinTools.writeRVI(Project.getBaseDir(), item.getTableName()+".rvi", item.getVariables());
+                    }
+                    for (RVX_MTRitem item : Project.getRvx().getMTRs()) {
+                        hasCollector = true;
+                        if (! tables.add(item.getTableName())) {
+                            Info.addValidationError("RVI item output table name is already in use: MTRs --> " + item.getTableName() + ".csv");
+                            Info.ValidationSuccessful = false;
+                        }
+                        // Write mvi in the project's folder
+                        EPlusWinTools.writeRVI(Project.getBaseDir(), item.getTableName()+".mvi", item.getMeters());
                     }
                     for (RVX_CSVitem item : Project.getRvx().getCSVs()) {
                         hasCollector = true;

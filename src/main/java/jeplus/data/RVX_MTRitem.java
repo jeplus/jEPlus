@@ -20,23 +20,26 @@ package jeplus.data;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
-// "rvis" : [
+// "esos" : [
 //		{
-//			"fileName" : "5ZoneCostEst2.rvi",
+//			"variables" : ["...","..."]
 //                      "frequency" : "Annual",
 //			"tableName" : "SimResults2",
 //                      "usedInCalc" : true
 //		}
 //	],
 @JsonPropertyOrder({ 
-    "fileName", 
+    "variables", 
     "frequency", 
     "tableName", 
     "usedInCalc"
 })
-public class RVX_RVIitem implements Serializable, IF_RVXItem {
+public class RVX_MTRitem implements Serializable, IF_RVXItem {
     
     public static enum Frequencies {
         Annual,
@@ -47,25 +50,17 @@ public class RVX_RVIitem implements Serializable, IF_RVXItem {
         Timestep,
         Detailed
     };
-    private String FileName = "my.rvi";
+    private List<String> Meters = new ArrayList<>();
     private String Frequency = "RunPeriod";
     private String TableName = "SimResults";
     private boolean UsedInCalc = true;
 
-    public RVX_RVIitem() {}
-    public RVX_RVIitem(String rvi, String freq, String table, boolean calc) {
-        FileName = rvi;
-        Frequency = freq;
-        TableName = table;
-        UsedInCalc = calc;
-    }
-    
-    public String getFileName() {
-        return FileName;
+    public List<String> getMeters() {
+        return Meters;
     }
 
-    public void setFileName(String FileName) {
-        this.FileName = FileName;
+    public void setMeters(List<String> Meters) {
+        this.Meters = Meters;
     }
 
     public String getFrequency() {
@@ -94,18 +89,19 @@ public class RVX_RVIitem implements Serializable, IF_RVXItem {
     
     @Override
     public String toString () {
-        return TableName + ":" + FileName + "(" + Frequency + ")" + (UsedInCalc ? "" : "*");
+        return TableName + ":" + Meters.size() + " meters (" + Frequency + ")" + (UsedInCalc ? "" : "*");
     }
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 53 * hash + Objects.hashCode(this.FileName);
-        hash = 53 * hash + Objects.hashCode(this.Frequency);
-        hash = 53 * hash + Objects.hashCode(this.TableName);
-        hash = 53 * hash + (this.UsedInCalc ? 1 : 0);
+        int hash = 7;
+        hash = 59 * hash + Objects.hashCode(this.Meters);
+        hash = 59 * hash + Objects.hashCode(this.Frequency);
+        hash = 59 * hash + Objects.hashCode(this.TableName);
+        hash = 59 * hash + (this.UsedInCalc ? 1 : 0);
         return hash;
     }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -118,11 +114,11 @@ public class RVX_RVIitem implements Serializable, IF_RVXItem {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final RVX_RVIitem other = (RVX_RVIitem) obj;
+        final RVX_MTRitem other = (RVX_MTRitem) obj;
         if (this.UsedInCalc != other.UsedInCalc) {
             return false;
         }
-        if (!Objects.equals(this.FileName, other.FileName)) {
+        if (! new HashSet<>(this.Meters).equals(new HashSet<>(other.Meters))) {
             return false;
         }
         if (!Objects.equals(this.Frequency, other.Frequency)) {
@@ -137,8 +133,8 @@ public class RVX_RVIitem implements Serializable, IF_RVXItem {
     @Override
     public void copyFrom(IF_RVXItem item) {
         try {
-            RVX_RVIitem src = (RVX_RVIitem)item;
-            FileName   = src.FileName  ;
+            RVX_MTRitem src = (RVX_MTRitem)item;
+            Meters   = src.Meters  ;
             Frequency  = src.Frequency ;
             TableName  = src.TableName ;
             UsedInCalc = src.UsedInCalc;

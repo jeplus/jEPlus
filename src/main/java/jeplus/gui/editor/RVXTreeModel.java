@@ -26,6 +26,8 @@ import javax.swing.tree.DefaultTreeModel;
 import jeplus.data.RVX;
 import jeplus.data.RVX_CSVitem;
 import jeplus.data.RVX_Constraint;
+import jeplus.data.RVX_ESOitem;
+import jeplus.data.RVX_MTRitem;
 import jeplus.data.RVX_Objective;
 import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX_SQLitem;
@@ -130,6 +132,30 @@ public class RVXTreeModel extends DefaultTreeModel {
     public static DefaultMutableTreeNode buildTree (RVX rvx) {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(new GroupType ("RVX", "Result collection configuration", null, null));
                 
+        DefaultMutableTreeNode CSVs = new DefaultMutableTreeNode (new GroupType ("CSVs", "Result collection configuration", rvx.getCSVs(), RVX_CSVitem.class));
+        for (RVX_CSVitem item : rvx.getCSVs()) {
+            CSVs.add(new DefaultMutableTreeNode (item, false));
+        }
+        root.add(CSVs);
+        
+        DefaultMutableTreeNode ESOs = new DefaultMutableTreeNode(new GroupType ("ESOs", "Result collection configuration", rvx.getESOs(), RVX_ESOitem.class));
+        for (RVX_ESOitem item : rvx.getESOs()) {
+            ESOs.add(new DefaultMutableTreeNode (item, false));
+        }
+        root.add(ESOs);
+        
+        DefaultMutableTreeNode MTRs = new DefaultMutableTreeNode(new GroupType ("MTRs", "Result collection configuration", rvx.getMTRs(), RVX_MTRitem.class));
+        for (RVX_MTRitem item : rvx.getMTRs()) {
+            MTRs.add(new DefaultMutableTreeNode (item, false));
+        }
+        root.add(MTRs);
+        
+        DefaultMutableTreeNode Scripts = new DefaultMutableTreeNode (new GroupType ("Scripts", "Result collection configuration", rvx.getScripts(), RVX_ScriptItem.class));
+        for (RVX_ScriptItem item : rvx.getScripts()) {
+            Scripts.add(new DefaultMutableTreeNode (item, false));
+        }
+        root.add(Scripts);
+        
         DefaultMutableTreeNode RVIs = new DefaultMutableTreeNode(new GroupType ("RVIs", "Result collection configuration", rvx.getRVIs(), RVX_RVIitem.class));
         for (RVX_RVIitem item : rvx.getRVIs()) {
             RVIs.add(new DefaultMutableTreeNode (item, false));
@@ -141,18 +167,6 @@ public class RVXTreeModel extends DefaultTreeModel {
             SQLs.add(new DefaultMutableTreeNode (item, false));
         }
         root.add(SQLs);
-        
-        DefaultMutableTreeNode Scripts = new DefaultMutableTreeNode (new GroupType ("Scripts", "Result collection configuration", rvx.getScripts(), RVX_ScriptItem.class));
-        for (RVX_ScriptItem item : rvx.getScripts()) {
-            Scripts.add(new DefaultMutableTreeNode (item, false));
-        }
-        root.add(Scripts);
-        
-        DefaultMutableTreeNode CSVs = new DefaultMutableTreeNode (new GroupType ("CSVs", "Result collection configuration", rvx.getCSVs(), RVX_CSVitem.class));
-        for (RVX_CSVitem item : rvx.getCSVs()) {
-            CSVs.add(new DefaultMutableTreeNode (item, false));
-        }
-        root.add(CSVs);
         
         DefaultMutableTreeNode UserSupplied = new DefaultMutableTreeNode (new GroupType ("UserSupplied", "Result collection configuration", rvx.getUserSupplied(), RVX_UserSuppliedItem.class));
         for (RVX_UserSuppliedItem item : rvx.getUserSupplied()) {

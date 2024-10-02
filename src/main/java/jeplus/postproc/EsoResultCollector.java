@@ -20,12 +20,15 @@ package jeplus.postproc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import jeplus.EPlusBatch;
 import jeplus.EPlusConfig;
 import jeplus.JEPlusConfig;
 import jeplus.data.RVX_RVIitem;
 import jeplus.data.RVX;
+import jeplus.data.RVX_ESOitem;
+import jeplus.data.RVX_MTRitem;
 import jeplus.util.RelativeDirUtil;
 import org.slf4j.LoggerFactory;
 
@@ -82,8 +85,33 @@ public class EsoResultCollector extends ResultCollector {
         int ResCollected = 0;
         ResultFiles.clear();
         RVX rvx = JobOwner.getProject().getRvx();
-        if (rvx != null && rvx.getRVIs() != null) {
-            for (RVX_RVIitem item : rvx.getRVIs()) {
+        if (rvx != null) {
+            List<RVX_RVIitem> rvis = new ArrayList<>();
+            if (rvx.getRVIs() != null) {
+                rvis.addAll(rvx.getRVIs());
+            }
+            if (rvx.getESOs() != null) {
+                for (RVX_ESOitem item : rvx.getESOs()) {
+                    rvis.add(
+                            new RVX_RVIitem(item.getTableName() + ".rvi", 
+                                    item.getFrequency(), 
+                                    item.getTableName(), 
+                                    item.isUsedInCalc())
+                    );
+                }
+            }
+            if (rvx.getMTRs() != null) {
+                for (RVX_MTRitem item : rvx.getMTRs()) {
+                    rvis.add(
+                            new RVX_RVIitem(item.getTableName() + ".mvi", 
+                                    item.getFrequency(), 
+                                    item.getTableName(), 
+                                    item.isUsedInCalc())
+                    );
+                }
+            }
+            
+            for (RVX_RVIitem item : rvis) {
                 String fn = item.getTableName() + ".csv";
                 ResultFiles.add(fn);
                 ResWriter = new DefaultCSVWriter(null, fn);
@@ -124,9 +152,21 @@ public class EsoResultCollector extends ResultCollector {
     @Override
     public ArrayList<String> getExpectedResultFiles(RVX rvx) {
         ArrayList<String> list = new ArrayList<> ();
-        if (rvx != null && rvx.getRVIs() != null) {
-            for (RVX_RVIitem item : rvx.getRVIs()) {
-                if (item.isUsedInCalc()) list.add(item.getTableName() + ".csv");
+        if (rvx != null) {
+            if (rvx.getRVIs() != null) {
+                for (RVX_RVIitem item : rvx.getRVIs()) {
+                    if (item.isUsedInCalc()) list.add(item.getTableName() + ".csv");
+                }
+            }
+            if (rvx.getESOs() != null) {
+                for (RVX_ESOitem item : rvx.getESOs()) {
+                    if (item.isUsedInCalc()) list.add(item.getTableName() + ".csv");
+                }
+            }
+            if (rvx.getMTRs() != null) {
+                for (RVX_MTRitem item : rvx.getMTRs()) {
+                    if (item.isUsedInCalc()) list.add(item.getTableName() + ".csv");
+                }
             }
         }
         return list;

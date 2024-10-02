@@ -68,6 +68,15 @@ public class RVX implements Serializable {
     @JsonSetter("rvis") public void setRVIs(ArrayList<RVX_RVIitem> RVIs) { this.RVIs = RVIs; }
     public void setRVIs(RVX_RVIitem[] RVIs) { this.RVIs.addAll(Arrays.asList(RVIs)); }
 
+    private ArrayList<RVX_ESOitem> ESOs = new ArrayList<>();
+    public ArrayList<RVX_ESOitem> getESOs() { return ESOs; }
+    @JsonSetter("esos") public void setESOs(ArrayList<RVX_ESOitem> ESOs) { this.ESOs = ESOs; }
+    public void setESOs(RVX_ESOitem[] ESOs) { this.ESOs.addAll(Arrays.asList(ESOs)); }
+
+    private ArrayList<RVX_MTRitem> MTRs = new ArrayList<>();
+    public ArrayList<RVX_MTRitem> getMTRs() { return MTRs; }
+    @JsonSetter("mtrs") public void setMTRs(ArrayList<RVX_MTRitem> MTRs) { this.MTRs = MTRs; }
+    public void setMTRs(RVX_MTRitem[] MTRs) { this.MTRs.addAll(Arrays.asList(MTRs)); }
     
     private ArrayList<RVX_SQLitem> SQLs = new ArrayList<>();
     public ArrayList<RVX_SQLitem> getSQLs() { return SQLs; }
